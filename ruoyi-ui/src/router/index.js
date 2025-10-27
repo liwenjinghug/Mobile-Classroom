@@ -87,6 +87,21 @@ export const constantRoutes = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
+  },
+  {
+    path: '/proj_myx',
+    component: Layout,
+    redirect: '/proj_myx/RandomPick',
+    name: 'proj_myx',
+    meta: { title: '移动课堂', icon: 'education' },
+    children: [
+      {
+        path: 'RandomPick',
+        component: () => import('@/views/proj_myx/RandomPick.vue'),
+        name: 'RandomPick',
+        meta: { title: '随机抽人', icon: 'education' }
+      }
+    ]
   }
 ]
 
