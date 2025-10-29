@@ -102,6 +102,21 @@ export const constantRoutes = [
         meta: { title: '随机抽人', icon: 'education' }
       }
     ]
+  },
+  {
+    path: '/course',
+    component: Layout,
+    redirect: '/course/list',
+    name: 'Course',
+    meta: { title: '课程管理', icon: 'education' },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/system/course/index'),
+        name: 'CourseList',
+        meta: { title: '课程列表', icon: 'list' }
+      }
+    ]
   }
 ]
 
