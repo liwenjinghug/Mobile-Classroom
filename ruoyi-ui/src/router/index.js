@@ -103,18 +103,19 @@ export const constantRoutes = [
       }
     ]
   },
+  // 在constantRoutes数组中添加
   {
-    path: '/course',
+    path: '/proj_lw',
     component: Layout,
-    redirect: '/course/list',
-    name: 'Course',
-    meta: { title: '课程管理', icon: 'education' },
+    redirect: '/proj_lw/course',
+    name: 'proj_lw',
+    meta: { title: '移动课堂', icon: 'education' },
     children: [
       {
-        path: 'list',
-        component: () => import('@/views/system/course/index'),
-        name: 'CourseList',
-        meta: { title: '课程列表', icon: 'list' }
+        path: 'course',
+        component: () => import('@/views/proj_lw/course/index.vue'),
+        name: 'course',
+        meta: { title: '课程管理', icon: 'list' }
       }
     ]
   }
