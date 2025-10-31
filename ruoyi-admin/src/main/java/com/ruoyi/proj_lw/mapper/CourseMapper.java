@@ -7,15 +7,15 @@ import java.util.List;
 @Mapper
 public interface CourseMapper {
 
-    // 动态查询课程列表
+    // 动态查询课程列表（使用 class_course 表）
     @Select("<script>" +
             "SELECT * FROM class_course " +
             "<where>" +
-            "   <if test='courseName != null and courseName != \"\"'> AND course_name LIKE CONCAT('%', #{courseName}, '%')</if>" +
-            "   <if test='courseCode != null and courseCode != \"\"'> AND course_code LIKE CONCAT('%', #{courseCode}, '%')</if>" +
-            "   <if test='courseType != null and courseType != \"\"'> AND course_type = #{courseType}</if>" +
-            "   <if test='college != null and college != \"\"'> AND college LIKE CONCAT('%', #{college}, '%')</if>" +
-            "   <if test='status != null and status != \"\"'> AND status = #{status}</if>" +
+            "   <if test=\"courseName != null and courseName != ''\"> AND course_name LIKE CONCAT('%', #{courseName}, '%')</if> " +
+            "   <if test=\"courseCode != null and courseCode != ''\"> AND course_code LIKE CONCAT('%', #{courseCode}, '%')</if> " +
+            "   <if test=\"courseType != null and courseType != ''\"> AND course_type = #{courseType}</if> " +
+            "   <if test=\"college != null and college != ''\"> AND college LIKE CONCAT('%', #{college}, '%')</if> " +
+            "   <if test=\"status != null and status != ''\"> AND status = #{status}</if> " +
             "</where>" +
             "</script>")
     @Results({
@@ -75,12 +75,10 @@ public interface CourseMapper {
     @Delete("DELETE FROM class_course WHERE course_id = #{courseId}")
     int deleteCourseById(Long courseId);
 
-    @Delete("<script>" +
-            "DELETE FROM class_course WHERE course_id IN " +
+    @Delete("<script>DELETE FROM class_course WHERE course_id IN " +
             "<foreach item='courseId' collection='array' open='(' separator=',' close=')'>" +
             "#{courseId}" +
-            "</foreach>" +
-            "</script>")
+            "</foreach></script>")
     int deleteCourseByIds(Long[] courseIds);
 
     @Select("SELECT * FROM class_course WHERE course_code = #{courseCode} LIMIT 1")

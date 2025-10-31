@@ -126,6 +126,28 @@ export const constantRoutes = [
         hidden: true
       }
     ]
+  },
+  // 新增作业管理路由
+  {
+    path: '/proj_lwj',
+    component: Layout,
+    redirect: '/proj_lwj/homework_publish',
+    name: 'proj_lwj',
+    meta: { title: '作业管理', icon: 'education' },
+    children: [
+      {
+        path: 'homework_publish',
+        component: () => import('@/views/proj_lwj/homework_publish/index.vue'),
+        name: 'HomeworkPublish',
+        meta: { title: '作业发布', icon: 'list' }
+      },
+      {
+        path: 'homework_upload',
+        component: () => import('@/views/proj_lwj/homework-upload/index.vue'),
+        name: 'HomeworkUpload',
+        meta: { title: '作业上传', icon: 'upload' }
+      }
+    ]
   }
 ]
 
