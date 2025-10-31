@@ -59,6 +59,7 @@
       <el-table-column label="课程类型" align="center" prop="courseType" />
       <el-table-column label="所属学院" align="center" prop="college" />
       <el-table-column label="学分" align="center" prop="credit" />
+      <el-table-column label="班级编号" align="center" prop="classNumber" />
       <el-table-column label="课程简介" align="center" prop="introduction" show-overflow-tooltip />
       <el-table-column label="状态" align="center" prop="status">
         <template slot-scope="scope">
@@ -68,6 +69,13 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-view"
+            @click="handleSession(scope.row)"
+            v-hasPermi="['projlw:session:list']"
+          >课堂详情</el-button>
           <el-button
             size="mini"
             type="text"
@@ -111,6 +119,9 @@
         </el-form-item>
         <el-form-item label="学分" prop="credit">
           <el-input-number v-model="form.credit" :precision="1" :step="0.5" :min="0" :max="10" />
+        </el-form-item>
+        <el-form-item label="班级编号" prop="classNumber">
+          <el-input-number v-model="form.classNumber" :min="1" :max="100" />
         </el-form-item>
         <el-form-item label="课程简介" prop="introduction">
           <el-input
@@ -180,6 +191,9 @@ export default {
         courseCode: [
           { required: true, message: "课程编号不能为空", trigger: "blur" }
         ],
+        classNumber: [
+          { required: true, message: "班级编号不能为空", trigger: "blur" }
+        ],
         introduction: [
           { required: true, message: "课程简介不能为空", trigger: "blur" }
         ],
@@ -216,8 +230,9 @@ export default {
         courseType: null,
         college: null,
         credit: null,
+        classNumber: null,
         introduction: null,
-        status: "0"  // 默认设置为正常状态
+        status: "0"
       };
       this.resetForm("form");
     },
@@ -253,6 +268,16 @@ export default {
         this.title = "修改课程";
       });
     },
+    /** 课堂详情按钮操作 */
+    handleSession(row) {
+      this.$router.push({
+        path: '/proj_lw/session',
+        query: {
+          classNumber: row.classNumber,
+          courseName: row.courseName
+        }
+      });
+    },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
@@ -286,3 +311,23 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.app-container {
+  padding: 20px;
+}
+
+.mb8 {
+  margin-bottom: 8px;
+}
+
+.small-padding .cell {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.fixed-width .el-button--mini {
+  padding: 7px 10px;
+  width: auto;
+}
+</style>

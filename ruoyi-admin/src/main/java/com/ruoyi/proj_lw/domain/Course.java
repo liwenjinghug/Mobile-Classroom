@@ -13,6 +13,7 @@ public class Course extends BaseEntity {
     private Double credit;
     private String introduction;
     private String status;
+    private Integer classNumber;
 
     public Long getCourseId() { return courseId; }
     public void setCourseId(Long courseId) { this.courseId = courseId; }
@@ -37,4 +38,7 @@ public class Course extends BaseEntity {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public Integer getClassNumber() { return classNumber; }
+    public void setClassNumber(Integer classNumber) { this.classNumber = classNumber; }
 }

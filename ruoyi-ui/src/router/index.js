@@ -116,6 +116,14 @@ export const constantRoutes = [
         component: () => import('@/views/proj_lw/course/index.vue'),
         name: 'course',
         meta: { title: '课程管理', icon: 'list' }
+      },
+      // 在proj_lw的children中添加
+      {
+        path: 'session',
+        component: () => import('@/views/proj_lw/session/index.vue'),
+        name: 'Session',
+        meta: { title: '课堂详情', icon: 'education' },
+        hidden: true
       }
     ]
   }

@@ -27,6 +27,7 @@ public interface CourseMapper {
             @Result(property = "credit", column = "credit"),
             @Result(property = "introduction", column = "introduction"),
             @Result(property = "status", column = "status"),
+            @Result(property = "classNumber", column = "class_number"),
             @Result(property = "createBy", column = "create_by"),
             @Result(property = "createTime", column = "create_time"),
             @Result(property = "updateBy", column = "update_by"),
@@ -44,6 +45,7 @@ public interface CourseMapper {
             @Result(property = "credit", column = "credit"),
             @Result(property = "introduction", column = "introduction"),
             @Result(property = "status", column = "status"),
+            @Result(property = "classNumber", column = "class_number"),
             @Result(property = "createBy", column = "create_by"),
             @Result(property = "createTime", column = "create_time"),
             @Result(property = "updateBy", column = "update_by"),
@@ -51,8 +53,8 @@ public interface CourseMapper {
     })
     Course selectCourseById(Long courseId);
 
-    @Insert("INSERT INTO class_course (course_name, course_code, course_type, college, credit, introduction, status, create_by, create_time) " +
-            "VALUES (#{courseName}, #{courseCode}, #{courseType}, #{college}, #{credit}, #{introduction}, #{status}, #{createBy}, NOW())")
+    @Insert("INSERT INTO class_course (course_name, course_code, course_type, college, credit, introduction, status, class_number, create_by, create_time) " +
+            "VALUES (#{courseName}, #{courseCode}, #{courseType}, #{college}, #{credit}, #{introduction}, #{status}, #{classNumber}, #{createBy}, NOW())")
     @Options(useGeneratedKeys = true, keyProperty = "courseId")
     int insertCourse(Course course);
 
@@ -64,6 +66,7 @@ public interface CourseMapper {
             "credit = #{credit}, " +
             "introduction = #{introduction}, " +
             "status = #{status}, " +
+            "class_number = #{classNumber}, " +
             "update_by = #{updateBy}, " +
             "update_time = NOW() " +
             "WHERE course_id = #{courseId}")
@@ -89,7 +92,8 @@ public interface CourseMapper {
             @Result(property = "college", column = "college"),
             @Result(property = "credit", column = "credit"),
             @Result(property = "introduction", column = "introduction"),
-            @Result(property = "status", column = "status")
+            @Result(property = "status", column = "status"),
+            @Result(property = "classNumber", column = "class_number")
     })
     Course checkCourseCodeUnique(String courseCode);
 }
