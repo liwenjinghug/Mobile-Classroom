@@ -22,6 +22,12 @@ public class ClassStudentHomework extends BaseEntity {
     // 新增字段：学生姓名（或学号显示用字段）
     private String studentName;
 
+    // 新增字段：学号（student_no），供前端填写后端转换为 student_id
+    private String studentNo;
+
+    // 新增字段：作业标题，供提交记录显示
+    private String homeworkTitle;
+
     public Long getStudentHomeworkId() { return studentHomeworkId; }
     public void setStudentHomeworkId(Long studentHomeworkId) { this.studentHomeworkId = studentHomeworkId; }
 
@@ -48,4 +54,10 @@ public class ClassStudentHomework extends BaseEntity {
 
     public String getStudentName() { return studentName; }
     public void setStudentName(String studentName) { this.studentName = studentName; }
+
+    public String getStudentNo() { return studentNo; }
+    public void setStudentNo(String studentNo) { this.studentNo = studentNo; }
+
+    public String getHomeworkTitle() { return homeworkTitle; }
+    public void setHomeworkTitle(String homeworkTitle) { this.homeworkTitle = homeworkTitle; }
 }

@@ -61,10 +61,10 @@ export function getSubmissions(homeworkId) {
   })
 }
 
-export function getStudentSubmissions(studentId) {
+export function getStudentSubmissions(studentNo) {
   return request({
     url: '/proj_lwj/homework/studentSubmissions/public',
     method: 'get',
-    params: { studentId }
+    params: { studentNo }
   })
 }

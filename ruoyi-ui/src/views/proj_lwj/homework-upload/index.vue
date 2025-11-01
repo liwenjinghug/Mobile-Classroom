@@ -54,9 +54,10 @@
         <div class="submission-section">
           <!-- 学号输入 -->
           <div style="margin-bottom:12px; display:flex; gap:8px; align-items:center">
-            <el-input v-model="studentId" placeholder="请输入学号 (studentId)" style="width:260px"></el-input>
+            <el-input v-model="studentName" placeholder="请输入姓名" style="width:200px"></el-input>
+            <el-input v-model="studentNo" placeholder="请输入学号" style="width:260px"></el-input>
             <el-button type="primary" size="mini" @click="confirmStudentId">确认学号</el-button>
-            <div style="color:#888">(确认后将显示您已提交的作业，并允许修改自己的提交)</div>
+            <div style="color:#888">(请先填写姓名和学号；确认后将显示您已提交的作业，并允许修改自己的提交)</div>
           </div>
 
           <el-alert v-if="submitted" title="您已提交作业" type="success" show-icon></el-alert>
@@ -97,9 +98,15 @@
           <el-card shadow="never">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
               <div style="font-weight:600">提交记录</div>
-              <div style="font-size:12px;color:#888">您的学号：{{ studentId || '未填写' }}</div>
+              <div style="font-size:12px;color:#888">您的姓名：{{ studentName || '未填写' }} &nbsp; 学号：{{ studentNo || '未填写' }}</div>
             </div>
             <el-table :data="submissions" stripe style="width:100%">
+              <el-table-column label="作业" width="220">
+                <template #default="{ row }">
+                  {{ row.homeworkTitle ? row.homeworkTitle : (row.homeworkId ? '作业#' + row.homeworkId : '—') }}
+                </template>
+              </el-table-column>
+
               <el-table-column label="学生" width="160">
                 <template #default="{ row }">
                   {{ row.studentName ? row.studentName : (row.studentId ? row.studentId : '—') }}
@@ -123,16 +130,49 @@
               </el-table-column>
               <el-table-column label="操作" width="120">
                 <template #default="{ row }">
-                  <el-button size="mini" type="primary" v-if="studentConfirmed && String(row.studentId) === String(studentId)" @click="editSubmission(row)">修改</el-button>
+                  <el-button size="mini" type="primary" v-if="studentConfirmed && String(row.studentId) === String(resolvedStudentId || studentId || '')" @click="editSubmission(row)">修改</el-button>
                 </template>
               </el-table-column>
             </el-table>
           </el-card>
           <div style="margin-top:8px">
-            <el-button size="small" type="primary" @click="loadMySubmissions" :disabled="!studentId">刷新我的提交</el-button>
+            <el-button size="small" type="primary" @click="loadMySubmissions" :disabled="!studentNo">刷新我的提交</el-button>
           </div>
         </div>
       </div>
+
+      <!-- Edit submission dialog -->
+      <el-dialog title="修改提交附件" :visible.sync="editDialogVisible" width="640px">
+        <div>
+          <div style="margin-bottom:8px">当前附件：</div>
+          <div v-if="editUploadedFiles.length">
+            <el-tag v-for="(f, i) in editUploadedFiles" :key="i" style="margin-right:8px;cursor:pointer">
+              <a href="javascript:void(0)" @click.prevent="previewFile(f)">{{ f }}</a>
+            </el-tag>
+          </div>
+          <div v-else style="color:#888;margin-bottom:8px">无附件</div>
+
+          <el-upload
+            ref="editUpload"
+            class="upload-demo"
+            :action="uploadUrl"
+            :headers="headers"
+            :on-success="editUploadSuccess"
+            :on-remove="editHandleRemove"
+            :file-list="editFileList"
+            :before-upload="beforeUpload"
+            multiple
+            list-type="text">
+            <el-button size="small" type="primary">选择文件（修改）</el-button>
+            <div slot="tip" class="el-upload__tip">可添加或替换附件，上传文件将追加到当前附件列表。</div>
+          </el-upload>
+        </div>
+
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="editDialogVisible = false">取消</el-button>
+          <el-button type="primary" :loading="editSubmitLoading" @click="saveEditSubmission">保存并重新提交</el-button>
+        </span>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -159,7 +199,8 @@ export default {
       [],
       uploadedFiles: // array of filenames returned by server
       [],
-      studentId: '', // 学号，提交时必填
+      studentName: '',
+      studentNo: '', // 学号，提交时必填
       submitLoading: false,
       submissions: [],
       submitted: false,
@@ -168,12 +209,20 @@ export default {
       headers: { Authorization: 'Bearer ' + getToken() },
       formCourseId: null,
       formSessionId: null,
+
+      // --- new fields for edit dialog ---
+      editDialogVisible: false,
+      editFileList: [],
+      editUploadedFiles: [],
+      editSubmitLoading: false,
+      resolvedStudentId: null, // student_id returned from backend after resolving studentNo
+      resolvedStudentName: null,
     }
   },
   computed: {
     submitDisabled() {
-      // require studentId and at least one uploaded file
-      return this.submitted || this.uploadedFiles.length === 0 || this.submitLoading || !this.studentId || !this.homeworkId
+      // require studentNo and at least one uploaded file
+      return this.submitted || this.uploadedFiles.length === 0 || this.submitLoading || !this.studentNo || !this.homeworkId
     },
     parsedHomeworkAttachments() {
       return this.parseAttachmentString(this.homework.attachments)
@@ -183,6 +232,10 @@ export default {
     // Keep uploadedFiles in sync with el-upload's fileList (covers cases where upload response doesn't return fileName)
     fileList(newList) {
       this.uploadedFiles = (newList || []).map(f => this.getNameFromFileObj(f)).filter(Boolean)
+    },
+    // keep editUploadedFiles in sync when editFileList changes
+    editFileList(newList) {
+      this.editUploadedFiles = (newList || []).map(f => this.getNameFromFileObj(f)).filter(Boolean)
     }
   },
   created() {
@@ -547,7 +600,8 @@ export default {
         return
       }
       // If editing an existing submission, allow update; otherwise prevent duplicate submission for same homework
-      if (!this.editingSubmissionId && this.submissions && this.submissions.some(s => Number(s.homeworkId) === Number(this.homeworkId) && String(s.studentId) === String(this.studentId))) {
+      // consider either resolvedStudentId (numeric) or studentNo (string) in submissions
+      if (!this.editingSubmissionId && this.submissions && this.submissions.some(s => Number(s.homeworkId) === Number(this.homeworkId) && ((this.resolvedStudentId && String(s.studentId) === String(this.resolvedStudentId)) || (!this.resolvedStudentId && s.studentNo && String(s.studentNo) === String(this.studentNo))))) {
         this.$message.info('检测到您已提交过本作业，若要修改请选择左侧列表的“修改”按钮')
         return
       }
@@ -555,17 +609,19 @@ export default {
         this.$message.error('请先上传至少一个文件')
         return
       }
-      if (!this.studentId) {
-        this.$message.error('请输入学号 studentId')
+      if (!this.studentNo) {
+        this.$message.error('请输入学号')
         return
       }
       this.submitLoading = true
       try {
-        // backend expects ClassStudentHomework: homeworkId, studentId, submissionFiles
+        // backend expects ClassStudentHomework: homeworkId, studentNo (we send studentNo), submissionFiles
         const payload = {
           studentHomeworkId: this.editingSubmissionId,
            homeworkId: this.homeworkId,
-           studentId: this.studentId,
+           // send studentNo (学号) so backend can resolve to studentId
+           studentNo: this.studentNo,
+           studentName: this.studentName,
            submissionFiles: this.uploadedFiles.join(','),
            remark: ''
          }
@@ -609,7 +665,11 @@ export default {
 
      // Confirm the entered studentId and load only that student's submissions
      async confirmStudentId() {
-       if (!this.studentId) {
+       if (!this.studentName) {
+         this.$message.error('请输入姓名后再确认')
+         return
+       }
+       if (!this.studentNo) {
          this.$message.error('请输入学号后再确认')
          return
        }
@@ -619,18 +679,26 @@ export default {
 
      // Load submissions for the current entered studentId
      async loadMySubmissions() {
-       if (!this.studentId) {
+       if (!this.studentNo) {
          this.$message.info('请输入学号以查看提交记录')
          return
        }
        try {
-         const res = await getStudentSubmissions(this.studentId)
+         const res = await getStudentSubmissions(this.studentNo)
          const list = (res && (res.data || res.rows)) ? (res.data || res.rows) : (res || [])
          // Only show this student's submissions after confirmation
          this.submissions = list
+        // backend may include resolved studentId in each row or return associated studentId
+        // record resolvedStudentId if available (first row)
+        if (this.submissions && this.submissions.length > 0) {
+          this.resolvedStudentId = this.submissions[0].studentId || null
+          this.resolvedStudentName = this.submissions[0].studentName || null
+          // if studentName input is empty, prefill it with resolved name
+          if (!this.studentName && this.resolvedStudentName) this.studentName = this.resolvedStudentName
+        }
          // If current homework has a submission by this student, mark submitted
          if (this.homeworkId) {
-           const mine = this.submissions.find(s => String(s.homeworkId) === String(this.homeworkId) && String(s.studentId) === String(this.studentId))
+           const mine = this.submissions.find(s => String(s.homeworkId) === String(this.homeworkId) && ((this.resolvedStudentId && String(s.studentId) === String(this.resolvedStudentId)) || (!this.resolvedStudentId && s.studentNo && String(s.studentNo) === String(this.studentNo))))
            if (mine) {
              this.submitted = true
              this.editingSubmissionId = mine.studentHomeworkId || null
@@ -650,21 +718,91 @@ export default {
      editSubmission(row) {
        if (!row) return
        // Only allow editing if the row belongs to current confirmed student
-       if (!this.studentConfirmed || String(row.studentId) !== String(this.studentId)) {
+       if (!this.studentConfirmed || (this.resolvedStudentId ? String(row.studentId) !== String(this.resolvedStudentId) : (row.studentNo && String(row.studentNo) !== String(this.studentNo)))) {
          this.$message.error('只能编辑您自己的提交')
          return
        }
+       // Open dialog to edit attachments
        this.editingSubmissionId = row.studentHomeworkId
        this.homeworkId = row.homeworkId
        // load homework details
        this.fetchHomework()
-       // populate uploadedFiles from submissionFiles
+       // populate editUploadedFiles from submissionFiles
        this.uploadedFiles = this.parseAttachmentString(row.submissionFiles || row.attachments || row.files)
-       // keep fileList empty (can't reconstruct el-upload file objects reliably)
-       this.fileList = []
-       this.submitted = true
-       this.$message.success('已加载提交，您可以修改附件后点击提交保存')
+       this.editFileList = []
+       this.editDialogVisible = true
+       this.$nextTick(() => {
+         this.$message.success('已打开修改窗口，您可以添加或删除附件，然后保存')
+       })
      },
+
+     // Handlers for edit dialog upload
+     editUploadSuccess(response, file) {
+      if (!response && !file) return
+      const nameFromResponse = response && (response.fileName || response.data || response.filename || response.name || (response.data && response.data.fileName))
+      const name = nameFromResponse || (file && file.name)
+      if (name) {
+        if (this.editUploadedFiles.indexOf(name) === -1) this.editUploadedFiles.push(name)
+      }
+      try {
+        const exists = this.editFileList && this.editFileList.some(f => (f.name === (file && file.name)) || (f.uid && file && file.uid && f.uid === file.uid))
+        if (!exists && file) {
+          this.editFileList = (this.editFileList || []).slice()
+          this.editFileList.push(file)
+        }
+      } catch (e) { }
+    },
+    editHandleRemove(file, fileList) {
+      this.editFileList = fileList || []
+      // editUploadedFiles will be synced by watcher on editFileList
+    },
+
+    // Save edited submission (update)
+    async saveEditSubmission() {
+      if (!this.editingSubmissionId) {
+        this.$message.error('编辑的提交ID缺失')
+        return
+      }
+      if (!this.studentNo) {
+        this.$message.error('请输入学号后再保存')
+        return
+      }
+      if (!this.editUploadedFiles || this.editUploadedFiles.length === 0) {
+        this.$message.error('请至少保留或上传一个附件')
+        return
+      }
+      this.editSubmitLoading = true
+      try {
+        const payload = {
+          studentHomeworkId: this.editingSubmissionId,
+          homeworkId: this.homeworkId,
+          // send studentNo and studentName so backend can resolve/update
+          studentNo: this.studentNo,
+          studentName: this.studentName,
+          submissionFiles: this.editUploadedFiles.join(',')
+        }
+        const res = await updateSubmission(payload)
+        const ok = (res && (res.code === 200 || res.code === 0 || res.success)) || res === 200
+        if (ok) {
+          this.$message.success('保存并重新提交成功')
+          this.editDialogVisible = false
+          // refresh lists
+          await this.fetchSubmissions()
+          await this.loadMySubmissions()
+          // clear editing state
+          this.editingSubmissionId = null
+          this.editFileList = []
+          this.editUploadedFiles = []
+        } else {
+          this.$message.error((res && res.msg) || '保存失败')
+        }
+      } catch (e) {
+        console.error('保存提交失败', e)
+        this.$message.error('保存失败')
+      } finally {
+        this.editSubmitLoading = false
+      }
+    },
    }
  }
  </script>

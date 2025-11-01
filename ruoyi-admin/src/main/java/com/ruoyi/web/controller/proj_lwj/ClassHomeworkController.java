@@ -9,6 +9,7 @@ import com.ruoyi.proj_lwj.domain.ClassHomework;
 import com.ruoyi.proj_lwj.domain.ClassStudentHomework;
 import com.ruoyi.proj_lwj.service.IClassHomeworkService;
 import com.ruoyi.proj_lwj.service.IClassStudentHomeworkService;
+import com.ruoyi.proj_lwj.mapper.ClassStudentMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,9 @@ public class ClassHomeworkController extends BaseController {
 
     @Autowired
     private IClassStudentHomeworkService studentHomeworkService;
+
+    @Autowired
+    private ClassStudentMapper classStudentMapper;
 
     @PreAuthorize("@ss.hasPermi('projlwj:homework:list')")
     @GetMapping("/list")
@@ -77,6 +81,17 @@ public class ClassHomeworkController extends BaseController {
     @PostMapping("/submit")
     public AjaxResult submit(@RequestBody ClassStudentHomework shw) {
         shw.setCreateBy(getUsername());
+
+        // 如果前端传学号 studentNo，则根据学号查 student_id 并设置
+        if (shw.getStudentNo() != null && !shw.getStudentNo().trim().isEmpty()) {
+            String sn = shw.getStudentNo().trim();
+            com.ruoyi.proj_lwj.domain.ClassStudent cs = classStudentMapper.selectByStudentNo(sn);
+            if (cs == null) {
+                return AjaxResult.error("学号 " + sn + " 未找到对应的学生，请检查后重试。");
+            }
+            shw.setStudentId(cs.getStudentId());
+        }
+
         // 如果前端没有传 studentId 或传的是空/无效，使用当前登录用户ID（确保与 sys_user.user_id 对应）
         if (shw.getStudentId() == null || shw.getStudentId() == 0L) {
             shw.setStudentId(getUserId());
@@ -101,6 +116,17 @@ public class ClassHomeworkController extends BaseController {
         if (shw.getStudentHomeworkId() == null) {
             return AjaxResult.error("studentHomeworkId 不能为空，无法更新提交记录");
         }
+
+        // If frontend provided studentNo, resolve to studentId same as in submit
+        if (shw.getStudentNo() != null && !shw.getStudentNo().trim().isEmpty()) {
+            String sn = shw.getStudentNo().trim();
+            com.ruoyi.proj_lwj.domain.ClassStudent cs = classStudentMapper.selectByStudentNo(sn);
+            if (cs == null) {
+                return AjaxResult.error("学号 " + sn + " 未找到对应的学生，请检查后重试。");
+            }
+            shw.setStudentId(cs.getStudentId());
+        }
+
         shw.setUpdateBy(getUsername());
         // update submitTime to now if not provided
         if (shw.getSubmitTime() == null) {
@@ -128,8 +154,16 @@ public class ClassHomeworkController extends BaseController {
 
     // 公共接口：某学生的提交记录（无需特殊权限），供前端学生确认学号使用
     @GetMapping("/studentSubmissions/public")
-    public AjaxResult publicStudentSubmissions(@RequestParam Long studentId) {
-        List<ClassStudentHomework> list = studentHomeworkService.selectByStudentId(studentId);
+    public AjaxResult publicStudentSubmissions(@RequestParam(required = false) Long studentId, @RequestParam(required = false) String studentNo) {
+        Long sid = studentId;
+        if ((sid == null || sid == 0L) && studentNo != null && !studentNo.trim().isEmpty()) {
+            com.ruoyi.proj_lwj.domain.ClassStudent cs = classStudentMapper.selectByStudentNo(studentNo.trim());
+            if (cs != null) sid = cs.getStudentId();
+        }
+        if (sid == null) {
+            return AjaxResult.error("请提供 studentId 或 studentNo 以查询学生提交记录");
+        }
+        List<ClassStudentHomework> list = studentHomeworkService.selectByStudentId(sid);
         return AjaxResult.success(list);
     }
 }
