@@ -1,4 +1,4 @@
-package com.ruoyi.proj_fz.controller;
+package com.ruoyi.web.controller.proj_fz;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
