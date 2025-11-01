@@ -148,6 +148,22 @@ export const constantRoutes = [
         meta: { title: '作业上传', icon: 'upload' }
       }
     ]
+  },
+  //作业看板
+  {
+    path: '/proj_fz',
+    component: Layout,
+    redirect: '/proj_fz/homework_dashboard',
+    name: 'proj_fz',
+    meta: { title: '学情数据', icon: 'chart' },
+    children: [
+      {
+        path: 'homework_dashboard',
+        component: () => import('@/views/proj_fz/homeworkDashboard/index.vue'),
+        name: 'HomeworkDashboard',
+        meta: { title: '作业看板', icon: 'dashboard' }
+      }
+    ]
   }
 ]
 

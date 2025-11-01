@@ -1,0 +1,183 @@
+package com.ruoyi.proj_fz.mapper;
+
+import com.ruoyi.proj_fz.domain.HomeworkStatisticsDTO;
+import org.apache.ibatis.annotations.*;
+import java.util.List;
+import java.util.Map;
+
+@Mapper
+public interface HomeworkStatisticsMapper {
+
+    @Select("SELECT " +
+            "    ch.homework_id as homeworkId, " +
+            "    ch.title as homeworkTitle, " +
+            "    cc.course_name as courseName, " +
+            "    cs.class_name as className, " +
+            "    ch.total_score as totalScore, " +
+            "    ch.deadline as deadline, " +
+            "    (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) as totalStudents, " +
+            "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) as submittedCount, " +
+            "    ((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) - " +
+            "     (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2'))) as notSubmittedCount, " +
+            "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2') AND submit_time > ch.deadline) as overdueCount, " +
+            "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status = '2') as gradedCount, " +
+            "    CASE " +
+            "        WHEN (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) > 0 " +
+            "        THEN ROUND((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) * 100.0 / " +
+            "                  (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1), 2) " +
+            "        ELSE 0 " +
+            "    END as submissionRate, " +
+            "    (SELECT ROUND(AVG(grade), 2) FROM class_student_homework WHERE homework_id = ch.homework_id AND grade IS NOT NULL AND status = '2') as averageScore, " +
+            "    ch.create_by as createBy " +
+            "FROM class_homework ch " +
+            "LEFT JOIN class_course cc ON ch.course_id = cc.course_id " +
+            "LEFT JOIN class_session cs ON ch.session_id = cs.session_id " +
+            "ORDER BY ch.create_time DESC")
+    @Results({
+            @Result(property = "homeworkId", column = "homeworkId"),
+            @Result(property = "homeworkTitle", column = "homeworkTitle"),
+            @Result(property = "courseName", column = "courseName"),
+            @Result(property = "className", column = "className"),
+            @Result(property = "totalScore", column = "totalScore"),
+            @Result(property = "deadline", column = "deadline"),
+            @Result(property = "totalStudents", column = "totalStudents"),
+            @Result(property = "submittedCount", column = "submittedCount"),
+            @Result(property = "notSubmittedCount", column = "notSubmittedCount"),
+            @Result(property = "overdueCount", column = "overdueCount"),
+            @Result(property = "gradedCount", column = "gradedCount"),
+            @Result(property = "submissionRate", column = "submissionRate"),
+            @Result(property = "averageScore", column = "averageScore"),
+            @Result(property = "createBy", column = "createBy")
+    })
+    List<HomeworkStatisticsDTO> selectHomeworkStatisticsList();
+
+    @Select("SELECT " +
+            "    ch.homework_id as homeworkId, " +
+            "    ch.title as homeworkTitle, " +
+            "    cc.course_name as courseName, " +
+            "    cs.class_name as className, " +
+            "    ch.total_score as totalScore, " +
+            "    ch.deadline as deadline, " +
+            "    (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) as totalStudents, " +
+            "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) as submittedCount, " +
+            "    ((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) - " +
+            "     (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2'))) as notSubmittedCount, " +
+            "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2') AND submit_time > ch.deadline) as overdueCount, " +
+            "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status = '2') as gradedCount, " +
+            "    CASE " +
+            "        WHEN (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) > 0 " +
+            "        THEN ROUND((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) * 100.0 / " +
+            "                  (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1), 2) " +
+            "        ELSE 0 " +
+            "    END as submissionRate, " +
+            "    (SELECT ROUND(AVG(grade), 2) FROM class_student_homework WHERE homework_id = ch.homework_id AND grade IS NOT NULL AND status = '2') as averageScore, " +
+            "    (SELECT MAX(grade) FROM class_student_homework WHERE homework_id = ch.homework_id AND grade IS NOT NULL AND status = '2') as maxScore, " +
+            "    (SELECT MIN(grade) FROM class_student_homework WHERE homework_id = ch.homework_id AND grade IS NOT NULL AND status = '2') as minScore, " +
+            "    ch.create_by as createBy " +
+            "FROM class_homework ch " +
+            "LEFT JOIN class_course cc ON ch.course_id = cc.course_id " +
+            "LEFT JOIN class_session cs ON ch.session_id = cs.session_id " +
+            "WHERE ch.homework_id = #{homeworkId}")
+    @Results({
+            @Result(property = "homeworkId", column = "homeworkId"),
+            @Result(property = "homeworkTitle", column = "homeworkTitle"),
+            @Result(property = "courseName", column = "courseName"),
+            @Result(property = "className", column = "className"),
+            @Result(property = "totalScore", column = "totalScore"),
+            @Result(property = "deadline", column = "deadline"),
+            @Result(property = "totalStudents", column = "totalStudents"),
+            @Result(property = "submittedCount", column = "submittedCount"),
+            @Result(property = "notSubmittedCount", column = "notSubmittedCount"),
+            @Result(property = "overdueCount", column = "overdueCount"),
+            @Result(property = "gradedCount", column = "gradedCount"),
+            @Result(property = "submissionRate", column = "submissionRate"),
+            @Result(property = "averageScore", column = "averageScore"),
+            @Result(property = "maxScore", column = "maxScore"),
+            @Result(property = "minScore", column = "minScore"),
+            @Result(property = "createBy", column = "createBy")
+    })
+    HomeworkStatisticsDTO selectHomeworkStatisticsById(@Param("homeworkId") Long homeworkId);
+
+    @Select("SELECT " +
+            "    CASE " +
+            "        WHEN grade BETWEEN 0 AND 59 THEN '0-59' " +
+            "        WHEN grade BETWEEN 60 AND 69 THEN '60-69' " +
+            "        WHEN grade BETWEEN 70 AND 79 THEN '70-79' " +
+            "        WHEN grade BETWEEN 80 AND 89 THEN '80-89' " +
+            "        WHEN grade BETWEEN 90 AND 100 THEN '90-100' " +
+            "        ELSE '未批改' " +
+            "    END as scoreRange, " +
+            "    COUNT(DISTINCT student_id) as count " +
+            "FROM class_student_homework " +
+            "WHERE homework_id = #{homeworkId} AND status = '2' " +
+            "GROUP BY " +
+            "    CASE " +
+            "        WHEN grade BETWEEN 0 AND 59 THEN '0-59' " +
+            "        WHEN grade BETWEEN 60 AND 69 THEN '60-69' " +
+            "        WHEN grade BETWEEN 70 AND 79 THEN '70-79' " +
+            "        WHEN grade BETWEEN 80 AND 89 THEN '80-89' " +
+            "        WHEN grade BETWEEN 90 AND 100 THEN '90-100' " +
+            "        ELSE '未批改' " +
+            "    END")
+    List<Map<String, Object>> selectScoreDistribution(@Param("homeworkId") Long homeworkId);
+
+    @Select("SELECT " +
+            "    DATE_FORMAT(submit_time, '%Y-%m-%d %H:00') as hour, " +
+            "    COUNT(DISTINCT student_id) as count " +
+            "FROM class_student_homework " +
+            "WHERE homework_id = #{homeworkId} AND status IN ('1','2') " +
+            "GROUP BY DATE_FORMAT(submit_time, '%Y-%m-%d %H:00') " +
+            "ORDER BY hour")
+    List<Map<String, Object>> selectSubmissionTrend(@Param("homeworkId") Long homeworkId);
+
+    @Select("SELECT " +
+            "    cc.course_name as courseName, " +
+            "    COUNT(DISTINCT ch.homework_id) as homeworkCount, " +
+            "    SUM((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2'))) as totalSubmissions, " +
+            "    CASE " +
+            "        WHEN SUM((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1)) > 0 " +
+            "        THEN ROUND(AVG((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) * 100.0 / " +
+            "                      (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1)), 2) " +
+            "        ELSE 0 " +
+            "    END as avgSubmissionRate " +
+            "FROM class_homework ch " +
+            "LEFT JOIN class_course cc ON ch.course_id = cc.course_id " +
+            "GROUP BY cc.course_id, cc.course_name")
+    List<Map<String, Object>> selectTeacherHomeworkOverview();
+
+    @Select("SELECT " +
+            "    csh.id as id, " +
+            "    csh.student_id as studentId, " +
+            "    csh.student_name as studentName, " +
+            "    cs.student_no as studentNo, " +
+            "    csh.submit_time as submitTime, " +
+            "    csh.grade as grade, " +
+            "    csh.status as status, " +
+            "    csh.grade_comment as gradeComment, " +
+            "    csh.submission_files as submissionFiles " +
+            "FROM class_student_homework csh " +
+            "LEFT JOIN class_student cs ON csh.student_id = cs.student_no " +
+            "WHERE csh.homework_id = #{homeworkId} " +
+            "ORDER BY csh.submit_time DESC")
+    List<Map<String, Object>> selectStudentSubmissionDetails(@Param("homeworkId") Long homeworkId);
+
+    @Select("SELECT " +
+            "    COUNT(DISTINCT ch.homework_id) as totalHomeworkCount, " +
+            "    SUM((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2'))) as totalSubmissionCount, " +
+            "    COUNT(DISTINCT ch.course_id) as totalCourseCount, " +
+            "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE status = '2') as gradedCount " +
+            "FROM class_homework ch")
+    Map<String, Object> selectDashboardOverview();
+
+    // 调试用：获取所有作业基本信息
+    @Select("SELECT homework_id, title, session_id, create_by FROM class_homework ORDER BY homework_id")
+    List<Map<String, Object>> selectAllHomeworkBasicInfo();
+
+    // 调试用：获取作业提交统计
+    @Select("SELECT homework_id, COUNT(*) as total_submissions, " +
+            "COUNT(DISTINCT student_id) as unique_students " +
+            "FROM class_student_homework " +
+            "WHERE status IN ('1','2') " +
+            "GROUP BY homework_id")
+    List<Map<String, Object>> selectHomeworkSubmissionStats();
+}
