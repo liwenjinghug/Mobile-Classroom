@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 01/11/2025 17:35:33
+ Date: 01/11/2025 23:05:27
 */
 
 SET NAMES utf8mb4;
@@ -142,7 +142,7 @@ CREATE TABLE `class_homework`  (
   INDEX `idx_course_id`(`course_id` ASC) USING BTREE,
   INDEX `idx_session_id`(`session_id` ASC) USING BTREE,
   INDEX `idx_deadline`(`deadline` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '作业主表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '作业主表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of class_homework
@@ -157,6 +157,8 @@ INSERT INTO `class_homework` VALUES (7, 1, 7, '研开第8周', '小程序', NULL
 INSERT INTO `class_homework` VALUES (8, 1, 7, '研开第8周', '小程序', NULL, 100.00, '2025-11-07 00:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc', NULL, '0', 'admin', '2025-11-01 15:12:49', '', NULL, NULL);
 INSERT INTO `class_homework` VALUES (9, 1, 1, '研开第8周', '小程序', NULL, 100.00, '2025-11-07 00:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc', NULL, '0', 'admin', '2025-11-01 15:13:28', '', NULL, NULL);
 INSERT INTO `class_homework` VALUES (10, 1, 1, '07周1', '小程序', NULL, 100.00, '2025-11-02 00:00:00', '', NULL, '0', 'admin', '2025-11-01 16:16:39', 'admin', '2025-11-01 17:23:26', NULL);
+INSERT INTO `class_homework` VALUES (12, 1, 1, '研开01班第8周作业', '小程序', NULL, 100.00, '2025-11-02 00:00:00', '/profile/upload/2025/11/01/命令_20251101225116A001.txt', NULL, '0', 'admin', '2025-11-01 22:51:17', '', NULL, NULL);
+INSERT INTO `class_homework` VALUES (14, 1, 1, '08', '小程序', NULL, 80.00, '2025-11-02 16:00:00', '/profile/upload/2025/11/01/作业_20251101230003A001.txt', NULL, '0', 'admin', '2025-11-01 23:00:05', '', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for class_random_pick
@@ -314,7 +316,7 @@ CREATE TABLE `class_student_homework`  (
   INDEX `idx_homework_id`(`homework_id` ASC) USING BTREE,
   INDEX `idx_student_id`(`student_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生作业表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生作业表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of class_student_homework
@@ -326,6 +328,10 @@ INSERT INTO `class_student_homework` VALUES (4, 6, 77, '', NULL, '改革开放�
 INSERT INTO `class_student_homework` VALUES (5, 8, 12121111, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, '2025-11-01 15:13:53', 1, NULL, '', '1', 'admin', '2025-11-01 15:13:52', '', NULL);
 INSERT INTO `class_student_homework` VALUES (6, 10, 2023141460368, '', NULL, '实验报告模版.doc', NULL, NULL, '2025-11-01 16:32:32', 1, NULL, '', '1', 'admin', '2025-11-01 16:32:31', '', NULL);
 INSERT INTO `class_student_homework` VALUES (7, 10, 2023141460368, '', NULL, '实验报告模板.docx', NULL, NULL, '2025-11-01 16:53:31', 1, NULL, '', '1', 'admin', '2025-11-01 16:53:30', '', NULL);
+INSERT INTO `class_student_homework` VALUES (8, 10, 20, '', NULL, '作业.txt', NULL, NULL, '2025-11-01 22:16:32', 1, NULL, '', NULL, 'admin', '2025-11-01 22:11:05', 'admin', '2025-11-01 22:16:32');
+INSERT INTO `class_student_homework` VALUES (9, 10, 38, '', NULL, '作业.txt', NULL, NULL, '2025-11-01 22:35:34', 1, NULL, '', '1', 'admin', '2025-11-01 22:35:34', '', NULL);
+INSERT INTO `class_student_homework` VALUES (10, 12, 38, '黎文靖', NULL, '实验报告模版.doc', NULL, NULL, '2025-11-01 22:52:03', 1, NULL, '', '1', 'admin', '2025-11-01 22:52:02', '', NULL);
+INSERT INTO `class_student_homework` VALUES (11, 14, 38, '黎文靖', NULL, '实验报告模版.doc', NULL, NULL, '2025-11-01 23:00:55', 1, NULL, NULL, NULL, 'admin', '2025-11-01 23:00:44', 'admin', '2025-11-01 23:00:54');
 
 -- ----------------------------
 -- Table structure for gen_table
@@ -840,7 +846,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 107 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 108 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -852,6 +858,7 @@ INSERT INTO `sys_logininfor` VALUES (103, 'admin', '127.0.0.1', '内网IP', 'Chr
 INSERT INTO `sys_logininfor` VALUES (104, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 21:36:17');
 INSERT INTO `sys_logininfor` VALUES (105, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-01 15:11:52');
 INSERT INTO `sys_logininfor` VALUES (106, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-01 17:25:16');
+INSERT INTO `sys_logininfor` VALUES (107, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-01 21:44:41');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -1020,7 +1027,7 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 152 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 167 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -1077,6 +1084,21 @@ INSERT INTO `sys_oper_log` VALUES (148, '作业管理', 1, 'com.ruoyi.web.contro
 INSERT INTO `sys_oper_log` VALUES (149, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":10,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":6,\"studentId\":2023141460368,\"submissionFiles\":\"实验报告模版.doc\",\"submitTime\":\"2025-11-01 16:32:31\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 16:32:31', 263);
 INSERT INTO `sys_oper_log` VALUES (150, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":10,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":7,\"studentId\":2023141460368,\"submissionFiles\":\"实验报告模板.docx\",\"submitTime\":\"2025-11-01 16:53:30\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 16:53:30', 227);
 INSERT INTO `sys_oper_log` VALUES (151, '作业管理', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"小程序\",\"courseId\":1,\"deadline\":\"2025-11-02 00:00:00\",\"homeworkId\":10,\"params\":{},\"sessionId\":1,\"title\":\"07周1\",\"totalScore\":100,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 17:23:26', 43);
+INSERT INTO `sys_oper_log` VALUES (152, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/附件5　四川大学本科毕业论文（设计）格式和参考文献著录要求_20251101214507A001.doc\",\"content\":\"11\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-02 00:00:00\",\"homeworkId\":11,\"params\":{},\"sessionId\":1,\"title\":\"11\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 21:45:08', 25);
+INSERT INTO `sys_oper_log` VALUES (153, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":10,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":8,\"studentId\":20,\"submissionFiles\":\"实验报告模板.docx\",\"submitTime\":\"2025-11-01 22:11:05\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 22:11:05', 28);
+INSERT INTO `sys_oper_log` VALUES (154, '作业提交', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.updateSubmit()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"homeworkId\":10,\"params\":{},\"remark\":\"\",\"studentHomeworkId\":8,\"studentId\":20,\"submissionFiles\":\"实验报告模版.doc\",\"submitTime\":\"2025-11-01 22:11:15\",\"updateBy\":\"admin\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'score\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassStudentHomeworkMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassStudentHomeworkMapper.update-Inline\r\n### The error occurred while setting parameters\r\n### SQL: UPDATE class_student_homework SET submission_files=?, submit_time=?, status=?, score=?, remark=?, update_by=?, update_time=NOW() WHERE id=?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'score\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'score\' in \'field list\'', '2025-11-01 22:11:16', 123);
+INSERT INTO `sys_oper_log` VALUES (155, '作业提交', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.updateSubmit()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"homeworkId\":10,\"params\":{},\"remark\":\"\",\"studentHomeworkId\":8,\"studentId\":20,\"submissionFiles\":\"实验报告模版.doc\",\"submitTime\":\"2025-11-01 22:11:17\",\"updateBy\":\"admin\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'score\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassStudentHomeworkMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassStudentHomeworkMapper.update-Inline\r\n### The error occurred while setting parameters\r\n### SQL: UPDATE class_student_homework SET submission_files=?, submit_time=?, status=?, score=?, remark=?, update_by=?, update_time=NOW() WHERE id=?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'score\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'score\' in \'field list\'', '2025-11-01 22:11:17', 5);
+INSERT INTO `sys_oper_log` VALUES (156, '作业提交', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.updateSubmit()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"homeworkId\":10,\"params\":{},\"remark\":\"\",\"studentHomeworkId\":8,\"studentId\":20,\"submissionFiles\":\"实验报告模版.doc\",\"submitTime\":\"2025-11-01 22:15:39\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 22:15:39', 33);
+INSERT INTO `sys_oper_log` VALUES (157, '作业提交', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.updateSubmit()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"homeworkId\":10,\"params\":{},\"remark\":\"\",\"studentHomeworkId\":8,\"studentId\":20,\"submissionFiles\":\"作业.txt\",\"submitTime\":\"2025-11-01 22:16:32\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 22:16:32', 10);
+INSERT INTO `sys_oper_log` VALUES (158, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":10,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":9,\"studentId\":38,\"studentNo\":\"2023141460368\",\"submissionFiles\":\"作业.txt\",\"submitTime\":\"2025-11-01 22:35:34\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 22:35:34', 276);
+INSERT INTO `sys_oper_log` VALUES (159, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/命令_20251101225116A001.txt\",\"content\":\"小程序\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-02 00:00:00\",\"homeworkId\":12,\"params\":{},\"sessionId\":1,\"title\":\"研开01班第8周作业\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 22:51:17', 239);
+INSERT INTO `sys_oper_log` VALUES (160, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":12,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":10,\"studentId\":38,\"studentName\":\"黎文靖\",\"studentNo\":\"2023141460368\",\"submissionFiles\":\"实验报告模版.doc\",\"submitTime\":\"2025-11-01 22:52:02\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 22:52:02', 18);
+INSERT INTO `sys_oper_log` VALUES (161, '作业管理', 3, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_lwj/homework/11', '127.0.0.1', '内网IP', '[11]', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 22:52:50', 12);
+INSERT INTO `sys_oper_log` VALUES (162, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/作业_20251101225359A003.txt\",\"content\":\"小程序\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-04 12:00:00\",\"homeworkId\":13,\"params\":{},\"sessionId\":1,\"title\":\"08\",\"totalScore\":90}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 22:54:01', 8);
+INSERT INTO `sys_oper_log` VALUES (163, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/作业_20251101230003A001.txt\",\"content\":\"小程序\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-02 16:00:00\",\"homeworkId\":14,\"params\":{},\"sessionId\":1,\"title\":\"08\",\"totalScore\":80}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 23:00:05', 216);
+INSERT INTO `sys_oper_log` VALUES (164, '作业管理', 3, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_lwj/homework/13', '127.0.0.1', '内网IP', '[13]', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 23:00:10', 13);
+INSERT INTO `sys_oper_log` VALUES (165, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":14,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":11,\"studentId\":38,\"studentName\":\"黎文靖\",\"studentNo\":\"2023141460368\",\"submissionFiles\":\"作业.txt\",\"submitTime\":\"2025-11-01 23:00:44\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 23:00:44', 22);
+INSERT INTO `sys_oper_log` VALUES (166, '作业提交', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.updateSubmit()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"homeworkId\":14,\"params\":{},\"studentHomeworkId\":11,\"studentId\":38,\"studentName\":\"黎文靖\",\"studentNo\":\"2023141460368\",\"submissionFiles\":\"实验报告模版.doc\",\"submitTime\":\"2025-11-01 23:00:54\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 23:00:54', 18);
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -1279,7 +1301,7 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-01 17:25:16', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
+INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-01 21:44:42', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
 INSERT INTO `sys_user` VALUES (2, 105, 'ry', '若依', '00', 'ry@qq.com', '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-10-30 17:06:55', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '测试员');
 
 -- ----------------------------
