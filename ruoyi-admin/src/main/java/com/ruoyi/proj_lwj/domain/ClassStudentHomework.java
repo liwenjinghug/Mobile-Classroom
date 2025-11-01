@@ -3,6 +3,7 @@ package com.ruoyi.proj_lwj.domain;
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.Date;
+import java.math.BigDecimal;
 
 public class ClassStudentHomework extends BaseEntity {
     private static final long serialVersionUID = 1L;
@@ -15,7 +16,8 @@ public class ClassStudentHomework extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date submitTime;
 
-    private Integer score;
+    // DB column `grade` is DECIMAL(5,2) — use BigDecimal in Java to preserve precision
+    private BigDecimal score;
     private Integer status; // 0=未提交 1=已提交 2=已批改
     private String remark;
 
@@ -43,8 +45,8 @@ public class ClassStudentHomework extends BaseEntity {
     public Date getSubmitTime() { return submitTime; }
     public void setSubmitTime(Date submitTime) { this.submitTime = submitTime; }
 
-    public Integer getScore() { return score; }
-    public void setScore(Integer score) { this.score = score; }
+    public BigDecimal getScore() { return score; }
+    public void setScore(BigDecimal score) { this.score = score; }
 
     public Integer getStatus() { return status; }
     public void setStatus(Integer status) { this.status = status; }

@@ -125,9 +125,8 @@
               <el-table-column prop="submitTime" label="提交时间" width="200">
                 <template #default="{ row }">{{ formatTime(row.submitTime) }}</template>
               </el-table-column>
-              <el-table-column prop="status" label="状态" width="120">
-                <template #default="{ row }">{{ submissionStatusText(row.status) }}</template>
-              </el-table-column>
+              <!-- 状态列已移除：学生端提交记录不再显示状态 -->
+
               <el-table-column label="操作" width="120">
                 <template #default="{ row }">
                   <el-button size="mini" type="primary" v-if="studentConfirmed && String(row.studentId) === String(resolvedStudentId || studentId || '')" @click="editSubmission(row)">修改</el-button>
