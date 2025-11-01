@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 01/11/2025 15:09:04
+ Date: 01/11/2025 15:16:56
 */
 
 SET NAMES utf8mb4;
@@ -141,7 +141,7 @@ CREATE TABLE `class_homework`  (
   INDEX `idx_course_id`(`course_id` ASC) USING BTREE,
   INDEX `idx_session_id`(`session_id` ASC) USING BTREE,
   INDEX `idx_deadline`(`deadline` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '作业主表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '作业主表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of class_homework
@@ -152,6 +152,9 @@ INSERT INTO `class_homework` VALUES (3, 1, 7, '11111111111', '333333333333333333
 INSERT INTO `class_homework` VALUES (4, 1, 7, '研开第8周作业', '小程序', NULL, 100.00, '2025-11-11 12:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101013529A007.doc', NULL, '0', 'admin', '2025-11-01 01:35:38', '', NULL, NULL);
 INSERT INTO `class_homework` VALUES (5, 1, 7, '99', '99', NULL, 100.00, '2025-11-06 00:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101015431A001.doc', NULL, '0', 'admin', '2025-11-01 01:54:32', '', NULL, NULL);
 INSERT INTO `class_homework` VALUES (6, 1, 7, '77', '77', NULL, 100.00, '2025-11-03 07:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101015911A004.doc', NULL, '0', 'admin', '2025-11-01 01:59:12', '', NULL, NULL);
+INSERT INTO `class_homework` VALUES (7, 1, 7, '研开第8周', '小程序', NULL, 100.00, '2025-11-07 00:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc', NULL, '0', 'admin', '2025-11-01 15:12:40', '', NULL, NULL);
+INSERT INTO `class_homework` VALUES (8, 1, 7, '研开第8周', '小程序', NULL, 100.00, '2025-11-07 00:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc', NULL, '0', 'admin', '2025-11-01 15:12:49', '', NULL, NULL);
+INSERT INTO `class_homework` VALUES (9, 1, 1, '研开第8周', '小程序', NULL, 100.00, '2025-11-07 00:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc', NULL, '0', 'admin', '2025-11-01 15:13:28', '', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for class_random_pick
@@ -213,7 +216,7 @@ CREATE TABLE `class_session`  (
 INSERT INTO `class_session` VALUES (1, '研究与开发实践01', 1, '2025-10-31 20:50:24', '2025-10-31 20:50:28', 1, 50, 'A', 1, '', NULL, '', NULL);
 INSERT INTO `class_session` VALUES (3, '计算机金融应用', 3, '2025-10-31 20:57:16', '2025-10-31 20:57:19', 0, 30, 'C', 3, '', NULL, 'admin', '2025-10-31 21:49:01');
 INSERT INTO `class_session` VALUES (4, '研究与开发实践02', 2, '2025-10-30 21:55:37', '2025-10-31 21:55:41', 2, 42, 'B', 1, 'admin', '2025-10-31 21:55:44', 'admin', '2025-10-31 21:56:17');
-INSERT INTO `class_session` VALUES (7, '研究与开发实践03', 1, '2025-11-07 00:00:00', '2025-11-20 00:00:00', 0, 30, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-11-01 00:43:14');
+INSERT INTO `class_session` VALUES (7, '研究与开发实践03', 1, '2025-11-07 00:00:00', '2025-11-20 00:00:00', 0, 32, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-11-01 15:12:04');
 
 -- ----------------------------
 -- Table structure for class_student
@@ -304,7 +307,7 @@ CREATE TABLE `class_student_homework`  (
   INDEX `idx_homework_id`(`homework_id` ASC) USING BTREE,
   INDEX `idx_student_id`(`student_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生作业表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生作业表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of class_student_homework
@@ -313,6 +316,7 @@ INSERT INTO `class_student_homework` VALUES (1, 3, 1212121, '', NULL, '改革开
 INSERT INTO `class_student_homework` VALUES (2, 5, 121212, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, '2025-11-01 01:54:58', 1, NULL, '', '1', 'admin', '2025-11-01 01:54:57', '', NULL);
 INSERT INTO `class_student_homework` VALUES (3, 5, 12, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, '2025-11-01 01:58:19', 1, NULL, '', '1', 'admin', '2025-11-01 01:58:19', '', NULL);
 INSERT INTO `class_student_homework` VALUES (4, 6, 77, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, '2025-11-01 01:59:39', 1, NULL, '', '1', 'admin', '2025-11-01 01:59:38', '', NULL);
+INSERT INTO `class_student_homework` VALUES (5, 8, 12121111, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, '2025-11-01 15:13:53', 1, NULL, '', '1', 'admin', '2025-11-01 15:13:52', '', NULL);
 
 -- ----------------------------
 -- Table structure for gen_table
@@ -827,7 +831,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 105 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 106 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -837,6 +841,7 @@ INSERT INTO `sys_logininfor` VALUES (101, 'admin', '127.0.0.1', '内网IP', 'Chr
 INSERT INTO `sys_logininfor` VALUES (102, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 19:10:48');
 INSERT INTO `sys_logininfor` VALUES (103, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 19:21:07');
 INSERT INTO `sys_logininfor` VALUES (104, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 21:36:17');
+INSERT INTO `sys_logininfor` VALUES (105, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-01 15:11:52');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -1005,7 +1010,7 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 140 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 145 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -1050,6 +1055,11 @@ INSERT INTO `sys_oper_log` VALUES (136, '作业提交', 1, 'com.ruoyi.web.contro
 INSERT INTO `sys_oper_log` VALUES (137, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":5,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":3,\"studentId\":12,\"submissionFiles\":\"改革开放史论文撰写模板.doc\",\"submitTime\":\"2025-11-01 01:58:19\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 01:58:19', 9);
 INSERT INTO `sys_oper_log` VALUES (138, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101015911A004.doc\",\"content\":\"77\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-03 07:00:00\",\"homeworkId\":6,\"params\":{},\"sessionId\":7,\"title\":\"77\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 01:59:12', 10);
 INSERT INTO `sys_oper_log` VALUES (139, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":6,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":4,\"studentId\":77,\"submissionFiles\":\"改革开放史论文撰写模板.doc\",\"submitTime\":\"2025-11-01 01:59:38\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 01:59:38', 12);
+INSERT INTO `sys_oper_log` VALUES (140, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"研究与开发实践03\",\"classNumber\":1,\"createBy\":\"admin\",\"createTime\":\"2025-11-01 00:42:58\",\"endTime\":\"2025-11-20 00:00:00\",\"params\":{},\"sessionId\":7,\"startTime\":\"2025-11-07 00:00:00\",\"status\":0,\"teacher\":\"C\",\"teacherId\":1,\"totalStudents\":32,\"updateBy\":\"admin\",\"updateTime\":\"2025-11-01 00:43:14\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 15:12:04', 31);
+INSERT INTO `sys_oper_log` VALUES (141, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc\",\"content\":\"小程序\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-07 00:00:00\",\"homeworkId\":7,\"params\":{},\"sessionId\":7,\"title\":\"研开第8周\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 15:12:41', 19);
+INSERT INTO `sys_oper_log` VALUES (142, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc\",\"content\":\"小程序\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-07 00:00:00\",\"homeworkId\":8,\"params\":{},\"sessionId\":7,\"title\":\"研开第8周\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 15:12:49', 10);
+INSERT INTO `sys_oper_log` VALUES (143, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc\",\"content\":\"小程序\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-07 00:00:00\",\"homeworkId\":9,\"params\":{},\"sessionId\":1,\"title\":\"研开第8周\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 15:13:28', 11);
+INSERT INTO `sys_oper_log` VALUES (144, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":8,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":5,\"studentId\":12121111,\"submissionFiles\":\"改革开放史论文撰写模板.doc\",\"submitTime\":\"2025-11-01 15:13:52\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 15:13:52', 20);
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -1252,7 +1262,7 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-10-31 21:36:18', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
+INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-01 15:11:53', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
 INSERT INTO `sys_user` VALUES (2, 105, 'ry', '若依', '00', 'ry@qq.com', '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-10-30 17:06:55', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '测试员');
 
 -- ----------------------------
