@@ -55,25 +55,22 @@
             <el-tabs v-model="activeChartTab" @tab-click="handleTabClick">
               <!-- 提交状态饼图 -->
               <el-tab-pane label="提交状态" name="submission">
-                <div v-if="chartsReady" ref="submissionChart" style="height: 400px;"></div>
-                <div v-else style="height: 400px; display: flex; align-items: center; justify-content: center;">
-                  <span>图表加载中...</span>
+                <div class="chart-container" ref="submissionChartContainer">
+                  <div v-show="activeChartTab === 'submission'" ref="submissionChart" class="chart"></div>
                 </div>
               </el-tab-pane>
 
               <!-- 成绩分布柱状图 -->
               <el-tab-pane label="成绩分布" name="score">
-                <div v-if="chartsReady" ref="scoreChart" style="height: 400px;"></div>
-                <div v-else style="height: 400px; display: flex; align-items: center; justify-content: center;">
-                  <span>图表加载中...</span>
+                <div class="chart-container" ref="scoreChartContainer">
+                  <div v-show="activeChartTab === 'score'" ref="scoreChart" class="chart"></div>
                 </div>
               </el-tab-pane>
 
               <!-- 提交趋势折线图 -->
               <el-tab-pane label="提交趋势" name="trend">
-                <div v-if="chartsReady" ref="trendChart" style="height: 400px;"></div>
-                <div v-else style="height: 400px; display: flex; align-items: center; justify-content: center;">
-                  <span>图表加载中...</span>
+                <div class="chart-container" ref="trendChartContainer">
+                  <div v-show="activeChartTab === 'trend'" ref="trendChart" class="chart"></div>
                 </div>
               </el-tab-pane>
             </el-tabs>
@@ -207,50 +204,150 @@ export default {
       scoreChart: null,
       trendChart: null,
       debugInfo: '',
-      chartsReady: false,
-      chartsInitialized: false
+      chartsInitialized: false,
+      initTimer: null,
+      resizeTimer: null,
+      initAttempts: 0,
+      maxInitAttempts: 10
     }
   },
   mounted() {
-    // 使用 nextTick 确保 DOM 已经渲染
-    this.$nextTick(() => {
-      this.initCharts()
-      this.loadDashboardData()
-      this.loadHomeworkList()
-    })
+    this.loadDashboardData()
+    this.loadHomeworkList()
+
+    // 添加窗口resize事件监听
+    window.addEventListener('resize', this.handleResize)
   },
   beforeUnmount() {
     this.disposeCharts()
+    if (this.initTimer) {
+      clearTimeout(this.initTimer)
+    }
+    if (this.resizeTimer) {
+      clearTimeout(this.resizeTimer)
+    }
+    // 移除resize事件监听
+    window.removeEventListener('resize', this.handleResize)
   },
   methods: {
-    // 初始化图表
+    // 初始化图表 - 完全重写的版本
     initCharts() {
-      // 检查DOM元素是否存在
-      if (!this.$refs.submissionChart || !this.$refs.scoreChart || !this.$refs.trendChart) {
-        console.warn('图表DOM元素未找到，延迟初始化')
-        setTimeout(() => {
-          this.initCharts()
-        }, 100)
-        return
+      // 清除之前的定时器
+      if (this.initTimer) {
+        clearTimeout(this.initTimer)
       }
 
-      try {
-        this.submissionChart = echarts.init(this.$refs.submissionChart)
-        this.scoreChart = echarts.init(this.$refs.scoreChart)
-        this.trendChart = echarts.init(this.$refs.trendChart)
+      // 防止无限重试
+      if (this.initAttempts >= this.maxInitAttempts) {
+        console.error('图表初始化失败：达到最大重试次数')
+        return
+      }
+      this.initAttempts++
 
-        this.chartsInitialized = true
-        this.chartsReady = true
+      this.initTimer = setTimeout(() => {
+        try {
+          console.log(`尝试初始化图表，第 ${this.initAttempts} 次`)
 
-        // 设置默认图表
-        this.renderSubmissionChart([])
-        this.renderScoreChart([])
-        this.renderTrendChart([])
+          // 如果已经初始化，先销毁
+          if (this.chartsInitialized) {
+            this.disposeCharts()
+          }
 
-        console.log('图表初始化成功')
-      } catch (error) {
-        console.error('图表初始化失败:', error)
-        this.chartsReady = false
+          // 使用更可靠的DOM查询方式
+          this.$nextTick(() => {
+            // 获取当前激活的图表容器
+            let currentChartRef = null
+            switch (this.activeChartTab) {
+              case 'submission':
+                currentChartRef = this.$refs.submissionChart
+                break
+              case 'score':
+                currentChartRef = this.$refs.scoreChart
+                break
+              case 'trend':
+                currentChartRef = this.$refs.trendChart
+                break
+            }
+
+            // 检查DOM元素是否存在且有尺寸
+            if (!currentChartRef) {
+              console.warn('当前图表DOM元素未找到，延迟初始化')
+              this.initCharts()
+              return
+            }
+
+            // 检查元素是否可见且有尺寸
+            if (currentChartRef.offsetWidth === 0 || currentChartRef.offsetHeight === 0) {
+              console.warn('图表容器尺寸为0，延迟初始化')
+              this.initCharts()
+              return
+            }
+
+            // 初始化当前激活的图表
+            this.initCurrentChart()
+
+            this.chartsInitialized = true
+            this.initAttempts = 0 // 重置重试计数
+
+            console.log('图表初始化成功')
+          })
+        } catch (error) {
+          console.error('图表初始化失败:', error)
+          // 失败后重试
+          this.initCharts()
+        }
+      }, 500)
+    },
+
+    // 初始化当前激活的图表
+    initCurrentChart() {
+      let chartElement = null
+      let chartInstance = null
+
+      switch (this.activeChartTab) {
+        case 'submission':
+          chartElement = this.$refs.submissionChart
+          if (chartElement && !this.submissionChart) {
+            this.submissionChart = echarts.init(chartElement)
+            chartInstance = this.submissionChart
+          }
+          break
+        case 'score':
+          chartElement = this.$refs.scoreChart
+          if (chartElement && !this.scoreChart) {
+            this.scoreChart = echarts.init(chartElement)
+            chartInstance = this.scoreChart
+          }
+          break
+        case 'trend':
+          chartElement = this.$refs.trendChart
+          if (chartElement && !this.trendChart) {
+            this.trendChart = echarts.init(chartElement)
+            chartInstance = this.trendChart
+          }
+          break
+      }
+
+      // 如果有数据，立即渲染当前图表
+      if (chartInstance && this.selectedHomeworkData) {
+        this.renderCurrentChart()
+      }
+    },
+
+    // 渲染当前激活的图表
+    renderCurrentChart() {
+      if (!this.selectedHomeworkData) return
+
+      switch (this.activeChartTab) {
+        case 'submission':
+          this.renderSubmissionChart()
+          break
+        case 'score':
+          this.renderScoreChart()
+          break
+        case 'trend':
+          this.renderTrendChart()
+          break
       }
     },
 
@@ -269,58 +366,151 @@ export default {
         this.trendChart = null
       }
       this.chartsInitialized = false
-      this.chartsReady = false
+    },
+
+    // 窗口resize处理
+    handleResize() {
+      // 延迟resize以避免频繁触发
+      clearTimeout(this.resizeTimer)
+      this.resizeTimer = setTimeout(() => {
+        if (this.submissionChart) this.submissionChart.resize()
+        if (this.scoreChart) this.scoreChart.resize()
+        if (this.trendChart) this.trendChart.resize()
+      }, 200)
     },
 
     // 标签点击事件
     handleTabClick(tab) {
-      if (this.chartsInitialized) {
-        // 确保图表重新渲染
-        this.$nextTick(() => {
-          this.refreshCharts()
-        })
-      }
+      this.activeChartTab = tab.name
+
+      // 延迟确保DOM更新
+      this.$nextTick(() => {
+        setTimeout(() => {
+          // 重新初始化当前激活的图表
+          this.initCurrentChart()
+        }, 300)
+      })
     },
 
-    // 刷新图表
-    refreshCharts() {
-      if (!this.chartsInitialized) {
-        this.initCharts()
-        return
-      }
+    // 渲染提交状态饼图
+    renderSubmissionChart() {
+      if (!this.submissionChart || !this.selectedHomeworkData) return
 
-      if (this.selectedHomeworkData) {
-        this.updateChartsWithData()
-      }
-    },
-
-    // 使用数据更新图表
-    updateChartsWithData() {
-      // 更新提交状态饼图
-      const submissionData = [
+      const data = [
         { value: this.selectedHomeworkData.submittedCount || 0, name: '已提交' },
         { value: this.selectedHomeworkData.notSubmittedCount || 0, name: '未提交' },
         { value: this.selectedHomeworkData.overdueCount || 0, name: '逾期提交' }
       ].filter(item => item.value > 0)
 
-      this.renderSubmissionChart(submissionData)
+      const option = {
+        title: {
+          text: data.length > 0 ? '提交状态分布' : '暂无提交数据',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c} ({d}%)'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left'
+        },
+        series: [
+          {
+            name: '提交状态',
+            type: 'pie',
+            radius: '50%',
+            data: data,
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            }
+          }
+        ]
+      }
+      this.submissionChart.setOption(option, true)
+    },
 
-      // 更新成绩分布柱状图
+    // 渲染成绩分布柱状图
+    renderScoreChart() {
+      if (!this.scoreChart || !this.selectedHomeworkData) return
+
+      let data = []
       if (this.selectedHomeworkData.scoreDistribution && Object.keys(this.selectedHomeworkData.scoreDistribution).length > 0) {
-        const scoreData = Object.entries(this.selectedHomeworkData.scoreDistribution)
+        data = Object.entries(this.selectedHomeworkData.scoreDistribution)
           .map(([name, value]) => ({ name, value }))
           .filter(item => item.value > 0)
-        this.renderScoreChart(scoreData)
-      } else {
-        this.renderScoreChart([])
       }
 
-      // 更新提交趋势折线图
-      if (this.selectedHomeworkData.chartData && this.selectedHomeworkData.chartData.length > 0) {
-        this.renderTrendChart(this.selectedHomeworkData.chartData)
-      } else {
-        this.renderTrendChart([])
+      const option = {
+        title: {
+          text: data.length > 0 ? '成绩分布' : '暂无成绩数据',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        xAxis: {
+          type: 'category',
+          data: data.map(item => item.name)
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            name: '人数',
+            type: 'bar',
+            data: data.map(item => item.value),
+            itemStyle: {
+              color: '#409EFF'
+            }
+          }
+        ]
       }
+      this.scoreChart.setOption(option, true)
+    },
+
+    // 渲染提交趋势折线图
+    renderTrendChart() {
+      if (!this.trendChart || !this.selectedHomeworkData) return
+
+      let data = this.selectedHomeworkData.chartData || []
+
+      const option = {
+        title: {
+          text: data.length > 0 ? '提交时间趋势' : '暂无提交趋势数据',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        xAxis: {
+          type: 'category',
+          data: data.map(item => item.hour)
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            name: '提交人数',
+            type: 'line',
+            data: data.map(item => item.count),
+            smooth: true,
+            lineStyle: {
+              color: '#67C23A'
+            },
+            itemStyle: {
+              color: '#67C23A'
+            }
+          }
+        ]
+      }
+      this.trendChart.setOption(option, true)
     },
 
     // 加载看板数据
@@ -395,15 +585,12 @@ export default {
         if (response.code === 200) {
           this.selectedHomeworkData = response.data
 
-          // 确保图表已经初始化
-          if (!this.chartsInitialized) {
-            this.initCharts()
-          }
-
-          // 更新图表数据
-          if (this.chartsInitialized) {
-            this.updateChartsWithData()
-          }
+          // 延迟确保DOM更新后再初始化图表
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.initCharts()
+            }, 500)
+          })
 
           this.debugInfo = `作业 ${homeworkId} 详情加载成功`
         } else {
@@ -413,112 +600,6 @@ export default {
         console.error('加载作业详情失败:', error)
         this.debugInfo = `作业详情加载异常: ${error.message}`
       }
-    },
-
-    // 渲染提交状态饼图
-    renderSubmissionChart(data) {
-      if (!this.submissionChart) return
-
-      const option = {
-        title: {
-          text: data.length > 0 ? '提交状态分布' : '暂无提交数据',
-          left: 'center'
-        },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
-        },
-        legend: {
-          orient: 'vertical',
-          left: 'left'
-        },
-        series: [
-          {
-            name: '提交状态',
-            type: 'pie',
-            radius: '50%',
-            data: data,
-            emphasis: {
-              itemStyle: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
-              }
-            }
-          }
-        ]
-      }
-      this.submissionChart.setOption(option, true)
-    },
-
-    // 渲染成绩分布柱状图
-    renderScoreChart(data) {
-      if (!this.scoreChart) return
-
-      const option = {
-        title: {
-          text: data.length > 0 ? '成绩分布' : '暂无成绩数据',
-          left: 'center'
-        },
-        tooltip: {
-          trigger: 'axis'
-        },
-        xAxis: {
-          type: 'category',
-          data: data.map(item => item.name)
-        },
-        yAxis: {
-          type: 'value'
-        },
-        series: [
-          {
-            name: '人数',
-            type: 'bar',
-            data: data.map(item => item.value),
-            itemStyle: {
-              color: '#409EFF'
-            }
-          }
-        ]
-      }
-      this.scoreChart.setOption(option, true)
-    },
-
-    // 渲染提交趋势折线图
-    renderTrendChart(data) {
-      if (!this.trendChart) return
-
-      const option = {
-        title: {
-          text: data.length > 0 ? '提交时间趋势' : '暂无提交趋势数据',
-          left: 'center'
-        },
-        tooltip: {
-          trigger: 'axis'
-        },
-        xAxis: {
-          type: 'category',
-          data: data.map(item => item.hour)
-        },
-        yAxis: {
-          type: 'value'
-        },
-        series: [
-          {
-            name: '提交人数',
-            type: 'line',
-            data: data.map(item => item.count),
-            smooth: true,
-            lineStyle: {
-              color: '#67C23A'
-            },
-            itemStyle: {
-              color: '#67C23A'
-            }
-          }
-        ]
-      }
-      this.trendChart.setOption(option, true)
     },
 
     // 选择作业
@@ -682,5 +763,28 @@ export default {
 
 .create-by {
   color: #909399;
+}
+
+/* 图表容器样式 */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  min-height: 400px;
+}
+
+.chart {
+  width: 100%;
+  height: 100%;
+}
+
+/* 确保标签页内容有正确尺寸 */
+.el-tab-pane {
+  position: relative;
+  height: 400px;
+}
+
+::v-deep .el-tabs__content {
+  overflow: visible;
 }
 </style>
