@@ -46,6 +46,14 @@ export function submitHomework(data) {
   })
 }
 
+export function updateSubmission(data) {
+  return request({
+    url: '/proj_lwj/homework/submit',
+    method: 'put',
+    data
+  })
+}
+
 export function getSubmissions(homeworkId) {
   return request({
     url: '/proj_lwj/homework/submissions/' + homeworkId,
@@ -53,3 +61,10 @@ export function getSubmissions(homeworkId) {
   })
 }
 
+export function getStudentSubmissions(studentId) {
+  return request({
+    url: '/proj_lwj/homework/studentSubmissions/public',
+    method: 'get',
+    params: { studentId }
+  })
+}

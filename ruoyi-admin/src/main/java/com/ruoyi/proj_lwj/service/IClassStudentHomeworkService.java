@@ -9,4 +9,5 @@ public interface IClassStudentHomeworkService {
     int insert(ClassStudentHomework shw);
     int update(ClassStudentHomework shw);
     int deleteById(Long id);
+    List<ClassStudentHomework> selectByStudentId(Long studentId);
 }

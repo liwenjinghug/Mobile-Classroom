@@ -37,5 +37,9 @@ public class ClassStudentHomeworkServiceImpl implements IClassStudentHomeworkSer
     public int deleteById(Long id) {
         return mapper.deleteById(id);
     }
-}
 
+    @Override
+    public List<ClassStudentHomework> selectByStudentId(Long studentId) {
+        return mapper.selectByStudentId(studentId);
+    }
+}

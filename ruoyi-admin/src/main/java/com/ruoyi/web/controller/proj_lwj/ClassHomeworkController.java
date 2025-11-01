@@ -92,11 +92,44 @@ public class ClassHomeworkController extends BaseController {
         return toAjax(r);
     }
 
+    // 更新学生已提交的作业（允许学生修改自己的提交）
+    @PreAuthorize("@ss.hasPermi('projlwj:homework:submit')")
+    @Log(title = "作业提交", businessType = BusinessType.UPDATE)
+    @PutMapping("/submit")
+    public AjaxResult updateSubmit(@RequestBody ClassStudentHomework shw) {
+        // require studentHomeworkId to update
+        if (shw.getStudentHomeworkId() == null) {
+            return AjaxResult.error("studentHomeworkId 不能为空，无法更新提交记录");
+        }
+        shw.setUpdateBy(getUsername());
+        // update submitTime to now if not provided
+        if (shw.getSubmitTime() == null) {
+            shw.setSubmitTime(new java.util.Date());
+        }
+        int r = studentHomeworkService.update(shw);
+        return toAjax(r);
+    }
+
     // 查看某作业的提交情况
     @PreAuthorize("@ss.hasPermi('projlwj:homework:query')")
     @GetMapping("/submissions/{homeworkId}")
     public AjaxResult submissions(@PathVariable Long homeworkId) {
         List<ClassStudentHomework> list = studentHomeworkService.selectByHomeworkId(homeworkId);
+        return AjaxResult.success(list);
+    }
+
+    // 查看某学生的提交记录（通过学号 studentId）
+    @PreAuthorize("@ss.hasPermi('projlwj:homework:query')")
+    @GetMapping("/studentSubmissions")
+    public AjaxResult studentSubmissions(@RequestParam Long studentId) {
+        List<ClassStudentHomework> list = studentHomeworkService.selectByStudentId(studentId);
+        return AjaxResult.success(list);
+    }
+
+    // 公共接口：某学生的提交记录（无需特殊权限），供前端学生确认学号使用
+    @GetMapping("/studentSubmissions/public")
+    public AjaxResult publicStudentSubmissions(@RequestParam Long studentId) {
+        List<ClassStudentHomework> list = studentHomeworkService.selectByStudentId(studentId);
         return AjaxResult.success(list);
     }
 }

@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 01/11/2025 15:17:57
+ Date: 01/11/2025 17:23:57
 */
 
 SET NAMES utf8mb4;
@@ -107,14 +107,15 @@ CREATE TABLE `class_course`  (
   `class_number` int NULL DEFAULT NULL,
   PRIMARY KEY (`course_id`) USING BTREE,
   UNIQUE INDEX `idx_course_code`(`course_code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '课程信息表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '课程信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_course
 -- ----------------------------
-INSERT INTO `class_course` VALUES (1, '研究与开发实践', 'SJXL230549', '必修', '计算机学院', 2.0, '2024-2025秋季学期开设', '0', 'admin', '2025-10-29 17:50:59', 'admin', '2025-10-29 18:18:46', '1', 1);
+INSERT INTO `class_course` VALUES (1, '研究与开发实践', '1', '必修', '计算机学院', 2.0, '2024-2025秋季学期开设', '0', 'admin', '2025-10-29 17:50:59', 'admin', '2025-11-01 15:50:35', '1', 1);
 INSERT INTO `class_course` VALUES (2, '计算机网络123', 'LZNU135465', '必修', '计算机学院', 3.0, '一门课aaaaaaaa\n', '1', 'admin', '2025-10-29 17:54:33', 'admin', '2025-10-29 18:37:45', '2', 2);
 INSERT INTO `class_course` VALUES (3, '计算机金融应用', 'MSNU32546', '选修', '经济学院', 3.5, '锻炼学生实践能力', '0', 'admin', '2025-10-29 18:22:47', 'admin', '2025-10-31 21:39:29', NULL, 3);
+INSERT INTO `class_course` VALUES (5, '数据库', '7', NULL, NULL, 2.0, '1', '0', 'admin', '2025-11-01 15:48:47', '', NULL, NULL, 1);
 
 -- ----------------------------
 -- Table structure for class_homework
@@ -141,7 +142,7 @@ CREATE TABLE `class_homework`  (
   INDEX `idx_course_id`(`course_id` ASC) USING BTREE,
   INDEX `idx_session_id`(`session_id` ASC) USING BTREE,
   INDEX `idx_deadline`(`deadline` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '作业主表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '作业主表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of class_homework
@@ -155,6 +156,7 @@ INSERT INTO `class_homework` VALUES (6, 1, 7, '77', '77', NULL, 100.00, '2025-11
 INSERT INTO `class_homework` VALUES (7, 1, 7, '研开第8周', '小程序', NULL, 100.00, '2025-11-07 00:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc', NULL, '0', 'admin', '2025-11-01 15:12:40', '', NULL, NULL);
 INSERT INTO `class_homework` VALUES (8, 1, 7, '研开第8周', '小程序', NULL, 100.00, '2025-11-07 00:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc', NULL, '0', 'admin', '2025-11-01 15:12:49', '', NULL, NULL);
 INSERT INTO `class_homework` VALUES (9, 1, 1, '研开第8周', '小程序', NULL, 100.00, '2025-11-07 00:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc', NULL, '0', 'admin', '2025-11-01 15:13:28', '', NULL, NULL);
+INSERT INTO `class_homework` VALUES (10, 1, 1, '07周1', '小程序', NULL, 100.00, '2025-11-02 00:00:00', '', NULL, '0', 'admin', '2025-11-01 16:16:39', 'admin', '2025-11-01 17:23:26', NULL);
 
 -- ----------------------------
 -- Table structure for class_random_pick
@@ -233,53 +235,58 @@ CREATE TABLE `class_student`  (
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` tinyint NULL DEFAULT 1 COMMENT '1在读 0退学',
+  `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '关联课程编号',
+  `session_id` bigint NULL DEFAULT NULL COMMENT '班级编号',
   PRIMARY KEY (`student_id`) USING BTREE,
-  UNIQUE INDEX `student_no`(`student_no` ASC) USING BTREE
+  UNIQUE INDEX `student_no`(`student_no` ASC) USING BTREE,
+  INDEX `idx_class_number`(`session_id` ASC) USING BTREE,
+  INDEX `idx_course_code`(`course_code` ASC) USING BTREE,
+  CONSTRAINT `fk_student_course_code` FOREIGN KEY (`course_code`) REFERENCES `class_course` (`course_code`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE = InnoDB AUTO_INCREMENT = 41 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_student
 -- ----------------------------
-INSERT INTO `class_student` VALUES (1, '2022141460087', '贺英洲', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (2, '2022141460092', '刘成伟', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:19:29', 1);
-INSERT INTO `class_student` VALUES (3, '2022141460189', '陈禹岐', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (4, '2022141460306', '王际华', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (5, '2023141460332', '邹易言', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (6, '2023141460333', '白桂源', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (7, '2023141460334', '李卓航', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (8, '2023141460335', '肖翰宇', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (9, '2023141460336', '谢东廷', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (10, '2023141460337', '黄正国', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (11, '2023141460339', '孙清正', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (12, '2023141460341', '毛国屹', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (13, '2023141460342', '徐雷博', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:20:08', 1);
-INSERT INTO `class_student` VALUES (14, '2023141460343', '温芃磊', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:20:30', 1);
-INSERT INTO `class_student` VALUES (15, '2023141460344', '卜天一', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (16, '2023141460345', '王慧卓', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (17, '2023141460346', '卢昊', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (18, '2023141460347', '朱藩林', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:21:37', 1);
-INSERT INTO `class_student` VALUES (19, '2023141460348', '李为', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (20, '2023141460349', '岂皓月', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:23:10', 1);
-INSERT INTO `class_student` VALUES (21, '2023141460350', '陈殷琦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:23:20', 1);
-INSERT INTO `class_student` VALUES (22, '2023141460352', '程晨', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (23, '2023141460353', '邹雨航', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (24, '2023141460354', '周雨龙', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (25, '2023141460355', '陈昱都', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (26, '2023141460356', '罗允绩', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:23:38', 1);
-INSERT INTO `class_student` VALUES (27, '2023141460357', '张越', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (28, '2023141460358', '吴昱稼', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:23:49', 1);
-INSERT INTO `class_student` VALUES (29, '2023141460359', '王远贵', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (30, '2023141460360', '范彭融', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:23:59', 1);
-INSERT INTO `class_student` VALUES (31, '2023141460361', '朱传龙', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (32, '2023141460362', '张瑾伦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (33, '2023141460363', '孙家鹤', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (34, '2023141460364', '孙宏森', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (35, '2023141460365', '官前锦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:24:14', 1);
-INSERT INTO `class_student` VALUES (36, '2023141460366', '方锦阳', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (37, '2023141460367', '熊眭杨', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:24:21', 1);
-INSERT INTO `class_student` VALUES (38, '2023141460368', '黎文靖', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
-INSERT INTO `class_student` VALUES (39, '2023141460369', '符桢', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:24:30', 1);
-INSERT INTO `class_student` VALUES (40, '2023141460370', '刘伊鸣', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
+INSERT INTO `class_student` VALUES (1, '2022141460087', '贺英洲', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (2, '2022141460092', '刘成伟', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (3, '2022141460189', '陈禹岐', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (4, '2022141460306', '王际华', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (5, '2023141460332', '邹易言', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (6, '2023141460333', '白桂源', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (7, '2023141460334', '李卓航', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (8, '2023141460335', '肖翰宇', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (9, '2023141460336', '谢东廷', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (10, '2023141460337', '黄正国', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (11, '2023141460339', '孙清正', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (12, '2023141460341', '毛国屹', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (13, '2023141460342', '徐雷博', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (14, '2023141460343', '温芃磊', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (15, '2023141460344', '卜天一', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (16, '2023141460345', '王慧卓', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (17, '2023141460346', '卢昊', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:14', 1, '1', NULL);
+INSERT INTO `class_student` VALUES (18, '2023141460347', '朱藩林', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (19, '2023141460348', '李为', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 16:01:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (20, '2023141460349', '岂皓月', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (21, '2023141460350', '陈殷琦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (22, '2023141460352', '程晨', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (23, '2023141460353', '邹雨航', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (24, '2023141460354', '周雨龙', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (25, '2023141460355', '陈昱都', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (26, '2023141460356', '罗允绩', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (27, '2023141460357', '张越', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (28, '2023141460358', '吴昱稼', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (29, '2023141460359', '王远贵', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (30, '2023141460360', '范彭融', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (31, '2023141460361', '朱传龙', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (32, '2023141460362', '张瑾伦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (33, '2023141460363', '孙家鹤', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (34, '2023141460364', '孙宏森', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (35, '2023141460365', '官前锦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (36, '2023141460366', '方锦阳', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (37, '2023141460367', '熊眭杨', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (38, '2023141460368', '黎文靖', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (39, '2023141460369', '符桢', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (40, '2023141460370', '刘伊鸣', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
 
 -- ----------------------------
 -- Table structure for class_student_homework
@@ -307,7 +314,7 @@ CREATE TABLE `class_student_homework`  (
   INDEX `idx_homework_id`(`homework_id` ASC) USING BTREE,
   INDEX `idx_student_id`(`student_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生作业表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生作业表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of class_student_homework
@@ -317,6 +324,8 @@ INSERT INTO `class_student_homework` VALUES (2, 5, 121212, '', NULL, '改革开�
 INSERT INTO `class_student_homework` VALUES (3, 5, 12, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, '2025-11-01 01:58:19', 1, NULL, '', '1', 'admin', '2025-11-01 01:58:19', '', NULL);
 INSERT INTO `class_student_homework` VALUES (4, 6, 77, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, '2025-11-01 01:59:39', 1, NULL, '', '1', 'admin', '2025-11-01 01:59:38', '', NULL);
 INSERT INTO `class_student_homework` VALUES (5, 8, 12121111, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, '2025-11-01 15:13:53', 1, NULL, '', '1', 'admin', '2025-11-01 15:13:52', '', NULL);
+INSERT INTO `class_student_homework` VALUES (6, 10, 2023141460368, '', NULL, '实验报告模版.doc', NULL, NULL, '2025-11-01 16:32:32', 1, NULL, '', '1', 'admin', '2025-11-01 16:32:31', '', NULL);
+INSERT INTO `class_student_homework` VALUES (7, 10, 2023141460368, '', NULL, '实验报告模板.docx', NULL, NULL, '2025-11-01 16:53:31', 1, NULL, '', '1', 'admin', '2025-11-01 16:53:30', '', NULL);
 
 -- ----------------------------
 -- Table structure for gen_table
@@ -1010,7 +1019,7 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 145 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 152 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -1060,6 +1069,13 @@ INSERT INTO `sys_oper_log` VALUES (141, '作业管理', 1, 'com.ruoyi.web.contro
 INSERT INTO `sys_oper_log` VALUES (142, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc\",\"content\":\"小程序\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-07 00:00:00\",\"homeworkId\":8,\"params\":{},\"sessionId\":7,\"title\":\"研开第8周\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 15:12:49', 10);
 INSERT INTO `sys_oper_log` VALUES (143, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101151240A001.doc\",\"content\":\"小程序\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-07 00:00:00\",\"homeworkId\":9,\"params\":{},\"sessionId\":1,\"title\":\"研开第8周\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 15:13:28', 11);
 INSERT INTO `sys_oper_log` VALUES (144, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":8,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":5,\"studentId\":12121111,\"submissionFiles\":\"改革开放史论文撰写模板.doc\",\"submitTime\":\"2025-11-01 15:13:52\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 15:13:52', 20);
+INSERT INTO `sys_oper_log` VALUES (145, '课程管理', 1, 'com.ruoyi.web.controller.proj_lw.CourseController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lw/course', '127.0.0.1', '内网IP', '{\"classNumber\":1,\"courseCode\":\"7\",\"courseId\":5,\"courseName\":\"数据库\",\"createBy\":\"admin\",\"credit\":2.0,\"introduction\":\"1\",\"params\":{},\"status\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 15:48:47', 237);
+INSERT INTO `sys_oper_log` VALUES (146, '课程管理', 1, 'com.ruoyi.web.controller.proj_lw.CourseController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lw/course', '127.0.0.1', '内网IP', '{\"classNumber\":1,\"college\":\"经济学\",\"courseCode\":\"7\",\"courseName\":\"统计\",\"credit\":2.0,\"introduction\":\"2\",\"params\":{},\"status\":\"0\"}', '{\"msg\":\"新增课程\'统计\'失败，课程编号已存在\",\"code\":500}', 0, NULL, '2025-11-01 15:50:04', 7);
+INSERT INTO `sys_oper_log` VALUES (147, '课程管理', 2, 'com.ruoyi.web.controller.proj_lw.CourseController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/course', '127.0.0.1', '内网IP', '{\"classNumber\":1,\"college\":\"计算机学院\",\"courseCode\":\"1\",\"courseId\":1,\"courseName\":\"研究与开发实践\",\"courseType\":\"必修\",\"createBy\":\"admin\",\"createTime\":\"2025-10-29 17:50:59\",\"credit\":2.0,\"introduction\":\"2024-2025秋季学期开设\",\"params\":{},\"remark\":\"1\",\"status\":\"0\",\"updateBy\":\"admin\",\"updateTime\":\"2025-10-29 18:18:46\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 15:50:35', 14);
+INSERT INTO `sys_oper_log` VALUES (148, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"小程序\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-02 00:00:00\",\"homeworkId\":10,\"params\":{},\"sessionId\":1,\"title\":\"07周\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 16:16:39', 230);
+INSERT INTO `sys_oper_log` VALUES (149, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":10,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":6,\"studentId\":2023141460368,\"submissionFiles\":\"实验报告模版.doc\",\"submitTime\":\"2025-11-01 16:32:31\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 16:32:31', 263);
+INSERT INTO `sys_oper_log` VALUES (150, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":10,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":7,\"studentId\":2023141460368,\"submissionFiles\":\"实验报告模板.docx\",\"submitTime\":\"2025-11-01 16:53:30\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 16:53:30', 227);
+INSERT INTO `sys_oper_log` VALUES (151, '作业管理', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"小程序\",\"courseId\":1,\"deadline\":\"2025-11-02 00:00:00\",\"homeworkId\":10,\"params\":{},\"sessionId\":1,\"title\":\"07周1\",\"totalScore\":100,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 17:23:26', 43);
 
 -- ----------------------------
 -- Table structure for sys_post
