@@ -8,6 +8,15 @@ export function getHomeworkStatisticsList() {
   })
 }
 
+// 根据条件获取作业统计列表
+export function getHomeworkStatisticsListByFilter(params) {
+  return request({
+    url: '/proj_fz/homeworkStatistics/listByFilter',
+    method: 'get',
+    params: params
+  })
+}
+
 // 获取作业详细统计
 export function getHomeworkStatistics(homeworkId) {
   return request({
@@ -35,15 +44,7 @@ export function getSubmissionTrend(homeworkId) {
 // 获取教师作业概览
 export function getTeacherOverview() {
   return request({
-    url: '/proj_fz/homeworkStatistics/overview',
-    method: 'get'
-  })
-}
-
-// 获取看板数据
-export function getDashboardData() {
-  return request({
-    url: '/proj_fz/homeworkStatistics/dashboard',
+    url: '/proj_fz/homeworkStatistics/teacherOverview',
     method: 'get'
   })
 }
@@ -51,7 +52,7 @@ export function getDashboardData() {
 // 获取学生提交详情
 export function getStudentSubmissionDetails(homeworkId) {
   return request({
-    url: `/proj_fz/homeworkStatistics/submissionDetails/${homeworkId}`,
+    url: `/proj_fz/homeworkStatistics/studentSubmissions/${homeworkId}`,
     method: 'get'
   })
 }
@@ -59,8 +60,42 @@ export function getStudentSubmissionDetails(homeworkId) {
 // 获取看板概览
 export function getDashboardOverview() {
   return request({
-    url: '/proj_fz/homeworkStatistics/dashboard/overview',
+    url: '/proj_fz/homeworkStatistics/dashboardOverview',
     method: 'get'
+  })
+}
+
+// 获取课程列表
+export function getCourseList() {
+  return request({
+    url: '/proj_fz/homeworkStatistics/courseList',
+    method: 'get'
+  })
+}
+
+// 获取课堂列表
+export function getSessionList() {
+  return request({
+    url: '/proj_fz/homeworkStatistics/sessionList',
+    method: 'get'
+  })
+}
+
+// 获取课堂作业概览
+export function getSessionOverview() {
+  return request({
+    url: '/proj_fz/homeworkStatistics/sessionOverview',
+    method: 'get'
+  })
+}
+
+// 导出作业数据
+export function exportHomeworkData(params) {
+  return request({
+    url: '/proj_fz/homeworkStatistics/export',
+    method: 'get',
+    params: params,
+    responseType: 'blob'
   })
 }
 

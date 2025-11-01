@@ -1,19 +1,5 @@
 <template>
   <div class="app-container homework-dashboard">
-    <!-- 调试信息 -->
-    <el-alert
-      v-if="debugInfo"
-      :title="'调试信息: ' + debugInfo"
-      type="info"
-      :closable="false"
-      style="margin-bottom: 20px;"
-    />
-
-    <!-- 调试按钮 -->
-    <el-button type="warning" @click="loadDebugInfo" style="margin-bottom: 20px;">
-      加载调试信息
-    </el-button>
-
     <el-row :gutter="20">
       <!-- 顶部概览卡片 -->
       <el-col :span="6" v-for="(card, index) in overviewCards" :key="index">
@@ -55,121 +41,175 @@
             <el-tabs v-model="activeChartTab" @tab-click="handleTabClick">
               <!-- 提交状态饼图 -->
               <el-tab-pane label="提交状态" name="submission">
-                <div class="chart-container" ref="submissionChartContainer">
-                  <div v-show="activeChartTab === 'submission'" ref="submissionChart" class="chart"></div>
+                <div class="chart-container">
+                  <div ref="submissionChart" class="chart" style="width: 100%; height: 400px;"></div>
                 </div>
               </el-tab-pane>
 
               <!-- 成绩分布柱状图 -->
               <el-tab-pane label="成绩分布" name="score">
-                <div class="chart-container" ref="scoreChartContainer">
-                  <div v-show="activeChartTab === 'score'" ref="scoreChart" class="chart"></div>
+                <div class="chart-container">
+                  <div ref="scoreChart" class="chart" style="width: 100%; height: 400px;"></div>
                 </div>
               </el-tab-pane>
 
               <!-- 提交趋势折线图 -->
               <el-tab-pane label="提交趋势" name="trend">
-                <div class="chart-container" ref="trendChartContainer">
-                  <div v-show="activeChartTab === 'trend'" ref="trendChart" class="chart"></div>
+                <div class="chart-container">
+                  <div ref="trendChart" class="chart" style="width: 100%; height: 400px;"></div>
                 </div>
               </el-tab-pane>
             </el-tabs>
           </div>
-          <div v-else style="text-align: center; padding: 50px;">
-            <el-empty description="请选择作业查看统计图表" />
+          <div v-else class="no-data">
+            <el-empty description="请选择一个作业查看统计图表" />
           </div>
         </el-card>
       </el-col>
 
-      <!-- 右侧作业列表 -->
+      <!-- 右侧课堂概览 -->
       <el-col :span="8">
-        <el-card shadow="hover" class="homework-list-card">
+        <el-card shadow="hover" class="overview-card">
           <template #header>
-            <span>作业列表 ({{ homeworkList.length }})</span>
+            <div class="card-header">
+              <span>课堂作业概览</span>
+            </div>
           </template>
-
-          <div class="homework-list">
-            <div
-              v-for="homework in homeworkList"
-              :key="homework.homeworkId"
-              class="homework-item"
-              :class="{ active: selectedHomework === homework.homeworkId }"
-              @click="selectHomework(homework.homeworkId)"
-            >
-              <div class="homework-title">{{ homework.homeworkTitle }}</div>
-              <div class="homework-meta">
-                <span class="course">{{ homework.courseName }}</span>
-                <span class="submission-rate">提交率: {{ homework.submissionRate || 0 }}%</span>
-              </div>
-              <div class="homework-stats">
-                <el-progress
-                  :percentage="Math.round(homework.submissionRate || 0)"
-                  :color="getProgressColor(homework.submissionRate || 0)"
-                  :show-text="false">
-                </el-progress>
-                <div class="stats-numbers">
-                  <span class="submitted">{{ homework.submittedCount || 0 }}/{{ homework.totalStudents || 0 }}</span>
-                  <span class="average" v-if="homework.averageScore">均分: {{ homework.averageScore }}</span>
-                  <span class="create-by" v-else>发布者: {{ homework.createBy }}</span>
+          <div class="session-list">
+            <div v-for="session in sessionOverview" :key="session.sessionId" class="session-item">
+              <div class="session-info">
+                <div class="session-name">{{ session.className }}</div>
+                <div class="session-course">{{ session.courseName }}</div>
+                <div class="session-stats">
+                  <span>作业数: {{ session.homeworkCount || 0 }}</span>
+                  <span>提交率: {{ session.avgSubmissionRate || 0 }}%</span>
                 </div>
               </div>
-            </div>
-            <div v-if="homeworkList.length === 0" style="text-align: center; padding: 20px;">
-              <el-empty description="暂无作业数据" />
+              <el-progress
+                :percentage="parseFloat(session.avgSubmissionRate) || 0"
+                :show-text="false"
+                :color="getProgressColor(session.avgSubmissionRate)">
+              </el-progress>
             </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 详细数据表格 -->
+    <!-- 作业数据表格 -->
     <el-card shadow="hover" style="margin-top: 20px;">
       <template #header>
-        <span>作业详细数据 ({{ homeworkList.length }})</span>
-        <el-button type="primary" @click="exportData" style="float: right;">导出Excel</el-button>
+        <div class="card-header">
+          <span>作业数据列表 ({{ homeworkList.length }})</span>
+          <div class="header-actions">
+            <el-button type="primary" @click="handleExport">
+              导出作业数据
+            </el-button>
+          </div>
+        </div>
       </template>
 
-      <el-table :data="homeworkList" v-loading="loading">
-        <el-table-column prop="homeworkTitle" label="作业名称" min-width="200">
-          <template #default="scope">
-            <el-button type="text" @click="viewHomeworkDetail(scope.row.homeworkId)">{{ scope.row.homeworkTitle }}</el-button>
-          </template>
+      <!-- 筛选条件 -->
+      <div class="filter-container">
+        <el-form :inline="true" :model="filterForm" class="demo-form-inline">
+          <el-form-item label="课程">
+            <el-select v-model="filterForm.courseId" placeholder="选择课程" clearable @change="handleFilterChange">
+              <el-option
+                v-for="course in courseList"
+                :key="course.courseId"
+                :label="course.courseName"
+                :value="course.courseId">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="课堂">
+            <el-select v-model="filterForm.sessionId" placeholder="选择课堂" clearable @change="handleFilterChange">
+              <el-option
+                v-for="session in sessionList"
+                :key="session.sessionId"
+                :label="session.className"
+                :value="session.sessionId">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <el-button @click="resetFilter">重置</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <el-table
+        :data="homeworkList"
+        v-loading="loading"
+        style="width: 100%"
+        :default-sort="{ prop: 'homeworkId', order: 'descending' }">
+        <el-table-column
+          prop="homeworkId"
+          label="作业ID"
+          width="80"
+          sortable>
         </el-table-column>
-        <el-table-column prop="courseName" label="课程" width="120"></el-table-column>
-        <el-table-column prop="className" label="课堂" width="120"></el-table-column>
-        <el-table-column prop="submissionRate" label="提交率" width="100">
+        <el-table-column
+          prop="homeworkTitle"
+          label="作业名称"
+          min-width="200"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column
+          prop="courseName"
+          label="课程"
+          width="120"
+          sortable>
+        </el-table-column>
+        <el-table-column
+          prop="className"
+          label="课堂"
+          width="120"
+          sortable>
+        </el-table-column>
+        <el-table-column
+          prop="submissionRate"
+          label="提交率"
+          width="100"
+          sortable>
           <template #default="scope">
-            <el-tag :type="getTagType(scope.row.submissionRate || 0)">
-              {{ (scope.row.submissionRate || 0).toFixed(1) }}%
+            <el-tag :type="getSubmissionRateType(scope.row.submissionRate)">
+              {{ scope.row.submissionRate || 0 }}%
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="submittedCount" label="已提交" width="80">
-          <template #default="scope">
-            {{ scope.row.submittedCount || 0 }}
-          </template>
+        <el-table-column
+          prop="submittedCount"
+          label="已提交"
+          width="80"
+          sortable>
         </el-table-column>
-        <el-table-column prop="notSubmittedCount" label="未提交" width="80">
-          <template #default="scope">
-            {{ scope.row.notSubmittedCount || 0 }}
-          </template>
+        <el-table-column
+          prop="notSubmittedCount"
+          label="未提交"
+          width="80"
+          sortable>
         </el-table-column>
-        <el-table-column prop="overdueCount" label="逾期" width="80">
-          <template #default="scope">
-            {{ scope.row.overdueCount || 0 }}
-          </template>
+        <el-table-column
+          prop="overdueCount"
+          label="逾期"
+          width="80"
+          sortable>
         </el-table-column>
-        <el-table-column prop="averageScore" label="平均分" width="80">
+        <el-table-column
+          prop="averageScore"
+          label="平均分"
+          width="100"
+          sortable>
           <template #default="scope">
             <span v-if="scope.row.averageScore">{{ scope.row.averageScore.toFixed(1) }}</span>
-            <span v-else>-</span>
+            <span v-else style="color: #909399;">未批改</span>
           </template>
         </el-table-column>
-        <el-table-column prop="createBy" label="发布者" width="100"></el-table-column>
-        <el-table-column label="操作" width="120">
-          <template #default="scope">
-            <el-button type="text" @click="viewHomeworkDetail(scope.row.homeworkId)">查看详情</el-button>
-          </template>
+        <el-table-column
+          prop="createBy"
+          label="发布者"
+          width="100">
         </el-table-column>
       </el-table>
     </el-card>
@@ -181,221 +221,183 @@ import * as echarts from 'echarts'
 import {
   getHomeworkStatisticsList,
   getHomeworkStatistics,
+  getScoreDistribution,
+  getSubmissionTrend,
   getDashboardOverview,
-  getDebugHomeworkInfo
+  getCourseList,
+  getSessionList,
+  exportHomeworkData,
+  getHomeworkStatisticsListByFilter,
+  getSessionOverview
 } from '@/api/proj_fz/homeworkStatistics'
 
 export default {
-  name: 'HomeworkDashboard',
+  name: 'HomeworkStatistics',
   data() {
     return {
       loading: false,
       homeworkList: [],
+      sessionOverview: [],
+      courseList: [],
+      sessionList: [],
       selectedHomework: null,
       selectedHomeworkData: null,
       activeChartTab: 'submission',
-      overviewCards: [
-        { label: '总作业数', value: 0, icon: 'el-icon-document', color: '#409EFF' },
-        { label: '总提交数', value: 0, icon: 'el-icon-success', color: '#67C23A' },
-        { label: '平均提交率', value: '0%', icon: 'el-icon-edit', color: '#E6A23C' },
-        { label: '涉及课程', value: 0, icon: 'el-icon-collection', color: '#F56C6C' }
-      ],
       submissionChart: null,
       scoreChart: null,
       trendChart: null,
-      debugInfo: '',
-      chartsInitialized: false,
-      initTimer: null,
-      resizeTimer: null,
-      initAttempts: 0,
-      maxInitAttempts: 10
+      filterForm: {
+        courseId: null,
+        sessionId: null
+      },
+      overviewCards: [
+        {
+          label: '总作业数',
+          value: 0,
+          icon: 'el-icon-document',
+          color: '#409EFF'
+        },
+        {
+          label: '总提交数',
+          value: 0,
+          icon: 'el-icon-upload',
+          color: '#67C23A'
+        },
+        {
+          label: '总课程数',
+          value: 0,
+          icon: 'el-icon-notebook-2',
+          color: '#E6A23C'
+        },
+        {
+          label: '已批改数',
+          value: 0,
+          icon: 'el-icon-check',
+          color: '#F56C6C'
+        }
+      ]
     }
   },
   mounted() {
-    this.loadDashboardData()
-    this.loadHomeworkList()
-
-    // 添加窗口resize事件监听
-    window.addEventListener('resize', this.handleResize)
+    this.loadData()
+    this.loadCourseList()
+    this.loadSessionList()
   },
   beforeUnmount() {
-    this.disposeCharts()
-    if (this.initTimer) {
-      clearTimeout(this.initTimer)
-    }
-    if (this.resizeTimer) {
-      clearTimeout(this.resizeTimer)
-    }
-    // 移除resize事件监听
-    window.removeEventListener('resize', this.handleResize)
+    this.destroyCharts()
   },
   methods: {
-    // 初始化图表 - 完全重写的版本
-    initCharts() {
-      // 清除之前的定时器
-      if (this.initTimer) {
-        clearTimeout(this.initTimer)
+    async loadData() {
+      this.loading = true
+      try {
+        await this.loadHomeworkList()
+        await this.loadOverviewData()
+        await this.loadSessionOverview()
+      } catch (error) {
+        console.error('加载数据失败:', error)
+        this.$message.error('数据加载失败')
+      } finally {
+        this.loading = false
       }
+    },
 
-      // 防止无限重试
-      if (this.initAttempts >= this.maxInitAttempts) {
-        console.error('图表初始化失败：达到最大重试次数')
-        return
-      }
-      this.initAttempts++
-
-      this.initTimer = setTimeout(() => {
-        try {
-          console.log(`尝试初始化图表，第 ${this.initAttempts} 次`)
-
-          // 如果已经初始化，先销毁
-          if (this.chartsInitialized) {
-            this.disposeCharts()
-          }
-
-          // 使用更可靠的DOM查询方式
-          this.$nextTick(() => {
-            // 获取当前激活的图表容器
-            let currentChartRef = null
-            switch (this.activeChartTab) {
-              case 'submission':
-                currentChartRef = this.$refs.submissionChart
-                break
-              case 'score':
-                currentChartRef = this.$refs.scoreChart
-                break
-              case 'trend':
-                currentChartRef = this.$refs.trendChart
-                break
-            }
-
-            // 检查DOM元素是否存在且有尺寸
-            if (!currentChartRef) {
-              console.warn('当前图表DOM元素未找到，延迟初始化')
-              this.initCharts()
-              return
-            }
-
-            // 检查元素是否可见且有尺寸
-            if (currentChartRef.offsetWidth === 0 || currentChartRef.offsetHeight === 0) {
-              console.warn('图表容器尺寸为0，延迟初始化')
-              this.initCharts()
-              return
-            }
-
-            // 初始化当前激活的图表
-            this.initCurrentChart()
-
-            this.chartsInitialized = true
-            this.initAttempts = 0 // 重置重试计数
-
-            console.log('图表初始化成功')
-          })
-        } catch (error) {
-          console.error('图表初始化失败:', error)
-          // 失败后重试
-          this.initCharts()
+    async loadHomeworkList() {
+      try {
+        let response
+        if (this.filterForm.courseId || this.filterForm.sessionId) {
+          response = await getHomeworkStatisticsListByFilter(this.filterForm)
+        } else {
+          response = await getHomeworkStatisticsList()
         }
-      }, 500)
-    },
+        this.homeworkList = response.data || []
 
-    // 初始化当前激活的图表
-    initCurrentChart() {
-      let chartElement = null
-      let chartInstance = null
-
-      switch (this.activeChartTab) {
-        case 'submission':
-          chartElement = this.$refs.submissionChart
-          if (chartElement && !this.submissionChart) {
-            this.submissionChart = echarts.init(chartElement)
-            chartInstance = this.submissionChart
-          }
-          break
-        case 'score':
-          chartElement = this.$refs.scoreChart
-          if (chartElement && !this.scoreChart) {
-            this.scoreChart = echarts.init(chartElement)
-            chartInstance = this.scoreChart
-          }
-          break
-        case 'trend':
-          chartElement = this.$refs.trendChart
-          if (chartElement && !this.trendChart) {
-            this.trendChart = echarts.init(chartElement)
-            chartInstance = this.trendChart
-          }
-          break
-      }
-
-      // 如果有数据，立即渲染当前图表
-      if (chartInstance && this.selectedHomeworkData) {
-        this.renderCurrentChart()
+        if (this.homeworkList.length > 0 && !this.selectedHomework) {
+          this.selectedHomework = this.homeworkList[0].homeworkId
+          await this.loadHomeworkDetail(this.selectedHomework)
+        }
+      } catch (error) {
+        console.error('加载作业列表失败:', error)
+        this.homeworkList = []
       }
     },
 
-    // 渲染当前激活的图表
-    renderCurrentChart() {
+    async loadOverviewData() {
+      try {
+        const response = await getDashboardOverview()
+        const data = response.data || {}
+        this.overviewCards[0].value = data.totalHomeworkCount || 0
+        this.overviewCards[1].value = data.totalSubmissionCount || 0
+        this.overviewCards[2].value = data.totalCourseCount || 0
+        this.overviewCards[3].value = data.gradedCount || 0
+      } catch (error) {
+        console.error('加载概览数据失败:', error)
+      }
+    },
+
+    async loadSessionOverview() {
+      try {
+        const response = await getSessionOverview()
+        this.sessionOverview = response.data || []
+      } catch (error) {
+        console.error('加载课堂概览失败:', error)
+        this.sessionOverview = []
+      }
+    },
+
+    async loadCourseList() {
+      try {
+        const response = await getCourseList()
+        this.courseList = response.data || []
+      } catch (error) {
+        console.error('加载课程列表失败:', error)
+        this.courseList = []
+      }
+    },
+
+    async loadSessionList() {
+      try {
+        const response = await getSessionList()
+        this.sessionList = response.data || []
+      } catch (error) {
+        console.error('加载课堂列表失败:', error)
+        this.sessionList = []
+      }
+    },
+
+    async loadHomeworkDetail(homeworkId) {
+      try {
+        const response = await getHomeworkStatistics(homeworkId)
+        this.selectedHomeworkData = response.data
+        this.$nextTick(() => {
+          this.renderCharts()
+        })
+      } catch (error) {
+        console.error('加载作业详情失败:', error)
+        this.selectedHomeworkData = null
+      }
+    },
+
+    renderCharts() {
       if (!this.selectedHomeworkData) return
+      this.destroyCharts()
+      this.renderSubmissionChart()
 
-      switch (this.activeChartTab) {
-        case 'submission':
-          this.renderSubmissionChart()
-          break
-        case 'score':
-          this.renderScoreChart()
-          break
-        case 'trend':
-          this.renderTrendChart()
-          break
+      if (this.activeChartTab === 'score') {
+        this.renderScoreChart()
+      } else if (this.activeChartTab === 'trend') {
+        this.renderTrendChart()
       }
     },
 
-    // 销毁图表
-    disposeCharts() {
+    async renderSubmissionChart() {
+      if (!this.selectedHomeworkData || !this.$refs.submissionChart) return
+
+      // 销毁现有图表
       if (this.submissionChart) {
         this.submissionChart.dispose()
-        this.submissionChart = null
       }
-      if (this.scoreChart) {
-        this.scoreChart.dispose()
-        this.scoreChart = null
-      }
-      if (this.trendChart) {
-        this.trendChart.dispose()
-        this.trendChart = null
-      }
-      this.chartsInitialized = false
-    },
 
-    // 窗口resize处理
-    handleResize() {
-      // 延迟resize以避免频繁触发
-      clearTimeout(this.resizeTimer)
-      this.resizeTimer = setTimeout(() => {
-        if (this.submissionChart) this.submissionChart.resize()
-        if (this.scoreChart) this.scoreChart.resize()
-        if (this.trendChart) this.trendChart.resize()
-      }, 200)
-    },
-
-    // 标签点击事件
-    handleTabClick(tab) {
-      this.activeChartTab = tab.name
-
-      // 延迟确保DOM更新
-      this.$nextTick(() => {
-        setTimeout(() => {
-          // 重新初始化当前激活的图表
-          this.initCurrentChart()
-        }, 300)
-      })
-    },
-
-    // 渲染提交状态饼图
-    renderSubmissionChart() {
-      if (!this.submissionChart || !this.selectedHomeworkData) return
-
+      this.submissionChart = echarts.init(this.$refs.submissionChart)
       const data = [
         { value: this.selectedHomeworkData.submittedCount || 0, name: '已提交' },
         { value: this.selectedHomeworkData.notSubmittedCount || 0, name: '未提交' },
@@ -404,7 +406,7 @@ export default {
 
       const option = {
         title: {
-          text: data.length > 0 ? '提交状态分布' : '暂无提交数据',
+          text: '提交状态分布',
           left: 'center'
         },
         tooltip: {
@@ -413,242 +415,217 @@ export default {
         },
         legend: {
           orient: 'vertical',
-          left: 'left'
-        },
-        series: [
-          {
-            name: '提交状态',
-            type: 'pie',
-            radius: '50%',
-            data: data,
-            emphasis: {
-              itemStyle: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
-              }
-            }
-          }
-        ]
-      }
-      this.submissionChart.setOption(option, true)
-    },
-
-    // 渲染成绩分布柱状图
-    renderScoreChart() {
-      if (!this.scoreChart || !this.selectedHomeworkData) return
-
-      let data = []
-      if (this.selectedHomeworkData.scoreDistribution && Object.keys(this.selectedHomeworkData.scoreDistribution).length > 0) {
-        data = Object.entries(this.selectedHomeworkData.scoreDistribution)
-          .map(([name, value]) => ({ name, value }))
-          .filter(item => item.value > 0)
-      }
-
-      const option = {
-        title: {
-          text: data.length > 0 ? '成绩分布' : '暂无成绩数据',
-          left: 'center'
-        },
-        tooltip: {
-          trigger: 'axis'
-        },
-        xAxis: {
-          type: 'category',
+          left: 'left',
           data: data.map(item => item.name)
         },
-        yAxis: {
-          type: 'value'
-        },
-        series: [
-          {
+        series: [{
+          name: '提交状态',
+          type: 'pie',
+          radius: '50%',
+          data: data,
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }]
+      }
+      this.submissionChart.setOption(option)
+    },
+
+    async renderScoreChart() {
+      if (!this.selectedHomeworkData || !this.$refs.scoreChart) return
+
+      // 销毁现有图表
+      if (this.scoreChart) {
+        this.scoreChart.dispose()
+      }
+
+      this.scoreChart = echarts.init(this.$refs.scoreChart)
+      try {
+        const response = await getScoreDistribution(this.selectedHomeworkData.homeworkId)
+        const distributionData = response.data || []
+
+        const xAxisData = []
+        const seriesData = []
+        const scoreRanges = ['0-59', '60-69', '70-79', '80-89', '90-100', '未批改']
+
+        scoreRanges.forEach(range => {
+          const item = distributionData.find(d => d.scoreRange === range)
+          xAxisData.push(range)
+          seriesData.push(item ? item.count : 0)
+        })
+
+        const option = {
+          title: {
+            text: '成绩分布',
+            left: 'center'
+          },
+          tooltip: {
+            trigger: 'axis'
+          },
+          xAxis: {
+            type: 'category',
+            data: xAxisData
+          },
+          yAxis: {
+            type: 'value',
+            name: '人数'
+          },
+          series: [{
             name: '人数',
             type: 'bar',
-            data: data.map(item => item.value),
+            data: seriesData,
             itemStyle: {
-              color: '#409EFF'
+              color: '#5470c6'
             }
-          }
-        ]
+          }]
+        }
+        this.scoreChart.setOption(option)
+      } catch (error) {
+        console.error('渲染成绩分布图失败:', error)
       }
-      this.scoreChart.setOption(option, true)
     },
 
-    // 渲染提交趋势折线图
-    renderTrendChart() {
-      if (!this.trendChart || !this.selectedHomeworkData) return
+    async renderTrendChart() {
+      if (!this.selectedHomeworkData || !this.$refs.trendChart) return
 
-      let data = this.selectedHomeworkData.chartData || []
+      // 销毁现有图表
+      if (this.trendChart) {
+        this.trendChart.dispose()
+      }
 
-      const option = {
-        title: {
-          text: data.length > 0 ? '提交时间趋势' : '暂无提交趋势数据',
-          left: 'center'
-        },
-        tooltip: {
-          trigger: 'axis'
-        },
-        xAxis: {
-          type: 'category',
-          data: data.map(item => item.hour)
-        },
-        yAxis: {
-          type: 'value'
-        },
-        series: [
-          {
+      this.trendChart = echarts.init(this.$refs.trendChart)
+      try {
+        const response = await getSubmissionTrend(this.selectedHomeworkData.homeworkId)
+        const trendData = response.data || []
+
+        const xAxisData = trendData.map(item => item.hour)
+        const seriesData = trendData.map(item => item.count)
+
+        const option = {
+          title: {
+            text: '提交趋势',
+            left: 'center'
+          },
+          tooltip: {
+            trigger: 'axis'
+          },
+          xAxis: {
+            type: 'category',
+            data: xAxisData,
+            axisLabel: {
+              rotate: 45
+            }
+          },
+          yAxis: {
+            type: 'value',
+            name: '提交人数'
+          },
+          series: [{
             name: '提交人数',
             type: 'line',
-            data: data.map(item => item.count),
+            data: seriesData,
             smooth: true,
-            lineStyle: {
-              color: '#67C23A'
-            },
             itemStyle: {
-              color: '#67C23A'
+              color: '#91cc75'
             }
-          }
-        ]
-      }
-      this.trendChart.setOption(option, true)
-    },
-
-    // 加载看板数据
-    async loadDashboardData() {
-      try {
-        this.debugInfo = '正在加载看板数据...'
-        const response = await getDashboardOverview()
-        console.log('看板概览数据:', response)
-
-        if (response.code === 200) {
-          const data = response.data
-          // 更新概览卡片
-          this.overviewCards[0].value = data.totalHomeworkCount || 0
-          this.overviewCards[1].value = data.totalSubmissionCount || 0
-          this.overviewCards[2].value = '计算中...'
-          this.overviewCards[3].value = data.totalCourseCount || 0
-
-          this.debugInfo = `看板数据加载成功: ${data.totalHomeworkCount}个作业, ${data.totalSubmissionCount}次提交`
-        } else {
-          this.debugInfo = `看板数据加载失败: ${response.msg}`
+          }]
         }
+        this.trendChart.setOption(option)
       } catch (error) {
-        console.error('加载看板数据失败:', error)
-        this.debugInfo = `看板数据加载异常: ${error.message}`
+        console.error('渲染提交趋势图失败:', error)
       }
     },
 
-    // 加载作业列表
-    async loadHomeworkList() {
-      this.loading = true
-      try {
-        this.debugInfo = '正在加载作业列表...'
-        const response = await getHomeworkStatisticsList()
-        console.log('作业列表数据:', response)
-
-        if (response.code === 200) {
-          this.homeworkList = response.data || []
-          this.debugInfo = `作业列表加载成功: ${this.homeworkList.length}条记录`
-
-          // 计算平均提交率
-          if (this.homeworkList.length > 0) {
-            const totalRate = this.homeworkList.reduce((sum, item) => sum + (item.submissionRate || 0), 0)
-            const avgRate = (totalRate / this.homeworkList.length).toFixed(1)
-            this.overviewCards[2].value = avgRate + '%'
-          } else {
-            this.overviewCards[2].value = '0%'
-          }
-
-          // 默认选择第一个作业
-          if (this.homeworkList.length > 0) {
-            this.selectedHomework = this.homeworkList[0].homeworkId
-            await this.loadHomeworkDetail(this.homeworkList[0].homeworkId)
-          }
-        } else {
-          this.debugInfo = `作业列表加载失败: ${response.msg}`
+    destroyCharts() {
+      [this.submissionChart, this.scoreChart, this.trendChart].forEach(chart => {
+        if (chart) {
+          chart.dispose()
         }
+      })
+    },
+
+    async handleHomeworkChange(homeworkId) {
+      await this.loadHomeworkDetail(homeworkId)
+    },
+
+    handleTabClick(tab) {
+      this.activeChartTab = tab.name
+      this.$nextTick(() => {
+        if (this.selectedHomeworkData) {
+          if (tab.name === 'submission') {
+            this.renderSubmissionChart()
+          } else if (tab.name === 'score') {
+            this.renderScoreChart()
+          } else if (tab.name === 'trend') {
+            this.renderTrendChart()
+          }
+        }
+      })
+    },
+
+    async handleExport() {
+      try {
+        this.loading = true
+        const response = await exportHomeworkData(this.filterForm)
+
+        // 创建下载链接
+        const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = '作业数据统计.xlsx'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        this.$message.success('导出成功')
       } catch (error) {
-        console.error('加载作业列表失败:', error)
-        this.debugInfo = `作业列表加载异常: ${error.message}`
+        console.error('导出失败:', error)
+        this.$message.error('导出失败')
       } finally {
         this.loading = false
       }
     },
 
-    // 加载作业详情
-    async loadHomeworkDetail(homeworkId) {
-      try {
-        this.debugInfo = `正在加载作业 ${homeworkId} 的详情...`
-        const response = await getHomeworkStatistics(homeworkId)
-        console.log('作业详情数据:', response)
+    handleFilterChange() {
+      this.loadHomeworkList()
+    },
 
-        if (response.code === 200) {
-          this.selectedHomeworkData = response.data
-
-          // 延迟确保DOM更新后再初始化图表
-          this.$nextTick(() => {
-            setTimeout(() => {
-              this.initCharts()
-            }, 500)
-          })
-
-          this.debugInfo = `作业 ${homeworkId} 详情加载成功`
-        } else {
-          this.debugInfo = `作业详情加载失败: ${response.msg}`
-        }
-      } catch (error) {
-        console.error('加载作业详情失败:', error)
-        this.debugInfo = `作业详情加载异常: ${error.message}`
+    resetFilter() {
+      this.filterForm = {
+        courseId: null,
+        sessionId: null
       }
+      this.loadHomeworkList()
     },
 
-    // 选择作业
-    selectHomework(homeworkId) {
-      this.selectedHomework = homeworkId
-      this.loadHomeworkDetail(homeworkId)
+    getSubmissionRateType(rate) {
+      const numRate = parseFloat(rate) || 0
+      if (numRate >= 80) return 'success'
+      if (numRate >= 60) return 'warning'
+      return 'danger'
     },
 
-    // 作业选择变更
-    handleHomeworkChange(homeworkId) {
-      this.loadHomeworkDetail(homeworkId)
-    },
-
-    // 查看作业详情
-    viewHomeworkDetail(homeworkId) {
-      this.$message.info(`查看作业详情: ${homeworkId}`)
-    },
-
-    // 导出数据
-    exportData() {
-      this.$message.info('导出功能开发中...')
-    },
-
-    // 加载调试信息
-    async loadDebugInfo() {
-      try {
-        const response = await getDebugHomeworkInfo()
-        console.log('调试信息:', response)
-        if (response.code === 200) {
-          this.$message.success('调试信息加载成功，请查看控制台')
-        }
-      } catch (error) {
-        console.error('加载调试信息失败:', error)
-        this.$message.error('加载调试信息失败')
-      }
-    },
-
-    // 获取进度条颜色
     getProgressColor(rate) {
-      if (rate >= 80) return '#67C23A'
-      if (rate >= 60) return '#E6A23C'
+      const numRate = parseFloat(rate) || 0
+      if (numRate >= 80) return '#67C23A'
+      if (numRate >= 60) return '#E6A23C'
       return '#F56C6C'
     },
 
-    // 获取标签类型
-    getTagType(rate) {
-      if (rate >= 80) return 'success'
-      if (rate >= 60) return 'warning'
-      return 'danger'
+    formatDate(dateString) {
+      if (!dateString) return '-'
+      try {
+        const date = new Date(dateString)
+        return date.toLocaleString('zh-CN')
+      } catch (error) {
+        return dateString
+      }
     }
   }
 }
@@ -671,7 +648,7 @@ export default {
 .card-icon {
   width: 60px;
   height: 60px;
-  border-radius: 50%;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -681,6 +658,10 @@ export default {
 .card-icon i {
   font-size: 24px;
   color: white;
+}
+
+.card-info {
+  flex: 1;
 }
 
 .card-value {
@@ -694,97 +675,87 @@ export default {
   font-size: 14px;
 }
 
-.chart-card, .homework-list-card {
-  min-height: 500px;
-}
-
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.homework-list {
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.chart-container {
+  padding: 20px 0;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px 0;
+  color: #909399;
+}
+
+.session-list {
   max-height: 400px;
   overflow-y: auto;
 }
 
-.homework-item {
-  padding: 15px;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
+.session-item {
+  padding: 15px 0;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.session-item:last-child {
+  border-bottom: none;
+}
+
+.session-info {
   margin-bottom: 10px;
-  cursor: pointer;
-  transition: all 0.3s;
 }
 
-.homework-item:hover {
-  border-color: #409EFF;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-
-.homework-item.active {
-  border-color: #409EFF;
-  background-color: #f0f9ff;
-}
-
-.homework-title {
+.session-name {
   font-weight: bold;
-  margin-bottom: 8px;
+  color: #303133;
   font-size: 14px;
 }
 
-.homework-meta {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
+.session-course {
+  font-size: 12px;
+  color: #909399;
+  margin: 4px 0;
+}
+
+.session-stats {
   font-size: 12px;
   color: #909399;
 }
 
-.homework-stats {
-  margin-top: 8px;
+.session-stats span {
+  margin-right: 10px;
 }
 
-.stats-numbers {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 5px;
-  font-size: 12px;
+.filter-container {
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
 }
 
-.submitted {
-  color: #409EFF;
-}
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .el-col {
+    margin-bottom: 20px;
+  }
 
-.average {
-  color: #67C23A;
-}
+  .card-content {
+    flex-direction: column;
+    text-align: center;
+  }
 
-.create-by {
-  color: #909399;
-}
-
-/* 图表容器样式 */
-.chart-container {
-  position: relative;
-  width: 100%;
-  height: 400px;
-  min-height: 400px;
-}
-
-.chart {
-  width: 100%;
-  height: 100%;
-}
-
-/* 确保标签页内容有正确尺寸 */
-.el-tab-pane {
-  position: relative;
-  height: 400px;
-}
-
-::v-deep .el-tabs__content {
-  overflow: visible;
+  .card-icon {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
 }
 </style>

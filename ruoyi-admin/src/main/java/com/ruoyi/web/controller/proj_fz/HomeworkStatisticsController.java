@@ -7,6 +7,7 @@ import com.ruoyi.proj_fz.service.IHomeworkStatisticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,28 @@ public class HomeworkStatisticsController extends BaseController {
             return AjaxResult.success("查询成功", list);
         } catch (Exception e) {
             logger.error("查询作业统计列表失败", e);
+            return AjaxResult.error("查询失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 根据条件获取作业统计列表
+     */
+    @GetMapping("/listByFilter")
+    public AjaxResult listByFilter(@RequestParam(required = false) Long courseId,
+                                   @RequestParam(required = false) Long sessionId) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            if (courseId != null) {
+                params.put("courseId", courseId);
+            }
+            if (sessionId != null) {
+                params.put("sessionId", sessionId);
+            }
+            List<HomeworkStatisticsDTO> list = homeworkStatisticsService.getHomeworkStatisticsListByFilter(params);
+            return AjaxResult.success("查询成功", list);
+        } catch (Exception e) {
+            logger.error("根据条件查询作业统计列表失败", e);
             return AjaxResult.error("查询失败: " + e.getMessage());
         }
     }
@@ -77,7 +100,7 @@ public class HomeworkStatisticsController extends BaseController {
     /**
      * 获取教师作业概览
      */
-    @GetMapping("/overview")
+    @GetMapping("/teacherOverview")
     public AjaxResult getOverview() {
         try {
             List<Map<String, Object>> overview = homeworkStatisticsService.getTeacherHomeworkOverview();
@@ -89,23 +112,9 @@ public class HomeworkStatisticsController extends BaseController {
     }
 
     /**
-     * 获取看板数据
-     */
-    @GetMapping("/dashboard")
-    public AjaxResult getDashboardData() {
-        try {
-            Map<String, Object> dashboardData = homeworkStatisticsService.getDashboardData();
-            return AjaxResult.success("查询成功", dashboardData);
-        } catch (Exception e) {
-            logger.error("查询看板数据失败", e);
-            return AjaxResult.error("查询失败: " + e.getMessage());
-        }
-    }
-
-    /**
      * 获取学生提交详情列表
      */
-    @GetMapping("/submissionDetails/{homeworkId}")
+    @GetMapping("/studentSubmissions/{homeworkId}")
     public AjaxResult getStudentSubmissionDetails(@PathVariable Long homeworkId) {
         try {
             List<Map<String, Object>> details = homeworkStatisticsService.getStudentSubmissionDetails(homeworkId);
@@ -119,7 +128,7 @@ public class HomeworkStatisticsController extends BaseController {
     /**
      * 获取看板概览数据
      */
-    @GetMapping("/dashboard/overview")
+    @GetMapping("/dashboardOverview")
     public AjaxResult getDashboardOverview() {
         try {
             Map<String, Object> overview = homeworkStatisticsService.getDashboardOverview();
@@ -127,6 +136,69 @@ public class HomeworkStatisticsController extends BaseController {
         } catch (Exception e) {
             logger.error("查询看板概览失败", e);
             return AjaxResult.error("查询失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取课程列表
+     */
+    @GetMapping("/courseList")
+    public AjaxResult getCourseList() {
+        try {
+            List<Map<String, Object>> courses = homeworkStatisticsService.getCourseList();
+            return AjaxResult.success("查询成功", courses);
+        } catch (Exception e) {
+            logger.error("查询课程列表失败", e);
+            return AjaxResult.error("查询失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取课堂列表
+     */
+    @GetMapping("/sessionList")
+    public AjaxResult getSessionList() {
+        try {
+            List<Map<String, Object>> sessions = homeworkStatisticsService.getSessionList();
+            return AjaxResult.success("查询成功", sessions);
+        } catch (Exception e) {
+            logger.error("查询课堂列表失败", e);
+            return AjaxResult.error("查询失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取课堂作业概览
+     */
+    @GetMapping("/sessionOverview")
+    public AjaxResult getSessionOverview() {
+        try {
+            List<Map<String, Object>> overview = homeworkStatisticsService.getSessionHomeworkOverview();
+            return AjaxResult.success("查询成功", overview);
+        } catch (Exception e) {
+            logger.error("查询课堂作业概览失败", e);
+            return AjaxResult.error("查询失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 导出作业数据
+     */
+    @GetMapping("/export")
+    public void exportHomeworkData(@RequestParam(required = false) Long courseId,
+                                   @RequestParam(required = false) Long sessionId,
+                                   HttpServletResponse response) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            if (courseId != null) {
+                params.put("courseId", courseId);
+            }
+            if (sessionId != null) {
+                params.put("sessionId", sessionId);
+            }
+            homeworkStatisticsService.exportHomeworkData(params, response);
+        } catch (Exception e) {
+            logger.error("导出作业数据失败", e);
         }
     }
 
