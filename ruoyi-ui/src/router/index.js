@@ -164,6 +164,29 @@ export const constantRoutes = [
         meta: { title: '作业看板', icon: 'dashboard' }
       }
     ]
+  },
+  {
+    path: '/proj_qhy',
+    component: Layout,
+    redirect: '/proj_qhy/article',
+    name: 'proj_qhy',
+    meta: { title: '学习社区', icon: 'peoples' },
+    alwaysShow: true,
+    children: [
+      {
+        path: 'article',
+        component: () => import('@/views/proj_qhy/article/index.vue'),
+        name: 'Article',
+        meta: { title: '文章管理', icon: 'documentation' }
+      },
+      {
+        path: 'article/detail/:id',
+        component: () => import('@/views/proj_qhy/article/ArticleDetail.vue'),
+        name: 'ArticleDetail',
+        meta: { title: '文章详情' },
+        hidden: true  // 确保这个路由在菜单中隐藏
+      }
+    ]
   }
 ]
 
