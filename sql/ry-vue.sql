@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : localhost_3306
+ Source Server         : ry-vue
  Source Server Type    : MySQL
  Source Server Version : 80042 (8.0.42)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 30/10/2025 21:25:52
+ Date: 01/11/2025 15:09:04
 */
 
 SET NAMES utf8mb4;
@@ -87,6 +87,73 @@ INSERT INTO `class_attendance` VALUES (39, 1, 39, NULL, 1, '2025-10-27 19:44:56'
 INSERT INTO `class_attendance` VALUES (40, 1, 40, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
 
 -- ----------------------------
+-- Table structure for class_course
+-- ----------------------------
+DROP TABLE IF EXISTS `class_course`;
+CREATE TABLE `class_course`  (
+  `course_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课程ID',
+  `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程名称',
+  `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程编号',
+  `course_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '课程类型',
+  `college` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '所属学院',
+  `credit` decimal(3, 1) NULL DEFAULT NULL COMMENT '学分',
+  `introduction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '课程简介',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '状态（0正常 1停用）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+  `class_number` int NULL DEFAULT NULL,
+  PRIMARY KEY (`course_id`) USING BTREE,
+  UNIQUE INDEX `idx_course_code`(`course_code` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '课程信息表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of class_course
+-- ----------------------------
+INSERT INTO `class_course` VALUES (1, '研究与开发实践', 'SJXL230549', '必修', '计算机学院', 2.0, '2024-2025秋季学期开设', '0', 'admin', '2025-10-29 17:50:59', 'admin', '2025-10-29 18:18:46', '1', 1);
+INSERT INTO `class_course` VALUES (2, '计算机网络123', 'LZNU135465', '必修', '计算机学院', 3.0, '一门课aaaaaaaa\n', '1', 'admin', '2025-10-29 17:54:33', 'admin', '2025-10-29 18:37:45', '2', 2);
+INSERT INTO `class_course` VALUES (3, '计算机金融应用', 'MSNU32546', '选修', '经济学院', 3.5, '锻炼学生实践能力', '0', 'admin', '2025-10-29 18:22:47', 'admin', '2025-10-31 21:39:29', NULL, 3);
+
+-- ----------------------------
+-- Table structure for class_homework
+-- ----------------------------
+DROP TABLE IF EXISTS `class_homework`;
+CREATE TABLE `class_homework`  (
+  `homework_id` bigint NOT NULL AUTO_INCREMENT COMMENT '作业ID',
+  `course_id` bigint NOT NULL COMMENT '课程ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '作业标题',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '作业内容',
+  `requirement` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '作业要求',
+  `total_score` decimal(5, 2) NULL DEFAULT NULL COMMENT '作业总分',
+  `deadline` datetime NOT NULL COMMENT '截止时间',
+  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '附件路径',
+  `attachment_names` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '附件原名',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '状态（0正常 1关闭）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`homework_id`) USING BTREE,
+  INDEX `idx_course_id`(`course_id` ASC) USING BTREE,
+  INDEX `idx_session_id`(`session_id` ASC) USING BTREE,
+  INDEX `idx_deadline`(`deadline` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '作业主表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of class_homework
+-- ----------------------------
+INSERT INTO `class_homework` VALUES (1, 1, 7, '111111111111111111', '12222222222222222222221321', NULL, 100.00, '2025-11-02 11:22:15', '', NULL, '0', 'admin', '2025-11-01 00:49:29', '', NULL, NULL);
+INSERT INTO `class_homework` VALUES (2, 1, 7, '111111111111111111', '12222222222222222222221321', NULL, 100.00, '2025-11-02 11:22:15', '', NULL, '0', 'admin', '2025-11-01 00:49:45', '', NULL, NULL);
+INSERT INTO `class_homework` VALUES (3, 1, 7, '11111111111', '3333333333333333333333333', NULL, 100.00, '2025-11-07 00:00:00', '', NULL, '0', 'admin', '2025-11-01 00:57:16', '', NULL, NULL);
+INSERT INTO `class_homework` VALUES (4, 1, 7, '研开第8周作业', '小程序', NULL, 100.00, '2025-11-11 12:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101013529A007.doc', NULL, '0', 'admin', '2025-11-01 01:35:38', '', NULL, NULL);
+INSERT INTO `class_homework` VALUES (5, 1, 7, '99', '99', NULL, 100.00, '2025-11-06 00:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101015431A001.doc', NULL, '0', 'admin', '2025-11-01 01:54:32', '', NULL, NULL);
+INSERT INTO `class_homework` VALUES (6, 1, 7, '77', '77', NULL, 100.00, '2025-11-03 07:00:00', '/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101015911A004.doc', NULL, '0', 'admin', '2025-11-01 01:59:12', '', NULL, NULL);
+
+-- ----------------------------
 -- Table structure for class_random_pick
 -- ----------------------------
 DROP TABLE IF EXISTS `class_random_pick`;
@@ -103,7 +170,7 @@ CREATE TABLE `class_random_pick`  (
   INDEX `class_rpick`(`student_id` ASC) USING BTREE,
   CONSTRAINT `class_rpick` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `class_rpick1` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_random_pick
@@ -116,6 +183,8 @@ INSERT INTO `class_random_pick` VALUES (11, 1, 0, 23, '2025-10-27 19:59:42', NUL
 INSERT INTO `class_random_pick` VALUES (12, 1, 0, 36, '2025-10-27 19:59:46', NULL, NULL);
 INSERT INTO `class_random_pick` VALUES (13, 1, 0, 24, '2025-10-27 19:59:48', NULL, NULL);
 INSERT INTO `class_random_pick` VALUES (14, 1, 0, 6, '2025-10-27 19:59:49', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (15, 1, 0, 37, '2025-10-31 21:58:52', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (16, 1, 0, 16, '2025-11-01 00:42:03', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for class_session
@@ -128,13 +197,23 @@ CREATE TABLE `class_session`  (
   `start_time` datetime NULL DEFAULT NULL,
   `end_time` datetime NULL DEFAULT NULL,
   `status` tinyint NULL DEFAULT 0 COMMENT '0未开始 1进行中 2已结束',
+  `total_students` int NULL DEFAULT NULL COMMENT '总人数',
+  `teacher` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `class_number` int NULL DEFAULT NULL,
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`session_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_session
 -- ----------------------------
-INSERT INTO `class_session` VALUES (1, '研究与开发实践', 1, NULL, NULL, 1);
+INSERT INTO `class_session` VALUES (1, '研究与开发实践01', 1, '2025-10-31 20:50:24', '2025-10-31 20:50:28', 1, 50, 'A', 1, '', NULL, '', NULL);
+INSERT INTO `class_session` VALUES (3, '计算机金融应用', 3, '2025-10-31 20:57:16', '2025-10-31 20:57:19', 0, 30, 'C', 3, '', NULL, 'admin', '2025-10-31 21:49:01');
+INSERT INTO `class_session` VALUES (4, '研究与开发实践02', 2, '2025-10-30 21:55:37', '2025-10-31 21:55:41', 2, 42, 'B', 1, 'admin', '2025-10-31 21:55:44', 'admin', '2025-10-31 21:56:17');
+INSERT INTO `class_session` VALUES (7, '研究与开发实践03', 1, '2025-11-07 00:00:00', '2025-11-20 00:00:00', 0, 30, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-11-01 00:43:14');
 
 -- ----------------------------
 -- Table structure for class_student
@@ -200,6 +279,42 @@ INSERT INTO `class_student` VALUES (39, '2023141460369', '符桢', NULL, NULL, N
 INSERT INTO `class_student` VALUES (40, '2023141460370', '刘伊鸣', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-10-26 14:15:37', 1);
 
 -- ----------------------------
+-- Table structure for class_student_homework
+-- ----------------------------
+DROP TABLE IF EXISTS `class_student_homework`;
+CREATE TABLE `class_student_homework`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `homework_id` bigint NOT NULL COMMENT '作业ID',
+  `student_id` bigint NOT NULL COMMENT '学生ID',
+  `student_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '学生姓名',
+  `submit_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '提交内容',
+  `submission_files` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '提交文件路径',
+  `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '文件原名',
+  `file_size` bigint NULL DEFAULT NULL COMMENT '文件大小',
+  `submit_time` datetime NULL DEFAULT NULL COMMENT '提交时间',
+  `version` int NULL DEFAULT 1 COMMENT '提交版本',
+  `grade` decimal(5, 2) NULL DEFAULT NULL COMMENT '得分',
+  `grade_comment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '评语',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '状态（0未提交 1已提交 2已批改 3逾期）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_homework_id`(`homework_id` ASC) USING BTREE,
+  INDEX `idx_student_id`(`student_id` ASC) USING BTREE,
+  INDEX `idx_status`(`status` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生作业表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of class_student_homework
+-- ----------------------------
+INSERT INTO `class_student_homework` VALUES (1, 3, 1212121, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, NULL, 1, NULL, '', NULL, 'admin', '2025-11-01 01:32:57', '', NULL);
+INSERT INTO `class_student_homework` VALUES (2, 5, 121212, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, '2025-11-01 01:54:58', 1, NULL, '', '1', 'admin', '2025-11-01 01:54:57', '', NULL);
+INSERT INTO `class_student_homework` VALUES (3, 5, 12, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, '2025-11-01 01:58:19', 1, NULL, '', '1', 'admin', '2025-11-01 01:58:19', '', NULL);
+INSERT INTO `class_student_homework` VALUES (4, 6, 77, '', NULL, '改革开放史论文撰写模板.doc', NULL, NULL, '2025-11-01 01:59:39', 1, NULL, '', '1', 'admin', '2025-11-01 01:59:38', '', NULL);
+
+-- ----------------------------
 -- Table structure for gen_table
 -- ----------------------------
 DROP TABLE IF EXISTS `gen_table`;
@@ -226,7 +341,7 @@ CREATE TABLE `gen_table`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`table_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of gen_table
@@ -260,7 +375,7 @@ CREATE TABLE `gen_table_column`  (
   `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`column_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表字段' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表字段' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of gen_table_column
@@ -275,7 +390,7 @@ CREATE TABLE `qrtz_calendars`  (
   `calendar_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '日历名称',
   `calendar` blob NOT NULL COMMENT '存放持久化calendar对象',
   PRIMARY KEY (`sched_name`, `calendar_name`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '日历信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '日历信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of qrtz_calendars
@@ -293,7 +408,7 @@ CREATE TABLE `qrtz_cron_triggers`  (
   `time_zone_id` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '时区',
   PRIMARY KEY (`sched_name`, `trigger_name`, `trigger_group`) USING BTREE,
   CONSTRAINT `qrtz_cron_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `qrtz_triggers` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'Cron类型的触发器表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'Cron类型的触发器表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of qrtz_cron_triggers
@@ -318,7 +433,7 @@ CREATE TABLE `qrtz_fired_triggers`  (
   `is_nonconcurrent` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '是否并发',
   `requests_recovery` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '是否接受恢复执行',
   PRIMARY KEY (`sched_name`, `entry_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '已触发的触发器表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '已触发的触发器表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of qrtz_fired_triggers
@@ -340,7 +455,7 @@ CREATE TABLE `qrtz_job_details`  (
   `requests_recovery` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '是否接受恢复执行',
   `job_data` blob NULL COMMENT '存放持久化job对象',
   PRIMARY KEY (`sched_name`, `job_name`, `job_group`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '任务详细信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '任务详细信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of qrtz_job_details
@@ -354,7 +469,7 @@ CREATE TABLE `qrtz_locks`  (
   `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
   `lock_name` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '悲观锁名称',
   PRIMARY KEY (`sched_name`, `lock_name`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '存储的悲观锁信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '存储的悲观锁信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of qrtz_locks
@@ -368,7 +483,7 @@ CREATE TABLE `qrtz_paused_trigger_grps`  (
   `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
   `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
   PRIMARY KEY (`sched_name`, `trigger_group`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '暂停的触发器表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '暂停的触发器表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of qrtz_paused_trigger_grps
@@ -384,7 +499,7 @@ CREATE TABLE `qrtz_scheduler_state`  (
   `last_checkin_time` bigint NOT NULL COMMENT '上次检查时间',
   `checkin_interval` bigint NOT NULL COMMENT '检查间隔时间',
   PRIMARY KEY (`sched_name`, `instance_name`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '调度器状态表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '调度器状态表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of qrtz_scheduler_state
@@ -403,7 +518,7 @@ CREATE TABLE `qrtz_simple_triggers`  (
   `times_triggered` bigint NOT NULL COMMENT '已经触发的次数',
   PRIMARY KEY (`sched_name`, `trigger_name`, `trigger_group`) USING BTREE,
   CONSTRAINT `qrtz_simple_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `qrtz_triggers` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '简单触发器的信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '简单触发器的信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of qrtz_simple_triggers
@@ -430,7 +545,7 @@ CREATE TABLE `qrtz_simprop_triggers`  (
   `bool_prop_2` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT 'Boolean类型的trigger的第二个参数',
   PRIMARY KEY (`sched_name`, `trigger_name`, `trigger_group`) USING BTREE,
   CONSTRAINT `qrtz_simprop_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `qrtz_triggers` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '同步机制的行锁表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '同步机制的行锁表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of qrtz_simprop_triggers
@@ -460,11 +575,39 @@ CREATE TABLE `qrtz_triggers`  (
   PRIMARY KEY (`sched_name`, `trigger_name`, `trigger_group`) USING BTREE,
   INDEX `sched_name`(`sched_name` ASC, `job_name` ASC, `job_group` ASC) USING BTREE,
   CONSTRAINT `qrtz_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `job_name`, `job_group`) REFERENCES `qrtz_job_details` (`sched_name`, `job_name`, `job_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '触发器详细信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '触发器详细信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of qrtz_triggers
 -- ----------------------------
+
+-- ----------------------------
+-- Table structure for sys_classroom
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_classroom`;
+CREATE TABLE `sys_classroom`  (
+  `classroom_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课堂ID',
+  `classroom_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '课堂名称',
+  `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '未命名课程',
+  `start_time` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '上课时间',
+  `end_time` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '下课时间',
+  `total_students` int NULL DEFAULT 0 COMMENT '课堂总人数',
+  `teacher` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '授课老师',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '课堂描述',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '0' COMMENT '状态（0进行中 1停授）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`classroom_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '课堂信息表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of sys_classroom
+-- ----------------------------
+INSERT INTO `sys_classroom` VALUES (1, 'SJXL230549', '研究与开发实践', '2025.10,29', '2025.10.31', 50, 'A', '2024-2025秋季学期开设', '0', '', NULL, '', NULL);
+INSERT INTO `sys_classroom` VALUES (2, '计算机网络123', '计算机网络123', '1', '2', 1, '12', NULL, '1', '', NULL, 'admin', '2025-10-31 20:16:57');
+INSERT INTO `sys_classroom` VALUES (3, 'MSNU32546', '计算机金融应用', '2111.1.1', '2112.1.1', 55, NULL, '锻炼学生实践能力', '0', '', NULL, '', NULL);
 
 -- ----------------------------
 -- Table structure for sys_config
@@ -482,7 +625,7 @@ CREATE TABLE `sys_config`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`config_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '参数配置表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '参数配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_config
@@ -495,35 +638,6 @@ INSERT INTO `sys_config` VALUES (5, '账号自助-是否开启用户注册功能
 INSERT INTO `sys_config` VALUES (6, '用户登录-黑名单列表', 'sys.login.blackIPList', '', 'Y', 'admin', '2025-10-30 17:06:55', '', NULL, '设置登录IP黑名单限制，多个匹配项以;分隔，支持匹配（*通配、网段）');
 INSERT INTO `sys_config` VALUES (7, '用户管理-初始密码修改策略', 'sys.account.initPasswordModify', '1', 'Y', 'admin', '2025-10-30 17:06:55', '', NULL, '0：初始密码修改策略关闭，没有任何提示，1：提醒用户，如果未修改初始密码，则在登录时就会提醒修改密码对话框');
 INSERT INTO `sys_config` VALUES (8, '用户管理-账号密码更新周期', 'sys.account.passwordValidateDays', '0', 'Y', 'admin', '2025-10-30 17:06:55', '', NULL, '密码更新周期（填写数字，数据初始化值为0不限制，若修改必须为大于0小于365的正整数），如果超过这个周期登录系统时，则在登录时就会提醒修改密码对话框');
-
--- ----------------------------
--- Table structure for sys_course
--- ----------------------------
-DROP TABLE IF EXISTS `sys_course`;
-CREATE TABLE `sys_course`  (
-  `course_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课程ID',
-  `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程名称',
-  `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程编号',
-  `course_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '课程类型',
-  `college` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '所属学院',
-  `credit` decimal(3, 1) NULL DEFAULT NULL COMMENT '学分',
-  `introduction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '课程简介',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '状态（0正常 1停用）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
-  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
-  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`course_id`) USING BTREE,
-  UNIQUE INDEX `idx_course_code`(`course_code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '课程信息表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of sys_course
--- ----------------------------
-INSERT INTO `sys_course` VALUES (1, '研究与开发实践', 'SJXL230549', '必修', '计算机学院', 2.0, '2024-2025秋季学期开设', '0', 'admin', '2025-10-29 17:50:59', 'admin', '2025-10-29 18:18:46', '1');
-INSERT INTO `sys_course` VALUES (2, '计算机网络123', 'LZNU135465', '必修', '计算机学院', 3.0, '一门课aaaaaaaa\n', '1', 'admin', '2025-10-29 17:54:33', 'admin', '2025-10-29 18:37:45', '2');
-INSERT INTO `sys_course` VALUES (3, '计算机金融应用', 'MSNU32546', '选修', '经济学院', 3.5, '锻炼学生实践能力', '0', 'admin', '2025-10-29 18:22:47', '', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for sys_dept
@@ -545,7 +659,7 @@ CREATE TABLE `sys_dept`  (
   `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`dept_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 200 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '部门表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 200 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '部门表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_dept
@@ -581,7 +695,7 @@ CREATE TABLE `sys_dict_data`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`dict_code`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典数据表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典数据表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_dict_data
@@ -632,7 +746,7 @@ CREATE TABLE `sys_dict_type`  (
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`dict_id`) USING BTREE,
   UNIQUE INDEX `dict_type`(`dict_type` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典类型表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '字典类型表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_dict_type
@@ -667,7 +781,7 @@ CREATE TABLE `sys_job`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '备注信息',
   PRIMARY KEY (`job_id`, `job_name`, `job_group`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '定时任务调度表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '定时任务调度表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_job
@@ -690,7 +804,7 @@ CREATE TABLE `sys_job_log`  (
   `exception_info` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '异常信息',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`job_log_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '定时任务调度日志表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '定时任务调度日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_job_log
@@ -713,13 +827,16 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 102 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 105 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
 -- ----------------------------
 INSERT INTO `sys_logininfor` VALUES (100, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-30 18:05:38');
 INSERT INTO `sys_logininfor` VALUES (101, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-30 20:17:20');
+INSERT INTO `sys_logininfor` VALUES (102, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 19:10:48');
+INSERT INTO `sys_logininfor` VALUES (103, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 19:21:07');
+INSERT INTO `sys_logininfor` VALUES (104, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 21:36:17');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -747,7 +864,7 @@ CREATE TABLE `sys_menu`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '备注',
   PRIMARY KEY (`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单权限表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
@@ -854,7 +971,7 @@ CREATE TABLE `sys_notice`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`notice_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '通知公告表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '通知公告表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_notice
@@ -888,11 +1005,51 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 140 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
 -- ----------------------------
+INSERT INTO `sys_oper_log` VALUES (100, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassroomController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/classroom', '127.0.0.1', '内网IP', '{\"classroomId\":2,\"classroomName\":\"计算机网络123\",\"courseName\":\"计算机网络123\",\"endTime\":\"2\",\"params\":{},\"startTime\":\"1\",\"status\":\"1\",\"teacher\":\"12\",\"totalStudents\":1,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 20:16:57', 8);
+INSERT INTO `sys_oper_log` VALUES (101, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"研究与开发实践01\",\"classNumber\":1,\"endTime\":\"2025-10-31 20:50:28\",\"params\":{},\"sessionId\":1,\"startTime\":\"2025-10-31 20:50:24\",\"status\":1,\"teacher\":\"A\",\"teacherId\":1,\"totalStudents\":22,\"updateBy\":\"admin\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'total_students\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lw/mapper/ClassSessionMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lw.mapper.ClassSessionMapper.updateSession-Inline\r\n### The error occurred while setting parameters\r\n### SQL: UPDATE class_session SET class_name = ?, teacher_id = ?, start_time = ?, end_time = ?, status = ?, total_students = ?, teacher = ?, class_number = ?, update_by = ?, update_time = NOW() WHERE session_id = ?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'total_students\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'total_students\' in \'field list\'', '2025-10-31 21:37:03', 66);
+INSERT INTO `sys_oper_log` VALUES (102, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"研究与开发实践01\",\"classNumber\":1,\"endTime\":\"2025-10-31 20:50:28\",\"params\":{},\"sessionId\":1,\"startTime\":\"2025-10-31 20:50:24\",\"status\":1,\"teacher\":\"AA\",\"teacherId\":1,\"totalStudents\":1,\"updateBy\":\"admin\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'total_students\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lw/mapper/ClassSessionMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lw.mapper.ClassSessionMapper.updateSession-Inline\r\n### The error occurred while setting parameters\r\n### SQL: UPDATE class_session SET class_name = ?, teacher_id = ?, start_time = ?, end_time = ?, status = ?, total_students = ?, teacher = ?, class_number = ?, update_by = ?, update_time = NOW() WHERE session_id = ?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'total_students\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'total_students\' in \'field list\'', '2025-10-31 21:37:16', 1);
+INSERT INTO `sys_oper_log` VALUES (103, '课程管理', 2, 'com.ruoyi.web.controller.proj_lw.CourseController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/course', '127.0.0.1', '内网IP', '{\"classNumber\":3,\"college\":\"经济学院\",\"courseCode\":\"MSNU32546\",\"courseId\":3,\"courseName\":\"计算机金融\",\"courseType\":\"选修\",\"createBy\":\"admin\",\"createTime\":\"2025-10-29 18:22:47\",\"credit\":3.5,\"introduction\":\"锻炼学生实践能力\",\"params\":{},\"status\":\"0\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 21:39:18', 11);
+INSERT INTO `sys_oper_log` VALUES (104, '课程管理', 2, 'com.ruoyi.web.controller.proj_lw.CourseController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/course', '127.0.0.1', '内网IP', '{\"classNumber\":3,\"college\":\"经济学院\",\"courseCode\":\"MSNU32546\",\"courseId\":3,\"courseName\":\"计算机金融应用\",\"courseType\":\"选修\",\"createBy\":\"admin\",\"createTime\":\"2025-10-29 18:22:47\",\"credit\":3.5,\"introduction\":\"锻炼学生实践能力\",\"params\":{},\"status\":\"0\",\"updateBy\":\"admin\",\"updateTime\":\"2025-10-31 21:39:18\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 21:39:29', 9);
+INSERT INTO `sys_oper_log` VALUES (105, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"计算机金融应用\",\"classNumber\":3,\"endTime\":\"2025-10-31 20:57:19\",\"params\":{},\"sessionId\":3,\"startTime\":\"2025-10-31 20:57:16\",\"status\":0,\"teacher\":\"C\",\"teacherId\":3,\"totalStudents\":10,\"updateBy\":\"admin\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'update_by\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lw/mapper/ClassSessionMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lw.mapper.ClassSessionMapper.updateSession-Inline\r\n### The error occurred while setting parameters\r\n### SQL: UPDATE class_session SET class_name = ?, teacher_id = ?, start_time = ?, end_time = ?, status = ?, total_students = ?, teacher = ?, class_number = ?, update_by = ?, update_time = NOW() WHERE session_id = ?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'update_by\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'update_by\' in \'field list\'', '2025-10-31 21:43:14', 5);
+INSERT INTO `sys_oper_log` VALUES (106, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"计算机金融应用\",\"classNumber\":3,\"endTime\":\"2025-10-31 20:57:19\",\"params\":{},\"sessionId\":3,\"startTime\":\"2025-10-31 20:57:16\",\"status\":0,\"teacher\":\"C\",\"teacherId\":3,\"totalStudents\":10,\"updateBy\":\"admin\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'update_by\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lw/mapper/ClassSessionMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lw.mapper.ClassSessionMapper.updateSession-Inline\r\n### The error occurred while setting parameters\r\n### SQL: UPDATE class_session SET class_name = ?, teacher_id = ?, start_time = ?, end_time = ?, status = ?, total_students = ?, teacher = ?, class_number = ?, update_by = ?, update_time = NOW() WHERE session_id = ?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'update_by\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'update_by\' in \'field list\'', '2025-10-31 21:43:19', 3);
+INSERT INTO `sys_oper_log` VALUES (107, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"计算机金融应用\",\"classNumber\":3,\"endTime\":\"2025-10-31 20:57:19\",\"params\":{},\"sessionId\":3,\"startTime\":\"2025-10-31 20:57:16\",\"status\":0,\"teacher\":\"C\",\"teacherId\":3,\"totalStudents\":10,\"updateBy\":\"admin\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'update_by\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lw/mapper/ClassSessionMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lw.mapper.ClassSessionMapper.updateSession-Inline\r\n### The error occurred while setting parameters\r\n### SQL: UPDATE class_session SET class_name = ?, teacher_id = ?, start_time = ?, end_time = ?, status = ?, total_students = ?, teacher = ?, class_number = ?, update_by = ?, update_time = NOW() WHERE session_id = ?\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'update_by\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'update_by\' in \'field list\'', '2025-10-31 21:43:25', 3);
+INSERT INTO `sys_oper_log` VALUES (108, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"计算机金融应用\",\"classNumber\":3,\"createBy\":\"\",\"endTime\":\"2025-10-31 20:57:19\",\"params\":{},\"sessionId\":3,\"startTime\":\"2025-10-31 20:57:16\",\"status\":0,\"teacher\":\"C\",\"teacherId\":3,\"totalStudents\":30,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 21:49:01', 15);
+INSERT INTO `sys_oper_log` VALUES (109, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"研究与开发实践02\",\"classNumber\":1,\"createBy\":\"\",\"endTime\":\"2025-10-31 20:56:20\",\"params\":{},\"sessionId\":2,\"startTime\":\"2025-10-31 20:56:09\",\"status\":0,\"teacher\":\"B\",\"teacherId\":2,\"totalStudents\":30,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 21:50:05', 7);
+INSERT INTO `sys_oper_log` VALUES (110, '课堂管理', 3, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_lw/session/2', '127.0.0.1', '内网IP', '[2]', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 21:50:59', 6);
+INSERT INTO `sys_oper_log` VALUES (111, '课堂管理', 1, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"研究与开发实践02\",\"classNumber\":1,\"createBy\":\"admin\",\"endTime\":\"2025-10-31 21:55:41\",\"params\":{},\"sessionId\":4,\"startTime\":\"2025-10-31 21:55:37\",\"status\":0,\"teacher\":\"B\",\"teacherId\":2,\"totalStudents\":36}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 21:55:44', 21);
+INSERT INTO `sys_oper_log` VALUES (112, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"研究与开发实践02\",\"classNumber\":1,\"createBy\":\"admin\",\"createTime\":\"2025-10-31 21:55:44\",\"endTime\":\"2025-10-31 21:55:41\",\"params\":{},\"sessionId\":4,\"startTime\":\"2025-10-30 21:55:37\",\"status\":2,\"teacher\":\"B\",\"teacherId\":2,\"totalStudents\":42,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 21:56:17', 9);
+INSERT INTO `sys_oper_log` VALUES (113, '课堂管理', 1, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"计算机网络\",\"classNumber\":2,\"createBy\":\"admin\",\"endTime\":\"2025-10-31 21:56:43\",\"params\":{},\"sessionId\":5,\"startTime\":\"2025-10-31 00:00:00\",\"status\":1,\"teacher\":\"ASA\",\"teacherId\":1,\"totalStudents\":30}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 21:56:45', 5);
+INSERT INTO `sys_oper_log` VALUES (114, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"计算机网络\",\"classNumber\":2,\"createBy\":\"admin\",\"createTime\":\"2025-10-31 21:56:45\",\"endTime\":\"2025-10-31 21:56:43\",\"params\":{},\"sessionId\":5,\"startTime\":\"2025-10-31 00:00:00\",\"status\":1,\"teacher\":\"ASA\",\"teacherId\":3,\"totalStudents\":36,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 21:56:55', 9);
+INSERT INTO `sys_oper_log` VALUES (115, '课堂管理', 3, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_lw/session/5', '127.0.0.1', '内网IP', '[5]', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 21:57:08', 9);
+INSERT INTO `sys_oper_log` VALUES (116, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-10-31 21:58:52.006\",\"sessionId\":1,\"studentId\":37,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 21:58:52', 7);
+INSERT INTO `sys_oper_log` VALUES (117, '课堂管理', 1, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"研究与开发实践03\",\"classNumber\":1,\"createBy\":\"admin\",\"endTime\":\"2025-10-31 22:01:34\",\"params\":{},\"sessionId\":6,\"startTime\":\"2025-10-31 22:01:31\",\"status\":0,\"teacher\":\"123\",\"teacherId\":2,\"totalStudents\":40}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 22:01:38', 4);
+INSERT INTO `sys_oper_log` VALUES (118, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"研究与开发实践03\",\"classNumber\":1,\"createBy\":\"admin\",\"createTime\":\"2025-10-31 22:01:38\",\"endTime\":\"2025-10-31 22:01:34\",\"params\":{},\"sessionId\":6,\"startTime\":\"2025-10-31 22:01:31\",\"status\":0,\"teacher\":\"11111\",\"teacherId\":2,\"totalStudents\":40,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 22:01:44', 5);
+INSERT INTO `sys_oper_log` VALUES (119, '课堂管理', 3, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_lw/session/6', '127.0.0.1', '内网IP', '[6]', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-10-31 22:01:48', 4);
+INSERT INTO `sys_oper_log` VALUES (120, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-01 00:42:02.917\",\"sessionId\":1,\"studentId\":16,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 00:42:03', 229);
+INSERT INTO `sys_oper_log` VALUES (121, '课堂管理', 1, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"研究与开发实践01\",\"classNumber\":1,\"createBy\":\"admin\",\"endTime\":\"2025-11-20 00:00:00\",\"params\":{},\"sessionId\":7,\"startTime\":\"2025-11-07 00:00:00\",\"status\":0,\"teacher\":\"C\",\"teacherId\":1,\"totalStudents\":30}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 00:42:58', 23);
+INSERT INTO `sys_oper_log` VALUES (122, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/session', '127.0.0.1', '内网IP', '{\"className\":\"研究与开发实践03\",\"classNumber\":1,\"createBy\":\"admin\",\"createTime\":\"2025-11-01 00:42:58\",\"endTime\":\"2025-11-20 00:00:00\",\"params\":{},\"sessionId\":7,\"startTime\":\"2025-11-07 00:00:00\",\"status\":0,\"teacher\":\"C\",\"teacherId\":1,\"totalStudents\":30,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 00:43:14', 15);
+INSERT INTO `sys_oper_log` VALUES (123, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"1111\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-05 00:00:00\",\"params\":{},\"sessionId\":7,\"title\":\"1111\",\"totalScore\":100}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_homework\' doesn\'t exist\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassHomeworkMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassHomeworkMapper.insertHomework-Inline\r\n### The error occurred while setting parameters\r\n### SQL: INSERT INTO class_homework (course_id, session_id, title, content, total_score, deadline, attachments, create_by, create_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())\r\n### Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_homework\' doesn\'t exist\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_homework\' doesn\'t exist', '2025-11-01 00:45:10', 341);
+INSERT INTO `sys_oper_log` VALUES (124, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"1111\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-05 00:00:00\",\"params\":{},\"sessionId\":7,\"title\":\"1111\",\"totalScore\":100}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_homework\' doesn\'t exist\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassHomeworkMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassHomeworkMapper.insertHomework-Inline\r\n### The error occurred while setting parameters\r\n### SQL: INSERT INTO class_homework (course_id, session_id, title, content, total_score, deadline, attachments, create_by, create_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())\r\n### Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_homework\' doesn\'t exist\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_homework\' doesn\'t exist', '2025-11-01 00:45:54', 10);
+INSERT INTO `sys_oper_log` VALUES (125, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"12222222222222222222221321\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-02 11:22:15\",\"homeworkId\":1,\"params\":{},\"sessionId\":7,\"title\":\"111111111111111111\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 00:49:29', 20);
+INSERT INTO `sys_oper_log` VALUES (126, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"12222222222222222222221321\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-02 11:22:15\",\"homeworkId\":2,\"params\":{},\"sessionId\":7,\"title\":\"111111111111111111\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 00:49:45', 13);
+INSERT INTO `sys_oper_log` VALUES (127, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"3333333333333333333333333\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-07 00:00:00\",\"homeworkId\":3,\"params\":{},\"sessionId\":7,\"title\":\"11111111111\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 00:57:16', 234);
+INSERT INTO `sys_oper_log` VALUES (128, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":3,\"params\":{},\"remark\":\"\",\"studentId\":121212121,\"submissionFiles\":\"改革开放史论文撰写模板.doc\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassStudentHomeworkMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassStudentHomeworkMapper.insert-Inline\r\n### The error occurred while setting parameters\r\n### SQL: INSERT INTO class_student_homework (homework_id, student_id, submission_files, submit_time, status, create_by, create_time) VALUES (?, ?, ?, ?, ?, ?, NOW())\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'', '2025-11-01 01:26:34', 404);
+INSERT INTO `sys_oper_log` VALUES (129, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":3,\"params\":{},\"remark\":\"\",\"studentId\":121212121,\"submissionFiles\":\"改革开放史论文撰写模板.doc\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassStudentHomeworkMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassStudentHomeworkMapper.insert-Inline\r\n### The error occurred while setting parameters\r\n### SQL: INSERT INTO class_student_homework (homework_id, student_id, submission_files, submit_time, status, create_by, create_time) VALUES (?, ?, ?, ?, ?, ?, NOW())\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'', '2025-11-01 01:29:50', 7);
+INSERT INTO `sys_oper_log` VALUES (130, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":3,\"params\":{},\"remark\":\"\",\"studentId\":12121212121,\"submissionFiles\":\"改革开放史论文撰写模板.doc\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassStudentHomeworkMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassStudentHomeworkMapper.insert-Inline\r\n### The error occurred while setting parameters\r\n### SQL: INSERT INTO class_student_homework (homework_id, student_id, submission_files, submit_time, status, create_by, create_time) VALUES (?, ?, ?, ?, ?, ?, NOW())\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'', '2025-11-01 01:30:24', 6);
+INSERT INTO `sys_oper_log` VALUES (131, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":3,\"params\":{},\"remark\":\"\",\"studentId\":12121212121,\"submissionFiles\":\"改革开放史论文撰写模板.doc\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassStudentHomeworkMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassStudentHomeworkMapper.insert-Inline\r\n### The error occurred while setting parameters\r\n### SQL: INSERT INTO class_student_homework (homework_id, student_id, submission_files, submit_time, status, create_by, create_time) VALUES (?, ?, ?, ?, ?, ?, NOW())\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'', '2025-11-01 01:31:10', 5);
+INSERT INTO `sys_oper_log` VALUES (132, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":2,\"params\":{},\"remark\":\"\",\"studentId\":121212121,\"submissionFiles\":\"改革开放史论文撰写模板.doc\"}', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassStudentHomeworkMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassStudentHomeworkMapper.insert-Inline\r\n### The error occurred while setting parameters\r\n### SQL: INSERT INTO class_student_homework (homework_id, student_id, submission_files, submit_time, status, create_by, create_time) VALUES (?, ?, ?, ?, ?, ?, NOW())\r\n### Cause: java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Unknown column \'submission_files\' in \'field list\'', '2025-11-01 01:31:35', 5);
+INSERT INTO `sys_oper_log` VALUES (133, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":3,\"params\":{},\"remark\":\"\",\"studentHomeworkId\":1,\"studentId\":1212121,\"submissionFiles\":\"改革开放史论文撰写模板.doc\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 01:32:57', 19);
+INSERT INTO `sys_oper_log` VALUES (134, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101013529A007.doc\",\"content\":\"小程序\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-11 12:00:00\",\"homeworkId\":4,\"params\":{},\"sessionId\":7,\"title\":\"研开第8周作业\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 01:35:38', 19);
+INSERT INTO `sys_oper_log` VALUES (135, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101015431A001.doc\",\"content\":\"99\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-06 00:00:00\",\"homeworkId\":5,\"params\":{},\"sessionId\":7,\"title\":\"99\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 01:54:32', 206);
+INSERT INTO `sys_oper_log` VALUES (136, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":5,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":2,\"studentId\":121212,\"submissionFiles\":\"改革开放史论文撰写模板.doc\",\"submitTime\":\"2025-11-01 01:54:57\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 01:54:57', 17);
+INSERT INTO `sys_oper_log` VALUES (137, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":5,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":3,\"studentId\":12,\"submissionFiles\":\"改革开放史论文撰写模板.doc\",\"submitTime\":\"2025-11-01 01:58:19\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 01:58:19', 9);
+INSERT INTO `sys_oper_log` VALUES (138, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/01/改革开放史论文撰写模板_20251101015911A004.doc\",\"content\":\"77\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-03 07:00:00\",\"homeworkId\":6,\"params\":{},\"sessionId\":7,\"title\":\"77\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 01:59:12', 10);
+INSERT INTO `sys_oper_log` VALUES (139, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":6,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":4,\"studentId\":77,\"submissionFiles\":\"改革开放史论文撰写模板.doc\",\"submitTime\":\"2025-11-01 01:59:38\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-01 01:59:38', 12);
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -910,7 +1067,7 @@ CREATE TABLE `sys_post`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`post_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '岗位信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '岗位信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_post
@@ -940,7 +1097,7 @@ CREATE TABLE `sys_role`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role
@@ -956,7 +1113,7 @@ CREATE TABLE `sys_role_dept`  (
   `role_id` bigint NOT NULL COMMENT '角色ID',
   `dept_id` bigint NOT NULL COMMENT '部门ID',
   PRIMARY KEY (`role_id`, `dept_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色和部门关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色和部门关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role_dept
@@ -973,7 +1130,7 @@ CREATE TABLE `sys_role_menu`  (
   `role_id` bigint NOT NULL COMMENT '角色ID',
   `menu_id` bigint NOT NULL COMMENT '菜单ID',
   PRIMARY KEY (`role_id`, `menu_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色和菜单关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '角色和菜单关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role_menu
@@ -1090,12 +1247,12 @@ CREATE TABLE `sys_user`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 100 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-10-30 20:17:21', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
+INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-10-31 21:36:18', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
 INSERT INTO `sys_user` VALUES (2, 105, 'ry', '若依', '00', 'ry@qq.com', '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-10-30 17:06:55', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '测试员');
 
 -- ----------------------------
@@ -1106,7 +1263,7 @@ CREATE TABLE `sys_user_post`  (
   `user_id` bigint NOT NULL COMMENT '用户ID',
   `post_id` bigint NOT NULL COMMENT '岗位ID',
   PRIMARY KEY (`user_id`, `post_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户与岗位关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户与岗位关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_post
@@ -1122,7 +1279,7 @@ CREATE TABLE `sys_user_role`  (
   `user_id` bigint NOT NULL COMMENT '用户ID',
   `role_id` bigint NOT NULL COMMENT '角色ID',
   PRIMARY KEY (`user_id`, `role_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户和角色关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户和角色关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_role
@@ -1131,4 +1288,3 @@ INSERT INTO `sys_user_role` VALUES (1, 1);
 INSERT INTO `sys_user_role` VALUES (2, 2);
 
 SET FOREIGN_KEY_CHECKS = 1;
-
