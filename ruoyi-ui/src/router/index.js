@@ -187,6 +187,34 @@ export const constantRoutes = [
         hidden: true  // 确保这个路由在菜单中隐藏
       }
     ]
+  },
+  {
+    path: '/proj_cyq',
+    component: Layout,
+    hidden: false,
+    redirect: '/proj_cyq/index',
+    name: 'ProjCyq',
+    meta: { title: '个人中心', icon: 'user' },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/proj_cyq/personal/index'),
+        name: 'PersonalHome',
+        meta: { title: '个人主页', icon: 'dashboard' }
+      },
+      {
+        path: 'todo',
+        component: () => import('@/views/proj_cyq/todo/index'),
+        name: 'Todo',
+        meta: { title: '待办事项', icon: 'list' }
+      },
+      {
+        path: 'message',
+        component: () => import('@/views/proj_cyq/message/index'),
+        name: 'Message',
+        meta: { title: '消息中心', icon: 'message' }
+      }
+    ]
   }
 ]
 
