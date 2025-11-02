@@ -1,0 +1,124 @@
+CREATE TABLE `class_student` (
+  `student_id` bigint NOT NULL AUTO_INCREMENT COMMENT '学生ID',
+  `student_no` varchar(50) NOT NULL COMMENT '学号',
+  `student_name` varchar(100) NOT NULL COMMENT '学生姓名',
+  `gender` char(1) DEFAULT NULL COMMENT '性别 M/F',
+  `class_name` varchar(100) DEFAULT NULL COMMENT '所属班级',
+  `phone` varchar(20) DEFAULT NULL COMMENT '联系方式',
+  `email` varchar(100) DEFAULT NULL COMMENT '邮箱',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `status` tinyint DEFAULT '1' COMMENT '1在读 0退学',
+  PRIMARY KEY (`student_id`) USING BTREE,
+  UNIQUE KEY `student_no` (`student_no`)
+) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学生信息表'
+
+CREATE TABLE `class_session` (
+  `session_id` bigint NOT NULL AUTO_INCREMENT,
+  `class_name` varchar(50) NOT NULL,
+  `teacher_id` bigint NOT NULL,
+  `start_time` datetime DEFAULT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `status` tinyint DEFAULT '0' COMMENT '0未开始 1进行中 2已结束',
+  PRIMARY KEY (`session_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+CREATE TABLE `class_attendance` (
+  `attendance_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到记录唯一ID',
+  `session_id` bigint NOT NULL COMMENT '关联的课堂ID',
+  `student_id` bigint NOT NULL COMMENT '关联的学生ID',
+  `attendance_time` datetime DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
+  `attendance_status` tinyint NOT NULL DEFAULT '0' COMMENT '签到状态: 0-未签到 1-已签到 2-迟到 3-请假 4-早退',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  `device_ip` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到设备IP地址',
+  `device_type` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
+  `location` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到地理位置',
+  PRIMARY KEY (`attendance_id`) USING BTREE,
+  UNIQUE KEY `uq_session_student` (`session_id`,`student_id`),
+  KEY `idx_session` (`session_id`),
+  KEY `idx_student` (`student_id`),
+  KEY `idx_status` (`attendance_status`),
+  KEY `idx_attendance_time` (`attendance_time`),
+  CONSTRAINT `class_attendance_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `class_attendance_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='学生课堂签到记录表'
+
+CREATE TABLE `class_random_pick` (
+  `rpick_id` bigint NOT NULL AUTO_INCREMENT,
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `teacher_id` bigint NOT NULL COMMENT '教师ID',
+  `student_id` bigint NOT NULL COMMENT '被抽学生ID',
+  `pick_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '抽取时间',
+  `round_no` int DEFAULT '1' COMMENT '第几次抽人',
+  `remark` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`rpick_id`) USING BTREE,
+  KEY `idx_session_picktime` (`session_id`,`pick_time`),
+  KEY `class_rpick` (`student_id`),
+  CONSTRAINT `class_rpick` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `class_rpick1` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+CREATE TABLE `class_attendance_task` (
+  `task_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '签到任务主键ID',
+  `session_id` BIGINT NOT NULL COMMENT '关联的课堂 session_id (class_session.session_id)',
+  `type` VARCHAR(20) NOT NULL DEFAULT 'location' COMMENT '签到方式：location 或 qr',
+  `center_lat` DOUBLE DEFAULT NULL COMMENT '位置签到中心纬度（仅 type=location 有效）',
+  `center_lng` DOUBLE DEFAULT NULL COMMENT '位置签到中心经度（仅 type=location 有效）',
+  `radius` INT DEFAULT NULL COMMENT '有效半径（米）（仅 type=location 有效）',
+  `qr_code` VARCHAR(255) DEFAULT NULL COMMENT '二维码静态 token 或默认值（可为空，复杂场景用 class_attendance_qr 存多 token）',
+  `start_time` DATETIME DEFAULT NULL COMMENT '签到开始时间',
+  `end_time` DATETIME DEFAULT NULL COMMENT '签到结束时间',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '任务状态：0=未开始 1=进行中 2=已结束',
+  `create_by` VARCHAR(64) DEFAULT NULL COMMENT '创建者用户名',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`task_id`),
+  INDEX `idx_task_session` (`session_id`),
+  INDEX `idx_task_status` (`status`),
+  CONSTRAINT `fk_task_session` FOREIGN KEY (`session_id`) REFERENCES `class_session`(`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='签到任务表（记录签到活动：位置/二维码等）';
+
+
+CREATE TABLE `class_attendance_qr` (
+  `qr_id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '二维码 token 主键',
+  `task_id` BIGINT NOT NULL COMMENT '关联的签到任务 task_id',
+  `token` VARCHAR(128) NOT NULL COMMENT '二维码 token（可为 UUID 或其他）',
+  `ttl_seconds` INT DEFAULT NULL COMMENT '有效期（秒），null 意味着使用 task.end_time 作为判定',
+  `expire_time` DATETIME DEFAULT NULL COMMENT '到期时间（可根据 ttl_seconds 计算填入）',
+  `used` TINYINT NOT NULL DEFAULT 0 COMMENT '是否已被使用（可选，用于一次性二维码）',
+  `create_by` VARCHAR(64) DEFAULT NULL,
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`qr_id`),
+  UNIQUE KEY `uq_token` (`token`),
+  INDEX `idx_task_qr` (`task_id`),
+  CONSTRAINT `fk_qr_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task`(`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='签到二维码/token 表（用于动态二维码与失效控制）';
+
+CREATE TABLE `class_session_student` (
+  `session_id` BIGINT NOT NULL COMMENT '课堂 session_id',
+  `student_id` BIGINT NOT NULL COMMENT '学生 student_id',
+  `assigned_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '分配时间（从旧数据迁移时填入）',
+  PRIMARY KEY (`session_id`,`student_id`),
+  KEY `idx_session` (`session_id`),
+  KEY `idx_student` (`student_id`),
+  CONSTRAINT `fk_session_student_session` FOREIGN KEY (`session_id`) REFERENCES `class_session`(`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_session_student_student` FOREIGN KEY (`student_id`) REFERENCES `class_student`(`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课堂与学生关联表（显式映射 session <-> student）';
+
+-- 迁移脚本（一次性）：如果你当前使用 class_name 字段作为映射，可用下面语句把现有数据迁移到 class_session_student
+-- 请在执行前先在测试环境验证并备份数据。
+-- 该语句把所有 class_session 与 class_student 中 class_name 相同的记录插入关联表（去重）
+INSERT INTO class_session_student (session_id, student_id)
+SELECT DISTINCT s.session_id, c.student_id
+FROM class_session s
+JOIN class_student c ON c.class_name = s.class_name
+WHERE s.class_name IS NOT NULL AND s.class_name <> '';
+
+-- 可选：如果你的系统里存在学生已经在 class_attendance 表中与 session 关联（部分签到记录），但关联表中没有对应行，可以用下列语句补齐：
+INSERT INTO class_session_student (session_id, student_id)
+SELECT DISTINCT a.session_id, a.student_id
+FROM class_attendance a
+LEFT JOIN class_session_student ss ON ss.session_id = a.session_id AND ss.student_id = a.student_id
+WHERE ss.session_id IS NULL;
+
+-- 迁移完成后，推荐检查并在应用中使用 class_session_student 作为权威的 session<->student 关系来源，之后可以考虑删除或忽略 class_student.class_name 的依赖。

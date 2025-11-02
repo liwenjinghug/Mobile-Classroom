@@ -100,6 +100,31 @@ export const constantRoutes = [
         component: () => import('@/views/proj_myx/RandomPick.vue'),
         name: 'RandomPick',
         meta: { title: '随机抽人', icon: 'education' }
+      },
+      {
+        path: 'Attendance',
+        component: () => import('@/views/proj_myx/Attendance.vue'),
+        name: 'Attendance',
+        meta: { title: '课堂签到', icon: 'peoples', roles: ['admin','common'] }
+      },
+      // Admin-only menu entries for detailed pages (they can also be accessed directly)
+      {
+        path: 'AttendanceCreate',
+        component: () => import('@/views/proj_myx/CreateAttendance.vue'),
+        name: 'AttendanceCreate',
+        meta: { title: '创建签到', icon: 'edit', roles: ['admin'] }
+      },
+      {
+        path: 'AttendanceStats',
+        component: () => import('@/views/proj_myx/AttendanceStats.vue'),
+        name: 'AttendanceStats',
+        meta: { title: '签到统计', icon: 'chart', roles: ['admin'] }
+      },
+      {
+        path: 'Vote',
+        component: () => import('@/views/proj_myx/Vote.vue'),
+        name: 'Vote',
+        meta: { title: '课堂投票', icon: 'vote', roles: ['admin','common'] }
       }
     ]
   },

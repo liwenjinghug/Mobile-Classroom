@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : ry-vue
+ Source Server         : 01tech
  Source Server Type    : MySQL
  Source Server Version : 80042 (8.0.42)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 02/11/2025 15:57:21
+ Date: 02/11/2025 20:48:44
 */
 
 SET NAMES utf8mb4;
@@ -69,7 +69,7 @@ CREATE TABLE `class_article_like`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_article_user`(`article_id` ASC, `user_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_article_like
@@ -104,7 +104,7 @@ CREATE TABLE `class_attendance`  (
 -- Records of class_attendance
 -- ----------------------------
 INSERT INTO `class_attendance` VALUES (1, 1, 1, '2021-09-29 12:14:27', 1, '2002-10-20 19:19:57', '2025-10-27 19:38:07', '', '', '');
-INSERT INTO `class_attendance` VALUES (2, 1, 2, '2008-09-23 17:00:24', 1, '2016-03-30 23:49:38', '2025-10-27 19:38:07', '', '', '');
+INSERT INTO `class_attendance` VALUES (2, 1, 2, '2025-11-07 20:42:22', 1, '2016-03-30 23:49:38', '2025-11-02 20:42:31', '', '', '');
 INSERT INTO `class_attendance` VALUES (3, 1, 3, '2019-12-19 06:16:26', 1, '2007-08-18 19:37:31', '2025-10-27 19:38:09', '', '', '');
 INSERT INTO `class_attendance` VALUES (4, 1, 4, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (5, 1, 5, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
@@ -119,7 +119,7 @@ INSERT INTO `class_attendance` VALUES (13, 1, 13, NULL, 1, '2025-10-27 19:44:56'
 INSERT INTO `class_attendance` VALUES (14, 1, 14, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (15, 1, 15, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (16, 1, 16, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (17, 1, 17, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (17, 1, 17, NULL, 0, '2025-10-27 19:44:56', '2025-11-02 20:42:46', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (18, 1, 18, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (19, 1, 19, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (20, 1, 20, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
@@ -143,6 +143,63 @@ INSERT INTO `class_attendance` VALUES (37, 1, 37, NULL, 1, '2025-10-27 19:44:56'
 INSERT INTO `class_attendance` VALUES (38, 1, 38, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (39, 1, 39, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (40, 1, 40, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+
+-- ----------------------------
+-- Table structure for class_attendance_qr
+-- ----------------------------
+DROP TABLE IF EXISTS `class_attendance_qr`;
+CREATE TABLE `class_attendance_qr`  (
+  `qr_id` bigint NOT NULL AUTO_INCREMENT COMMENT '二维码 token 主键',
+  `task_id` bigint NOT NULL COMMENT '关联的签到任务 task_id',
+  `token` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '二维码 token（可为 UUID 或其他）',
+  `ttl_seconds` int NULL DEFAULT NULL COMMENT '有效期（秒），null 意味着使用 task.end_time 作为判定',
+  `expire_time` datetime NULL DEFAULT NULL COMMENT '到期时间（可根据 ttl_seconds 计算填入）',
+  `used` tinyint NOT NULL DEFAULT 0 COMMENT '是否已被使用（可选，用于一次性二维码）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`qr_id`) USING BTREE,
+  UNIQUE INDEX `uq_token`(`token` ASC) USING BTREE,
+  INDEX `idx_task_qr`(`task_id` ASC) USING BTREE,
+  CONSTRAINT `fk_qr_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到二维码/token 表（用于动态二维码与失效控制）' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of class_attendance_qr
+-- ----------------------------
+INSERT INTO `class_attendance_qr` VALUES (1, 3, 'TEST-TOKEN-123456', 1800, '2025-11-02 20:12:04', 0, 'admin', '2025-11-02 19:42:04');
+
+-- ----------------------------
+-- Table structure for class_attendance_task
+-- ----------------------------
+DROP TABLE IF EXISTS `class_attendance_task`;
+CREATE TABLE `class_attendance_task`  (
+  `task_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到任务主键ID',
+  `session_id` bigint NOT NULL COMMENT '关联的课堂 session_id (class_session.session_id)',
+  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'location' COMMENT '签到方式：location 或 qr',
+  `center_lat` double NULL DEFAULT NULL COMMENT '位置签到中心纬度（仅 type=location 有效）',
+  `center_lng` double NULL DEFAULT NULL COMMENT '位置签到中心经度（仅 type=location 有效）',
+  `radius` int NULL DEFAULT NULL COMMENT '有效半径（米）（仅 type=location 有效）',
+  `qr_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '二维码静态 token 或默认值（可为空，复杂场景用 class_attendance_qr 存多 token）',
+  `start_time` datetime NULL DEFAULT NULL COMMENT '签到开始时间',
+  `end_time` datetime NULL DEFAULT NULL COMMENT '签到结束时间',
+  `status` tinyint NOT NULL DEFAULT 0 COMMENT '任务状态：0=未开始 1=进行中 2=已结束',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '创建者用户名',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`task_id`) USING BTREE,
+  INDEX `idx_task_session`(`session_id` ASC) USING BTREE,
+  INDEX `idx_task_status`(`status` ASC) USING BTREE,
+  CONSTRAINT `fk_task_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到任务表（记录签到活动：位置/二维码等）' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of class_attendance_task
+-- ----------------------------
+INSERT INTO `class_attendance_task` VALUES (1, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-02 19:19:34', '2025-11-02 19:19:37', 1, 'admin', '2025-11-02 19:19:38');
+INSERT INTO `class_attendance_task` VALUES (2, 3, 'location', 1, 1, 500, NULL, '2025-11-02 19:20:59', '2025-11-03 00:00:00', 1, 'admin', '2025-11-02 19:21:03');
+INSERT INTO `class_attendance_task` VALUES (3, 3, 'qr', NULL, NULL, NULL, NULL, '2025-11-02 19:42:04', '2025-11-02 20:12:04', 1, 'admin', '2025-11-02 19:42:04');
+INSERT INTO `class_attendance_task` VALUES (4, 3, 'location', 1, 1, 500, NULL, NULL, NULL, 1, 'admin', '2025-11-02 19:42:59');
+INSERT INTO `class_attendance_task` VALUES (5, 3, 'location', 1, 1, 500, NULL, '2025-11-02 20:06:30', '2025-11-02 20:06:31', 1, 'admin', '2025-11-02 20:06:32');
+INSERT INTO `class_attendance_task` VALUES (6, 1, 'location', 1, 1, 500, NULL, '2025-11-02 20:20:54', '2025-11-04 20:20:55', 1, 'admin', '2025-11-02 20:20:59');
 
 -- ----------------------------
 -- Table structure for class_course
@@ -281,6 +338,65 @@ INSERT INTO `class_session` VALUES (4, '研究与开发实践02', 2, '2025-10-30
 INSERT INTO `class_session` VALUES (7, '研究与开发实践03', 1, '2025-11-07 00:00:00', '2025-11-20 00:00:00', 0, 32, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-11-01 15:12:04');
 
 -- ----------------------------
+-- Table structure for class_session_student
+-- ----------------------------
+DROP TABLE IF EXISTS `class_session_student`;
+CREATE TABLE `class_session_student`  (
+  `session_id` bigint NOT NULL COMMENT '课堂 session_id',
+  `student_id` bigint NOT NULL COMMENT '学生 student_id',
+  `assigned_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '分配时间（从旧数据迁移时填入）',
+  PRIMARY KEY (`session_id`, `student_id`) USING BTREE,
+  INDEX `idx_session`(`session_id` ASC) USING BTREE,
+  INDEX `idx_student`(`student_id` ASC) USING BTREE,
+  CONSTRAINT `fk_session_student_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_session_student_student` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '课堂与学生关联表（显式映射 session <-> student）' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of class_session_student
+-- ----------------------------
+INSERT INTO `class_session_student` VALUES (1, 1, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 2, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 3, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 4, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 5, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 6, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 7, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 8, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 9, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 10, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 11, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 12, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 13, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 14, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 15, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 16, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 17, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 18, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 19, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 20, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 21, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 22, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 23, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 24, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 25, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 26, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 27, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 28, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 29, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 30, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 31, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 32, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 33, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 34, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 35, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 36, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 37, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 38, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 39, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 40, '2025-11-02 20:20:16');
+
+-- ----------------------------
 -- Table structure for class_student
 -- ----------------------------
 DROP TABLE IF EXISTS `class_student`;
@@ -302,7 +418,7 @@ CREATE TABLE `class_student`  (
   INDEX `idx_class_number`(`session_id` ASC) USING BTREE,
   INDEX `idx_course_code`(`course_code` ASC) USING BTREE,
   CONSTRAINT `fk_student_course_code` FOREIGN KEY (`course_code`) REFERENCES `class_course` (`course_code`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 41 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生信息表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 50 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_student
@@ -347,6 +463,9 @@ INSERT INTO `class_student` VALUES (37, '2023141460367', '熊眭杨', NULL, NULL
 INSERT INTO `class_student` VALUES (38, '2023141460368', '黎文靖', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
 INSERT INTO `class_student` VALUES (39, '2023141460369', '符桢', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
 INSERT INTO `class_student` VALUES (40, '2023141460370', '刘伊鸣', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
+INSERT INTO `class_student` VALUES (41, 'S001', '张三', 'M', '测试班级-在线课堂', '13800000001', 's001@example.com', '2025-11-02 19:40:01', '2025-11-02 19:40:01', 1, NULL, NULL);
+INSERT INTO `class_student` VALUES (42, 'S002', '李四', 'F', '测试班级-在线课堂', '13800000002', 's002@example.com', '2025-11-02 19:40:01', '2025-11-02 19:40:01', 1, NULL, NULL);
+INSERT INTO `class_student` VALUES (43, 'S003', '王五', 'M', '测试班级-在线课堂', '13800000003', 's003@example.com', '2025-11-02 19:40:01', '2025-11-02 19:40:01', 1, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for class_student_homework
@@ -422,7 +541,7 @@ CREATE TABLE `class_todo`  (
   INDEX `idx_message_status`(`message_status` ASC) USING BTREE,
   INDEX `idx_message_read`(`message_read` ASC) USING BTREE,
   INDEX `idx_sequence_number`(`sequence_number` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '待办事项表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '待办事项表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_todo
@@ -976,7 +1095,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 111 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 114 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -992,6 +1111,9 @@ INSERT INTO `sys_logininfor` VALUES (107, 'admin', '127.0.0.1', '内网IP', 'Chr
 INSERT INTO `sys_logininfor` VALUES (108, 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-02 00:20:23');
 INSERT INTO `sys_logininfor` VALUES (109, 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-02 00:56:37');
 INSERT INTO `sys_logininfor` VALUES (110, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 01:07:48');
+INSERT INTO `sys_logininfor` VALUES (111, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 16:25:50');
+INSERT INTO `sys_logininfor` VALUES (112, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 17:50:20');
+INSERT INTO `sys_logininfor` VALUES (113, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 18:22:02');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -1019,14 +1141,14 @@ CREATE TABLE `sys_menu`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '备注',
   PRIMARY KEY (`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2018 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 2020 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
 -- ----------------------------
 INSERT INTO `sys_menu` VALUES (1, '系统管理', 0, 1, 'system', NULL, '', '', 1, 0, 'M', '0', '0', '', 'system', 'admin', '2025-10-30 17:06:55', 'admin', '2025-11-02 15:31:36', '系统管理目录');
 INSERT INTO `sys_menu` VALUES (2, '系统监控', 0, 2, 'monitor', NULL, '', '', 1, 0, 'M', '1', '0', '', 'monitor', 'admin', '2025-10-30 17:06:55', 'admin', '2025-11-02 15:31:13', '系统监控目录');
-INSERT INTO `sys_menu` VALUES (3, '系统工具', 0, 3, 'tool', NULL, '', '', 1, 0, 'M', '1', '0', '', 'tool', 'admin', '2025-10-30 17:06:55', 'admin', '2025-11-02 15:31:28', '系统工具目录');
+INSERT INTO `sys_menu` VALUES (3, '系统工具', 0, 3, 'tool', NULL, '', '', 1, 0, 'M', '0', '0', '', 'tool', 'admin', '2025-10-30 17:06:55', 'admin', '2025-11-02 18:23:05', '系统工具目录');
 INSERT INTO `sys_menu` VALUES (4, '若依官网', 0, 4, 'http://ruoyi.vip', NULL, '', '', 0, 0, 'M', '1', '0', '', 'guide', 'admin', '2025-10-30 17:06:55', 'admin', '2025-11-02 15:31:24', '若依官网地址');
 INSERT INTO `sys_menu` VALUES (100, '用户管理', 1, 1, 'user', 'system/user/index', '', '', 1, 0, 'C', '0', '0', 'system:user:list', 'user', 'admin', '2025-10-30 17:06:55', '', NULL, '用户管理菜单');
 INSERT INTO `sys_menu` VALUES (101, '角色管理', 1, 2, 'role', 'system/role/index', '', '', 1, 0, 'C', '0', '0', 'system:role:list', 'peoples', 'admin', '2025-10-30 17:06:55', '', NULL, '角色管理菜单');
@@ -1126,6 +1248,8 @@ INSERT INTO `sys_menu` VALUES (2014, '个人中心', 0, 0, 'proj_cyq', NULL, NUL
 INSERT INTO `sys_menu` VALUES (2015, '个人主页', 2014, 0, 'index', NULL, NULL, '', 1, 0, 'C', '0', '0', NULL, 'user', 'admin', '2025-11-02 15:28:58', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2016, '待办事项', 2014, 2, 'todo', NULL, NULL, '', 1, 0, 'C', '0', '0', NULL, 'list', 'admin', '2025-11-02 15:29:41', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2017, '消息中心', 2014, 3, 'message', NULL, NULL, '', 1, 0, 'C', '0', '0', NULL, 'wechat', 'admin', '2025-11-02 15:30:56', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2018, '课堂签到', 2004, 1, 'Attendance', NULL, NULL, '', 1, 0, 'M', '0', '0', NULL, 'checkbox', 'admin', '2025-11-02 17:52:22', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2019, '课堂投票', 2004, 2, 'vote', NULL, NULL, '', 1, 0, 'M', '0', '0', NULL, 'chart', 'admin', '2025-11-02 20:39:23', '', NULL, '');
 
 -- ----------------------------
 -- Table structure for sys_notice
@@ -1177,7 +1301,7 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 201 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 204 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -1283,6 +1407,9 @@ INSERT INTO `sys_oper_log` VALUES (197, '菜单管理', 2, 'com.ruoyi.web.contro
 INSERT INTO `sys_oper_log` VALUES (198, '菜单管理', 2, 'com.ruoyi.web.controller.system.SysMenuController.edit()', 'PUT', 1, 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createTime\":\"2025-10-30 17:06:55\",\"icon\":\"system\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuId\":1,\"menuName\":\"系统管理\",\"menuType\":\"M\",\"orderNum\":1,\"params\":{},\"parentId\":0,\"path\":\"system\",\"perms\":\"\",\"query\":\"\",\"routeName\":\"\",\"status\":\"0\",\"updateBy\":\"admin\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-02 15:31:36', 23);
 INSERT INTO `sys_oper_log` VALUES (199, '菜单管理', 2, 'com.ruoyi.web.controller.system.SysMenuController.edit()', 'PUT', 1, 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createTime\":\"2025-11-02 15:23:28\",\"icon\":\"row\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuId\":2008,\"menuName\":\"课堂详情\",\"menuType\":\"C\",\"orderNum\":1,\"params\":{},\"parentId\":2006,\"path\":\"session\",\"perms\":\"\",\"routeName\":\"\",\"status\":\"0\",\"updateBy\":\"admin\",\"visible\":\"1\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-02 15:32:41', 26);
 INSERT INTO `sys_oper_log` VALUES (200, '批量标记消息已读', 2, 'com.ruoyi.web.controller.proj_cyq.MessageController.markAllAsRead()', 'PUT', 1, 'admin', '研发部门', '/proj_cyq/message/read/all', '127.0.0.1', '内网IP', '', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-02 15:33:43', 44);
+INSERT INTO `sys_oper_log` VALUES (201, '菜单管理', 1, 'com.ruoyi.web.controller.system.SysMenuController.add()', 'POST', 1, 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createBy\":\"admin\",\"icon\":\"checkbox\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuName\":\"课堂签到\",\"menuType\":\"M\",\"orderNum\":1,\"params\":{},\"parentId\":2004,\"path\":\"Attendance\",\"status\":\"0\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-02 17:52:22', 11);
+INSERT INTO `sys_oper_log` VALUES (202, '菜单管理', 2, 'com.ruoyi.web.controller.system.SysMenuController.edit()', 'PUT', 1, 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createTime\":\"2025-10-30 17:06:55\",\"icon\":\"tool\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuId\":3,\"menuName\":\"系统工具\",\"menuType\":\"M\",\"orderNum\":3,\"params\":{},\"parentId\":0,\"path\":\"tool\",\"perms\":\"\",\"query\":\"\",\"routeName\":\"\",\"status\":\"0\",\"updateBy\":\"admin\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-02 18:23:05', 6);
+INSERT INTO `sys_oper_log` VALUES (203, '菜单管理', 1, 'com.ruoyi.web.controller.system.SysMenuController.add()', 'POST', 1, 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createBy\":\"admin\",\"icon\":\"chart\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuName\":\"课堂投票\",\"menuType\":\"M\",\"orderNum\":2,\"params\":{},\"parentId\":2004,\"path\":\"vote\",\"status\":\"0\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-02 20:39:23', 78);
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -1485,7 +1612,7 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-02 01:07:48', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
+INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-02 18:22:03', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
 INSERT INTO `sys_user` VALUES (2, 105, 'ry', '若依', '00', 'ry@qq.com', '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-10-30 17:06:55', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '测试员');
 
 -- ----------------------------
