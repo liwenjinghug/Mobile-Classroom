@@ -109,7 +109,7 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/proj_lw/course',
     name: 'proj_lw',
-    meta: { title: '移动课堂', icon: 'education' },
+    meta: { title: '课程资源', icon: 'education' },
     children: [
       {
         path: 'course',
