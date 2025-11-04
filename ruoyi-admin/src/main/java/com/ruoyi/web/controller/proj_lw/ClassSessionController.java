@@ -32,12 +32,14 @@ public class ClassSessionController extends BaseController {
     }
 
     /**
-     * 根据课程编号获取课堂列表
+     * 根据课程ID获取课堂列表
      */
     @PreAuthorize("@ss.hasPermi('projlw:session:list')")
-    @GetMapping("/byClassNumber/{classNumber}")
-    public AjaxResult getSessionsByClassNumber(@PathVariable Integer classNumber) {
-        List<ClassSession> list = sessionService.selectSessionsByClassNumber(classNumber);
+    @GetMapping("/byCourseId/{courseId}")
+    public AjaxResult getSessionsByCourseId(@PathVariable Long courseId) {
+        ClassSession session = new ClassSession();
+        session.setCourseId(courseId);
+        List<ClassSession> list = sessionService.selectSessionList(session);
         return AjaxResult.success(list);
     }
 
@@ -57,6 +59,10 @@ public class ClassSessionController extends BaseController {
     @Log(title = "课堂管理", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody ClassSession session) {
+        // 验证courseId不为空
+        if (session.getCourseId() == null) {
+            return AjaxResult.error("课程ID不能为空");
+        }
         session.setCreateBy(getUsername());
         return toAjax(sessionService.insertSession(session));
     }
@@ -68,6 +74,10 @@ public class ClassSessionController extends BaseController {
     @Log(title = "课堂管理", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody ClassSession session) {
+        // 验证courseId不为空
+        if (session.getCourseId() == null) {
+            return AjaxResult.error("课程ID不能为空");
+        }
         session.setUpdateBy(getUsername());
         return toAjax(sessionService.updateSession(session));
     }

@@ -144,19 +144,10 @@ export default {
   watch: {
     'form.courseId'(val) {
       if (val) {
-        const selected = this.courses.find(c => c.courseId === val)
-        const classNumber = selected ? selected.classNumber : null
-        if (classNumber != null) {
-          this.sessions = []
-          this.$apiGetSessionsByClassNumber(classNumber).then(() => {
-            // after sessions loaded, if only one session leave it, otherwise clear selection
-            this.form.sessionId = null
-          })
-        } else {
-          this.sessions = []
-        }
+        this.fetchSessionsByCourseId(val)
       } else {
         this.sessions = []
+        this.form.sessionId = null
       }
     },
     'form.sessionId'(val) {
@@ -180,6 +171,25 @@ export default {
         this.$message.error('获取课程失败请检查后端接口或权限')
       })
     },
+
+    fetchSessionsByCourseId(courseId) {
+      const api = require('@/api/proj_lw/session')
+      return api.getSessionsByCourseId(courseId).then(res => {
+        // 处理响应数据格式
+        this.sessions = res && res.rows ? res.rows : (res && res.data ? res.data : [])
+        this.form.sessionId = null // 清空课堂选择
+        if (!this.sessions || this.sessions.length === 0) {
+          this.$message.info('该课程下暂无课堂')
+        }
+        return this.sessions
+      }).catch(err => {
+        console.error('fetchSessionsByCourseId error', err)
+        this.sessions = []
+        this.$message.error('获取课堂失败')
+        return []
+      })
+    },
+
     formatDateToBackend(value) {
       if (!value) return null
       const d = value instanceof Date ? value : new Date(value)
@@ -192,27 +202,14 @@ export default {
       const s = String(d.getSeconds()).padStart(2, '0')
       return `${Y}-${M}-${D} ${h}:${m}:${s}`
     },
-    $apiGetSessionsByClassNumber(classNumber) {
-      const api = require('@/api/proj_lw/session')
-      return api.getSessionsByClassNumber(classNumber).then(res => {
-        this.sessions = res && res.data ? res.data : []
-        if (!this.sessions || this.sessions.length === 0) {
-          this.$message.info('未查询到对应课堂')
-        }
-        return this.sessions
-      }).catch(err => {
-        console.error('getSessionsByClassNumber error', err)
-        this.sessions = []
-        this.$message.error('获取课堂失败请检查后端接口或权限')
-        return []
-      })
-    },
+
     uploadSuccess(response) {
       if (response && response.fileName) {
         const prev = this.form.attachments ? this.form.attachments + ',' : ''
         this.form.attachments = prev + response.fileName
       }
     },
+
     publishOrSave() {
       if (!this.form.title) { this.$message.error('请输入标题'); return }
       if (!this.form.courseId) { this.$message.error('请选择课程'); return }
@@ -270,6 +267,7 @@ export default {
         })
       }
     },
+
     resetForm() {
       this.editing = false
       this.editingId = null
@@ -279,6 +277,7 @@ export default {
       this.form.deadline = null
       this.form.attachments = ''
     },
+
     startEdit(row) {
       this.editing = true
       this.editingId = row.homeworkId || row.id || null
@@ -291,14 +290,15 @@ export default {
       // try to parse deadline into Date
       this.form.deadline = row.deadline ? new Date(row.deadline) : null
       this.form.attachments = row.attachments || ''
-      // ensure session list contains the session
-      if (this.form.courseId && (!this.sessions || this.sessions.length===0)) {
-        const selected = this.courses.find(c => c.courseId === this.form.courseId)
-        const classNumber = selected ? selected.classNumber : null
-        if (classNumber) this.$apiGetSessionsByClassNumber(classNumber)
+
+      // 确保课堂列表包含当前课堂
+      if (this.form.courseId && (!this.sessions || !this.sessions.find(s => s.sessionId === this.form.sessionId))) {
+        this.fetchSessionsByCourseId(this.form.courseId)
       }
     },
+
     cancelEdit() { this.resetForm() },
+
     confirmDelete(row) {
       this.$confirm('确认删除该作业？', '提示', { type: 'warning' }).then(() => {
         const id = row.homeworkId || row.id
@@ -315,6 +315,7 @@ export default {
         })
       }).catch(() => {})
     },
+
     loadHomeworks(sessionId) {
       if (!sessionId) { this.homeworkList = []; return }
       this.listLoading = true
@@ -327,6 +328,7 @@ export default {
         this.$message.error('获取已发布作业失败')
       })
     },
+
     async viewSubmissions(row) {
       const id = row.homeworkId || row.id
       if (!id) { this.$message.error('作业ID缺失'); return }
@@ -399,16 +401,19 @@ export default {
         this.submissions = []
       }
     },
+
     parseAttachments(str) {
       if (!str) return []
       return String(str).split(',').map(s => s.trim()).filter(Boolean)
     },
+
     downloadUrl(fileName) {
       const token = require('@/utils/auth').getToken()
       // include token as query param if needed
       const base = process.env.VUE_APP_BASE_API + '/common/download?fileName=' + encodeURIComponent(fileName)
       return base + (token ? ('&token=' + token) : '')
     },
+
     formatTime(val) {
       if (!val) return null
       const d = new Date(val)
@@ -421,6 +426,7 @@ export default {
       const s = String(d.getSeconds()).padStart(2, '0')
       return `${Y}-${M}-${D} ${h}:${m}:${s}`
     },
+
     exportSubmissions() {
       if (!this.submissions || this.submissions.length === 0) { this.$message.info('没有可导出的数据'); return }
       // build CSV

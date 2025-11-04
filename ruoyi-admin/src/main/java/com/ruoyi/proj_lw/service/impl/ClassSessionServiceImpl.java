@@ -43,8 +43,9 @@ public class ClassSessionServiceImpl implements IClassSessionService {
         return sessionMapper.deleteSessionByIds(sessionIds);
     }
 
-    @Override
-    public List<ClassSession> selectSessionsByClassNumber(Integer classNumber) {
-        return sessionMapper.selectSessionsByClassNumber(classNumber);
-    }
+    // 删除这个方法，因为我们已经改用courseId进行关联
+    // @Override
+    // public List<ClassSession> selectSessionsByClassNumber(Integer classNumber) {
+    //     return sessionMapper.selectSessionsByClassNumber(classNumber);
+    // }
 }

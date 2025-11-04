@@ -8,10 +8,21 @@ export function listSession(query) {
   })
 }
 
+// 修改这个方法：使用查询参数方式
 export function getSessionsByClassNumber(classNumber) {
   return request({
-    url: '/proj_lw/session/byClassNumber/' + classNumber,
-    method: 'get'
+    url: '/proj_lw/session/list',
+    method: 'get',
+    params: { classNumber: classNumber }
+  })
+}
+
+// 修改这个方法：使用查询参数方式
+export function getSessionsByCourseId(courseId) {
+  return request({
+    url: '/proj_lw/session/list',
+    method: 'get',
+    params: { courseId: courseId }
   })
 }
 

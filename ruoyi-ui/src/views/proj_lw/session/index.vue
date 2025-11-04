@@ -47,19 +47,19 @@
           </div>
           <div class="info-item">
             <span class="label">上课时间：</span>
-            <span class="value">{{ parseTime(session.startTime, '{y}-{m}-{d} {h}:{i}') }}</span>
+            <span class="value">{{ formatSessionTime(session) }}</span>
           </div>
           <div class="info-item">
-            <span class="label">下课时间：</span>
-            <span class="value">{{ parseTime(session.endTime, '{y}-{m}-{d} {h}:{i}') }}</span>
+            <span class="label">每堂课时长：</span>
+            <span class="value">{{ session.classDuration || 45 }}分钟</span>
           </div>
           <div class="info-item">
             <span class="label">课堂人数：</span>
             <span class="value">{{ session.totalStudents || 0 }}人</span>
           </div>
           <div class="info-item">
-            <span class="label">课堂编号：</span>
-            <span class="value">{{ session.classNumber }}</span>
+            <span class="label">课程ID：</span>
+            <span class="value">{{ session.courseId }}</span>
           </div>
         </div>
       </el-card>
@@ -84,26 +84,52 @@
         <el-form-item label="老师ID" prop="teacherId">
           <el-input-number v-model="form.teacherId" :min="1" placeholder="请输入老师ID" style="width: 100%" />
         </el-form-item>
+
+        <!-- 上课时间设置 -->
+        <el-form-item label="星期" prop="weekDay">
+          <el-select v-model="form.weekDay" placeholder="请选择星期" style="width: 100%">
+            <el-option label="周一" value="1" />
+            <el-option label="周二" value="2" />
+            <el-option label="周三" value="3" />
+            <el-option label="周四" value="4" />
+            <el-option label="周五" value="5" />
+            <el-option label="周六" value="6" />
+            <el-option label="周日" value="7" />
+          </el-select>
+        </el-form-item>
+
         <el-form-item label="上课时间" prop="startTime">
-          <el-date-picker
+          <el-time-picker
             v-model="form.startTime"
-            type="datetime"
             placeholder="选择上课时间"
-            format="yyyy-MM-dd HH:mm:ss"
-            value-format="yyyy-MM-dd HH:mm:ss"
+            format="HH:mm"
+            value-format="HH:mm"
             style="width: 100%"
           />
         </el-form-item>
+
         <el-form-item label="下课时间" prop="endTime">
-          <el-date-picker
+          <el-time-picker
             v-model="form.endTime"
-            type="datetime"
             placeholder="选择下课时间"
-            format="yyyy-MM-dd HH:mm:ss"
-            value-format="yyyy-MM-dd HH:mm:ss"
+            format="HH:mm"
+            value-format="HH:mm"
             style="width: 100%"
           />
         </el-form-item>
+
+        <el-form-item label="每堂课时长" prop="classDuration">
+          <el-input-number
+            v-model="form.classDuration"
+            :min="30"
+            :max="180"
+            :step="5"
+            placeholder="请输入每堂课时长（分钟）"
+            style="width: 100%"
+          />
+          <div class="form-tip">单位：分钟</div>
+        </el-form-item>
+
         <el-form-item label="课堂人数" prop="totalStudents">
           <el-input-number v-model="form.totalStudents" :min="1" :max="200" placeholder="请输入课堂人数" style="width: 100%" />
         </el-form-item>
@@ -114,8 +140,8 @@
             <el-radio :label="2">已结束</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="班级编号">
-          <el-input v-model="form.classNumber" disabled />
+        <el-form-item label="课程ID">
+          <el-input v-model="form.courseId" disabled />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -127,7 +153,7 @@
 </template>
 
 <script>
-import { getSessionsByClassNumber, getSession, addSession, updateSession, delSession } from "@/api/proj_lw/session";
+import { listSession, getSession, addSession, updateSession, delSession } from "@/api/proj_lw/session";
 
 export default {
   name: "ClassSession",
@@ -141,8 +167,8 @@ export default {
       sessionList: [],
       // 课程名称
       courseName: '',
-      // 课程编号
-      classNumber: null,
+      // 课程ID
+      courseId: null,
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -160,11 +186,17 @@ export default {
         teacherId: [
           { required: true, message: "老师ID不能为空", trigger: "blur" }
         ],
+        weekDay: [
+          { required: true, message: "请选择星期", trigger: "change" }
+        ],
         startTime: [
           { required: true, message: "请选择上课时间", trigger: "change" }
         ],
         endTime: [
           { required: true, message: "请选择下课时间", trigger: "change" }
+        ],
+        classDuration: [
+          { required: true, message: "请输入每堂课时长", trigger: "blur" }
         ],
         totalStudents: [
           { required: true, message: "请输入课堂人数", trigger: "blur" }
@@ -176,7 +208,7 @@ export default {
     };
   },
   created() {
-    this.classNumber = parseInt(this.$route.query.classNumber);
+    this.courseId = this.$route.query.courseId;
     this.courseName = this.$route.query.courseName;
     this.getList();
   },
@@ -184,8 +216,11 @@ export default {
     /** 查询课堂列表 */
     getList() {
       this.loading = true;
-      getSessionsByClassNumber(this.classNumber).then(response => {
-        this.sessionList = response.data || [];
+      const queryParams = {
+        courseId: this.courseId
+      };
+      listSession(queryParams).then(response => {
+        this.sessionList = response.rows || [];
         this.loading = false;
       }).catch(error => {
         console.error("获取课堂列表失败:", error);
@@ -209,11 +244,13 @@ export default {
         className: null,
         teacherId: 1,
         teacher: null,
+        weekDay: null,
         startTime: null,
         endTime: null,
+        classDuration: 45, // 默认45分钟
         status: 0,
         totalStudents: 30,
-        classNumber: this.classNumber
+        courseId: this.courseId
       };
       this.resetForm("form");
     },
@@ -232,13 +269,21 @@ export default {
         // 确保数字字段有值
         this.form.totalStudents = this.form.totalStudents || 30;
         this.form.teacherId = this.form.teacherId || 1;
-        // 转换日期格式
+        this.form.classDuration = this.form.classDuration || 45;
+
+        // 处理时间格式
         if (this.form.startTime) {
-          this.form.startTime = this.parseTime(this.form.startTime, '{y}-{m}-{d} {h}:{i}:{s}');
+          // 如果是从数据库获取的完整时间戳，提取时间部分
+          if (this.form.startTime.includes(' ')) {
+            this.form.startTime = this.form.startTime.split(' ')[1].substring(0, 5);
+          }
         }
         if (this.form.endTime) {
-          this.form.endTime = this.parseTime(this.form.endTime, '{y}-{m}-{d} {h}:{i}:{s}');
+          if (this.form.endTime.includes(' ')) {
+            this.form.endTime = this.form.endTime.split(' ')[1].substring(0, 5);
+          }
         }
+
         this.open = true;
         this.title = "修改课堂";
       }).catch(error => {
@@ -255,7 +300,8 @@ export default {
           // 确保数字字段有值
           this.form.totalStudents = this.form.totalStudents || 30;
           this.form.teacherId = this.form.teacherId || 1;
-          this.form.classNumber = this.classNumber;
+          this.form.classDuration = this.form.classDuration || 45;
+          this.form.courseId = this.courseId;
 
           // 创建深拷贝，避免修改原始数据
           const submitData = { ...this.form };
@@ -315,6 +361,32 @@ export default {
         2: 'warning'
       };
       return typeMap[status] || 'info';
+    },
+    /** 格式化课堂时间显示 */
+    formatSessionTime(session) {
+      const weekDayMap = {
+        '1': '周一',
+        '2': '周二',
+        '3': '周三',
+        '4': '周四',
+        '5': '周五',
+        '6': '周六',
+        '7': '周日'
+      };
+
+      let weekDay = weekDayMap[session.weekDay] || '';
+      let startTime = session.startTime || '';
+      let endTime = session.endTime || '';
+
+      // 如果时间包含日期部分，只取时间部分
+      if (startTime.includes(' ')) {
+        startTime = startTime.split(' ')[1].substring(0, 5);
+      }
+      if (endTime.includes(' ')) {
+        endTime = endTime.split(' ')[1].substring(0, 5);
+      }
+
+      return `${weekDay} ${startTime}-${endTime}`;
     }
   }
 };
@@ -394,7 +466,7 @@ export default {
 
 .label {
   color: #909399;
-  min-width: 80px;
+  min-width: 100px;
   font-weight: 500;
 }
 
@@ -406,5 +478,11 @@ export default {
 .empty-state {
   text-align: center;
   padding: 40px 0;
+}
+
+.form-tip {
+  font-size: 12px;
+  color: #909399;
+  margin-top: 4px;
 }
 </style>
