@@ -33,4 +33,10 @@ public interface IHomeworkStatisticsService {
     List<Map<String, Object>> getSessionHomeworkOverview();
 
     void exportHomeworkData(Map<String, Object> params, HttpServletResponse response);
+
+    // 获取今日截止作业数
+    Integer getTodayDeadlineCount();
+
+    // 获取带更多筛选条件的作业统计列表
+    List<HomeworkStatisticsDTO> getHomeworkStatisticsListByAdvancedFilter(Map<String, Object> params);
 }
