@@ -18,11 +18,22 @@
     <div v-loading="loading" class="session-list">
       <el-card v-for="session in sessionList" :key="session.sessionId" class="session-card">
         <div class="session-header">
-          <h3 class="session-name">{{ session.className }}</h3>
+          <div class="session-title">
+            <h3 class="session-name">{{ courseName }}</h3>
+            <div class="session-id">课堂ID: {{ session.sessionId }}</div>
+          </div>
           <div class="session-actions">
             <el-tag :type="getStatusType(session.status)">
               {{ getStatusText(session.status) }}
             </el-tag>
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-video-play"
+              @click="handleEnterClass(session)"
+              :disabled="session.status !== 1"
+              v-hasPermi="['projlw:session:enter']"
+            >进入课堂</el-button>
             <el-button
               size="mini"
               type="text"
@@ -46,6 +57,10 @@
             <span class="value">{{ session.teacher || '未分配' }}</span>
           </div>
           <div class="info-item">
+            <span class="label">老师ID：</span>
+            <span class="value">{{ session.teacherId }}</span>
+          </div>
+          <div class="info-item">
             <span class="label">上课时间：</span>
             <span class="value">{{ formatSessionTime(session) }}</span>
           </div>
@@ -56,10 +71,6 @@
           <div class="info-item">
             <span class="label">课堂人数：</span>
             <span class="value">{{ session.totalStudents || 0 }}人</span>
-          </div>
-          <div class="info-item">
-            <span class="label">课程ID：</span>
-            <span class="value">{{ session.courseId }}</span>
           </div>
         </div>
       </el-card>
@@ -75,8 +86,11 @@
     <!-- 添加或修改课堂对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="课堂名称" prop="className">
-          <el-input v-model="form.className" placeholder="请输入课堂名称" />
+        <el-form-item label="课程名称">
+          <el-input :value="courseName" disabled />
+        </el-form-item>
+        <el-form-item v-if="form.sessionId" label="课堂ID">
+          <el-input :value="form.sessionId" disabled />
         </el-form-item>
         <el-form-item label="授课老师" prop="teacher">
           <el-input v-model="form.teacher" placeholder="请输入授课老师姓名" />
@@ -141,7 +155,7 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="课程ID">
-          <el-input v-model="form.courseId" disabled />
+          <el-input :value="courseId" disabled />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -177,9 +191,6 @@ export default {
       form: {},
       // 表单校验
       rules: {
-        className: [
-          { required: true, message: "课堂名称不能为空", trigger: "blur" }
-        ],
         teacher: [
           { required: true, message: "授课老师不能为空", trigger: "blur" }
         ],
@@ -241,7 +252,7 @@ export default {
     reset() {
       this.form = {
         sessionId: null,
-        className: null,
+        className: this.courseName, // 直接使用课程名称
         teacherId: 1,
         teacher: null,
         weekDay: null,
@@ -291,6 +302,25 @@ export default {
         this.$modal.msgError("获取课堂详情失败");
       });
     },
+    /** 进入课堂按钮操作 */
+    handleEnterClass(row) {
+      if (row.status !== 1) {
+        this.$modal.msgWarning("只有进行中的课堂才能进入");
+        return;
+      }
+
+      // 跳转到上课界面
+      this.$router.push({
+        path: '/proj_lw/classroom',
+        query: {
+          sessionId: row.sessionId,
+          courseId: this.courseId,
+          courseName: this.courseName,
+          teacher: row.teacher,
+          teacherId: row.teacherId
+        }
+      });
+    },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
@@ -302,6 +332,7 @@ export default {
           this.form.teacherId = this.form.teacherId || 1;
           this.form.classDuration = this.form.classDuration || 45;
           this.form.courseId = this.courseId;
+          this.form.className = this.courseName; // 直接使用课程名称
 
           // 创建深拷贝，避免修改原始数据
           const submitData = { ...this.form };
@@ -337,7 +368,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const sessionId = row.sessionId;
-      this.$modal.confirm('是否确认删除课堂"' + row.className + '"？').then(() => {
+      this.$modal.confirm('是否确认删除"' + this.courseName + '"的课堂(ID:' + sessionId + ')？').then(() => {
         return delSession(sessionId);
       }).then(() => {
         this.getList();
@@ -436,16 +467,25 @@ export default {
 .session-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 15px;
   padding-bottom: 10px;
   border-bottom: 1px solid #f0f0f0;
 }
 
+.session-title {
+  flex: 1;
+}
+
 .session-name {
-  margin: 0;
+  margin: 0 0 5px 0;
   color: #303133;
   font-size: 18px;
+}
+
+.session-id {
+  font-size: 14px;
+  color: #909399;
 }
 
 .session-actions {
@@ -484,5 +524,11 @@ export default {
   font-size: 12px;
   color: #909399;
   margin-top: 4px;
+}
+
+/* 进入课堂按钮样式 */
+.el-button--text[disabled] {
+  color: #c0c4cc !important;
+  cursor: not-allowed !important;
 }
 </style>
