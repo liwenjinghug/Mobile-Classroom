@@ -59,7 +59,6 @@
       <el-table-column label="课程类型" align="center" prop="courseType" />
       <el-table-column label="所属学院" align="center" prop="college" />
       <el-table-column label="学分" align="center" prop="credit" />
-      <el-table-column label="班级编号" align="center" prop="classNumber" />
       <el-table-column label="课程简介" align="center" prop="introduction" show-overflow-tooltip />
       <el-table-column label="状态" align="center" prop="status">
         <template slot-scope="scope">
@@ -119,9 +118,6 @@
         </el-form-item>
         <el-form-item label="学分" prop="credit">
           <el-input-number v-model="form.credit" :precision="1" :step="0.5" :min="0" :max="10" />
-        </el-form-item>
-        <el-form-item label="班级编号" prop="classNumber">
-          <el-input-number v-model="form.classNumber" :min="1" :max="100" />
         </el-form-item>
         <el-form-item label="课程简介" prop="introduction">
           <el-input
@@ -191,9 +187,6 @@ export default {
         courseCode: [
           { required: true, message: "课程编号不能为空", trigger: "blur" }
         ],
-        classNumber: [
-          { required: true, message: "班级编号不能为空", trigger: "blur" }
-        ],
         introduction: [
           { required: true, message: "课程简介不能为空", trigger: "blur" }
         ],
@@ -230,7 +223,6 @@ export default {
         courseType: null,
         college: null,
         credit: null,
-        classNumber: null,
         introduction: null,
         status: "0"
       };
