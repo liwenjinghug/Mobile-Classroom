@@ -1,7 +1,14 @@
 <template>
   <div class="app-container classroom-container">
     <div class="classroom-header">
-      <h1>正在上课</h1>
+      <div class="classroom-title">
+        <h1 class="animated-title">
+          <span class="text">正在上课</span>
+          <span class="dot dot-1">.</span>
+          <span class="dot dot-2">.</span>
+          <span class="dot dot-3">.</span>
+        </h1>
+      </div>
       <div class="classroom-info">
         <p><strong>课程：</strong>{{ courseName }}</p>
         <p><strong>课堂ID：</strong>{{ sessionId }}</p>
@@ -72,23 +79,44 @@ export default {
     },
 
     handleAttendance() {
-      this.$message.success('开始课堂签到');
-      // 这里可以跳转到签到页面或打开签到弹窗
+      // 跳转到在线课堂的课堂签到
+      this.$router.push({
+        path: '/proj_myx/AttendanceCreate',
+        query: {
+          courseId: this.courseId,
+          courseName: this.courseName,
+          sessionId: this.sessionId
+        }
+      });
     },
 
     handleRandomPick() {
-      this.$message.success('开始随机抽人');
-      // 这里可以跳转到随机抽人页面或打开抽人弹窗
+      // 跳转到在线课堂的随机抽人
+      this.$router.push({
+        path: '/proj_myx/RandomPick',
+        query: {
+          courseId: this.courseId,
+          courseName: this.courseName,
+          sessionId: this.sessionId
+        }
+      });
     },
 
     handleVote() {
-      this.$message.success('开始课堂投票');
-      // 这里可以跳转到投票页面或打开投票弹窗
+      // 跳转到在线课堂的课堂投票
+      this.$router.push({
+        path: '/proj_myx/Vote',
+        query: {
+          courseId: this.courseId,
+          courseName: this.courseName,
+          sessionId: this.sessionId
+        }
+      });
     },
 
     handleInteraction() {
       this.$message.success('开始课堂互动');
-      // 这里可以跳转到互动页面或打开互动弹窗
+      // 这里可以添加课堂互动的具体逻辑
     },
 
     formatTime(time) {
@@ -116,10 +144,64 @@ export default {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.classroom-header h1 {
+.classroom-title {
+  display: flex;
+  align-items: center;
+}
+
+.animated-title {
+  display: flex;
+  align-items: center;
   margin: 0;
   color: #303133;
-  font-size: 24px;
+  font-size: 28px;
+  font-weight: bold;
+  position: relative;
+}
+
+.animated-title .text {
+  color: #409EFF;
+  text-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
+  animation: textGlow 2s ease-in-out infinite alternate;
+}
+
+.animated-title .dot {
+  color: #409EFF;
+  opacity: 0;
+  animation: dotBlink 1.5s infinite;
+}
+
+.animated-title .dot-1 {
+  animation-delay: 0s;
+}
+
+.animated-title .dot-2 {
+  animation-delay: 0.3s;
+}
+
+.animated-title .dot-3 {
+  animation-delay: 0.6s;
+}
+
+@keyframes textGlow {
+  0% {
+    text-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
+  }
+  100% {
+    text-shadow: 0 2px 8px rgba(64, 158, 255, 0.6), 0 4px 16px rgba(64, 158, 255, 0.4);
+  }
+}
+
+@keyframes dotBlink {
+  0%, 20% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  80%, 100% {
+    opacity: 0;
+  }
 }
 
 .classroom-info {
