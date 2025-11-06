@@ -187,18 +187,31 @@ public class HomeworkStatisticsController extends BaseController {
     @GetMapping("/export")
     public void exportHomeworkData(@RequestParam(required = false) Long courseId,
                                    @RequestParam(required = false) Long sessionId,
+                                   @RequestParam(required = false) String createTimeStart,
+                                   @RequestParam(required = false) String createTimeEnd,
+                                   @RequestParam(required = false) String deadlineStart,
+                                   @RequestParam(required = false) String deadlineEnd,
+                                   @RequestParam(required = false) String expireStatus,
+                                   @RequestParam(required = false) String gradeStatus,
+                                   @RequestParam(required = false) String completionStatus,
                                    HttpServletResponse response) {
         try {
             Map<String, Object> params = new HashMap<>();
-            if (courseId != null) {
-                params.put("courseId", courseId);
-            }
-            if (sessionId != null) {
-                params.put("sessionId", sessionId);
-            }
+            if (courseId != null) params.put("courseId", courseId);
+            if (sessionId != null) params.put("sessionId", sessionId);
+            if (createTimeStart != null && !createTimeStart.isEmpty()) params.put("createTimeStart", createTimeStart);
+            if (createTimeEnd != null && !createTimeEnd.isEmpty()) params.put("createTimeEnd", createTimeEnd);
+            if (deadlineStart != null && !deadlineStart.isEmpty()) params.put("deadlineStart", deadlineStart);
+            if (deadlineEnd != null && !deadlineEnd.isEmpty()) params.put("deadlineEnd", deadlineEnd);
+            if (expireStatus != null && !expireStatus.isEmpty()) params.put("expireStatus", expireStatus);
+            if (gradeStatus != null && !gradeStatus.isEmpty()) params.put("gradeStatus", gradeStatus);
+            if (completionStatus != null && !completionStatus.isEmpty()) params.put("completionStatus", completionStatus);
+
+            logger.info("导出作业数据参数: {}", params);
             homeworkStatisticsService.exportHomeworkData(params, response);
         } catch (Exception e) {
             logger.error("导出作业数据失败", e);
+            throw new RuntimeException("导出失败: " + e.getMessage());
         }
     }
 
@@ -219,6 +232,56 @@ public class HomeworkStatisticsController extends BaseController {
         } catch (Exception e) {
             logger.error("查询调试信息失败", e);
             return AjaxResult.error("查询调试信息失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取今日截止作业数
+     */
+    @GetMapping("/todayDeadlineCount")
+    public AjaxResult getTodayDeadlineCount() {
+        try {
+            Integer count = homeworkStatisticsService.getTodayDeadlineCount();
+            return AjaxResult.success("查询成功", count);
+        } catch (Exception e) {
+            logger.error("查询今日截止作业数失败", e);
+            return AjaxResult.error("查询失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 根据高级筛选条件获取作业统计列表
+     */
+    @GetMapping("/listByAdvancedFilter")
+    public AjaxResult listByAdvancedFilter(@RequestParam(required = false) Long courseId,
+                                           @RequestParam(required = false) Long sessionId,
+                                           @RequestParam(required = false) String homeworkTitle,  // 确保这个参数存在
+                                           @RequestParam(required = false) String createTimeStart,
+                                           @RequestParam(required = false) String createTimeEnd,
+                                           @RequestParam(required = false) String deadlineStart,
+                                           @RequestParam(required = false) String deadlineEnd,
+                                           @RequestParam(required = false) String expireStatus,
+                                           @RequestParam(required = false) String gradeStatus,
+                                           @RequestParam(required = false) String completionStatus) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            if (courseId != null) params.put("courseId", courseId);
+            if (sessionId != null) params.put("sessionId", sessionId);
+            if (homeworkTitle != null && !homeworkTitle.isEmpty()) params.put("homeworkTitle", homeworkTitle);
+            if (createTimeStart != null && !createTimeStart.isEmpty()) params.put("createTimeStart", createTimeStart);
+            if (createTimeEnd != null && !createTimeEnd.isEmpty()) params.put("createTimeEnd", createTimeEnd);
+            if (deadlineStart != null && !deadlineStart.isEmpty()) params.put("deadlineStart", deadlineStart);
+            if (deadlineEnd != null && !deadlineEnd.isEmpty()) params.put("deadlineEnd", deadlineEnd);
+            if (expireStatus != null && !expireStatus.isEmpty()) params.put("expireStatus", expireStatus);
+            if (gradeStatus != null && !gradeStatus.isEmpty()) params.put("gradeStatus", gradeStatus);
+            if (completionStatus != null && !completionStatus.isEmpty()) params.put("completionStatus", completionStatus);
+
+            logger.info("高级筛选参数: {}", params);
+            List<HomeworkStatisticsDTO> list = homeworkStatisticsService.getHomeworkStatisticsListByAdvancedFilter(params);
+            return AjaxResult.success("查询成功", list);
+        } catch (Exception e) {
+            logger.error("根据高级筛选条件查询作业统计列表失败", e);
+            return AjaxResult.error("查询失败: " + e.getMessage());
         }
     }
 }

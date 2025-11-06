@@ -177,4 +177,17 @@ public class HomeworkStatisticsDTO {
     public void setCreateBy(String createBy) {
         this.createBy = createBy;
     }
+
+    // 在HomeworkStatisticsDTO类中添加以下字段和方法
+
+    private String createTime;
+
+    // getters and setters
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
 }

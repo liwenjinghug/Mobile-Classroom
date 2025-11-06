@@ -1,5 +1,6 @@
 <template>
   <div class="app-container homework-dashboard">
+    <!-- 顶部概览卡片和图表部分保持不变 -->
     <el-row :gutter="20">
       <!-- 顶部概览卡片 -->
       <el-col :span="6" v-for="(card, index) in overviewCards" :key="index">
@@ -105,44 +106,182 @@
             <el-button type="primary" @click="handleExport">
               导出作业数据
             </el-button>
+            <el-button type="success" @click="handlePrint">
+              打印统计报表
+            </el-button>
           </div>
         </div>
       </template>
 
-      <!-- 筛选条件 -->
+      <!-- 筛选条件 - 优化布局 -->
       <div class="filter-container">
-        <el-form :inline="true" :model="filterForm" class="demo-form-inline">
-          <el-form-item label="课程">
-            <el-select v-model="filterForm.courseId" placeholder="选择课程" clearable @change="handleFilterChange">
-              <el-option
-                v-for="course in courseList"
-                :key="course.courseId"
-                :label="course.courseName"
-                :value="course.courseId">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="课堂">
-            <el-select v-model="filterForm.sessionId" placeholder="选择课堂" clearable @change="handleFilterChange">
-              <el-option
-                v-for="session in sessionList"
-                :key="session.sessionId"
-                :label="session.className"
-                :value="session.sessionId">
-              </el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button @click="resetFilter">重置</el-button>
-          </el-form-item>
-        </el-form>
+        <div class="filter-row">
+          <!-- 第一行筛选条件 -->
+          <div class="filter-group">
+            <div class="filter-item">
+              <span class="filter-label">作业名称：</span>
+              <el-input
+                v-model="filterForm.homeworkTitle"
+                placeholder="输入作业名称"
+                clearable
+                style="width: 200px;"
+                @input="handleFilterChange"
+                @clear="handleFilterChange">
+              </el-input>
+            </div>
+
+            <div class="filter-item">
+              <span class="filter-label">课程：</span>
+              <el-select
+                v-model="filterForm.courseId"
+                placeholder="选择课程"
+                clearable
+                style="width: 160px;"
+                @change="handleFilterChange">
+                <el-option
+                  v-for="course in courseList"
+                  :key="course.courseId"
+                  :label="course.courseName"
+                  :value="course.courseId">
+                </el-option>
+              </el-select>
+            </div>
+
+            <div class="filter-item">
+              <span class="filter-label">课堂：</span>
+              <el-select
+                v-model="filterForm.sessionId"
+                placeholder="选择课堂"
+                clearable
+                style="width: 160px;"
+                @change="handleFilterChange">
+                <el-option
+                  v-for="session in sessionList"
+                  :key="session.sessionId"
+                  :label="session.className"
+                  :value="session.sessionId">
+                </el-option>
+              </el-select>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <!-- 第二行筛选条件 -->
+          <div class="filter-group">
+            <div class="filter-item">
+              <span class="filter-label">发布时间：</span>
+              <el-date-picker
+                v-model="filterForm.createTimeStart"
+                type="date"
+                placeholder="开始日期"
+                value-format="yyyy-MM-dd"
+                style="width: 150px;"
+                @change="handleFilterChange">
+              </el-date-picker>
+              <span class="date-separator">至</span>
+              <el-date-picker
+                v-model="filterForm.createTimeEnd"
+                type="date"
+                placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                style="width: 150px;"
+                @change="handleFilterChange">
+              </el-date-picker>
+            </div>
+
+            <div class="filter-item">
+              <span class="filter-label">截止时间：</span>
+              <el-date-picker
+                v-model="filterForm.deadlineStart"
+                type="date"
+                placeholder="开始日期"
+                value-format="yyyy-MM-dd"
+                style="width: 150px;"
+                @change="handleFilterChange">
+              </el-date-picker>
+              <span class="date-separator">至</span>
+              <el-date-picker
+                v-model="filterForm.deadlineEnd"
+                type="date"
+                placeholder="结束日期"
+                value-format="yyyy-MM-dd"
+                style="width: 150px;"
+                @change="handleFilterChange">
+              </el-date-picker>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <!-- 第三行筛选条件 -->
+          <div class="filter-group">
+            <div class="filter-item">
+              <span class="filter-label">过期状态：</span>
+              <el-select
+                v-model="filterForm.expireStatus"
+                placeholder="选择状态"
+                clearable
+                style="width: 140px;"
+                @change="handleFilterChange">
+                <el-option
+                  v-for="option in expireStatusOptions"
+                  :key="option.value"
+                  :label="option.label"
+                  :value="option.value">
+                </el-option>
+              </el-select>
+            </div>
+
+            <div class="filter-item">
+              <span class="filter-label">批改状态：</span>
+              <el-select
+                v-model="filterForm.gradeStatus"
+                placeholder="选择状态"
+                clearable
+                style="width: 140px;"
+                @change="handleFilterChange">
+                <el-option
+                  v-for="option in gradeStatusOptions"
+                  :key="option.value"
+                  :label="option.label"
+                  :value="option.value">
+                </el-option>
+              </el-select>
+            </div>
+
+            <div class="filter-item">
+              <span class="filter-label">完成状态：</span>
+              <el-select
+                v-model="filterForm.completionStatus"
+                placeholder="选择状态"
+                clearable
+                style="width: 140px;"
+                @change="handleFilterChange">
+                <el-option
+                  v-for="option in completionStatusOptions"
+                  :key="option.value"
+                  :label="option.label"
+                  :value="option.value">
+                </el-option>
+              </el-select>
+            </div>
+
+            <div class="filter-item">
+              <el-button @click="resetFilter" type="default" icon="el-icon-refresh">
+                重置
+              </el-button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <el-table
         :data="homeworkList"
         v-loading="loading"
         style="width: 100%"
-        :default-sort="{ prop: 'homeworkId', order: 'descending' }">
+        :default-sort="{ prop: 'homeworkId', order: 'descending' }"
+        id="printTable">
         <el-table-column
           prop="homeworkId"
           label="作业ID"
@@ -166,6 +305,24 @@
           label="课堂"
           width="120"
           sortable>
+        </el-table-column>
+        <el-table-column
+          prop="createTime"
+          label="发布时间"
+          width="160"
+          sortable>
+          <template #default="scope">
+            <span>{{ formatDate(scope.row.createTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="deadline"
+          label="截止时间"
+          width="160"
+          sortable>
+          <template #default="scope">
+            <span>{{ formatDate(scope.row.deadline) }}</span>
+          </template>
         </el-table-column>
         <el-table-column
           prop="submissionRate"
@@ -228,7 +385,9 @@ import {
   getSessionList,
   exportHomeworkData,
   getHomeworkStatisticsListByFilter,
-  getSessionOverview
+  getSessionOverview,
+  getTodayDeadlineCount,
+  getHomeworkStatisticsListByAdvancedFilter
 } from '@/api/proj_fz/homeworkStatistics'
 
 export default {
@@ -246,11 +405,46 @@ export default {
       submissionChart: null,
       scoreChart: null,
       trendChart: null,
+
+      // 整合所有筛选条件到一个表单中
       filterForm: {
+        homeworkTitle: '',
         courseId: null,
-        sessionId: null
+        sessionId: null,
+        createTimeStart: null,
+        createTimeEnd: null,
+        deadlineStart: null,
+        deadlineEnd: null,
+        expireStatus: '',
+        gradeStatus: '',
+        completionStatus: ''
       },
+
+      expireStatusOptions: [
+        { label: '全部', value: '' },
+        { label: '已过期', value: 'expired' },
+        { label: '未过期', value: 'notExpired' }
+      ],
+      gradeStatusOptions: [
+        { label: '全部', value: '' },
+        { label: '已批改', value: 'graded' },
+        { label: '未批改', value: 'notGraded' }
+      ],
+      completionStatusOptions: [
+        { label: '全部', value: '' },
+        { label: '已完成', value: 'completed' },
+        { label: '按期完成', value: 'onTime' },
+        { label: '逾期完成', value: 'overdue' },
+        { label: '未完成', value: 'notCompleted' }
+      ],
+
       overviewCards: [
+        {
+          label: '今日截止作业',
+          value: 0,
+          icon: 'el-icon-alarm-clock',
+          color: '#FF6B6B'
+        },
         {
           label: '总作业数',
           value: 0,
@@ -287,28 +481,29 @@ export default {
     this.destroyCharts()
   },
   methods: {
-    async loadData() {
-      this.loading = true
+    async loadTodayDeadlineCount() {
       try {
-        await this.loadHomeworkList()
-        await this.loadOverviewData()
-        await this.loadSessionOverview()
+        const response = await getTodayDeadlineCount()
+        this.overviewCards[0].value = response.data || 0
       } catch (error) {
-        console.error('加载数据失败:', error)
-        this.$message.error('数据加载失败')
-      } finally {
-        this.loading = false
+        console.error('加载今日截止作业数失败:', error)
+        this.overviewCards[0].value = 0
       }
     },
 
     async loadHomeworkList() {
       try {
         let response
-        if (this.filterForm.courseId || this.filterForm.sessionId) {
-          response = await getHomeworkStatisticsListByFilter(this.filterForm)
+
+        // 判断是否有任何筛选条件
+        if (this.hasAnyFilter()) {
+          // 使用高级筛选，支持所有条件
+          response = await getHomeworkStatisticsListByAdvancedFilter(this.filterForm)
         } else {
+          // 没有筛选条件，获取全部数据
           response = await getHomeworkStatisticsList()
         }
+
         this.homeworkList = response.data || []
 
         if (this.homeworkList.length > 0 && !this.selectedHomework) {
@@ -321,14 +516,40 @@ export default {
       }
     },
 
+    // 检查是否有任何筛选条件
+    hasAnyFilter() {
+      const form = this.filterForm
+      return form.homeworkTitle || form.courseId || form.sessionId ||
+        form.createTimeStart || form.createTimeEnd ||
+        form.deadlineStart || form.deadlineEnd ||
+        form.expireStatus || form.gradeStatus ||
+        form.completionStatus
+    },
+
+    // 其他方法保持不变...
+    async loadData() {
+      this.loading = true
+      try {
+        await this.loadTodayDeadlineCount()
+        await this.loadHomeworkList()
+        await this.loadOverviewData()
+        await this.loadSessionOverview()
+      } catch (error) {
+        console.error('加载数据失败:', error)
+        this.$message.error('数据加载失败')
+      } finally {
+        this.loading = false
+      }
+    },
+
     async loadOverviewData() {
       try {
         const response = await getDashboardOverview()
         const data = response.data || {}
-        this.overviewCards[0].value = data.totalHomeworkCount || 0
-        this.overviewCards[1].value = data.totalSubmissionCount || 0
-        this.overviewCards[2].value = data.totalCourseCount || 0
-        this.overviewCards[3].value = data.gradedCount || 0
+        this.overviewCards[1].value = data.totalHomeworkCount || 0
+        this.overviewCards[2].value = data.totalSubmissionCount || 0
+        this.overviewCards[3].value = data.totalCourseCount || 0
+        this.overviewCards[4].value = data.gradedCount || 0
       } catch (error) {
         console.error('加载概览数据失败:', error)
       }
@@ -392,7 +613,6 @@ export default {
     async renderSubmissionChart() {
       if (!this.selectedHomeworkData || !this.$refs.submissionChart) return
 
-      // 销毁现有图表
       if (this.submissionChart) {
         this.submissionChart.dispose()
       }
@@ -438,7 +658,6 @@ export default {
     async renderScoreChart() {
       if (!this.selectedHomeworkData || !this.$refs.scoreChart) return
 
-      // 销毁现有图表
       if (this.scoreChart) {
         this.scoreChart.dispose()
       }
@@ -492,7 +711,6 @@ export default {
     async renderTrendChart() {
       if (!this.selectedHomeworkData || !this.$refs.trendChart) return
 
-      // 销毁现有图表
       if (this.trendChart) {
         this.trendChart.dispose()
       }
@@ -570,7 +788,12 @@ export default {
     async handleExport() {
       try {
         this.loading = true
-        const response = await exportHomeworkData(this.filterForm)
+
+        // 构建导出参数 - 使用当前筛选条件
+        const exportParams = { ...this.filterForm }
+
+        console.log('导出参数:', exportParams)
+        const response = await exportHomeworkData(exportParams)
 
         // 创建下载链接
         const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
@@ -592,14 +815,105 @@ export default {
       }
     },
 
+    // 打印功能
+    handlePrint() {
+      this.$nextTick(() => {
+        const printContent = document.getElementById('printTable').outerHTML
+        const charts = []
+
+        // 获取图表数据
+        if (this.submissionChart) {
+          charts.push({
+            title: '提交状态分布',
+            dataUrl: this.submissionChart.getDataURL({ type: 'png', pixelRatio: 2 })
+          })
+        }
+        if (this.scoreChart) {
+          charts.push({
+            title: '成绩分布',
+            dataUrl: this.scoreChart.getDataURL({ type: 'png', pixelRatio: 2 })
+          })
+        }
+        if (this.trendChart) {
+          charts.push({
+            title: '提交趋势',
+            dataUrl: this.trendChart.getDataURL({ type: 'png', pixelRatio: 2 })
+          })
+        }
+
+        const printWindow = window.open('', '_blank')
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>作业统计报表</title>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+                .print-header h1 { margin: 0; color: #333; }
+                .print-time { color: #666; font-size: 14px; }
+                .chart-container { margin: 20px 0; text-align: center; }
+                .chart-container img { max-width: 100%; height: auto; }
+                .chart-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f5f5f5; font-weight: bold; }
+                @media print {
+                  body { margin: 0; }
+                  .no-print { display: none; }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="print-header">
+                <h1>作业统计报表</h1>
+                <div class="print-time">打印时间: ${new Date().toLocaleString()}</div>
+              </div>
+
+              ${charts.map(chart => `
+                <div class="chart-container">
+                  <div class="chart-title">${chart.title}</div>
+                  <img src="${chart.dataUrl}" alt="${chart.title}">
+                </div>
+              `).join('')}
+
+              <div class="table-container">
+                <h3>作业数据列表 (${this.homeworkList.length} 条记录)</h3>
+                ${printContent}
+              </div>
+            </body>
+          </html>
+        `)
+        printWindow.document.close()
+
+        printWindow.onload = function() {
+          printWindow.print()
+          printWindow.onafterprint = function() {
+            printWindow.close()
+          }
+        }
+      })
+    },
+
     handleFilterChange() {
-      this.loadHomeworkList()
+      // 防抖处理，避免频繁请求
+      clearTimeout(this.filterTimer)
+      this.filterTimer = setTimeout(() => {
+        this.loadHomeworkList()
+      }, 500)
     },
 
     resetFilter() {
       this.filterForm = {
+        homeworkTitle: '',
         courseId: null,
-        sessionId: null
+        sessionId: null,
+        createTimeStart: null,
+        createTimeEnd: null,
+        deadlineStart: null,
+        deadlineEnd: null,
+        expireStatus: '',
+        gradeStatus: '',
+        completionStatus: ''
       }
       this.loadHomeworkList()
     },
@@ -618,13 +932,22 @@ export default {
       return '#F56C6C'
     },
 
+    // 格式化日期显示
     formatDate(dateString) {
       if (!dateString) return '-'
       try {
         const date = new Date(dateString)
-        return date.toLocaleString('zh-CN')
+        if (isNaN(date.getTime())) return '-'
+        return date.toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).replace(/\//g, '-')
       } catch (error) {
-        return dateString
+        console.error('日期格式化错误:', error)
+        return '-'
       }
     }
   }
@@ -667,12 +990,18 @@ export default {
 .card-value {
   font-size: 24px;
   font-weight: bold;
+  color: #303133;
   margin-bottom: 5px;
 }
 
 .card-label {
-  color: #909399;
   font-size: 14px;
+  color: #909399;
+}
+
+.chart-card,
+.overview-card {
+  height: 500px;
 }
 
 .card-header {
@@ -681,19 +1010,15 @@ export default {
   align-items: center;
 }
 
-.header-actions {
-  display: flex;
-  gap: 10px;
-}
-
 .chart-container {
-  padding: 20px 0;
+  height: 400px;
 }
 
 .no-data {
-  text-align: center;
-  padding: 40px 0;
-  color: #909399;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .session-list {
@@ -717,45 +1042,102 @@ export default {
 .session-name {
   font-weight: bold;
   color: #303133;
-  font-size: 14px;
+  margin-bottom: 5px;
 }
 
 .session-course {
   font-size: 12px;
   color: #909399;
-  margin: 4px 0;
+  margin-bottom: 8px;
 }
 
 .session-stats {
+  display: flex;
+  justify-content: space-between;
   font-size: 12px;
-  color: #909399;
+  color: #606266;
 }
 
-.session-stats span {
-  margin-right: 10px;
-}
-
+/* 筛选条件样式优化 */
 .filter-container {
   margin-bottom: 20px;
   padding: 20px;
   background-color: #f8f9fa;
-  border-radius: 4px;
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+}
+
+.filter-row {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.filter-row:last-child {
+  margin-bottom: 0;
+}
+
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-label {
+  font-size: 14px;
+  color: #606266;
+  white-space: nowrap;
+  min-width: 60px;
+  text-align: right;
+}
+
+.date-separator {
+  color: #909399;
+  font-size: 14px;
+  margin: 0 8px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
 }
 
 /* 响应式设计 */
+@media (max-width: 1200px) {
+  .el-col-16, .el-col-8 {
+    width: 100%;
+  }
+
+  .filter-group {
+    gap: 12px;
+  }
+
+  .filter-item {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
 @media (max-width: 768px) {
-  .el-col {
-    margin-bottom: 20px;
-  }
-
-  .card-content {
+  .filter-row {
     flex-direction: column;
-    text-align: center;
+    align-items: stretch;
   }
 
-  .card-icon {
-    margin-right: 0;
-    margin-bottom: 10px;
+  .filter-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filter-item {
+    flex: none;
   }
 }
 </style>
