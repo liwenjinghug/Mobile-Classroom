@@ -149,6 +149,13 @@ export const constantRoutes = [
         name: 'Session',
         meta: { title: '课堂详情', icon: 'education' },
         hidden: true
+      },
+      {
+        path: 'classroom',
+        component: () => import('@/views/proj_lw/classroom/index.vue'),
+        name: 'Classroom',
+        meta: { title: '正在上课', icon: 'video' },
+        hidden: true
       }
     ]
   },
@@ -314,7 +321,8 @@ export const dynamicRoutes = [
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
       }
     ]
-  }
+  },
+
 ]
 
 // 防止连续点击多次路由报错
