@@ -12,6 +12,9 @@
             <div class="welcome-actions">
               <el-button type="primary" icon="el-icon-list" @click="$router.push('/proj_cyq/todo')">待办事项</el-button>
               <el-button type="success" icon="el-icon-message" @click="$router.push('/proj_cyq/message')">消息中心</el-button>
+              <!-- 新增日志查看按钮 -->
+              <el-button type="warning" icon="el-icon-document" @click="$router.push('/proj_cyq/operlog')">操作日志</el-button>
+              <el-button type="info" icon="el-icon-time" @click="$router.push('/proj_cyq/loginlog')">登录日志</el-button>
             </div>
           </div>
         </el-card>
@@ -42,13 +45,22 @@
             >
               查看消息
             </el-button>
+            <!-- 新增日志快速入口 -->
+            <el-button
+              type="warning"
+              icon="el-icon-document"
+              class="access-item"
+              @click="$router.push('/proj_cyq/operlog')"
+            >
+              操作日志
+            </el-button>
             <el-button
               type="info"
-              icon="el-icon-s-data"
+              icon="el-icon-time"
               class="access-item"
-              @click="$router.push('/proj_cyq/todo')"
+              @click="$router.push('/proj_cyq/loginlog')"
             >
-              数据统计
+              登录日志
             </el-button>
           </div>
         </el-card>
@@ -148,10 +160,12 @@ export default {
 .access-items {
   display: flex;
   gap: 15px;
+  flex-wrap: wrap;
 }
 
 .access-item {
   flex: 1;
+  min-width: 120px;
 }
 
 .stats-items {
@@ -179,5 +193,12 @@ export default {
 .quick-access,
 .stats-overview {
   height: 200px;
+}
+
+/* 确保按钮组有适当的间距 */
+.welcome-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 </style>
