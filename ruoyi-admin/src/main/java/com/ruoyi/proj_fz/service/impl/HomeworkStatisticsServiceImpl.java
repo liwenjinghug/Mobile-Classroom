@@ -91,11 +91,8 @@ public class HomeworkStatisticsServiceImpl implements IHomeworkStatisticsService
         try {
             List<HomeworkStatisticsDTO> dataList;
 
-            if (params.containsKey("courseId") || params.containsKey("sessionId")) {
-                dataList = this.getHomeworkStatisticsListByFilter(params);
-            } else {
-                dataList = this.getHomeworkStatisticsList();
-            }
+            // 统一使用高级筛选方法，支持所有筛选条件
+            dataList = this.getHomeworkStatisticsListByAdvancedFilter(params);
 
             // 创建Excel工作簿
             Workbook workbook = new XSSFWorkbook();
@@ -122,9 +119,9 @@ public class HomeworkStatisticsServiceImpl implements IHomeworkStatisticsService
 
             // 创建表头
             String[] headers = {
-                    "作业ID", "作业名称", "课程", "课堂", "总人数",
-                    "已提交", "未提交", "逾期提交", "已批改",
-                    "提交率(%)", "平均分", "总分", "发布者", "截止时间"
+                    "作业ID", "作业名称", "课程", "课堂", "发布时间", "截止时间",
+                    "总人数", "已提交", "未提交", "逾期提交", "已批改",
+                    "提交率(%)", "平均分", "总分", "发布者"
             };
 
             Row headerRow = sheet.createRow(0);
@@ -144,6 +141,8 @@ public class HomeworkStatisticsServiceImpl implements IHomeworkStatisticsService
                 row.createCell(colNum++).setCellValue(data.getHomeworkTitle() != null ? data.getHomeworkTitle() : "");
                 row.createCell(colNum++).setCellValue(data.getCourseName() != null ? data.getCourseName() : "");
                 row.createCell(colNum++).setCellValue(data.getClassName() != null ? data.getClassName() : "");
+                row.createCell(colNum++).setCellValue(data.getCreateTime() != null ? data.getCreateTime() : "");
+                row.createCell(colNum++).setCellValue(data.getDeadline() != null ? data.getDeadline() : "");
                 row.createCell(colNum++).setCellValue(data.getTotalStudents() != null ? data.getTotalStudents() : 0);
                 row.createCell(colNum++).setCellValue(data.getSubmittedCount() != null ? data.getSubmittedCount() : 0);
                 row.createCell(colNum++).setCellValue(data.getNotSubmittedCount() != null ? data.getNotSubmittedCount() : 0);
@@ -153,7 +152,6 @@ public class HomeworkStatisticsServiceImpl implements IHomeworkStatisticsService
                 row.createCell(colNum++).setCellValue(data.getAverageScore() != null ? data.getAverageScore() : 0);
                 row.createCell(colNum++).setCellValue(data.getTotalScore() != null ? data.getTotalScore() : 0);
                 row.createCell(colNum++).setCellValue(data.getCreateBy() != null ? data.getCreateBy() : "");
-                row.createCell(colNum++).setCellValue(data.getDeadline() != null ? data.getDeadline() : "");
             }
 
             // 自动调整列宽
@@ -174,5 +172,22 @@ public class HomeworkStatisticsServiceImpl implements IHomeworkStatisticsService
         } catch (Exception e) {
             throw new RuntimeException("导出失败: " + e.getMessage(), e);
         }
+    }
+
+    private boolean hasAdvancedFilter(Map<String, Object> params) {
+        return params.containsKey("createTimeStart") || params.containsKey("createTimeEnd") ||
+                params.containsKey("deadlineStart") || params.containsKey("deadlineEnd") ||
+                params.containsKey("expireStatus") || params.containsKey("gradeStatus") ||
+                params.containsKey("completionStatus");
+    }
+
+    @Override
+    public Integer getTodayDeadlineCount() {
+        return statisticsMapper.selectTodayDeadlineCount();
+    }
+
+    @Override
+    public List<HomeworkStatisticsDTO> getHomeworkStatisticsListByAdvancedFilter(Map<String, Object> params) {
+        return statisticsMapper.selectHomeworkStatisticsListByAdvancedFilter(params);
     }
 }

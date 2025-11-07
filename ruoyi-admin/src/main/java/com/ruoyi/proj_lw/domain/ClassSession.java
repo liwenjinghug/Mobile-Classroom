@@ -8,23 +8,22 @@ public class ClassSession extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     private Long sessionId;
-    private String className;
+    private String className;  // 保留这个字段，用于存储组合后的名称
     private Long teacherId;
 
     @JsonFormat(pattern = "HH:mm")
-    private String startTime;  // 修改为String类型，只存储时间
+    private String startTime;
 
     @JsonFormat(pattern = "HH:mm")
-    private String endTime;    // 修改为String类型，只存储时间
+    private String endTime;
 
-    private String weekDay;    // 新增：星期几（1-7）
-    private Integer classDuration; // 新增：每堂课时长（分钟）
-
+    private String weekDay;
+    private Integer classDuration;
     private Integer status;
     private Integer totalStudents;
     private String teacher;
     private Long courseId;
-    private Integer classNumber;  // 添加这个字段定义
+    private Integer classNumber;
 
     // getter 和 setter 方法
     public Long getSessionId() { return sessionId; }
@@ -60,6 +59,6 @@ public class ClassSession extends BaseEntity {
     public Long getCourseId() { return courseId; }
     public void setCourseId(Long courseId) { this.courseId = courseId; }
 
-    public Integer getClassNumber() { return classNumber; }  // 添加getter
-    public void setClassNumber(Integer classNumber) { this.classNumber = classNumber; }  // 添加setter
+    public Integer getClassNumber() { return classNumber; }
+    public void setClassNumber(Integer classNumber) { this.classNumber = classNumber; }
 }

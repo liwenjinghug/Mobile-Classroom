@@ -15,6 +15,7 @@ public interface HomeworkStatisticsMapper {
             "    cs.class_name as className, " +
             "    ch.total_score as totalScore, " +
             "    ch.deadline as deadline, " +
+            "    ch.create_time as createTime, " +  // 新增这一行
             "    (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) as totalStudents, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) as submittedCount, " +
             "    ((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) - " +
@@ -40,6 +41,7 @@ public interface HomeworkStatisticsMapper {
             @Result(property = "className", column = "className"),
             @Result(property = "totalScore", column = "totalScore"),
             @Result(property = "deadline", column = "deadline"),
+            @Result(property = "createTime", column = "createTime"),  // 新增这一行
             @Result(property = "totalStudents", column = "totalStudents"),
             @Result(property = "submittedCount", column = "submittedCount"),
             @Result(property = "notSubmittedCount", column = "notSubmittedCount"),
@@ -48,6 +50,7 @@ public interface HomeworkStatisticsMapper {
             @Result(property = "submissionRate", column = "submissionRate"),
             @Result(property = "averageScore", column = "averageScore"),
             @Result(property = "createBy", column = "createBy")
+
     })
     List<HomeworkStatisticsDTO> selectHomeworkStatisticsList();
 
@@ -110,6 +113,7 @@ public interface HomeworkStatisticsMapper {
             "    cs.class_name as className, " +
             "    ch.total_score as totalScore, " +
             "    ch.deadline as deadline, " +
+            "    ch.create_time as createTime, " +
             "    (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) as totalStudents, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) as submittedCount, " +
             "    ((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) - " +
@@ -137,6 +141,7 @@ public interface HomeworkStatisticsMapper {
             @Result(property = "className", column = "className"),
             @Result(property = "totalScore", column = "totalScore"),
             @Result(property = "deadline", column = "deadline"),
+            @Result(property = "createTime", column = "createTime"),  // 新增这一行
             @Result(property = "totalStudents", column = "totalStudents"),
             @Result(property = "submittedCount", column = "submittedCount"),
             @Result(property = "notSubmittedCount", column = "notSubmittedCount"),
@@ -255,4 +260,112 @@ public interface HomeworkStatisticsMapper {
 
     @Select("SELECT DISTINCT session_id as sessionId, class_name as className FROM class_session")
     List<Map<String, Object>> selectSessionList();
+
+    @Select("SELECT COUNT(*) FROM class_homework WHERE DATE(deadline) = CURDATE() AND status = '0'")
+    Integer selectTodayDeadlineCount();
+
+    @Select("<script>" +
+            "SELECT " +
+            "    ch.homework_id as homeworkId, " +
+            "    ch.title as homeworkTitle, " +
+            "    cc.course_name as courseName, " +
+            "    cs.class_name as className, " +
+            "    ch.total_score as totalScore, " +
+            "    ch.deadline as deadline, " +
+            "    ch.create_time as createTime, " +
+            "    (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) as totalStudents, " +
+            "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) as submittedCount, " +
+            "    ((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) - " +
+            "     (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2'))) as notSubmittedCount, " +
+            "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2') AND submit_time > ch.deadline) as overdueCount, " +
+            "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status = '2') as gradedCount, " +
+            "    CASE " +
+            "        WHEN (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) > 0 " +
+            "        THEN ROUND((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) * 100.0 / " +
+            "                  (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1), 2) " +
+            "        ELSE 0 " +
+            "    END as submissionRate, " +
+            "    (SELECT ROUND(AVG(grade), 2) FROM class_student_homework WHERE homework_id = ch.homework_id AND grade IS NOT NULL AND status = '2') as averageScore, " +
+            "    ch.create_by as createBy " +
+            "FROM class_homework ch " +
+            "LEFT JOIN class_course cc ON ch.course_id = cc.course_id " +
+            "LEFT JOIN class_session cs ON ch.session_id = cs.session_id " +
+            "WHERE 1=1 " +
+            "<if test='homeworkTitle != null and homeworkTitle != \"\"'>" +
+            "   AND ch.title LIKE CONCAT('%', #{homeworkTitle}, '%') " +
+            "</if>" +
+            "<if test='courseId != null'>" +
+            "   AND ch.course_id = #{courseId} " +
+            "</if>" +
+            "<if test='sessionId != null'>" +
+            "   AND ch.session_id = #{sessionId} " +
+            "</if>" +
+            "<if test='createTimeStart != null and createTimeStart != \"\"'>" +
+            "   AND DATE(ch.create_time) &gt;= #{createTimeStart} " +
+            "</if>" +
+            "<if test='createTimeEnd != null and createTimeEnd != \"\"'>" +
+            "   AND DATE(ch.create_time) &lt;= #{createTimeEnd} " +
+            "</if>" +
+            "<if test='deadlineStart != null and deadlineStart != \"\"'>" +
+            "   AND DATE(ch.deadline) &gt;= #{deadlineStart} " +
+            "</if>" +
+            "<if test='deadlineEnd != null and deadlineEnd != \"\"'>" +
+            "   AND DATE(ch.deadline) &lt;= #{deadlineEnd} " +
+            "</if>" +
+            "<if test='expireStatus != null and expireStatus != \"\"'>" +
+            "   <choose>" +
+            "       <when test='expireStatus == \"expired\"'>" +
+            "           AND ch.deadline &lt; NOW() " +
+            "       </when>" +
+            "       <when test='expireStatus == \"notExpired\"'>" +
+            "           AND ch.deadline &gt;= NOW() " +
+            "       </when>" +
+            "   </choose>" +
+            "</if>" +
+            "<if test='gradeStatus != null and gradeStatus != \"\"'>" +
+            "   <choose>" +
+            "       <when test='gradeStatus == \"graded\"'>" +
+            "           AND (SELECT COUNT(*) FROM class_student_homework WHERE homework_id = ch.homework_id AND status = '2') > 0 " +
+            "       </when>" +
+            "       <when test='gradeStatus == \"notGraded\"'>" +
+            "           AND (SELECT COUNT(*) FROM class_student_homework WHERE homework_id = ch.homework_id AND status = '2') = 0 " +
+            "       </when>" +
+            "   </choose>" +
+            "</if>" +
+            "<if test='completionStatus != null and completionStatus != \"\"'>" +
+            "   <choose>" +
+            "       <when test='completionStatus == \"completed\"'>" +
+            "           AND (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) > 0 " +
+            "       </when>" +
+            "       <when test='completionStatus == \"onTime\"'>" +
+            "           AND (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2') AND submit_time &lt;= ch.deadline) > 0 " +
+            "       </when>" +
+            "       <when test='completionStatus == \"overdue\"'>" +
+            "           AND (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2') AND submit_time > ch.deadline) > 0 " +
+            "       </when>" +
+            "       <when test='completionStatus == \"notCompleted\"'>" +
+            "           AND (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) = 0 " +
+            "       </when>" +
+            "   </choose>" +
+            "</if>" +
+            "ORDER BY ch.create_time DESC" +
+            "</script>")
+    @Results({
+            @Result(property = "homeworkId", column = "homeworkId"),
+            @Result(property = "homeworkTitle", column = "homeworkTitle"),
+            @Result(property = "courseName", column = "courseName"),
+            @Result(property = "className", column = "className"),
+            @Result(property = "totalScore", column = "totalScore"),
+            @Result(property = "deadline", column = "deadline"),
+            @Result(property = "createTime", column = "createTime"),
+            @Result(property = "totalStudents", column = "totalStudents"),
+            @Result(property = "submittedCount", column = "submittedCount"),
+            @Result(property = "notSubmittedCount", column = "notSubmittedCount"),
+            @Result(property = "overdueCount", column = "overdueCount"),
+            @Result(property = "gradedCount", column = "gradedCount"),
+            @Result(property = "submissionRate", column = "submissionRate"),
+            @Result(property = "averageScore", column = "averageScore"),
+            @Result(property = "createBy", column = "createBy")
+    })
+    List<HomeworkStatisticsDTO> selectHomeworkStatisticsListByAdvancedFilter(Map<String, Object> params);
 }

@@ -106,3 +106,20 @@ export function getDebugHomeworkInfo() {
     method: 'get'
   })
 }
+
+// 获取今日截止作业数
+export function getTodayDeadlineCount() {
+  return request({
+    url: '/proj_fz/homeworkStatistics/todayDeadlineCount',
+    method: 'get'
+  })
+}
+
+// 根据高级筛选条件获取作业统计列表
+export function getHomeworkStatisticsListByAdvancedFilter(params) {
+  return request({
+    url: '/proj_fz/homeworkStatistics/listByAdvancedFilter',
+    method: 'get',
+    params: params
+  })
+}

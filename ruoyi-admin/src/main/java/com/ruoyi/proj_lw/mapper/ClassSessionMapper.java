@@ -18,7 +18,7 @@ public interface ClassSessionMapper {
             "   <if test='teacher != null and teacher != \"\"'> AND teacher LIKE CONCAT('%', #{teacher}, '%')</if>" +
             "   <if test='classNumber != null'> AND class_number = #{classNumber}</if>" +
             "</where>" +
-            "ORDER BY week_day, start_time" +
+            "ORDER BY session_id ASC" +
             "</script>")
     @Results({
             @Result(property = "sessionId", column = "session_id"),
@@ -99,8 +99,8 @@ public interface ClassSessionMapper {
             "</script>")
     int deleteSessionByIds(Long[] sessionIds);
 
-    // 根据课程ID查询课堂列表（可选方法）
-    @Select("SELECT * FROM class_session WHERE course_id = #{courseId} ORDER BY week_day, start_time")
+    // 根据课程ID查询课堂列表 - 按session_id排序
+    @Select("SELECT * FROM class_session WHERE course_id = #{courseId} ORDER BY session_id DESC")
     @Results({
             @Result(property = "sessionId", column = "session_id"),
             @Result(property = "className", column = "class_name"),
