@@ -245,6 +245,18 @@ export const constantRoutes = [
         component: () => import('@/views/proj_cyq/message/index'),
         name: 'Message',
         meta: { title: '消息中心', icon: 'message' }
+      },
+      {
+        path: 'operlog',
+        component: () => import('@/views/proj_cyq/operlog/index'),
+        name: 'Operlog',
+        meta: { title: '操作日志', icon: 'log' }
+      },
+      {
+        path: 'loginlog',
+        component: () => import('@/views/proj_cyq/loginlog/index'),
+        name: 'Loginlog',
+        meta: { title: '登录日志', icon: 'logininfor' }
       }
     ]
   }
