@@ -30,6 +30,24 @@ public class ClassStudentHomework extends BaseEntity {
     // 新增字段：作业标题，供提交记录显示
     private String homeworkTitle;
 
+    // 新增的批改/统计字段
+    /** 是否已批改：0-未批改 1-已批改 */
+    private Integer isGraded;
+    /** 批改教师ID */
+    private Long correctedBy;
+    /** 批改时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date correctedTime;
+    /** 批改附件（批注文件等） */
+    private String gradeAttachment;
+    /** 评分细则 JSON 字符串 */
+    private String rubricScores;
+    /** 统计的字数 */
+    private Integer wordCount;
+
+    /** 非持久化字段：所关联作业是否已被删除（true = 已删除） */
+    private Boolean homeworkDeleted;
+
     public Long getStudentHomeworkId() { return studentHomeworkId; }
     public void setStudentHomeworkId(Long studentHomeworkId) { this.studentHomeworkId = studentHomeworkId; }
 
@@ -62,4 +80,25 @@ public class ClassStudentHomework extends BaseEntity {
 
     public String getHomeworkTitle() { return homeworkTitle; }
     public void setHomeworkTitle(String homeworkTitle) { this.homeworkTitle = homeworkTitle; }
+
+    public Integer getIsGraded() { return isGraded; }
+    public void setIsGraded(Integer isGraded) { this.isGraded = isGraded; }
+
+    public Long getCorrectedBy() { return correctedBy; }
+    public void setCorrectedBy(Long correctedBy) { this.correctedBy = correctedBy; }
+
+    public Date getCorrectedTime() { return correctedTime; }
+    public void setCorrectedTime(Date correctedTime) { this.correctedTime = correctedTime; }
+
+    public String getGradeAttachment() { return gradeAttachment; }
+    public void setGradeAttachment(String gradeAttachment) { this.gradeAttachment = gradeAttachment; }
+
+    public String getRubricScores() { return rubricScores; }
+    public void setRubricScores(String rubricScores) { this.rubricScores = rubricScores; }
+
+    public Integer getWordCount() { return wordCount; }
+    public void setWordCount(Integer wordCount) { this.wordCount = wordCount; }
+
+    public Boolean getHomeworkDeleted() { return homeworkDeleted; }
+    public void setHomeworkDeleted(Boolean homeworkDeleted) { this.homeworkDeleted = homeworkDeleted; }
 }

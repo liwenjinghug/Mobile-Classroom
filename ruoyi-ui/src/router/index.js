@@ -178,6 +178,27 @@ export const constantRoutes = [
         component: () => import('@/views/proj_lwj/homework-upload/index.vue'),
         name: 'HomeworkUpload',
         meta: { title: '作业上传', icon: 'upload' }
+      },
+      {
+        path: 'homework_grading',
+        component: () => import('@/views/proj_lwj/homework_grading/index.vue'),
+        name: 'HomeworkGrading',
+        meta: { title: '作业批改', icon: 'edit' }
+      },
+      // 新增：在作业批改下可见的“提交列表”菜单（展示某个作业的所有学生提交）
+      {
+        path: 'homework_grading/list/:homeworkId',
+        component: () => import('@/views/proj_lwj/homework_grading/index.vue'),
+        name: 'HomeworkGradingList',
+        meta: { title: '提交列表', icon: 'list' }
+      },
+      // 支持通过路由 params 直接打开某个作业的批改详情页面（不在侧边栏显示）
+      {
+        path: 'homework_grading/:homeworkId',
+        component: () => import('@/views/proj_lwj/homework_grading/index.vue'),
+        name: 'HomeworkGradingDetail',
+        meta: { title: '作业批改详情', icon: 'edit' },
+        hidden: true
       }
     ]
   },

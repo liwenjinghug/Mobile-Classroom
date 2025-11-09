@@ -5,6 +5,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.proj_lwj.domain.ClassHomework;
 import com.ruoyi.proj_lwj.domain.ClassStudentHomework;
 import com.ruoyi.proj_lwj.service.IClassHomeworkService;
@@ -31,9 +32,9 @@ public class ClassHomeworkController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('projlwj:homework:list')")
     @GetMapping("/list")
-    public TableDataInfo list(com.ruoyi.proj_lwj.domain.ClassHomework hw) {
+    public TableDataInfo list(ClassHomework hw) {
         startPage();
-        java.util.List<com.ruoyi.proj_lwj.domain.ClassHomework> list = homeworkService.selectHomeworkList(hw);
+        java.util.List<ClassHomework> list = homeworkService.selectHomeworkList(hw);
         return getDataTable(list);
     }
 
@@ -71,7 +72,16 @@ public class ClassHomeworkController extends BaseController {
     @PreAuthorize("@ss.hasPermi('projlwj:homework:remove')")
     @Log(title = "作业管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids) {
+    public AjaxResult remove(@PathVariable Long[] ids, @RequestParam(required = false, defaultValue = "false") boolean cascade) {
+        try {
+            if (cascade) {
+                // delete student submissions linked to these homework ids first
+                studentHomeworkService.deleteByHomeworkIds(ids);
+            }
+        } catch (Exception ex) {
+            logger.warn("Cascade delete of student submissions failed", ex);
+            // continue to attempt homework deletion even if cascade fails
+        }
         return toAjax(homeworkService.removeHomeworkByIds(ids));
     }
 
@@ -81,6 +91,16 @@ public class ClassHomeworkController extends BaseController {
     @PostMapping("/submit")
     public AjaxResult submit(@RequestBody ClassStudentHomework shw) {
         shw.setCreateBy(getUsername());
+
+        // require homeworkId
+        if (shw.getHomeworkId() == null) {
+            return AjaxResult.error(HttpStatus.BAD_REQUEST, "提交失败：未指定作业ID");
+        }
+        // ensure homework exists (not deleted)
+        ClassHomework targetHw = homeworkService.selectHomeworkById(shw.getHomeworkId());
+        if (targetHw == null) {
+            return AjaxResult.error(HttpStatus.NOT_FOUND, "该作业已被删除或不存在，无法提交");
+        }
 
         // 如果前端传学号 studentNo，则根据学号查 student_id 并设置
         if (shw.getStudentNo() != null && !shw.getStudentNo().trim().isEmpty()) {
@@ -96,6 +116,25 @@ public class ClassHomeworkController extends BaseController {
         if (shw.getStudentId() == null || shw.getStudentId() == 0L) {
             shw.setStudentId(getUserId());
         }
+
+        // Prevent submission if there's an existing graded submission for this student & homework
+        try {
+            // try to find latest submission for this student & homework
+            List<ClassStudentHomework> existing = studentHomeworkService.selectByStudentId(shw.getStudentId());
+            if (existing != null && !existing.isEmpty()) {
+                for (ClassStudentHomework e : existing) {
+                    if (e.getHomeworkId() != null && e.getHomeworkId().equals(shw.getHomeworkId())) {
+                        // if any existing record for this homework is graded, reject new submission
+                        if ((e.getIsGraded() != null && e.getIsGraded() == 1) || (e.getStatus() != null && String.valueOf(e.getStatus()).equals("2"))) {
+                            return AjaxResult.error("该作业已被教师批改，无法再次提交或修改");
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            logger.warn("检查已存在提交时出错", ex);
+        }
+
         // 保证提交时间与状态由后端设置，前端可不传
         if (shw.getSubmitTime() == null) {
             shw.setSubmitTime(new java.util.Date());
@@ -114,7 +153,7 @@ public class ClassHomeworkController extends BaseController {
     public AjaxResult updateSubmit(@RequestBody ClassStudentHomework shw) {
         // require studentHomeworkId to update
         if (shw.getStudentHomeworkId() == null) {
-            return AjaxResult.error("studentHomeworkId 不能为空，无法更新提交记录");
+            return AjaxResult.error(HttpStatus.BAD_REQUEST, "studentHomeworkId 不能为空，无法更新提交记录");
         }
 
         // If frontend provided studentNo, resolve to studentId same as in submit
@@ -122,9 +161,27 @@ public class ClassHomeworkController extends BaseController {
             String sn = shw.getStudentNo().trim();
             com.ruoyi.proj_lwj.domain.ClassStudent cs = classStudentMapper.selectByStudentNo(sn);
             if (cs == null) {
-                return AjaxResult.error("学号 " + sn + " 未找到对应的学生，请检查后重试。");
+                return AjaxResult.error(HttpStatus.NOT_FOUND, "学号 " + sn + " 未找到对应的学生，请检查后重试。");
             }
             shw.setStudentId(cs.getStudentId());
+        }
+
+        // check existing record: do not allow update if already graded
+        try {
+            ClassStudentHomework exist = studentHomeworkService.selectById(shw.getStudentHomeworkId());
+            if (exist != null) {
+                // determine homework id: prefer provided value, fall back to existing record
+                Long hwId = (shw.getHomeworkId() != null) ? shw.getHomeworkId() : exist.getHomeworkId();
+                if (hwId == null || homeworkService.selectHomeworkById(hwId) == null) {
+                    return AjaxResult.error(HttpStatus.NOT_FOUND, "该作业已被删除，无法修改提交记录");
+                }
+                // also prevent modification if already graded
+                if ((exist.getIsGraded() != null && exist.getIsGraded() == 1) || (exist.getStatus() != null && String.valueOf(exist.getStatus()).equals("2"))) {
+                    return AjaxResult.error("该提交已被教师批改，无法修改");
+                }
+            }
+        } catch (Exception ex) {
+            logger.warn("检查提交是否可编辑时出错", ex);
         }
 
         shw.setUpdateBy(getUsername());
@@ -141,6 +198,17 @@ public class ClassHomeworkController extends BaseController {
     @GetMapping("/submissions/{homeworkId}")
     public AjaxResult submissions(@PathVariable Long homeworkId) {
         List<ClassStudentHomework> list = studentHomeworkService.selectByHomeworkId(homeworkId);
+        // if the homework is deleted, mark each submission accordingly
+        ClassHomework hw = homeworkService.selectHomeworkById(homeworkId);
+        boolean deleted = (hw == null);
+        for (ClassStudentHomework sh : list) {
+            sh.setHomeworkDeleted(deleted);
+            if (deleted) {
+                sh.setHomeworkTitle("该作业已被老师删除");
+            } else if (sh.getHomeworkTitle() == null || sh.getHomeworkTitle().trim().isEmpty()) {
+                sh.setHomeworkTitle(hw.getTitle());
+            }
+        }
         return AjaxResult.success(list);
     }
 
@@ -149,21 +217,67 @@ public class ClassHomeworkController extends BaseController {
     @GetMapping("/studentSubmissions")
     public AjaxResult studentSubmissions(@RequestParam Long studentId) {
         List<ClassStudentHomework> list = studentHomeworkService.selectByStudentId(studentId);
+        // populate homework deleted/title per submission
+        for (ClassStudentHomework sh : list) {
+            Long hwId = sh.getHomeworkId();
+            if (hwId == null) {
+                sh.setHomeworkDeleted(true);
+                sh.setHomeworkTitle("该作业已被老师删除");
+                continue;
+            }
+            ClassHomework hw = homeworkService.selectHomeworkById(hwId);
+            if (hw == null) {
+                sh.setHomeworkDeleted(true);
+                sh.setHomeworkTitle("该作业已被老师删除");
+            } else {
+                sh.setHomeworkDeleted(false);
+                if (sh.getHomeworkTitle() == null || sh.getHomeworkTitle().trim().isEmpty()) sh.setHomeworkTitle(hw.getTitle());
+            }
+        }
         return AjaxResult.success(list);
     }
 
     // 公共接口：某学生的提交记录（无需特殊权限），供前端学生确认学号使用
     @GetMapping("/studentSubmissions/public")
-    public AjaxResult publicStudentSubmissions(@RequestParam(required = false) Long studentId, @RequestParam(required = false) String studentNo) {
+    public AjaxResult publicStudentSubmissions(@RequestParam(required = false) Long studentId, @RequestParam(required = false) String studentNo, @RequestParam(required = false) String studentName) {
+        // Log incoming params to help troubleshoot student-side lookups
+        logger.info("publicStudentSubmissions called with studentId={}, studentNo={}, studentName={}", studentId, studentNo, studentName);
         Long sid = studentId;
         if ((sid == null || sid == 0L) && studentNo != null && !studentNo.trim().isEmpty()) {
             com.ruoyi.proj_lwj.domain.ClassStudent cs = classStudentMapper.selectByStudentNo(studentNo.trim());
             if (cs != null) sid = cs.getStudentId();
         }
-        if (sid == null) {
-            return AjaxResult.error("请提供 studentId 或 studentNo 以查询学生提交记录");
+        // If we resolved a studentId, return by studentId (preferred)
+        if (sid != null) {
+            List<ClassStudentHomework> list = studentHomeworkService.selectByStudentId(sid);
+            return AjaxResult.success(list);
         }
-        List<ClassStudentHomework> list = studentHomeworkService.selectByStudentId(sid);
-        return AjaxResult.success(list);
+
+        // Fallback: if studentNo provided but no matching ClassStudent record found,
+        // try to fetch submissions directly by studentNo (some records may store student_no without a class_student entry)
+        if (studentNo != null && !studentNo.trim().isEmpty()) {
+            try {
+                List<ClassStudentHomework> list = studentHomeworkService.selectByStudentNo(studentNo.trim());
+                if (list != null && !list.isEmpty()) {
+                    return AjaxResult.success(list);
+                }
+            } catch (Exception ex) {
+                logger.warn("fallback selectByStudentNo failed", ex);
+            }
+        }
+
+        // Additional fallback: allow searching by studentName (exact match) against submission records
+        if (studentName != null && !studentName.trim().isEmpty()) {
+            try {
+                List<ClassStudentHomework> list = studentHomeworkService.selectByStudentIdentifier(studentName.trim());
+                if (list != null && !list.isEmpty()) {
+                    return AjaxResult.success(list);
+                }
+            } catch (Exception ex) {
+                logger.warn("fallback selectByStudentIdentifier failed", ex);
+            }
+        }
+
+        return AjaxResult.error("请提供 studentId 或 studentNo 以查询学生提交记录（或确认学号/姓名是否正确）");
     }
 }

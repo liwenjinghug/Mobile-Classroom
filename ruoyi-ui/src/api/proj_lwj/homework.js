@@ -31,10 +31,11 @@ export function updateHomework(data) {
   })
 }
 
-export function delHomework(id) {
+export function delHomework(id, cascade) {
   return request({
     url: '/proj_lwj/homework/' + id,
-    method: 'delete'
+    method: 'delete',
+    params: cascade ? { cascade: true } : {}
   })
 }
 
@@ -65,6 +66,19 @@ export function getStudentSubmissions(studentNo) {
   return request({
     url: '/proj_lwj/homework/studentSubmissions/public',
     method: 'get',
-    params: { studentNo }
+    // send both common param names to be tolerant to backend naming
+    params: { studentNo, student_no: studentNo }
+  })
+}
+
+// Convenience alias for grading (uses same backend endpoint as updateSubmission)
+export function gradeSubmission(data) {
+  return updateSubmission(data)
+}
+
+export function deleteSubmission(id) {
+  return request({
+    url: '/proj_lwj/homework/submission/' + id,
+    method: 'delete'
   })
 }

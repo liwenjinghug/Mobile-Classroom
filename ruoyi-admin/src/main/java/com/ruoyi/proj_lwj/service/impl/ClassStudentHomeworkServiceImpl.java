@@ -42,4 +42,19 @@ public class ClassStudentHomeworkServiceImpl implements IClassStudentHomeworkSer
     public List<ClassStudentHomework> selectByStudentId(Long studentId) {
         return mapper.selectByStudentId(studentId);
     }
+
+    @Override
+    public List<ClassStudentHomework> selectByStudentNo(String studentNo) {
+        return mapper.selectByStudentNo(studentNo);
+    }
+
+    @Override
+    public List<ClassStudentHomework> selectByStudentIdentifier(String ident) {
+        return mapper.selectByStudentIdentifier(ident);
+    }
+
+    @Override
+    public int deleteByHomeworkIds(Long[] homeworkIds) {
+        return mapper.deleteByHomeworkIds(homeworkIds);
+    }
 }

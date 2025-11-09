@@ -10,4 +10,7 @@ public interface IClassStudentHomeworkService {
     int update(ClassStudentHomework shw);
     int deleteById(Long id);
     List<ClassStudentHomework> selectByStudentId(Long studentId);
+    List<ClassStudentHomework> selectByStudentNo(String studentNo);
+    List<ClassStudentHomework> selectByStudentIdentifier(String ident);
+    int deleteByHomeworkIds(Long[] homeworkIds);
 }
