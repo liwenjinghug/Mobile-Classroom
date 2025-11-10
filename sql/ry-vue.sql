@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 09/11/2025 20:02:31
+ Date: 10/11/2025 18:12:20
 */
 
 SET NAMES utf8mb4;
@@ -620,7 +620,7 @@ INSERT INTO `class_student_homework` VALUES (10, 11, 38, NULL, NULL, NULL, NULL,
 INSERT INTO `class_student_homework` VALUES (11, 9, 38, NULL, NULL, NULL, NULL, NULL, '2025-11-08 00:27:01', 1, 90.00, '完成基本功能', '2', 'admin', '2025-11-08 00:26:14', 'admin', '2025-11-08 00:27:00', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `class_student_homework` VALUES (12, 17, 38, '黎文靖', NULL, '测试作业.docx', NULL, NULL, '2025-11-08 01:15:02', 1, NULL, '', NULL, 'admin', '2025-11-08 00:45:52', 'admin', '2025-11-08 01:15:01', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `class_student_homework` VALUES (15, 20, 38, '黎文靖', NULL, '测试作业.docx', NULL, NULL, '2025-11-09 16:28:57', 1, NULL, '', '1', 'admin', '2025-11-09 16:28:57', '', NULL, 0, NULL, NULL, NULL, 0, '2023141460368');
-INSERT INTO `class_student_homework` VALUES (16, 22, 38, '黎文靖', NULL, '测试作业.docx', NULL, NULL, '2025-11-09 19:57:59', 1, NULL, '', '1', 'admin', '2025-11-09 19:57:59', '', NULL, 0, NULL, NULL, NULL, 0, '2023141460368');
+INSERT INTO `class_student_homework` VALUES (16, 22, 38, NULL, NULL, NULL, NULL, NULL, '2025-11-09 20:09:26', 1, 90.00, '基本完成', '2', 'admin', '2025-11-09 19:57:59', 'admin', '2025-11-09 20:09:26', NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for class_todo
@@ -1435,7 +1435,7 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 240 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 241 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -1580,6 +1580,7 @@ INSERT INTO `sys_oper_log` VALUES (236, '菜单管理', 2, 'com.ruoyi.web.contro
 INSERT INTO `sys_oper_log` VALUES (237, '作业管理', 3, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_lwj/homework/19', '127.0.0.1', '内网IP', '{\"cascade\":\"true\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-09 19:57:16', 23);
 INSERT INTO `sys_oper_log` VALUES (238, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"333\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-10 00:00:00\",\"homeworkId\":22,\"params\":{},\"sessionId\":1,\"title\":\"444\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-09 19:57:24', 36);
 INSERT INTO `sys_oper_log` VALUES (239, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":22,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":16,\"studentId\":38,\"studentName\":\"黎文靖\",\"studentNo\":\"2023141460368\",\"submissionFiles\":\"测试作业.docx\",\"submitTime\":\"2025-11-09 19:57:59\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-09 19:57:59', 51);
+INSERT INTO `sys_oper_log` VALUES (240, '作业提交', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.updateSubmit()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"homeworkId\":22,\"params\":{},\"remark\":\"基本完成\",\"score\":90,\"status\":2,\"studentHomeworkId\":16,\"studentId\":38,\"submitTime\":\"2025-11-09 20:09:26\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-09 20:09:26', 28);
 
 -- ----------------------------
 -- Table structure for sys_post
