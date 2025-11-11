@@ -221,7 +221,7 @@ export const constantRoutes = [
   {
     path: '/proj_qhy',
     component: Layout,
-    redirect: '/proj_qhy/article',
+    redirect: '/forum/article',
     name: 'proj_qhy',
     meta: { title: '学习社区', icon: 'peoples' },
     alwaysShow: true,
@@ -238,6 +238,12 @@ export const constantRoutes = [
         name: 'ArticleDetail',
         meta: { title: '文章详情' },
         hidden: true  // 确保这个路由在菜单中隐藏
+      },
+      {
+        path: 'forum',
+        component: () => import('@/views/proj_qhy/forum/index.vue'),
+        name: 'Forum',
+        meta: { title: '论坛', icon: 'message' }
       }
     ]
   },
