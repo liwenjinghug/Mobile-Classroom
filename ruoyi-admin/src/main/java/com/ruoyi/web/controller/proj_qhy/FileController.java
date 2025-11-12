@@ -1,6 +1,7 @@
 package com.ruoyi.web.controller.proj_qhy;
 
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.config.RuoYiConfig;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,8 +16,26 @@ import java.util.Map;
 @RequestMapping("/proj_qhy/file")
 public class FileController {
 
-    // 图片保存目录（直接写死绝对路径，确保正确）
-    private static final String SAVE_DIR = "D:\\code\\java\\Mobile-Classroom\\ruoyi-ui\\src\\assets\\xxsq_images\\";
+    // 图片保存目录：优先使用 ruoyi.profile 配置，否则回退到项目内的 ruoyi-ui/src/assets/xxsq_images
+    private static final String SAVE_DIR;
+
+    static {
+        String configured = RuoYiConfig.getProfile();
+        String savePath = null;
+        if (configured != null && !configured.trim().isEmpty()) {
+            File cfg = new File(configured);
+            if (cfg.isAbsolute()) {
+                savePath = cfg.getAbsolutePath();
+            } else {
+                // 相对路径，拼接到当前工作目录
+                savePath = new File(System.getProperty("user.dir"), configured).getAbsolutePath();
+            }
+        } else {
+            savePath = new File(System.getProperty("user.dir"), "ruoyi-ui/src/assets/xxsq_images").getAbsolutePath();
+        }
+        if (!savePath.endsWith(File.separator)) savePath = savePath + File.separator;
+        SAVE_DIR = savePath;
+    }
 
     @PostMapping("/uploadLocal")
     public AjaxResult uploadLocalImage(@RequestBody Map<String, String> params) {

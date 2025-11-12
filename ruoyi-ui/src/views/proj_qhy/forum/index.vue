@@ -37,7 +37,7 @@
                 class="image-item"
                 v-if="img.trim()"
               >
-                <img :src="img" alt="帖子图片" class="post-img" @error="handleImageError($event, img)">
+                <img :src="getImageUrl(img)" alt="帖子图片" class="post-img" @error="handleImageError($event, img)">
               </div>
             </div>
 
@@ -200,6 +200,7 @@
 <script>
 import forumApi from '@/api/proj_qhy/forum'
 import { Loading } from 'element-ui'
+import { getImageUrl, handleImageError as utilsHandleImageError } from '@/utils/forumImage'
 
 // 时间格式化函数
 function formatDate(date, fmt) {
@@ -270,6 +271,7 @@ export default {
     this.loadPosts()
   },
   methods: {
+    getImageUrl,
     // 加载帖子列表
     loadPosts() {
       forumApi.getPostList().then(response => {
@@ -464,9 +466,14 @@ export default {
 
     // 图片加载失败处理
     handleImageError(event, imgUrl) {
+      // 使用 utils 的错误回退（会把图片替换为项目内默认占位图），并记录日志
+      try {
+        utilsHandleImageError(event)
+      } catch (e) {
+        // 兜底：如果 utils 出错仍然使用组件默认头像
+        event.target.src = this.defaultAvatar
+      }
       console.error(`图片加载失败: ${imgUrl}`)
-      // 可以设置一张默认错误图片
-      event.target.src = this.defaultAvatar
     },
 
     // 获取点赞用户名称
