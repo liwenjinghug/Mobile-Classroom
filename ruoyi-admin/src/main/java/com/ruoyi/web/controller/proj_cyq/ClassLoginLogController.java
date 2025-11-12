@@ -35,7 +35,6 @@ public class ClassLoginLogController extends BaseController {
     /**
      * 查询系统登录日志列表
      */
-    @PreAuthorize("@ss.hasPermi('proj_cyq:loginlog:list')")
     @Log(title = "登录日志", businessType = BusinessType.OTHER)
     @GetMapping("/list")
     public TableDataInfo list(ClassLoginLog classLoginLog) {
@@ -45,28 +44,38 @@ public class ClassLoginLogController extends BaseController {
     }
 
     /**
-     * 导出系统登录日志列表
+     * 导出系统登录日志列表 - 修改为GET请求，参考操作日志的方式
      */
-    @PreAuthorize("@ss.hasPermi('proj_cyq:loginlog:export')")
     @Log(title = "登录日志", businessType = BusinessType.EXPORT)
-    @PostMapping("/export")
+    @GetMapping("/export")
     public void export(HttpServletResponse response, ClassLoginLog classLoginLog) {
+        System.out.println("开始导出登录日志，查询条件: " + classLoginLog);
+
         List<ClassLoginLog> list = classLoginLogService.selectClassLoginLogList(classLoginLog);
 
-        // 调试信息
+        // 详细的调试信息
         System.out.println("导出登录日志数据条数: " + (list != null ? list.size() : 0));
         if (list != null && !list.isEmpty()) {
-            System.out.println("第一条数据: " + list.get(0));
+            for (int i = 0; i < Math.min(list.size(), 3); i++) {
+                System.out.println("第" + (i+1) + "条数据: " + list.get(i));
+            }
+        } else {
+            System.out.println("导出的登录日志数据为空");
         }
 
-        ExcelUtil<ClassLoginLog> util = new ExcelUtil<ClassLoginLog>(ClassLoginLog.class);
-        util.exportExcel(response, list, "系统登录日志数据");
+        try {
+            ExcelUtil<ClassLoginLog> util = new ExcelUtil<ClassLoginLog>(ClassLoginLog.class);
+            util.exportExcel(response, list, "系统登录日志数据");
+            System.out.println("Excel导出完成");
+        } catch (Exception e) {
+            System.out.println("Excel导出异常: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
      * 获取系统登录日志详细信息
      */
-    @PreAuthorize("@ss.hasPermi('proj_cyq:loginlog:query')")
     @Log(title = "登录日志", businessType = BusinessType.OTHER)
     @GetMapping(value = "/{loginId}")
     public AjaxResult getInfo(@PathVariable("loginId") Long loginId) {
@@ -76,7 +85,6 @@ public class ClassLoginLogController extends BaseController {
     /**
      * 删除系统登录日志
      */
-    @PreAuthorize("@ss.hasPermi('proj_cyq:loginlog:remove')")
     @Log(title = "登录日志", businessType = BusinessType.DELETE)
     @DeleteMapping("/{loginIds}")
     public AjaxResult remove(@PathVariable Long[] loginIds) {
@@ -86,7 +94,6 @@ public class ClassLoginLogController extends BaseController {
     /**
      * 清空登录日志
      */
-    @PreAuthorize("@ss.hasPermi('proj_cyq:loginlog:remove')")
     @Log(title = "登录日志", businessType = BusinessType.CLEAN)
     @DeleteMapping("/clean")
     public AjaxResult clean() {

@@ -13,7 +13,6 @@ public interface TodoMapper {
     @Results({
             @Result(column = "todo_id", property = "todoId"),
             @Result(column = "user_id", property = "userId"),
-            @Result(column = "sequence_number", property = "sequenceNumber"),
             @Result(column = "title", property = "title"),
             @Result(column = "content", property = "content"),
             @Result(column = "todo_type", property = "todoType"),
@@ -40,12 +39,11 @@ public interface TodoMapper {
             "<if test='todoType != null and todoType != \"\"'> AND todo_type = #{todoType}</if>" +
             "<if test='priority != null and priority != \"\"'> AND priority = #{priority}</if>" +
             "<if test='status != null and status != \"\"'> AND status = #{status}</if>" +
-            " ORDER BY sequence_number DESC, create_time DESC" +
+            " ORDER BY create_time DESC" +
             "</script>")
     @Results({
             @Result(column = "todo_id", property = "todoId"),
             @Result(column = "user_id", property = "userId"),
-            @Result(column = "sequence_number", property = "sequenceNumber"),
             @Result(column = "title", property = "title"),
             @Result(column = "content", property = "content"),
             @Result(column = "todo_type", property = "todoType"),
@@ -67,11 +65,10 @@ public interface TodoMapper {
             "WHERE user_id = #{userId} " +
             "AND message_status = '0' " +
             "AND status = '0' " +
-            "ORDER BY sequence_number DESC, create_time DESC")
+            "ORDER BY create_time DESC")
     @Results({
             @Result(column = "todo_id", property = "todoId"),
             @Result(column = "user_id", property = "userId"),
-            @Result(column = "sequence_number", property = "sequenceNumber"),
             @Result(column = "title", property = "title"),
             @Result(column = "content", property = "content"),
             @Result(column = "todo_type", property = "todoType"),
@@ -87,10 +84,6 @@ public interface TodoMapper {
             @Result(column = "message_read", property = "messageRead")
     })
     List<Todo> selectTodoMessages(Long userId);
-
-    // 获取当前用户的最大连续编号
-    @Select("SELECT COALESCE(MAX(sequence_number), 0) FROM class_todo WHERE user_id = #{userId}")
-    Integer selectMaxSequenceNumber(Long userId);
 
     // 更新消息状态
     @Update("UPDATE class_todo SET " +
@@ -110,12 +103,12 @@ public interface TodoMapper {
     int selectUnreadMessageCount(Long userId);
 
     @Insert("INSERT INTO class_todo(" +
-            "user_id, sequence_number, title, content, todo_type, priority, " +
+            "user_id, title, content, todo_type, priority, " +
             "start_time, end_time, status, remind_time, is_reminded, " +
             "message_status, message_read, " +
             "create_by, create_time, update_by, update_time, remark" +
             ") VALUES(" +
-            "#{userId}, #{sequenceNumber}, #{title}, #{content}, #{todoType}, #{priority}, " +
+            "#{userId}, #{title}, #{content}, #{todoType}, #{priority}, " +
             "#{startTime}, #{endTime}, #{status}, #{remindTime}, #{isReminded}, " +
             "#{messageStatus}, #{messageRead}, " +
             "#{createBy}, #{createTime}, #{updateBy}, #{updateTime}, #{remark}" +
@@ -124,7 +117,6 @@ public interface TodoMapper {
     int insertTodo(Todo todo);
 
     @Update("UPDATE class_todo SET " +
-            "sequence_number = #{sequenceNumber}, " +
             "title = #{title}, content = #{content}, " +
             "todo_type = #{todoType}, priority = #{priority}, start_time = #{startTime}, " +
             "end_time = #{endTime}, status = #{status}, remind_time = #{remindTime}, " +
@@ -149,7 +141,6 @@ public interface TodoMapper {
     @Results({
             @Result(column = "todo_id", property = "todoId"),
             @Result(column = "user_id", property = "userId"),
-            @Result(column = "sequence_number", property = "sequenceNumber"),
             @Result(column = "title", property = "title"),
             @Result(column = "content", property = "content"),
             @Result(column = "todo_type", property = "todoType"),

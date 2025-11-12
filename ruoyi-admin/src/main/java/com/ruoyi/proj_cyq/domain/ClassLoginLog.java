@@ -37,7 +37,7 @@ public class ClassLoginLog extends BaseEntity {
 
     /** 登录状态（0成功 1失败） */
     @Excel(name = "登录状态", readConverterExp = "0=成功,1=失败")
-    private Integer status;  // 确保这里是 Integer 类型
+    private Integer status;  // 修改为 Integer 类型
 
     /** 提示消息 */
     @Excel(name = "提示消息")

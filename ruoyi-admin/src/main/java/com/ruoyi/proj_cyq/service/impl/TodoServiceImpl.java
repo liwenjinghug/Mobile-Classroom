@@ -22,11 +22,6 @@ public class TodoServiceImpl implements ITodoService {
         todo.setCreateTime(new Date());
         todo.setCreateBy(SecurityUtils.getUsername());
 
-        // 生成连续编号
-        Integer maxSequenceNumber = todoMapper.selectMaxSequenceNumber(userId);
-        int newSequenceNumber = maxSequenceNumber + 1;
-        todo.setSequenceNumber(newSequenceNumber);
-
         // 设置默认值
         if (todo.getStatus() == null) {
             todo.setStatus("0");
@@ -54,14 +49,12 @@ public class TodoServiceImpl implements ITodoService {
 
         System.out.println("🔔 插入待办事项");
         System.out.println("   用户ID: " + userId);
-        System.out.println("   连续编号: " + newSequenceNumber);
         System.out.println("   标题: " + todo.getTitle());
 
         int result = todoMapper.insertTodo(todo);
 
         System.out.println("✅ 插入结果: " + result);
         System.out.println("🆔 获得的todoId: " + todo.getTodoId());
-        System.out.println("🔢 连续编号: " + todo.getSequenceNumber());
 
         if (result > 0 && todo.getTodoId() == null) {
             System.err.println("❌ 警告：插入成功但todoId未正确返回");
@@ -91,8 +84,7 @@ public class TodoServiceImpl implements ITodoService {
         System.out.println("查询结果数量: " + todoList.size());
 
         for (Todo item : todoList) {
-            System.out.println("待办项 - 连续编号: " + item.getSequenceNumber() +
-                    ", ID: " + item.getTodoId() +
+            System.out.println("待办项 - ID: " + item.getTodoId() +
                     ", 标题: " + item.getTitle());
         }
 

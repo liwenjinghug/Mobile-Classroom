@@ -90,7 +90,6 @@
                 size="small"
                 :disabled="multiple"
                 @click="handleDelete"
-                v-hasPermi="['proj_cyq:operlog:remove']"
               >删除</el-button>
             </el-col>
             <el-col :span="1.5">
@@ -100,7 +99,6 @@
                 icon="el-icon-delete"
                 size="small"
                 @click="handleClean"
-                v-hasPermi="['proj_cyq:operlog:remove']"
               >清空</el-button>
             </el-col>
             <el-col :span="1.5">
@@ -110,7 +108,6 @@
                 icon="el-icon-download"
                 size="small"
                 @click="handleExport"
-                v-hasPermi="['proj_cyq:operlog:export']"
                 :loading="exportLoading"
               >导出</el-button>
             </el-col>
@@ -139,7 +136,6 @@
                   type="text"
                   icon="el-icon-view"
                   @click="handleView(scope.row)"
-                  v-hasPermi="['proj_cyq:operlog:query']"
                 >详细</el-button>
               </template>
             </el-table-column>
@@ -187,7 +183,7 @@
 </template>
 
 <script>
-import { listOperlog, delOperlog, cleanOperlog, exportOperlog } from "@/api/proj_cyq/operlog";
+import {listOperlog, delOperlog, cleanOperlog, exportOperlog} from "@/api/proj_cyq/operlog";
 
 export default {
   name: "Operlog",
@@ -209,21 +205,21 @@ export default {
       open: false,
       // 类型数据字典 - 使用硬编码
       businessTypeOptions: [
-        { value: '0', label: '其它' },
-        { value: '1', label: '新增' },
-        { value: '2', label: '修改' },
-        { value: '3', label: '删除' },
-        { value: '4', label: '授权' },
-        { value: '5', label: '导出' },
-        { value: '6', label: '导入' },
-        { value: '7', label: '强退' },
-        { value: '8', label: '生成代码' },
-        { value: '9', label: '清空数据' }
+        {value: '0', label: '其它'},
+        {value: '1', label: '新增'},
+        {value: '2', label: '修改'},
+        {value: '3', label: '删除'},
+        {value: '4', label: '授权'},
+        {value: '5', label: '导出'},
+        {value: '6', label: '导入'},
+        {value: '7', label: '强退'},
+        {value: '8', label: '生成代码'},
+        {value: '9', label: '清空数据'}
       ],
       // 状态数据字典 - 使用硬编码
       statusOptions: [
-        { value: '0', label: '成功' },
-        { value: '1', label: '失败' }
+        {value: '0', label: '成功'},
+        {value: '1', label: '失败'}
       ],
       // 日期范围
       dateRange: [],
@@ -256,46 +252,55 @@ export default {
       }).catch(error => {
         console.error('获取列表失败:', error);
         this.loading = false;
+        this.$modal.msgError('获取数据失败');
       });
     },
+
     // 操作日志状态字典翻译
     statusFormat(row, column) {
       const status = row.status;
       const dict = this.statusOptions.find(item => item.value == status);
       return dict ? dict.label : '未知';
     },
+
     // 操作日志类型字典翻译
     businessTypeFormat(row, column) {
       const businessType = row.businessType;
       const dict = this.businessTypeOptions.find(item => item.value == businessType);
       return dict ? dict.label : '未知';
     },
+
     // 业务类型过滤器（用于对话框显示）
     businessTypeFilter(businessType) {
       const dict = this.businessTypeOptions.find(item => item.value == businessType);
       return dict ? dict.label : '未知';
     },
+
     /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
       this.getList();
     },
+
     /** 重置按钮操作 */
     resetQuery() {
       this.dateRange = [];
       this.resetForm("queryForm");
       this.handleQuery();
     },
+
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.operId)
       this.multiple = !selection.length
     },
+
     /** 详细按钮操作 */
     handleView(row) {
       this.open = true;
       this.form = row;
     },
+
     /** 删除按钮操作 */
     handleDelete(row) {
       const operIds = row.operId || this.ids;
@@ -304,8 +309,10 @@ export default {
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => {
+      });
     },
+
     /** 清空按钮操作 */
     handleClean() {
       this.$modal.confirm('是否确认清空所有操作日志数据项？').then(() => {
@@ -313,8 +320,10 @@ export default {
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("清空成功");
-      }).catch(() => {});
+      }).catch(() => {
+      });
     },
+
     /** 导出按钮操作 - 修复版本 */
     handleExport() {
       this.$modal.confirm('是否确认导出所有操作日志数据项？').then(() => {

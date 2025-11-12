@@ -16,9 +16,6 @@ public class Todo extends BaseEntity {
     @Excel(name = "用户ID")
     private Long userId;
 
-    @Excel(name = "连续编号")
-    private Integer sequenceNumber;
-
     @Excel(name = "待办标题")
     private String title;
 
@@ -62,9 +59,6 @@ public class Todo extends BaseEntity {
     public void setUserId(Long userId) { this.userId = userId; }
     public Long getUserId() { return userId; }
 
-    public void setSequenceNumber(Integer sequenceNumber) { this.sequenceNumber = sequenceNumber; }
-    public Integer getSequenceNumber() { return sequenceNumber; }
-
     public void setTitle(String title) { this.title = title; }
     public String getTitle() { return title; }
 
@@ -103,7 +97,6 @@ public class Todo extends BaseEntity {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
                 .append("todoId", getTodoId())
                 .append("userId", getUserId())
-                .append("sequenceNumber", getSequenceNumber())
                 .append("title", getTitle())
                 .append("content", getContent())
                 .append("todoType", getTodoType())

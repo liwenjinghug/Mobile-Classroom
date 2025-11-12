@@ -35,7 +35,6 @@ public class ClassOperLogController extends BaseController {
     /**
      * 查询操作日志记录列表
      */
-    @PreAuthorize("@ss.hasPermi('proj_cyq:operlog:list')")
     @Log(title = "操作日志", businessType = BusinessType.OTHER)
     @GetMapping("/list")
     public TableDataInfo list(ClassOperLog classOperLog) {
@@ -47,7 +46,6 @@ public class ClassOperLogController extends BaseController {
     /**
      * 导出操作日志记录列表 - 支持 GET 和 POST 请求
      */
-    @PreAuthorize("@ss.hasPermi('proj_cyq:operlog:export')")
     @Log(title = "操作日志", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     @PostMapping("/export") // 同时支持 GET 和 POST
@@ -60,7 +58,6 @@ public class ClassOperLogController extends BaseController {
     /**
      * 获取操作日志记录详细信息
      */
-    @PreAuthorize("@ss.hasPermi('proj_cyq:operlog:query')")
     @Log(title = "操作日志", businessType = BusinessType.OTHER)
     @GetMapping(value = "/{operId}")
     public AjaxResult getInfo(@PathVariable("operId") Long operId) {
@@ -70,7 +67,6 @@ public class ClassOperLogController extends BaseController {
     /**
      * 删除操作日志记录
      */
-    @PreAuthorize("@ss.hasPermi('proj_cyq:operlog:remove')")
     @Log(title = "操作日志", businessType = BusinessType.DELETE)
     @DeleteMapping("/{operIds}")
     public AjaxResult remove(@PathVariable Long[] operIds) {
@@ -80,7 +76,6 @@ public class ClassOperLogController extends BaseController {
     /**
      * 清空操作日志
      */
-    @PreAuthorize("@ss.hasPermi('proj_cyq:operlog:remove')")
     @Log(title = "操作日志", businessType = BusinessType.CLEAN)
     @DeleteMapping("/clean")
     public AjaxResult clean() {

@@ -31,6 +31,7 @@ public interface ClassLoginLogMapper {
             "<if test=\"userName != null and userName != ''\"> AND user_name like concat('%', #{userName}, '%')</if>",
             "<if test=\"ipaddr != null and ipaddr != ''\"> AND ipaddr like concat('%', #{ipaddr}, '%')</if>",
             "<if test=\"status != null\"> AND status = #{status}</if>",
+            "<if test=\"msg != null and msg != ''\"> AND msg like concat('%', #{msg}, '%')</if>",
             "</where>",
             "order by login_id desc",
             "</script>"

@@ -65,11 +65,6 @@
       row-key="todoId"
     >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="连续编号" align="center" prop="sequenceNumber" width="100">
-        <template slot-scope="scope">
-          <span class="sequence-number">{{ scope.row.sequenceNumber || '-' }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="待办ID" align="center" prop="todoId" width="100">
         <template slot-scope="scope">
           <div class="todo-id-cell">
@@ -193,11 +188,6 @@
         <el-table-column label="索引" align="center" width="60">
           <template slot-scope="scope">
             {{ scope.$index + 1 }}
-          </template>
-        </el-table-column>
-        <el-table-column label="连续编号" align="center" prop="sequenceNumber" width="100">
-          <template slot-scope="scope">
-            <span>{{ scope.row.sequenceNumber || '-' }}</span>
           </template>
         </el-table-column>
         <el-table-column label="标题" align="center" prop="title" />
@@ -424,7 +414,6 @@ export default {
     reset() {
       this.form = {
         todoId: undefined,
-        sequenceNumber: undefined,
         title: undefined,
         content: undefined,
         todoType: undefined,
@@ -787,11 +776,5 @@ export default {
 .invalid-id {
   color: #f56c6c;
   font-style: italic;
-}
-
-.sequence-number {
-  font-weight: bold;
-  color: #67c23a;
-  font-size: 14px;
 }
 </style>
