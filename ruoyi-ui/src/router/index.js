@@ -142,7 +142,12 @@ export const constantRoutes = [
         name: 'course',
         meta: { title: '课程管理', icon: 'list' }
       },
-      // 在proj_lw的children中添加
+      {
+        path: 'material',
+        component: () => import('@/views/proj_lw/material/index.vue'),
+        name: 'material',
+        meta: { title: '资料管理', icon: 'document' },
+      },
       {
         path: 'session',
         component: () => import('@/views/proj_lw/session/index.vue'),
@@ -156,7 +161,7 @@ export const constantRoutes = [
         name: 'Classroom',
         meta: { title: '正在上课', icon: 'video' },
         hidden: true
-      }
+      },
     ]
   },
   // 新增作业管理路由
