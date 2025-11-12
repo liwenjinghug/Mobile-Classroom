@@ -193,6 +193,39 @@ public class ClassHomeworkController extends BaseController {
         return toAjax(r);
     }
 
+    // 教师批改：允许修改成绩和评语（可重复修改）
+    // 权限检查已移除，允许所有用户访问批改接口（前端页面无需额外权限）
+    @Log(title = "作业批改", businessType = BusinessType.UPDATE)
+    @PutMapping("/grade")
+    public AjaxResult gradeSubmission(@RequestBody ClassStudentHomework shw) {
+        // require id
+        if (shw.getStudentHomeworkId() == null) {
+            return AjaxResult.error(HttpStatus.BAD_REQUEST, "studentHomeworkId 不能为空，无法批改");
+        }
+
+        // Ensure the submission exists
+        ClassStudentHomework exist = studentHomeworkService.selectById(shw.getStudentHomeworkId());
+        if (exist == null) {
+            return AjaxResult.error(HttpStatus.NOT_FOUND, "提交记录不存在，无法批改");
+        }
+
+        // Only update grading-related fields. Set corrected_by and corrected_time if not provided
+        if (shw.getCorrectedBy() == null) {
+            shw.setCorrectedBy(getUserId());
+        }
+        if (shw.getCorrectedTime() == null) {
+            shw.setCorrectedTime(new java.util.Date());
+        }
+        // mark as graded
+        shw.setIsGraded(1);
+        // set status to 2 (已批改)
+        shw.setStatus(2);
+        shw.setUpdateBy(getUsername());
+
+        int r = studentHomeworkService.updateGrade(shw);
+        return toAjax(r);
+    }
+
     // 查看某作业的提交情况
     @PreAuthorize("@ss.hasPermi('projlwj:homework:query')")
     @GetMapping("/submissions/{homeworkId}")

@@ -20,8 +20,7 @@ public interface ClassStudentHomeworkMapper {
             "  csh.grade, " +
             "  csh.grade_comment, " +
             "  COALESCE(csh.status, '0') AS status, " +
-            "  ch.title AS homework_title, " +
-            "  csh.is_graded, csh.corrected_by, csh.corrected_time, csh.grade_attachment, csh.word_count " +
+            "  ch.title AS homework_title " +
             "FROM class_session_student css " +
             "JOIN class_student s ON css.student_id = s.student_id " +
             "LEFT JOIN sys_user su ON s.student_id = su.user_id " +
@@ -42,13 +41,7 @@ public interface ClassStudentHomeworkMapper {
             @Result(property = "remark", column = "grade_comment"),
             @Result(property = "status", column = "status"),
             @Result(property = "studentName", column = "student_name"),
-            @Result(property = "homeworkTitle", column = "homework_title"),
-            // new columns
-            @Result(property = "isGraded", column = "is_graded"),
-            @Result(property = "correctedBy", column = "corrected_by"),
-            @Result(property = "correctedTime", column = "corrected_time"),
-            @Result(property = "gradeAttachment", column = "grade_attachment"),
-            @Result(property = "wordCount", column = "word_count")
+            @Result(property = "homeworkTitle", column = "homework_title")
     })
     List<ClassStudentHomework> selectByHomeworkId(Long homeworkId);
 
@@ -64,13 +57,7 @@ public interface ClassStudentHomeworkMapper {
             @Result(property = "remark", column = "grade_comment"),
             @Result(property = "status", column = "status"),
             @Result(property = "studentName", column = "student_name"),
-            @Result(property = "homeworkTitle", column = "homework_title"),
-            // new columns
-            @Result(property = "isGraded", column = "is_graded"),
-            @Result(property = "correctedBy", column = "corrected_by"),
-            @Result(property = "correctedTime", column = "corrected_time"),
-            @Result(property = "gradeAttachment", column = "grade_attachment"),
-            @Result(property = "wordCount", column = "word_count")
+            @Result(property = "homeworkTitle", column = "homework_title")
     })
     ClassStudentHomework selectById(Long id);
 
@@ -86,17 +73,12 @@ public interface ClassStudentHomeworkMapper {
             @Result(property = "remark", column = "grade_comment"),
             @Result(property = "status", column = "status"),
             @Result(property = "studentName", column = "student_name"),
-            @Result(property = "homeworkTitle", column = "homework_title"),
-            // new columns
-            @Result(property = "isGraded", column = "is_graded"),
-            @Result(property = "correctedBy", column = "corrected_by"),
-            @Result(property = "correctedTime", column = "corrected_time"),
-            @Result(property = "gradeAttachment", column = "grade_attachment"),
-            @Result(property = "wordCount", column = "word_count")
+            @Result(property = "homeworkTitle", column = "homework_title")
     })
     List<ClassStudentHomework> selectByStudentId(Long studentId);
 
-    @Select("SELECT csh.*, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id WHERE csh.student_no = #{studentNo} ORDER BY csh.submit_time DESC")
+    // select submissions by student number - join class_student and filter on s.student_no
+    @Select("SELECT csh.*, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id WHERE s.student_no = #{studentNo} ORDER BY csh.submit_time DESC")
     @Results({
             @Result(property = "studentHomeworkId", column = "id"),
             @Result(property = "homeworkId", column = "homework_id"),
@@ -108,17 +90,12 @@ public interface ClassStudentHomeworkMapper {
             @Result(property = "remark", column = "grade_comment"),
             @Result(property = "status", column = "status"),
             @Result(property = "studentName", column = "student_name"),
-            @Result(property = "homeworkTitle", column = "homework_title"),
-            // new columns
-            @Result(property = "isGraded", column = "is_graded"),
-            @Result(property = "correctedBy", column = "corrected_by"),
-            @Result(property = "correctedTime", column = "corrected_time"),
-            @Result(property = "gradeAttachment", column = "grade_attachment"),
-            @Result(property = "wordCount", column = "word_count")
+            @Result(property = "homeworkTitle", column = "homework_title")
     })
     List<ClassStudentHomework> selectByStudentNo(String studentNo);
 
-    @Select("SELECT csh.*, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id WHERE (csh.student_no = #{ident} OR csh.student_name = #{ident}) ORDER BY csh.submit_time DESC")
+    // select by identifier (either student_no or student_name) - check values in class_student
+    @Select("SELECT csh.*, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id WHERE (s.student_no = #{ident} OR s.student_name = #{ident}) ORDER BY csh.submit_time DESC")
     @Results({
             @Result(property = "studentHomeworkId", column = "id"),
             @Result(property = "homeworkId", column = "homework_id"),
@@ -130,22 +107,17 @@ public interface ClassStudentHomeworkMapper {
             @Result(property = "remark", column = "grade_comment"),
             @Result(property = "status", column = "status"),
             @Result(property = "studentName", column = "student_name"),
-            @Result(property = "homeworkTitle", column = "homework_title"),
-            @Result(property = "isGraded", column = "is_graded"),
-            @Result(property = "correctedBy", column = "corrected_by"),
-            @Result(property = "correctedTime", column = "corrected_time"),
-            @Result(property = "gradeAttachment", column = "grade_attachment"),
-            @Result(property = "wordCount", column = "word_count")
+            @Result(property = "homeworkTitle", column = "homework_title")
     })
     List<ClassStudentHomework> selectByStudentIdentifier(String ident);
 
-    @Insert("INSERT INTO class_student_homework (homework_id, student_id, student_no, student_name, submission_files, submit_time, status, create_by, create_time) " +
-            "VALUES (#{homeworkId}, #{studentId}, #{studentNo}, #{studentName}, #{submissionFiles}, #{submitTime}, #{status}, #{createBy}, NOW())")
+    @Insert("INSERT INTO class_student_homework (homework_id, student_id, student_name, submission_files, submit_time, status, create_by, create_time) " +
+            "VALUES (#{homeworkId}, #{studentId}, #{studentName}, #{submissionFiles}, #{submitTime}, #{status}, #{createBy}, NOW())")
     @Options(useGeneratedKeys = true, keyProperty = "studentHomeworkId")
     int insert(ClassStudentHomework shw);
 
-    // use actual DB column names `grade` and `grade_comment`
-    @Update("UPDATE class_student_homework SET student_id=#{studentId}, student_no=#{studentNo}, student_name=#{studentName}, submission_files=#{submissionFiles}, submit_time=#{submitTime}, status=#{status}, grade=#{score}, grade_comment=#{remark}, is_graded=#{isGraded}, corrected_by=#{correctedBy}, corrected_time=#{correctedTime}, grade_attachment=#{gradeAttachment}, word_count=#{wordCount}, update_by=#{updateBy}, update_time=NOW() WHERE id=#{studentHomeworkId}")
+    // update — keep to columns that exist in the database
+    @Update("UPDATE class_student_homework SET student_id=#{studentId}, student_name=#{studentName}, submission_files=#{submissionFiles}, submit_time=#{submitTime}, status=#{status}, grade=#{score}, grade_comment=#{remark}, update_by=#{updateBy}, update_time=NOW() WHERE id=#{studentHomeworkId}")
     int update(ClassStudentHomework shw);
 
     @Delete("DELETE FROM class_student_homework WHERE id = #{id}")
@@ -153,4 +125,8 @@ public interface ClassStudentHomeworkMapper {
 
     @Delete("<script>DELETE FROM class_student_homework WHERE homework_id IN <foreach item='id' collection='array' open='(' separator=',' close=')'> #{id} </foreach></script>")
     int deleteByHomeworkIds(Long[] homeworkIds);
+
+    // 新增：专用的批改更新，只更新评分/评语/批改相关字段，避免覆盖学生提交内容
+    @Update("UPDATE class_student_homework SET grade=#{score}, grade_comment=#{remark}, is_graded=#{isGraded}, corrected_by=#{correctedBy}, corrected_time=#{correctedTime}, grade_attachment=#{gradeAttachment}, rubric_scores=#{rubricScores}, word_count=#{wordCount}, update_by=#{updateBy}, update_time=NOW() WHERE id=#{studentHomeworkId}")
+    int updateGrade(ClassStudentHomework shw);
 }

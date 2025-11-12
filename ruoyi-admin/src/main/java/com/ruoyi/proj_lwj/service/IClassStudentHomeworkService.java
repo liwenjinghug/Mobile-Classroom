@@ -13,4 +13,5 @@ public interface IClassStudentHomeworkService {
     List<ClassStudentHomework> selectByStudentNo(String studentNo);
     List<ClassStudentHomework> selectByStudentIdentifier(String ident);
     int deleteByHomeworkIds(Long[] homeworkIds);
+    int updateGrade(ClassStudentHomework shw);
 }

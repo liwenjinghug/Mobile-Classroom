@@ -65,6 +65,10 @@
               <el-table-column prop="submitTime" label="提交时间" width="160">
                 <template #default="{ row }">{{ formatTime(row.submitTime) || '—' }}</template>
               </el-table-column>
+              <!-- 新增批改时间列：支持后端不同字段名 -->
+              <el-table-column label="批改时间" width="160">
+                <template #default="{ row }">{{ formatTime(row.corrected_time || row.correctedTime || row.gradedAt || row.gradeTime) || '—' }}</template>
+              </el-table-column>
               <el-table-column label="成绩/评语" width="200">
                 <template #default="{ row }">
                   <div v-if="row.score !== null && row.score !== undefined">{{ row.score }} 分</div>
@@ -119,6 +123,10 @@
           <el-table-column prop="submitTime" label="提交时间" width="160">
             <template #default="{ row }">{{ formatTime(row.submitTime) || '—' }}</template>
           </el-table-column>
+          <!-- 新增批改时间列：支持后端不同字段名 -->
+          <el-table-column label="批改时间" width="160">
+            <template #default="{ row }">{{ formatTime(row.corrected_time || row.correctedTime || row.gradedAt || row.gradeTime) || '—' }}</template>
+          </el-table-column>
           <el-table-column label="成绩/评语" width="200">
             <template #default="{ row }">
               <div v-if="row.score !== null && row.score !== undefined">{{ row.score }} 分</div>
@@ -142,6 +150,7 @@
       <div>
         <div style="margin-bottom:8px"><strong>学生：</strong>{{ gradingRow.studentName || gradingRow.studentId }}</div>
         <div style="margin-bottom:8px"><strong>提交时间：</strong>{{ formatTime(gradingRow.submitTime) || '—' }}</div>
+        <div v-if="gradingRow.corrected_time || gradingRow.correctedTime || gradingRow.gradedAt || gradingRow.gradeTime" style="margin-bottom:8px"><strong>批改时间：</strong>{{ formatTime(gradingRow.corrected_time || gradingRow.correctedTime || gradingRow.gradedAt || gradingRow.gradeTime) || '—' }}</div>
         <div style="margin-bottom:8px"><strong>附件：</strong>
           <div v-if="gradingRow.submissionFiles">
             <a v-for="(f, idx) in parseAttachments(gradingRow.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
@@ -199,6 +208,10 @@
           </el-table-column>
           <el-table-column prop="submitTime" label="提交时间" width="160">
             <template #default="{ row }">{{ formatTime(row.submitTime) || '—' }}</template>
+          </el-table-column>
+          <!-- 新增批改时间列：支持后端不同字段名 -->
+          <el-table-column label="批改时间" width="160">
+            <template #default="{ row }">{{ formatTime(row.corrected_time || row.correctedTime || row.gradedAt || row.gradeTime) || '—' }}</template>
           </el-table-column>
           <el-table-column label="成绩/评语" width="200">
             <template #default="{ row }">
@@ -438,7 +451,24 @@ export default {
         this.refreshSubmissions()
       }).catch(err => { console.error(err); this.gradeSubmitting = false; this.$message.error('保存失败') })
     },
-    formatTime(val){ if(!val) return null; const d = new Date(val); if(isNaN(d.getTime())) return val; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}` },
+    formatTime(val){
+      if (val === null || val === undefined || val === '') return null
+      // If numeric (number or numeric string), coerce to number and treat as seconds when value looks like seconds
+      let ts = val
+      if (typeof val === 'string' && /^\d+$/.test(val)) ts = Number(val)
+      if (typeof ts === 'number') {
+        // if timestamp is seconds (e.g. 10-digit), convert to ms
+        if (ts > 0 && ts < 1e12) ts = ts * 1000
+        const dnum = new Date(ts)
+        if (!isNaN(dnum.getTime())) {
+          return `${dnum.getFullYear()}-${String(dnum.getMonth()+1).padStart(2,'0')}-${String(dnum.getDate()).padStart(2,'0')} ${String(dnum.getHours()).padStart(2,'0')}:${String(dnum.getMinutes()).padStart(2,'0')}:${String(dnum.getSeconds()).padStart(2,'0')}`
+        }
+      }
+      // Fallback: try Date parsing for ISO strings
+      const d = new Date(val)
+      if (isNaN(d.getTime())) return val
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`
+    },
     statusLabel(row) {
       // Prefer status field if present
       const s = row.status !== null && row.status !== undefined ? String(row.status) : null
@@ -467,8 +497,8 @@ export default {
     },
     exportSubmissions() {
       if (!this.submissions || !this.submissions.length) { this.$message.info('没有可导出的数据'); return }
-      const headers = ['序号ID','学号','姓名','附件','提交时间','状态','成绩','评语']
-      const rows = (this.sortedSubmissions || []).map(r => [r.student_id || r.studentId || r.id || '', r.student_no || r.studentNo || '', r.studentName || '', (r.submissionFiles || '').replace(/,/g, ';'), this.formatTime(r.submitTime) || '', r.status || '', (r.score !== null && r.score !== undefined) ? r.score : '', r.remark || ''])
+      const headers = ['序号ID','学号','姓名','附件','提交时间','批改时间','状态','成绩','评语']
+      const rows = (this.sortedSubmissions || []).map(r => [r.student_id || r.studentId || r.id || '', r.student_no || r.studentNo || '', r.studentName || '', (r.submissionFiles || '').replace(/,/g, ';'), this.formatTime(r.submitTime) || '', this.formatTime(r.corrected_time || r.correctedTime || r.gradedAt || r.gradeTime) || '', r.status || '', (r.score !== null && r.score !== undefined) ? r.score : '', r.remark || ''])
       const csv = [headers.join(',')].concat(rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(','))).join('\n')
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
@@ -509,13 +539,13 @@ export default {
 
       html += `<div class="print-header"><div style="font-size:16px;font-weight:600">${title}</div><div style="margin-top:6px;color:#666">${courseName ? '课程：' + courseName : ''}${courseName && sessionName ? ' / ' : ''}${sessionName ? '课堂：' + sessionName : ''}</div></div>`
       html += `<div class="print-footer">打印时间：${new Date().toLocaleString()}</div>`
-      html += `<div class="print-content"><table><thead><tr><th style="width:90px">序号ID</th><th style="width:90px">学号</th><th style="width:140px">姓名</th><th>附件</th><th style="width:150px">提交时间</th><th style="width:90px">状态</th><th style="width:90px">成绩</th><th style="width:200px">评语</th></tr></thead><tbody>`
+      html += `<div class="print-content"><table><thead><tr><th style="width:90px">序号ID</th><th style="width:90px">学号</th><th style="width:140px">姓名</th><th>附件</th><th style="width:150px">提交时间</th><th style="width:150px">批改时间</th><th style="width:90px">状态</th><th style="width:90px">成绩</th><th style="width:200px">评语</th></tr></thead><tbody>`
 
       (this.sortedSubmissions || []).forEach(r => {
         const files = (r.submissionFiles || '').replace(/,/g, ';')
         const idVal = r.student_id || r.studentId || r.id || ''
         const no = r.student_no || r.studentNo || ''
-        html += `<tr><td>${idVal}</td><td>${no}</td><td>${r.studentName || ''}</td><td>${files}</td><td>${this.formatTime(r.submitTime) || ''}</td><td>${this.statusLabel(r)}</td><td>${(r.score !== null && r.score !== undefined) ? r.score : ''}</td><td>${(r.remark || '')}</td></tr>`
+        html += `<tr><td>${idVal}</td><td>${no}</td><td>${r.studentName || ''}</td><td>${files}</td><td>${this.formatTime(r.submitTime) || ''}</td><td>${this.formatTime(r.corrected_time || r.correctedTime || r.gradedAt || r.gradeTime) || ''}</td><td>${this.statusLabel(r)}</td><td>${(r.score !== null && r.score !== undefined) ? r.score : ''}</td><td>${(r.remark || '')}</td></tr>`
       })
 
       html += `</tbody></table></div>`
