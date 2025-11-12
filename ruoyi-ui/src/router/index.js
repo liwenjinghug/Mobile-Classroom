@@ -264,31 +264,45 @@ export const constantRoutes = [
         path: 'index',
         component: () => import('@/views/proj_cyq/personal/index'),
         name: 'PersonalHome',
-        meta: { title: '个人主页', icon: 'dashboard' }
+        meta: { title: '个人主页', icon: 'dashboard',permissions: ['proj_cyq:personal:view'] }
       },
       {
         path: 'todo',
         component: () => import('@/views/proj_cyq/todo/index'),
         name: 'Todo',
-        meta: { title: '待办事项', icon: 'list' }
+        meta: { title: '待办事项', icon: 'list',permissions: ['proj_cyq:todo:view'] }
       },
       {
         path: 'message',
         component: () => import('@/views/proj_cyq/message/index'),
         name: 'Message',
-        meta: { title: '消息中心', icon: 'message' }
+        meta: { title: '消息中心', icon: 'message',permissions: ['proj_cyq:message:view'] }
       },
+      // ========== 新增：用户管理和角色管理 ==========
+      {
+        path: 'system-user',  // 修改路径避免冲突
+        component: () => import('@/views/system/user/index'),
+        name: 'SystemUser',
+        meta: { title: '用户管理', icon: 'user', permissions: ['system:user:list'] }
+      },
+      {
+        path: 'system-role',  // 修改路径避免冲突
+        component: () => import('@/views/system/role/index'),
+        name: 'SystemRole',
+        meta: { title: '角色管理', icon: 'peoples', permissions: ['system:role:list'] }
+      },
+      // ========== 结束新增 ==========
       {
         path: 'operlog',
         component: () => import('@/views/proj_cyq/operlog/index'),
         name: 'Operlog',
-        meta: { title: '操作日志', icon: 'log' }
+        meta: { title: '操作日志', icon: 'log'}
       },
       {
         path: 'loginlog',
         component: () => import('@/views/proj_cyq/loginlog/index'),
         name: 'Loginlog',
-        meta: { title: '登录日志', icon: 'logininfor' }
+        meta: { title: '登录日志', icon: 'logininfor'}
       }
     ]
   }
