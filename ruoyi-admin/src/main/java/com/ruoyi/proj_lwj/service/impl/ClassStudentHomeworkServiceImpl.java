@@ -57,4 +57,9 @@ public class ClassStudentHomeworkServiceImpl implements IClassStudentHomeworkSer
     public int deleteByHomeworkIds(Long[] homeworkIds) {
         return mapper.deleteByHomeworkIds(homeworkIds);
     }
+
+    @Override
+    public int updateGrade(ClassStudentHomework shw) {
+        return mapper.updateGrade(shw);
+    }
 }

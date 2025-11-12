@@ -3,7 +3,6 @@
     <div slot="header" class="clearfix">
       <span style="line-height:36px;font-weight:600">作业提交</span>
       <div style="float:right;margin-top:4px;display:flex;align-items:center;gap:8px">
-        <el-button size="small" type="info" @click="testApi">API测试</el-button>
         <el-button v-if="homeworkId" size="small" type="text" @click="chooseAnother">选择其他作业</el-button>
       </div>
     </div>
@@ -102,159 +101,99 @@
         </div>
 
         <div style="margin-bottom:12px">
-          <el-button type="primary" :disabled="submitDisabled" @click="submit" :loading="submitLoading">提交作业</el-button>
+          <el-button type="primary" :disabled="submitDisabled" @click="submit" :loading="submitLoading">{{ editingSubmissionId ? '保存修改' : '提交作业' }}</el-button>
           <el-button @click="resetUpload">清空</el-button>
           <el-button type="warning" @click="chooseAnother" style="margin-left:8px">选择其他作业</el-button>
           <el-button @click="$router.back()">返回</el-button>
         </div>
 
-        <!-- submissions table (always rendered for debugging/visibility) -->
+        <!-- submissions table -->
         <el-card shadow="never" class="submissions-card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <div style="font-weight:600">提交记录</div>
+            <div style="font-weight:600">提交记录 <span style="font-weight:400;color:#888;margin-left:8px;font-size:12px">显示 {{ displayedCount }} / {{ submissionsCount }}</span></div>
             <div style="display:flex;align-items:center;gap:12px">
               <div style="font-size:12px;color:#888">您的姓名：{{ studentName || '未填写' }} &nbsp; 学号：{{ studentNo || '未填写' }}</div>
               <el-switch v-model="showOnlyGraded" active-text="仅显示已批改" inactive-text="显示全部" size="small"></el-switch>
             </div>
           </div>
-          <!-- debug info: always present in DOM when v-show -> helps verify data exists and card is rendered -->
-          <div v-if="debugEnabled" style="font-size:12px;color:#666;margin-bottom:8px">调试：studentConfirmed={{ studentConfirmed }}，显示记录数={{ displayedSubmissions.length }}，resolvedStudentId={{ resolvedStudentId }}</div>
+
+          <div v-if="submissionsCount > 0 && displayedCount < submissionsCount" style="margin-bottom:8px;color:#e6a23c;font-size:12px">提示：当前显示记录被过滤（显示 {{ displayedCount }} / 共 {{ submissionsCount }} 条）。尝试关闭“仅显示已批改”或确认学号以查看完整记录。</div>
 
           <div class="table-wrapper">
-             <el-table :data="displayedSubmissions" stripe border :key="tableKey" style="width:100%;color:#333;" row-key="studentHomeworkId">
-               <!-- Simple ID column to ensure rows render and are visible -->
-               <el-table-column prop="studentHomeworkId" label="ID" width="80" />
+            <el-table :data="displayedSubmissions" stripe border :key="tableKey" style="width:100%;color:#333;" row-key="studentHomeworkId">
+              <el-table-column prop="studentHomeworkId" label="ID" width="80" />
 
-               <el-table-column label="作业" width="220">
-                 <template #default="{ row }">
-                   <div>
-                     <div v-if="row.homeworkTitle || row.title">{{ row.homeworkTitle || row.title }}</div>
-                     <div v-else-if="row.homeworkId" style="color:#e55353">作业已被老师删除（ID: {{ row.homeworkId }}）</div>
-                     <div v-else>—</div>
-                   </div>
-                 </template>
-               </el-table-column>
+              <el-table-column label="作业" width="220">
+                <template #default="{ row }">
+                  <div>
+                    <div v-if="row.homeworkTitle || row.title">{{ row.homeworkTitle || row.title }}</div>
+                    <div v-else-if="row.homeworkId" style="color:#e55353">作业已被老师删除（ID: {{ row.homeworkId }}）</div>
+                    <div v-else>—</div>
+                  </div>
+                </template>
+              </el-table-column>
 
-               <el-table-column label="学生" width="160">
-                 <template #default="{ row }">
-                   {{ row.studentName ? row.studentName : (row.studentId ? row.studentId : '—') }}
-                 </template>
-               </el-table-column>
+              <el-table-column label="学生" width="160">
+                <template #default="{ row }">{{ row.studentName || row.studentNo || row.studentId || '—' }}</template>
+              </el-table-column>
 
-               <!-- 学号列 -->
-               <el-table-column prop="studentNo" label="学号" width="140">
-                 <template #default="{ row }">
-                   {{ row.studentNo || row.student_no || '—' }}
-                 </template>
-               </el-table-column>
+              <el-table-column prop="studentNo" label="学号" width="140">
+                <template #default="{ row }">{{ row.studentNo || row.student_no || row.studentId || '—' }}</template>
+              </el-table-column>
 
-               <el-table-column prop="submissionFiles" label="附件">
-                 <template #default="{ row }">
-                   <div v-if="row.submissionFiles || row.attachments || row.files">
-                     <el-tag v-for="(f, i) in parseAttachmentString(row.submissionFiles || row.attachments || row.files)" :key="i" class="attachment-tag" style="margin-right:6px;cursor:pointer">
-                       <a href="javascript:void(0)" @click.prevent="previewFile(f)" class="attachment-link">{{ f }}</a>
-                     </el-tag>
-                   </div>
-                   <div v-else>无</div>
-                 </template>
-               </el-table-column>
+              <el-table-column prop="submissionFiles" label="附件">
+                <template #default="{ row }">
+                  <div v-if="row.submissionFiles || row.attachments || row.files">
+                    <el-tag v-for="(f, i) in parseAttachmentString(row.submissionFiles || row.attachments || row.files)" :key="i" class="attachment-tag" style="margin-right:6px;cursor:pointer">
+                      <a href="javascript:void(0)" @click.prevent="previewFile(f)" class="attachment-link">{{ f }}</a>
+                    </el-tag>
+                  </div>
+                  <div v-else>无</div>
+                </template>
+              </el-table-column>
 
-               <el-table-column prop="submitTime" label="提交时间" width="200">
-                 <template #default="{ row }">{{ formatTime(row.submitTime) }}</template>
-               </el-table-column>
+              <el-table-column prop="submitTime" label="提交时间" width="200">
+                <template #default="{ row }">{{ formatTime(row.submitTime) }}</template>
+              </el-table-column>
 
-               <el-table-column label="成绩" width="160">
-                 <template #default="{ row }">
-                   <div v-if="row.score !== null && row.score !== undefined">{{ row.score }} 分</div>
-                   <div v-if="row.remark" style="color:#666;margin-top:6px">评语：{{ row.remark }}</div>
-                   <div v-if="!(row.score !== null && row.score !== undefined) && !row.remark" style="color:#888">未批改</div>
-                 </template>
-               </el-table-column>
+              <el-table-column label="成绩" width="160">
+                <template #default="{ row }">
+                  <div v-if="row.score !== null && row.score !== undefined">{{ row.score }} 分</div>
+                  <div v-if="row.remark" style="color:#666;margin-top:6px">评语：{{ row.remark }}</div>
+                  <div v-if="!(row.score !== null && row.score !== undefined) && !row.remark" style="color:#888">未批改</div>
+                </template>
+              </el-table-column>
 
-               <!-- 批改时间 -->
-               <el-table-column prop="gradedTime" label="批改时间" width="200">
-                 <template #default="{ row }">{{ row.gradedTime ? formatTime(row.gradedTime) : '—' }}</template>
-               </el-table-column>
+              <el-table-column prop="gradedTime" label="批改时间" width="200">
+                <template #default="{ row }">{{ row.gradedTime ? formatTime(row.gradedTime) : '—' }}</template>
+              </el-table-column>
 
-               <el-table-column label="操作" width="140">
-                 <template #default="{ row }">
-                   <el-button size="mini" type="primary" v-if="studentConfirmed && isRowOwn(row) && canEditSubmission(row)" @click="editSubmission(row)">修改</el-button>
-                   <el-tooltip v-else-if="studentConfirmed && isRowOwn(row) && (row.homeworkDeleted || row.homework_deleted)" content="该作业已被老师删除，无法修改" placement="top">
-                     <el-button size="mini" type="primary" disabled>已删除</el-button>
-                   </el-tooltip>
-                   <el-tooltip v-else-if="studentConfirmed && isRowOwn(row) && (row.gradedTime || row.is_graded || row.score !== null && row.score !== undefined)" content="该提交已被批改，无法修改" placement="top">
-                     <el-button size="mini" type="primary" disabled>已批改</el-button>
-                   </el-tooltip>
-                 </template>
-               </el-table-column>
-             </el-table>
-           </div>
+              <el-table-column label="操作" width="140">
+                <template #default="{ row }">
+                  <el-button size="mini" type="primary" v-if="(studentConfirmed ? isRowOwn(row) : true) && canEditSubmission(row)" @click="editSubmission(row)">修改</el-button>
+                  <el-tooltip v-else-if="studentConfirmed && isRowOwn(row) && (row.homeworkDeleted || row.homework_deleted)" content="该作业已被老师删除，无法修改" placement="top">
+                    <el-button size="mini" type="primary" disabled>已删除</el-button>
+                  </el-tooltip>
+                  <el-tooltip v-else-if="studentConfirmed && isRowOwn(row) && (row.gradedTime || row.is_graded || row.score !== null && row.score !== undefined)" content="该提交已被批改，无法修改" placement="top">
+                    <el-button size="mini" type="primary" disabled>已批改</el-button>
+                  </el-tooltip>
+                </template>
+              </el-table-column>
 
-          <!-- debug view for submissions JSON -->
-          <div v-if="debugEnabled && submissions && submissions.length" style="margin-top:12px">
-            <div style="font-weight:600;margin-bottom:6px">原始提交记录（调试用）</div>
-            <pre style="white-space:pre-wrap;word-break:break-all">{{ submissions }}</pre>
+            </el-table>
           </div>
-          <div v-if="debugEnabled && displayedSubmissions && displayedSubmissions.length" style="margin-top:12px">
-            <div style="font-weight:600;margin-bottom:6px">传入表格的记录（displayedSubmissions）</div>
-            <pre style="white-space:pre-wrap;word-break:break-all">{{ displayedSubmissions }}</pre>
-          </div>
+
         </el-card>
 
-        <!-- keep a compact hint below the card as well -->
         <div v-if="!studentConfirmed" style="margin:12px 0;color:#666">（提示）提交记录已载入，但编辑仅在确认学号后启用。</div>
 
         <div style="margin-top:8px">
-          <el-button size="small" type="primary" @click="loadMySubmissions" :disabled="!studentNo">刷新我的提交</el-button>
-          <el-button size="small" type="info" @click="testApi" style="margin-left:8px">API测试</el-button>
+          <el-button size="small" type="primary" @click="loadMySubmissions" :disabled="!studentName || !studentNo">刷新我的提交</el-button>
         </div>
+
       </div>
+
     </div>
-
-    <!-- edit dialog -->
-    <el-dialog title="修改提交附件" :visible.sync="editDialogVisible" width="640px">
-      <div>
-        <div style="margin-bottom:8px">当前附件：</div>
-        <div v-if="editUploadedFiles.length">
-          <el-tag v-for="(f, i) in editUploadedFiles" :key="i" style="margin-right:8px;cursor:pointer">
-            <a href="javascript:void(0)" @click.prevent="previewFile(f)">{{ f }}</a>
-          </el-tag>
-        </div>
-        <div v-else style="color:#888;margin-bottom:8px">无附件</div>
-
-        <el-upload
-          ref="editUpload"
-          class="upload-demo"
-          :action="uploadUrl"
-          :headers="headers"
-          :on-success="editUploadSuccess"
-          :on-remove="editHandleRemove"
-          :file-list="editFileList"
-          :before-upload="beforeUpload"
-          multiple
-          list-type="text">
-          <el-button size="small" type="primary">选择文件（修改）</el-button>
-          <div slot="tip" class="el-upload__tip">可添加或替换附件，上传文件将追加到当前附件列表。</div>
-        </el-upload>
-      </div>
-
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="editDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="editSubmitLoading" @click="saveEditSubmission">保存并重新提交</el-button>
-      </span>
-    </el-dialog>
-
-    <!-- debug dialog for API response -->
-    <el-dialog title="调试信息" :visible.sync="debugDialogVisible" width="800px">
-      <div v-if="debugResp">
-        <pre style="white-space:pre-wrap;word-break:break-all">{{ debugResp }}</pre>
-      </div>
-      <div v-else style="color:#888;text-align:center;padding:40px 0">无调试信息</div>
-
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="debugDialogVisible = false">关闭</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 
@@ -276,7 +215,7 @@ export default {
     return {
       // debug: capture raw API response for student submissions
       debugResp: null,
-      // when true, show inline debug blocks inside the submissions card
+      // when true, show inline debug blocks inside the submissions card (disabled in production)
       debugEnabled: false,
       debugLogs: [],
       // key used to force el-table re-render when submissions change
@@ -300,6 +239,8 @@ export default {
       studentName: '',
       studentNo: '',
       studentConfirmed: false,
+      // debounce timer id for auto-loading submissions when typing
+      _loadMySubmissionsTimer: null,
 
       // submissions
       submissions: [],
@@ -308,7 +249,8 @@ export default {
 
       // upload config
       uploadUrl: process.env.VUE_APP_BASE_API + '/common/upload',
-      headers: { Authorization: 'Bearer ' + getToken() },
+      // include both Authorization and isToken (some backend utils expect isToken header)
+      headers: { Authorization: 'Bearer ' + getToken(), isToken: true },
 
       // editing dialog
       editDialogVisible: false,
@@ -323,7 +265,7 @@ export default {
       submitLoading: false,
 
       // when true, only show submissions that have a score
-      showOnlyGraded: true
+      showOnlyGraded: false
     }
   },
   computed: {
@@ -338,31 +280,46 @@ export default {
       const hwDeleted = !!(this.homework && (this.homework.homeworkDeleted || this.homework.homework_deleted))
       // check deadline (if provided)
       const pastDeadline = this.homework && this.homework.deadline ? (new Date(this.homework.deadline).getTime() < Date.now()) : false
-      return graded || hwDeleted || pastDeadline || this.submitted || false
+      // If an existing (ungraded) submission belongs to the student, allow submission when the user is actively editing it
+      // i.e. when editingSubmissionId is set we should allow submitting an update; otherwise disable.
+      if (existing) {
+        // if already graded or homework deleted or past deadline -> disable
+        if (graded || hwDeleted || pastDeadline) return true
+        // if there is an existing submission and the user is NOT in edit mode, disable the main "提交作业" button
+        if (!this.editingSubmissionId) return true
+        // if user is in edit mode, allow (fall through)
+      }
+      // Finally, if the component-level `submitted` flag is true and we're not editing, disable; otherwise enable
+      if (this.submitted && !this.editingSubmissionId) return true
+      return false
     },
     parsedHomeworkAttachments() {
       return this.parseAttachmentString(this.homework.attachments || this.homework.teacherFiles)
     },
     // Ensure the table always receives a plain-array of objects with the expected display fields.
     displayedSubmissions() {
-      if (!this.submissions || !Array.isArray(this.submissions)) return []
-      const mapped = this.submissions.map(s => {
-         const obj = (s && typeof s === 'object') ? s : { __raw: s }
-         return {
-           studentHomeworkId: obj.studentHomeworkId || obj.id || obj.student_homework_id || null,
-           homeworkId: obj.homeworkId || obj.homework_id || obj.homework || null,
-           homeworkTitle: obj.homeworkTitle || obj.title || (obj.__raw && obj.__raw.title) || '',
-           studentId: obj.studentId || obj.student_id || null,
-           studentNo: obj.studentNo || obj.student_no || obj.stu_no || '',
-           studentName: obj.studentName || obj.student_name || obj.student_name || '',
-           submissionFiles: obj.submissionFiles || obj.submission_files || obj.attachments || obj.files || '',
-           submitTime: obj.submitTime || obj.submit_time || obj.create_time || null,
-           gradedTime: obj.gradedTime || obj.gradeTime || obj.grade_time || obj.graded_at || obj.marked_at || obj.update_time || obj.updatedAt || null,
-           score: obj.score != null ? obj.score : (obj.grade != null ? obj.grade : null),
-           remark: obj.remark || obj.grade_comment || null,
-           homeworkDeleted: !!(obj.homeworkDeleted || obj.homework_deleted)
-         }
-      })
+      // Only show submissions after the user has entered both name and student number.
+      // This prevents exposing the full class list before identifying the student.
+      if (!this.studentName || !this.studentNo) return []
+      const source = (this.submissions || [])
+      if (!Array.isArray(source)) return []
+       const mapped = source.map(s => {
+          const obj = (s && typeof s === 'object') ? s : { __raw: s }
+          return {
+            studentHomeworkId: obj.studentHomeworkId || obj.id || obj.student_homework_id || null,
+            homeworkId: obj.homeworkId || obj.homework_id || obj.homework || null,
+            homeworkTitle: obj.homeworkTitle || obj.title || (obj.__raw && obj.__raw.title) || '',
+            studentId: obj.studentId || obj.student_id || null,
+            studentNo: obj.studentNo || obj.student_no || obj.stu_no || '',
+            studentName: obj.studentName || obj.student_name || obj.student_name || '',
+            submissionFiles: obj.submissionFiles || obj.submission_files || obj.attachments || obj.files || '',
+            submitTime: obj.submitTime || obj.submit_time || obj.create_time || null,
+            gradedTime: obj.gradedTime || obj.gradeTime || obj.grade_time || obj.graded_at || obj.marked_at || obj.update_time || obj.updatedAt || null,
+            score: obj.score != null ? obj.score : (obj.grade != null ? obj.grade : null),
+            remark: obj.remark || obj.grade_comment || null,
+            homeworkDeleted: !!(obj.homeworkDeleted || obj.homework_deleted)
+          }
+       })
 
       // If requested, only return submissions that have a score
       if (this.showOnlyGraded) {
@@ -370,6 +327,16 @@ export default {
       }
 
       return mapped
+     },
+     submissionsCount() {
+      // Only show submission counts for the identified student (require both name and studentNo)
+      if (!this.studentName || !this.studentNo) return 0
+      const source = (this.submissions || [])
+      return (source || []).filter(s => String(s.homeworkId) === String(this.homeworkId)).length
+    },
+     displayedCount() {
+       // count of submissions currently displayed in the table
+       return (this.displayedSubmissions || []).length
      }
   },
   watch: {
@@ -378,18 +345,51 @@ export default {
     },
     editFileList(newList) {
       this.editUploadedFiles = (newList || []).map(f => this.getNameFromFileObj(f)).filter(Boolean)
+    },
+    // auto-load submissions when user types studentNo or studentName (debounced)
+    studentNo() {
+      // If user edits studentNo after confirming, invalidate the confirmed state and clear loaded submissions
+      if (this._loadMySubmissionsTimer) { clearTimeout(this._loadMySubmissionsTimer); this._loadMySubmissionsTimer = null }
+      if (this.studentConfirmed) {
+        this.studentConfirmed = false
+        this.submissions = []
+        this.resolvedStudentId = null
+        this.resolvedStudentName = null
+        this.submitted = false
+      }
+    },
+    studentName() {
+      // If user edits studentName after confirming, invalidate the confirmed state and clear loaded submissions
+      if (this._loadMySubmissionsTimer) { clearTimeout(this._loadMySubmissionsTimer); this._loadMySubmissionsTimer = null }
+      if (this.studentConfirmed) {
+        this.studentConfirmed = false
+        this.submissions = []
+        this.resolvedStudentId = null
+        this.resolvedStudentName = null
+        this.submitted = false
+      }
     }
   },
   created() {
     // prefer homeworkId from query
     this.homeworkId = this.getValidHomeworkId(this.$route && this.$route.query && this.$route.query.homeworkId ? this.$route.query.homeworkId : null)
-    this.fetchCourses().then(() => {
+    // Use finally so we always clear loading or call init even if fetchCourses throws
+    this.fetchCourses().finally(() => {
       if (!this.homeworkId) {
         this.loading = false
       } else {
+        // init will set loading true then false around fetches
         this.init()
       }
     })
+
+    // Safety fallback: if something hangs (network, unexpected runtime), clear the spinner after 8s
+    setTimeout(() => {
+      if (this.loading) {
+        console.warn('homework-upload: loading fallback cleared after timeout')
+        this.loading = false
+      }
+    }, 8000)
   },
   methods: {
     // fetch courses
@@ -400,6 +400,8 @@ export default {
       } catch (e) {
         console.error('fetchCourses error', e)
         this.courses = []
+        // store debugResp internally but do not open debug UI
+        try { this.debugResp = `fetchCourses error:\n${(e && e.message) || e}` } catch (er) { this.debugResp = String(e) }
       }
     },
 
@@ -510,14 +512,46 @@ export default {
 
     // upload hooks
     uploadSuccess(response, file) {
-      const nameFromResponse = response && (response.fileName || response.data || response.filename || response.name)
-      const name = nameFromResponse || (file && file.name)
-      if (name && this.uploadedFiles.indexOf(name) === -1) this.uploadedFiles.push(name)
+      // robustly extract filename from a few possible response shapes
       try {
+        if (!response) {
+          this.$message.error('上传返回为空，请重试')
+          return
+        }
+        // If backend returns an AjaxResult wrapper (code/msg/data)
+        const payload = (response.data && (typeof response.data === 'object')) ? response.data : response
+        // try multiple fields
+        const nameFromResponse = payload.fileName || payload.filename || payload.name || payload.file || payload.data || null
+        const name = nameFromResponse || (file && file.name)
+        if (!name) {
+          this.$message.error('上传后未返回文件名，可能上传失败')
+          return
+        }
+        if (this.uploadedFiles.indexOf(name) === -1) this.uploadedFiles.push(name)
         const exists = this.fileList && this.fileList.some(f => (f.name === (file && file.name)) || (f.uid && file && file.uid && f.uid === file.uid))
         if (!exists && file) this.fileList = (this.fileList || []).concat(file)
-      } catch (e) {}
+      } catch (e) {
+        console.error('uploadSuccess parse error', e)
+        this.$message.error('上传解析失败')
+      }
     },
+    // for edit dialog uploads
+    editUploadSuccess(response, file) {
+      try {
+        if (!response) { this.$message.error('上传返回为空，请重试'); return }
+        const payload = (response.data && (typeof response.data === 'object')) ? response.data : response
+        const nameFromResponse = payload.fileName || payload.filename || payload.name || payload.file || payload.data || null
+        const name = nameFromResponse || (file && file.name)
+        if (!name) { this.$message.error('上传后未返回文件名，可能上传失败'); return }
+        if (this.editUploadedFiles.indexOf(name) === -1) this.editUploadedFiles.push(name)
+        const exists = this.editFileList && this.editFileList.some(f => (f.name === (file && file.name)) || (f.uid && file && file.uid && f.uid === file.uid))
+        if (!exists && file) this.editFileList = (this.editFileList || []).concat(file)
+      } catch (e) {
+        console.error('editUploadSuccess parse error', e)
+        this.$message.error('上传解析失败')
+      }
+    },
+    editHandleRemove(file, fileList) { this.editFileList = fileList || []; this.editUploadedFiles = (this.editFileList || []).map(f => this.getNameFromFileObj(f)).filter(Boolean) },
     handleRemove(file, fileList) { this.fileList = fileList || [] },
     beforeUpload(file) {
       const max = 50 * 1024 * 1024
@@ -536,11 +570,62 @@ export default {
 
     parseAttachmentString(str) { if (!str) return []; return String(str).split(',').map(s => s.trim()).filter(Boolean) },
 
+    // Helper: try to pull a list/rows array from various API response shapes
+    extractListFromApi(resp) {
+      if (!resp) return []
+      // common shapes: { data: { rows: [...] } } or { rows: [...] } or { data: [...] } or []
+      try {
+        if (Array.isArray(resp)) return resp
+        if (resp.rows && Array.isArray(resp.rows)) return resp.rows
+        if (resp.data) {
+          if (Array.isArray(resp.data)) return resp.data
+          if (resp.data.rows && Array.isArray(resp.data.rows)) return resp.data.rows
+        }
+        // some backends wrap result under list or records
+        if (resp.list && Array.isArray(resp.list)) return resp.list
+        if (resp.records && Array.isArray(resp.records)) return resp.records
+        // fallback: if resp has a 'result' field
+        if (resp.result && Array.isArray(resp.result)) return resp.result
+      } catch (e) {
+        console.warn('extractListFromApi failed to parse response', e)
+      }
+      return []
+    },
+
+    // Helper: normalize/validate homeworkId (accept number or string); return null for invalid
+    getValidHomeworkId(id) {
+      if (id === null || id === undefined) return null
+      // try to coerce to string/number
+      const s = String(id).trim()
+      if (s === '' || s === 'null' || s === 'undefined') return null
+      return s
+    },
+
+    // Helper: format timestamps (accept number or string), return readable local string or empty
+    formatTime(ts) {
+      if (!ts && ts !== 0) return ''
+      try {
+        // if numeric string and seems seconds (10 digits), convert to ms
+        let n = typeof ts === 'number' ? ts : Number(ts)
+        if (Number.isNaN(n)) {
+          // try Date parsing
+          const d = new Date(ts)
+          return isNaN(d.getTime()) ? '' : d.toLocaleString()
+        }
+        if (n > 0 && String(n).length === 10) n = n * 1000
+        const d = new Date(n)
+        if (isNaN(d.getTime())) return ''
+        return d.toLocaleString()
+      } catch (e) {
+        return ''
+      }
+    },
+
     previewFile(fileName) {
       const prefix = (process.env && process.env.VUE_APP_BASE_API) ? process.env.VUE_APP_BASE_API : ''
       const url = `${prefix}/common/download?fileName=${encodeURIComponent(fileName)}`
       const request = require('@/utils/request').default
-      request({ url, method: 'get', responseType: 'blob', headers: { isToken: true } }).then(blobData => {
+      request({ url, method: 'get', responseType: 'blob', headers: { isToken: true, Authorization: 'Bearer ' + getToken() } }).then(blobData => {
         try {
           const blob = blobData instanceof Blob ? blobData : new Blob([blobData])
           const mime = blob.type || ''
@@ -593,7 +678,8 @@ export default {
       } finally { this.submitLoading = false }
     },
 
-    resetUpload() { this.$refs.upload && this.$refs.upload.clearFiles && this.$refs.upload.clearFiles(); this.fileList = []; this.uploadedFiles = [] },
+    // override resetUpload to also clear edit-file lists
+    resetUpload() { this.$refs.upload && this.$refs.upload.clearFiles && this.$refs.upload.clearFiles(); this.fileList = []; this.uploadedFiles = []; this.editFileList = []; this.editUploadedFiles = [] },
 
     // normalize a raw submission record to a consistent shape
     normalizeSubmission(raw) {
@@ -630,25 +716,31 @@ export default {
     async confirmStudentId() {
       this.studentName = (this.studentName || '').toString().trim()
       this.studentNo = (this.studentNo || '').toString().trim()
-      if (!this.studentName) { this.$message.error('请输入姓名后再确认'); return }
-      if (!this.studentNo) { this.$message.error('请输入学号后再确认'); return }
+      // require both studentName and studentNo to proceed
+      if (!this.studentName || !this.studentNo) { this.$message.error('请输入姓名和学号后再确认'); return }
 
-      // optimistically mark confirmed so UI updates while loading, but surface errors if they occur
-      this.studentConfirmed = true
+      // Attempt to load submissions and only mark confirmed on success
       try {
         if (this.homeworkId) await this.fetchSubmissions().catch(() => {})
+        // non-silent so the user sees messages when they actively confirm
         await this.loadMySubmissions()
-        console.debug('confirmStudentId: submissions after load', this.submissions)
-        this.$message.success('学号确认成功，已加载您的提交记录')
+        // if we got any matched submissions or resolved id, mark confirmed
+        if ((this.submissions && this.submissions.length > 0) || this.resolvedStudentId) {
+          this.studentConfirmed = true
+          this.$message.success('学号/姓名确认成功，已加载您的提交记录')
+        } else {
+          // even when none matched, still set confirmed so user can submit a new one if allowed
+          this.studentConfirmed = true
+          this.$message.info('未检索到已提交记录；您可以继续上传并提交作业')
+        }
       } catch (e) {
         console.error('confirmStudentId error', e)
-        // try to surface backend message when available
         if (e && e.response && e.response.data) {
           const d = e.response.data
           const serverMsg = d.msg || d.message || (typeof d === 'string' ? d : null)
-          if (serverMsg) { this.$message.error(`学号确认失败：${serverMsg}`); return }
+          if (serverMsg) { this.$message.error(`确认失败：${serverMsg}`); return }
         }
-        this.$message.error('学号确认失败，请重试')
+        this.$message.error('确认学号/姓名失败，请重试')
         this.submissions = []
       }
     },
@@ -663,12 +755,19 @@ export default {
         this.allSubmissions = (rawAll || []).map(s => this.normalizeSubmission(s))
         // update debugResp for visibility
         this.debugResp = this.debugLogs.concat([`allSubmissions count=${this.allSubmissions.length}`]).join('\n')
-        if (this.studentConfirmed) await this.loadMySubmissions()
-      } catch (err) { console.error('获取提交记录失败', err); this.debugLogs.push(`fetchSubmissions error: ${err && err.message ? err.message : err}`); this.$message.error('获取提交记录失败') }
+        // if the page already marked the student as confirmed, refresh their submissions silently
+        if (this.studentConfirmed) await this.loadMySubmissions(true)
+      } catch (err) { console.error('获取提交记录失败', err); this.debugLogs.push(`fetchSubmissions error: ${err && err.message ? err.message : err}`); this.$message.error('获取提交记录失败')
+        // store debugResp internally but keep debug UI hidden
+        try { this.debugResp = `fetchSubmissions error:\n${(err && err.response && (JSON.stringify(err.response.data) || err.response.statusText)) || err.message || err}` } catch (er) { this.debugResp = String(err) }
+      }
     },
 
-    async loadMySubmissions() {
-      if (!this.studentNo) { this.$message.info('请输入学号以查看提交记录'); return }
+    async loadMySubmissions(silent = false) {
+      if (!this.studentNo && !this.studentName) {
+        if (!silent) this.$message.info('请输入学号或姓名以查看提交记录')
+        return
+      }
 
       const inputNo = (this.studentNo || '').toString().trim()
       const inputName = (this.studentName || '').toString().trim()
@@ -677,7 +776,7 @@ export default {
       try {
         this.debugLogs.push(`loadMySubmissions: start - studentNo=${inputNo}, studentName=${inputName}, homeworkId=${this.homeworkId}`)
         console.log('loadMySubmissions start', { studentNo: inputNo, studentName: inputName, homeworkId: this.homeworkId })
-        const res = await getStudentSubmissions(this.studentNo)
+        const res = await getStudentSubmissions(this.studentNo || this.studentName)
         this.debugLogs.push(`getStudentSubmissions response: ${JSON.stringify(res)}`)
         this.debugResp = JSON.stringify(res, null, 2)
         let list = this.extractListFromApi(res)
@@ -698,6 +797,8 @@ export default {
           if (s.studentId && String(s.studentId) === String(inputNo)) return true;
           if (inputNo && s.studentNo && String(s.studentNo) === String(inputNo)) return true;
           if (!inputNo && inputName && s.studentName && (s.studentName === inputName || s.studentName.indexOf(inputName) !== -1)) return true;
+          // also allow matching by name even if studentNo provided
+          if (inputName && s.studentName && (s.studentName === inputName || s.studentName.indexOf(inputName) !== -1)) return true;
           return false;
         })
 
@@ -708,13 +809,13 @@ export default {
         // force table to re-render (handles some environment rendering glitches)
         this.tableKey = `submissions-${Date.now()}-${(this.submissions || []).length}`
         if (this.submissions && this.submissions.length > 0) {
-          this.$message.success(`已加载 ${this.submissions.length} 条提交记录（仅显示您的记录）`)
+          if (!silent) this.$message.success(`已加载 ${this.submissions.length} 条提交记录（仅显示您的记录）`)
           this.resolvedStudentId = this.submissions[0].studentId || null
           this.resolvedStudentName = this.submissions[0].studentName || null
           if (!this.studentName && this.resolvedStudentName) this.studentName = this.resolvedStudentName
         } else {
-          this.$message.info('未找到匹配您学号/姓名的提交记录（若您确定已提交，请检查学号/姓名或联系教师）')
-          this.debugDialogVisible = true
+          // do not show debug dialog by default when auto-loading
+          if (!silent) this.$message.info('未找到匹配的提交记录；如果您尚未提交，可直接上传并提交。')
         }
 
         // set submitted/editingSubmissionId for current homework if present
@@ -761,7 +862,7 @@ export default {
         this.submissions = []
       } catch (e2) {
         console.error('Fallback fetchSubmissions failed', e2)
-        this.debugLogs.push(`Fallback fetchSubmissions failed: ${e2 && e2.message ? e2.message : e2}`)
+        this.debugLogs.push(`Fallback fetchSubmissions failed: ${e2 && e2.message ? e2.message : e}`)
         this.$message.error('加载学生提交失败')
         this.submissions = []
       }
@@ -769,16 +870,20 @@ export default {
 
     editSubmission(row) {
       if (!row) return
-      if (!this.studentConfirmed || (this.resolvedStudentId ? String(row.studentId) !== String(this.resolvedStudentId) : (row.studentNo && String(row.studentNo) !== String(this.studentNo)))) {
-        this.$message.error('只能编辑您自己的提交'); return
+      // if student identity is confirmed, enforce own-submission restriction; otherwise allow editing unconfirmed entries (for convenience)
+      if (this.studentConfirmed) {
+        if (this.resolvedStudentId ? String(row.studentId) !== String(this.resolvedStudentId) : (row.studentNo && String(row.studentNo) !== String(this.studentNo))) {
+          this.$message.error('只能编辑您自己的提交'); return
+        }
       }
-      if (row.homeworkDeleted || row.homework_deleted) { this.$message.error('该作业已被老师删除，无法修改'); return }
-      if (!this.canEditSubmission(row)) { this.$message.error('该提交已被教师批改或已过截止时间，无法修改'); return }
 
       this.editingSubmissionId = row.studentHomeworkId
       this.homeworkId = this.getValidHomeworkId(row.homeworkId)
       this.fetchHomework()
-      this.uploadedFiles = this.parseAttachmentString(row.submissionFiles || row.attachments || row.files)
+      // populate upload lists: show existing attachments in both main and edit contexts
+      const attachments = this.parseAttachmentString(row.submissionFiles || row.attachments || row.files)
+      this.uploadedFiles = attachments.slice()
+      this.editUploadedFiles = attachments.slice()
       this.editFileList = []
       this.editDialogVisible = true
       this.$nextTick(() => this.$message.success('已打开修改窗口，您可以添加或删除附件，然后保存'))
@@ -800,10 +905,12 @@ export default {
 
     async saveEditSubmission() {
       if (!this.editingSubmissionId) { this.$message.error('无效的提交记录'); return }
-      if (!this.uploadedFiles || this.uploadedFiles.length === 0) { this.$message.error('请先上传至少一个文件'); return }
+      // prefer files uploaded in edit dialog; fallback to main uploadedFiles
+      const filesToSubmit = (this.editUploadedFiles && this.editUploadedFiles.length) ? this.editUploadedFiles : (this.uploadedFiles || [])
+      if (!filesToSubmit || filesToSubmit.length === 0) { this.$message.error('请先上传至少一个文件'); return }
       this.editSubmitLoading = true
       try {
-        const payload = { studentHomeworkId: this.editingSubmissionId, homeworkId: this.homeworkId, studentNo: this.studentNo, studentName: this.studentName, submissionFiles: this.uploadedFiles.join(','), remark: '' }
+        const payload = { studentHomeworkId: this.editingSubmissionId, homeworkId: this.homeworkId, studentNo: this.studentNo, studentName: this.studentName, submissionFiles: filesToSubmit.join(','), remark: '' }
         const res = await updateSubmission(payload)
         const ok = (res && (res.code === 200 || res.code === 0 || res.success)) || res === 200
         if (ok) {
@@ -830,91 +937,66 @@ export default {
       // sometimes studentId may be in studentId field but we only have studentNo input
       if (this.resolvedStudentId && row.studentId == null && row.studentNo) return String(row.studentNo) === String(this.studentNo)
       return false
-    },
-
-    // Helper to extract array list from various API response shapes
-    extractListFromApi(resp) {
-      // resp may be: array, {rows: [...]}, {data: [...]}, {data: {rows: [...]}} or the raw AjaxResult with data/rows
-      if (!resp) return []
-      // If axios interceptor already returned res.data (AjaxResult), it may still contain code/msg/data
-      // Try multiple known shapes safely
-      try {
-        if (Array.isArray(resp)) return resp
-        if (resp.rows && Array.isArray(resp.rows)) return resp.rows
-        if (resp.data && Array.isArray(resp.data)) return resp.data
-        if (resp.data && resp.data.rows && Array.isArray(resp.data.rows)) return resp.data.rows
-        // sometimes backend returns object with 'records' or 'list'
-        if (resp.records && Array.isArray(resp.records)) return resp.records
-        if (resp.list && Array.isArray(resp.list)) return resp.list
-        // if resp itself is an object wrapper with fields being the entries
-        // fallback: if object values contain arrays, pick the first array
-        const vals = Object.values(resp)
-        for (const v of vals) {
-          if (Array.isArray(v)) return v
-        }
-      } catch (e) {
-        console.warn('extractListFromApi parse error', e)
-      }
-      return []
-    },
-
-    // helpers
-    formatTime(val) { if (!val) return ''; try { const d = new Date(val); if (isNaN(d.getTime())) return String(val); return d.toLocaleString() } catch (e) { return String(val) } },
-    getValidHomeworkId(val) { if (val === null || val === undefined) return null; if (typeof val === 'number' && !isNaN(val)) return val; const s = ('' + val).toString().trim(); if (!s) return null; if (s.toLowerCase() === 'null' || s.toLowerCase() === 'undefined') return null; const n = Number(s); if (!isNaN(n) && n !== 0) return n; return null },
-
-    // API test helper: call the student/homework APIs and show raw result in debug dialog
-    async testApi() {
-      try {
-        this.debugLogs.push('testApi: invoked')
-        let res
-        if (this.studentNo) {
-          this.debugLogs.push(`testApi: calling getStudentSubmissions(${this.studentNo})`)
-          res = await getStudentSubmissions(this.studentNo)
-        } else if (this.homeworkId) {
-          this.debugLogs.push(`testApi: calling getSubmissions(${this.homeworkId})`)
-          res = await getSubmissions(this.homeworkId)
-        } else {
-          this.debugLogs.push('testApi: no studentNo or homeworkId provided; calling listHomework(sample)')
-          res = await listHomework({ pageNum: 1, pageSize: 5 })
-        }
-        this.debugLogs.push(`testApi result: ${JSON.stringify(res)}`)
-        this.debugResp = this.debugLogs.join('\n') + '\n\nAPI result:\n' + JSON.stringify(res, null, 2)
-        this.debugDialogVisible = true
-        this.$message.success('API 调用已完成，调试信息已打开')
-      } catch (err) {
-        console.error('testApi error', err)
-        this.debugLogs.push(`testApi error: ${err && err.message ? err.message : err}`)
-        this.debugResp = this.debugLogs.join('\n')
-        this.debugDialogVisible = true
-        this.$message.error('API 调用失败，请查看调试信息')
-      }
     }
   }
 }
 </script>
 
 <style scoped>
-.app-container { padding: 24px; background-color: #f5f7fa; min-height: calc(100vh - 48px); }
-.submission-section { background-color: #fff; padding: 16px; border-radius: 4px }
-.upload-demo { display: inline-block; width: 100%; padding: 16px; border: 2px dashed #409eff; border-radius: 4px; background-color: #fafafa }
-.el-upload__tip { margin-top: 8px; font-size: 12px; color: #999 }
-.dialog-footer { text-align: right; padding: 10px 0 }
+.app-container {
+  padding: 16px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
 
-/* Ensure the submissions table is visible and has a reasonable height with scroll */
-.submission-section { position: relative }
-.submission-section .submissions-card { position: relative }
-.submission-section .table-wrapper { min-height: 160px; max-height: 520px; overflow: visible; padding-right: 6px; }
-/* target Element UI generated classes using deep selector so scoped CSS applies */
-.submission-section ::v-deep .el-table { width: 100% !important; color: #333 !important }
-.submission-section ::v-deep .el-table__header, .submission-section ::v-deep .el-table__body { visibility: visible !important; opacity: 1 !important }
-/* ensure Element UI sets a scrollable body area for the table rows */
-.submission-section ::v-deep .el-table__body-wrapper { max-height: 420px !important; overflow: auto !important }
+.clearfix::after {
+  content: '';
+  display: table;
+  clear: both;
+}
 
-/* Defensive rules: ensure Element UI table elements are visible */
-.submission-section ::v-deep .el-table, .submission-section ::v-deep .el-table * { box-sizing: border-box }
-.submission-section ::v-deep .el-table { background: transparent }
+.el-upload__tip {
+  font-size: 12px;
+  color: #999;
+}
 
-/* Attachment tag: keep a single-line truncated filename so the tag doesn't expand the row height */
-.attachment-tag { max-width: 320px; display: inline-block; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.attachment-link { color: inherit; display: inline-block; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.submission-section {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+}
+
+.submissions-card {
+  margin-top: 16px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.attachment-tag {
+  background-color: #e1f5fe;
+  border-color: #81d4fa;
+  color: #01579b;
+}
+
+.attachment-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.el-descriptions-item label {
+  color: #666;
+  font-weight: 500;
+}
+
+.el-descriptions-item {
+  padding: 8px 0;
+}
+
+.el-alert {
+  margin-bottom: 12px;
+}
 </style>
