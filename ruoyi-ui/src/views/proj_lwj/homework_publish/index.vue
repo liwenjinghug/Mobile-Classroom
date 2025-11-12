@@ -241,7 +241,7 @@ export default {
       }
     },
 
-    publishOrSave() {
+    async publishOrSave() {
       if (!this.form.title) { this.$message.error('请输入标题'); return }
       if (!this.form.courseId) { this.$message.error('请选择课程'); return }
       if (!this.form.sessionId) { this.$message.error('请选择课堂'); return }
@@ -269,6 +269,13 @@ export default {
           this.$message.error('保存失败')
         })
       } else {
+        // Check for duplicate title in the same session
+        const isDuplicate = await this.checkDuplicateTitle(this.form.sessionId, this.form.title)
+        if (isDuplicate) {
+          this.publishLoading = false
+          this.$message.error('发布失败：当前课堂已存在相同标题的作业，请修改标题后重试')
+          return
+        }
         addHomework(payload).then(res => {
           this.publishLoading = false
           if (res && (res.code === 200 || res.code === 0)) {
@@ -480,6 +487,41 @@ export default {
        console.error('删除提交失败', e)
       this.$message.error('删除失败')
      }
+    },
+
+    // Check whether a title duplicates an existing non-deleted homework in the same session.
+    // Returns true if duplicate exists (excluding optional excludeId), false otherwise.
+    async checkDuplicateTitle(sessionId, title, excludeId = null) {
+      if (!sessionId || !title) return false
+      try {
+        const resp = await listHomework({ sessionId: sessionId, pageNum: 1, pageSize: 1000 })
+        const list = (resp && (resp.rows || resp.data)) ? (resp.rows || resp.data) : (resp || [])
+        const normalized = (list || []).map(h => ({
+          id: h.homeworkId || h.id,
+          title: (h.title || '').toString().trim(),
+          deleted: !!(h.homeworkDeleted || h.homework_deleted)
+        }))
+        const t = title.toString().trim().toLowerCase()
+        for (const h of normalized) {
+          if (!h || h.deleted) continue
+          if (excludeId && String(h.id) === String(excludeId)) continue
+          if (h.title.toLowerCase() === t) return true
+        }
+        return false
+      } catch (e) {
+        console.warn('checkDuplicateTitle failed, falling back to client-side check', e)
+        // fallback: check the currently loaded homeworkList if available
+        const t = title.toString().trim().toLowerCase()
+        const list = this.homeworkList || []
+        for (const h of list) {
+          const id = h.homeworkId || h.id
+          const deleted = !!(h.homeworkDeleted || h.homework_deleted)
+          if (deleted) continue
+          if (excludeId && String(id) === String(excludeId)) continue
+          if ((h.title || '').toString().trim().toLowerCase() === t) return true
+        }
+        return false
+      }
     },
   }
 }

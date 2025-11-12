@@ -202,27 +202,41 @@
                 <template #default="{ row }">{{ row.gradedTime ? formatTime(row.gradedTime) : '—' }}</template>
               </el-table-column>
 
-              <el-table-column label="操作" width="140">
+              <el-table-column label="操作" width="200">
                 <template #default="{ row }">
-                  <!-- Deleted homework: show disabled '已删除' -->
-                  <el-tooltip v-if="row.homeworkDeleted || row.homework_deleted" content="该作业已被老师删除，无法修改" placement="top">
-                    <el-button size="mini" type="primary" disabled>已删除</el-button>
-                  </el-tooltip>
+                  <div class="action-buttons">
+                    <!-- Keep order fixed and use hidden placeholders to avoid layout shift -->
+                    <div class="action-slot">
+                      <el-tooltip v-if="row.homeworkDeleted || row.homework_deleted" content="该作业已被老师删除，无法修改" placement="top">
+                        <el-button class="action-btn" size="mini" type="primary" disabled>已删除</el-button>
+                      </el-tooltip>
+                      <span v-else-if="false" class="action-button-placeholder"></span>
+                    </div>
 
-                  <!-- Graded submissions: show disabled '已批改' -->
-                  <el-tooltip v-else-if="row.gradedTime || row.is_graded === 1 || (row.score !== null && row.score !== undefined)" content="该提交已被批改，无法修改" placement="top">
-                    <el-button size="mini" type="primary" disabled>已批改</el-button>
-                  </el-tooltip>
+                    <div class="action-slot">
+                      <el-tooltip v-if="row.gradedTime || row.is_graded === 1 || (row.score !== null && row.score !== undefined)" content="该提交已被批改，无法修改" placement="top">
+                        <el-button class="action-btn" size="mini" type="primary" disabled>已批改</el-button>
+                      </el-tooltip>
+                      <span v-else class="action-button-placeholder"></span>
+                    </div>
 
-                  <!-- Past-deadline: computed by isPastDeadline(row) -->
-                  <el-tooltip v-else-if="isPastDeadline(row)" content="已过截止时间，无法修改" placement="top">
-                    <el-button size="mini" type="primary" disabled>已过截止时间</el-button>
-                  </el-tooltip>
+                    <div class="action-slot">
+                      <el-tooltip v-if="isPastDeadline(row)" content="已过截止时间，无法修改" placement="top">
+                        <el-button class="action-btn" size="mini" type="primary" disabled>已过截止时间</el-button>
+                      </el-tooltip>
+                      <span v-else class="action-button-placeholder"></span>
+                    </div>
 
-                  <!-- Editable: show Modify button when allowed by canEditSubmission -->
-                  <el-button size="mini" type="primary" v-else-if="canEditSubmission(row)" @click="editSubmission(row)">修改</el-button>
-                  <!-- Allow the student to delete their own submission (confirm first). Only show when this row belongs to the current student and the homework isn't deleted -->
-                  <el-button size="mini" type="danger" v-if="isRowOwn(row) && !(row.homeworkDeleted || row.homework_deleted)" @click="confirmDelete(row)" style="margin-left:6px">删除</el-button>
+                    <div class="action-slot">
+                      <el-button v-if="canEditSubmission(row)" class="action-btn" size="mini" type="primary" @click="editSubmission(row)">修改</el-button>
+                      <span v-else class="action-button-placeholder"></span>
+                    </div>
+
+                    <div class="action-slot">
+                      <el-button v-if="isRowOwn(row) && !(row.homeworkDeleted || row.homework_deleted)" class="action-btn danger" size="mini" type="danger" @click="confirmDelete(row)">删除</el-button>
+                      <span v-else class="action-button-placeholder"></span>
+                    </div>
+                  </div>
                 </template>
               </el-table-column>
 
@@ -329,16 +343,23 @@ export default {
       const existing = this.submissions && this.submissions.length ? this.submissions.find(s => String(s.homeworkId) === String(this.homeworkId)) : null
       const hwDeleted = !!(this.homework && (this.homework.homeworkDeleted || this.homework.homework_deleted))
       const pastDeadline = this.homework && this.homework.deadline ? (new Date(this.homework.deadline).getTime() < Date.now()) : false
-      const graded = existing && (existing.gradedTime || existing.is_graded === 1 || existing.score !== null && existing.score !== undefined)
 
       // If homework deleted or past deadline, always disable
       if (hwDeleted || pastDeadline) return true
 
-      // If there is an existing submission, disallow new submission and disallow saving if it's graded
+      // If there is an existing submission record for this student/homework, check whether it's already submitted/graded.
       if (existing) {
-        if (graded) return true
-        // if there is an existing submission and user is not in edit mode, disable (prompt to use 修改)
-        if (!this.editingSubmissionId) return true
+        const isActuallySubmitted = Boolean((existing.submitTime && String(existing.submitTime).trim() !== '') || (existing.status && String(existing.status) === '2') || (existing.score !== null && existing.score !== undefined) || (existing.gradedTime))
+        // If it is already submitted/graded, disallow creating a new submission; require edit mode to modify
+        if (isActuallySubmitted) {
+          if (!this.editingSubmissionId) return true
+        } else {
+          // existing record exists but is not actually submitted: allow submission (student can submit files)
+          // However, if they're in the middle of editing another submission, prevent duplicate actions
+          if (this.editingSubmissionId && String(this.editingSubmissionId) !== String(existing.studentHomeworkId)) {
+            return true
+          }
+        }
       }
 
       // if component-level submitted flag and not editing, disable
@@ -795,6 +816,11 @@ export default {
       // require both studentName and studentNo to proceed
       if (!this.studentName || !this.studentNo) { this.$message.error('请输入姓名和学号后再确认'); return }
 
+      // Clear any previous submission/edit state: confirming identity must not auto-mark as submitted
+      this.submitted = false
+      this.editingSubmissionId = null
+      // Keep uploadedFiles untouched so students don't lose selected files when they confirm
+
       // Attempt to load submissions and only mark confirmed on success
       try {
         if (this.homeworkId) await this.fetchSubmissions().catch(() => {})
@@ -878,11 +904,17 @@ export default {
         // filter for current student: prefer id, then exact studentNo, then name contains
         let matched = (list || []).filter(s => {
           if (!s) return false;
+          // If user provided a studentNo, require match by studentNo or resolvedStudentId only.
+          if (inputNo) {
+            if (this.resolvedStudentId && s.studentId && String(s.studentId) === String(this.resolvedStudentId)) return true;
+            if (s.studentId && String(s.studentId) === String(inputNo)) return true;
+            if (s.studentNo && String(s.studentNo) === String(inputNo)) return true;
+            if (s.student_no && String(s.student_no) === String(inputNo)) return true;
+            // do NOT fallback to name-match when studentNo provided (avoids false positives)
+            return false;
+          }
+          // If no studentNo provided, allow matching by resolvedStudentId or name contains
           if (this.resolvedStudentId && s.studentId && String(s.studentId) === String(this.resolvedStudentId)) return true;
-          if (s.studentId && String(s.studentId) === String(inputNo)) return true;
-          if (inputNo && s.studentNo && String(s.studentNo) === String(inputNo)) return true;
-          if (!inputNo && inputName && s.studentName && (s.studentName === inputName || s.studentName.indexOf(inputName) !== -1)) return true;
-          // also allow matching by name even if studentNo provided
           if (inputName && s.studentName && (s.studentName === inputName || s.studentName.indexOf(inputName) !== -1)) return true;
           return false;
         })
@@ -912,11 +944,10 @@ export default {
           if (!silent) this.$message.info('未找到匹配的提交记录；如果您尚未提交，可直接上传并提交。')
         }
 
-        // set submitted/editingSubmissionId for current homework if present
-        if (this.homeworkId) {
-          const mine = (this.submissions || []).find(s => String(s.homeworkId) === String(this.homeworkId))
-          if (mine) { this.submitted = true; this.editingSubmissionId = mine.studentHomeworkId || null } else { this.submitted = false; this.editingSubmissionId = null }
-        }
+        // NOTE: Do NOT automatically set `submitted`/`editingSubmissionId` here.
+        // The confirm action should only display the student's submissions; it must not change
+        // submit state or disable the submit button. Users should upload files and click 提交 or
+        // use the 列表的“修改”按钮 to edit an existing submission.
 
         // update debugResp with logs for easier troubleshooting
         this.debugResp = this.debugLogs.join('\n') + '\n\nAPI result:\n' + JSON.stringify(res, null, 2)
@@ -955,10 +986,9 @@ export default {
             this.resolvedStudentId = this.submissions[0].studentId || null
             this.resolvedStudentName = this.submissions[0].studentName || null
             if (!this.studentName && this.resolvedStudentName) this.studentName = this.resolvedStudentName
-            const mine = this.submissions.find(s => String(s.homeworkId) === String(this.homeworkId))
-            if (mine) { this.submitted = true; this.editingSubmissionId = mine.studentHomeworkId || null }
-            return
-          }
+            // Do NOT auto-assign submitted/editingSubmissionId in fallback either.
+             return
+           }
         }
         this.$message.info('未找到与所填学号/姓名匹配的提交记录；若您确定已提交，请联系教师或尝试刷新页面。')
         this.submissions = []
@@ -1156,7 +1186,22 @@ export default {
         this.$message.error((res && res.msg) || '删除失败')
       } catch (err) {
         console.error('删除提交失败', err)
-        this.$message.error('删除失败，请稍后重试')
+        // Try to show server-provided message (common Axios error shapes)
+        let info = '删除失败，请稍后重试'
+        try {
+          // If server returned 404, give a clearer user-facing hint
+          if (err && err.response && err.response.status === 404) {
+            info = '提交记录未找到（可能已被删除）'
+          } else {
+            if (err && err.response && err.response.data) {
+              const data = err.response.data
+              info = data.msg || data.message || JSON.stringify(data)
+            } else if (err && err.message) {
+              info = err.message
+            }
+          }
+        } catch (e) { console.warn('confirmDelete error parse failed', e) }
+        this.$message.error(`删除提交失败：${info}`)
       } finally {
         // close any global loading overlay
         try { const l = document.querySelector('.el-loading-mask'); if (l) l.remove() } catch (e) {}
@@ -1222,5 +1267,23 @@ export default {
 
 .el-alert {
   margin-bottom: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.action-slot {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-button-placeholder {
+  flex: 1;
+  height: 32px;
 }
 </style>

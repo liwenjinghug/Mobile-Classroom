@@ -313,4 +313,17 @@ public class ClassHomeworkController extends BaseController {
 
         return AjaxResult.error("请提供 studentId 或 studentNo 以查询学生提交记录（或确认学号/姓名是否正确）");
     }
+
+    // 删除学生的提交记录（学生或教师可调用）
+    @Log(title = "作业提交", businessType = BusinessType.DELETE)
+    @DeleteMapping("/submission/{id}")
+    public AjaxResult deleteSubmission(@PathVariable Long id) {
+        try {
+            int r = studentHomeworkService.deleteById(id);
+            return toAjax(r);
+        } catch (Exception e) {
+            logger.error("删除提交失败", e);
+            return AjaxResult.error("删除提交失败：" + e.getMessage());
+        }
+    }
 }

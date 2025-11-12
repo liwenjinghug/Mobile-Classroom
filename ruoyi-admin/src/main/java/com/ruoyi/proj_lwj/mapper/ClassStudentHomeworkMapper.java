@@ -111,13 +111,13 @@ public interface ClassStudentHomeworkMapper {
     })
     List<ClassStudentHomework> selectByStudentIdentifier(String ident);
 
-    @Insert("INSERT INTO class_student_homework (homework_id, student_id, student_no, student_name, submission_files, submit_time, status, create_by, create_time) " +
-            "VALUES (#{homeworkId}, #{studentId}, #{studentNo}, #{studentName}, #{submissionFiles}, #{submitTime}, #{status}, #{createBy}, NOW())")
+    @Insert("INSERT INTO class_student_homework (homework_id, student_id, student_name, submission_files, submit_time, status, create_by, create_time) " +
+            "VALUES (#{homeworkId}, #{studentId}, #{studentName}, #{submissionFiles}, #{submitTime}, #{status}, #{createBy}, NOW())")
     @Options(useGeneratedKeys = true, keyProperty = "studentHomeworkId")
     int insert(ClassStudentHomework shw);
 
     // update — keep to columns that exist in the database
-    @Update("UPDATE class_student_homework SET student_id=#{studentId}, student_no=#{studentNo}, student_name=#{studentName}, submission_files=#{submissionFiles}, submit_time=#{submitTime}, status=#{status}, grade=#{score}, grade_comment=#{remark}, update_by=#{updateBy}, update_time=NOW() WHERE id=#{studentHomeworkId}")
+    @Update("UPDATE class_student_homework SET student_id=#{studentId}, student_name=#{studentName}, submission_files=#{submissionFiles}, submit_time=#{submitTime}, status=#{status}, grade=#{score}, grade_comment=#{remark}, update_by=#{updateBy}, update_time=NOW() WHERE id=#{studentHomeworkId}")
     int update(ClassStudentHomework shw);
 
     @Delete("DELETE FROM class_student_homework WHERE id = #{id}")
