@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : ry-vue
+ Source Server         : 01tech
  Source Server Type    : MySQL
  Source Server Version : 80042 (8.0.42)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 10/11/2025 18:12:20
+ Date: 12/11/2025 22:16:58
 */
 
 SET NAMES utf8mb4;
@@ -47,7 +47,7 @@ CREATE TABLE `class_article`  (
   INDEX `idx_create_time`(`create_time` ASC) USING BTREE,
   INDEX `idx_article_type`(`article_type` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文章表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_article
@@ -55,6 +55,7 @@ CREATE TABLE `class_article`  (
 INSERT INTO `class_article` VALUES (1, 'Spring Boot 入门教程', '本文介绍Spring Boot的基本使用和配置', '<h1><img src=\"/dev-api/profile/upload/2025/11/02/屏幕截图 2024-06-06 011230_20251102021029A001.png\">入门</h1>', 'https://picsum.photos/id/1029/600/400', '技术', 'published', 170, 12, 59, 12, 0, '岂皓月', 1, 'admin', '2025-11-01 23:24:22', '', '2025-11-07 10:31:31', NULL);
 INSERT INTO `class_article` VALUES (2, '生活中的小确幸', '记录生活中的美好瞬间，( •̀ ω •́ )y', '<p>生活中总有一些小确幸让我们感到温暖...美好！</p>', 'https://picsum.photos/id/1035/600/400', '生活', 'published', 92, 8, 34, 1, 0, '岂皓月', 1, 'admin', '2025-11-01 23:24:22', '', '2025-11-07 10:17:14', NULL);
 INSERT INTO `class_article` VALUES (3, 'Java编程思想', '深入理解Java编程思想', '<p>Java编程思想是每个Java开发者都应该掌握的...</p>', 'https://picsum.photos/id/1/600/400', '技术', 'published', 204, 25, 78, 0, 0, '岂皓月', 1, 'admin', '2025-11-01 23:24:22', '', '2025-11-02 02:39:34', NULL);
+INSERT INTO `class_article` VALUES (8, '1', NULL, NULL, '/profile/upload/2025/11/11/屏幕截图 2023-11-08 200640_20251111212916A001.png', '技术', 'editting', 0, 0, 0, 0, 0, '若依', NULL, NULL, '2025-11-11 21:29:31', '', '2025-11-11 21:29:31', NULL);
 
 -- ----------------------------
 -- Table structure for class_article_like
@@ -236,6 +237,127 @@ INSERT INTO `class_course` VALUES (7, '121', '12', '1', '222', 0.0, '1', '0', 'a
 INSERT INTO `class_course` VALUES (8, '123123', '112', '212', '11', 0.0, '111', '0', 'admin', '2025-11-04 22:22:02', '', NULL, NULL, 1);
 
 -- ----------------------------
+-- Table structure for class_forum_comment
+-- ----------------------------
+DROP TABLE IF EXISTS `class_forum_comment`;
+CREATE TABLE `class_forum_comment`  (
+  `comment_id` bigint NOT NULL AUTO_INCREMENT COMMENT '评论ID',
+  `post_id` bigint NOT NULL COMMENT '帖子ID',
+  `user_id` bigint NOT NULL COMMENT '评论用户ID',
+  `parent_id` bigint NULL DEFAULT 0 COMMENT '父评论ID（0表示顶级评论）',
+  `reply_to_user_id` bigint NULL DEFAULT NULL COMMENT '回复目标用户ID',
+  `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '评论内容',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`comment_id`) USING BTREE,
+  INDEX `idx_comment_post_id`(`post_id` ASC) USING BTREE,
+  INDEX `idx_comment_user_id`(`user_id` ASC) USING BTREE,
+  INDEX `idx_parent_id`(`parent_id` ASC) USING BTREE,
+  CONSTRAINT `fk_comment_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 116 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '论坛评论表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of class_forum_comment
+-- ----------------------------
+INSERT INTO `class_forum_comment` VALUES (100, 2, 1, 0, NULL, '太棒了！', '0', '', '2025-11-06 15:52:00', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (101, 2, 1, 0, NULL, '厉害！', '0', '', '2025-11-06 15:53:48', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (102, 1, 1, 0, NULL, '请大家积极评论', '0', '', '2025-11-06 16:18:48', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (103, 1, 1, 0, NULL, '谢谢大家', '0', 'admin', '2025-11-06 16:29:21', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (104, 3, 4, 0, NULL, 'Vue双向绑定基于Object.defineProperty实现的', '0', 'teacher1', '2025-11-06 14:10:00', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (105, 3, 3, 104, 4, '谢谢王老师！我去查一下这个方法', '0', 'student1', '2025-11-06 14:15:00', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (106, 4, 1, 0, NULL, '请问需要安装哪些依赖？', '0', 'admin', '2025-11-06 15:35:00', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (107, 4, 4, 106, 1, '只需要spring-boot-starter-web即可', '0', 'teacher1', '2025-11-06 15:40:00', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (108, 4, 5, 0, NULL, '会讲数据库连接吗？', '0', 'student2', '2025-11-06 15:45:00', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (109, 4, 4, 108, 5, '会的，会包含MySQL和MyBatis的整合', '0', 'teacher1', '2025-11-06 15:50:00', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (110, 4, 2, 0, NULL, '期待！', '0', 'ry', '2025-11-06 16:00:00', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (111, 5, 1, 0, NULL, '求链接！', '0', 'admin', '2025-11-06 16:50:00', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (112, 4, 1, 106, NULL, '蹲蹲！', '0', 'admin', '2025-11-06 21:02:46', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (114, 119, 1, 0, NULL, '好！', '0', 'admin', '2025-11-11 19:30:02', '', NULL);
+INSERT INTO `class_forum_comment` VALUES (115, 4, 1, 108, 5, '好！', '0', 'admin', '2025-11-11 19:30:14', '', NULL);
+
+-- ----------------------------
+-- Table structure for class_forum_like
+-- ----------------------------
+DROP TABLE IF EXISTS `class_forum_like`;
+CREATE TABLE `class_forum_like`  (
+  `like_id` bigint NOT NULL AUTO_INCREMENT COMMENT '点赞ID',
+  `post_id` bigint NOT NULL COMMENT '帖子ID',
+  `user_id` bigint NOT NULL COMMENT '点赞用户ID',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`like_id`) USING BTREE,
+  UNIQUE INDEX `idx_post_user`(`post_id` ASC, `user_id` ASC) USING BTREE,
+  INDEX `idx_like_user_id`(`user_id` ASC) USING BTREE,
+  CONSTRAINT `fk_like_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_like_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 118 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '论坛点赞表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of class_forum_like
+-- ----------------------------
+INSERT INTO `class_forum_like` VALUES (1, 1, 2, '0', 'ry', '2025-11-06 10:05:00', '', NULL);
+INSERT INTO `class_forum_like` VALUES (2, 1, 1, '0', 'admin', '2025-11-06 10:10:00', 'admin', '2025-11-06 21:00:09');
+INSERT INTO `class_forum_like` VALUES (3, 2, 1, '2', 'admin', '2025-11-06 11:35:00', 'admin', '2025-11-07 11:07:59');
+INSERT INTO `class_forum_like` VALUES (104, 3, 4, '0', 'teacher1', '2025-11-06 14:05:00', '', NULL);
+INSERT INTO `class_forum_like` VALUES (105, 4, 1, '0', 'admin', '2025-11-06 15:32:00', '', NULL);
+INSERT INTO `class_forum_like` VALUES (106, 4, 2, '0', 'ry', '2025-11-06 15:33:00', '', NULL);
+INSERT INTO `class_forum_like` VALUES (107, 4, 5, '0', 'student2', '2025-11-06 15:34:00', '', NULL);
+INSERT INTO `class_forum_like` VALUES (108, 5, 1, '0', 'admin', '2025-11-06 16:46:00', '', NULL);
+INSERT INTO `class_forum_like` VALUES (109, 5, 4, '0', 'teacher1', '2025-11-06 16:47:00', '', NULL);
+INSERT INTO `class_forum_like` VALUES (110, 100, 1, '0', 'admin', '2025-11-06 17:04:12', '', NULL);
+INSERT INTO `class_forum_like` VALUES (111, 107, 1, '2', 'admin', NULL, '', NULL);
+INSERT INTO `class_forum_like` VALUES (113, 3, 1, '0', 'admin', NULL, 'admin', '2025-11-07 09:38:57');
+INSERT INTO `class_forum_like` VALUES (116, 118, 1, '2', 'admin', '2025-11-11 18:45:49', 'admin', '2025-11-11 18:47:52');
+INSERT INTO `class_forum_like` VALUES (117, 119, 1, '0', 'admin', '2025-11-11 19:29:55', '', NULL);
+
+-- ----------------------------
+-- Table structure for class_forum_post
+-- ----------------------------
+DROP TABLE IF EXISTS `class_forum_post`;
+CREATE TABLE `class_forum_post`  (
+  `post_id` bigint NOT NULL AUTO_INCREMENT COMMENT '帖子ID',
+  `user_id` bigint NOT NULL COMMENT '发布用户ID',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '帖子内容',
+  `image_urls` varchar(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '图片URL列表，逗号分隔',
+  `like_count` int NULL DEFAULT 0 COMMENT '点赞数',
+  `comment_count` int NULL DEFAULT 0 COMMENT '评论数',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '状态（0正常 1关闭）',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`post_id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
+  CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 131 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '论坛帖子表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of class_forum_post
+-- ----------------------------
+INSERT INTO `class_forum_post` VALUES (1, 1, '欢迎大家来到课堂论坛！这里是我们交流学习心得的地方。', '', 2, 2, '0', '0', 'admin', '2025-11-06 10:00:00', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (2, 2, '今天学习了Spring Security，感觉对权限管理有了更深的理解。分享一些学习笔记...', '', 0, 2, '0', '0', 'ry', '2025-11-06 11:30:00', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (3, 3, '有没有同学知道Vue的双向绑定原理？想请教一下~', 'https://picsum.photos/400/300?random=10,https://picsum.photos/400/300?random=11', 2, 3, '0', '0', 'student1', '2025-11-06 14:00:00', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (4, 4, '下周将讲解Spring Boot实战案例，大家提前准备好环境哦！', '', 3, 5, '0', '0', 'teacher1', '2025-11-06 15:30:00', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (5, 5, '分享一个好用的学习资源网站，里面有很多Java教程~', 'https://picsum.photos/400/300?random=12', 2, 1, '0', '0', 'student2', '2025-11-06 16:45:00', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (100, 1, '计网好难啊！！！！！', '', 1, 0, '0', '0', 'admin', '2025-11-06 17:02:38', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (107, 1, 'test', 'https://picsum.photos/400/300?random=13', 0, 0, '0', '0', 'admin', '2025-11-06 20:00:09', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (125, 1, '1', '/profile/welcome.jpg', 0, 0, '0', '0', 'admin', '2025-11-12 20:28:02', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (126, 1, '123', '/profile/ee5de0d4-0aea-4bcc-a474-2093d2befc8a.png', 0, 0, '0', '0', 'admin', '2025-11-12 20:37:43', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (127, 1, '1', '/profile/8d9b73e5-c19c-484a-8dbe-bede27a18684.jpg', 0, 0, '0', '0', 'admin', '2025-11-12 21:01:28', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (128, 1, '1', '/profile/381b6d51-c3e3-41b3-b3eb-1dcd22e2f2ff.png', 0, 0, '0', '0', 'admin', '2025-11-12 21:19:57', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (129, 1, '2', '/profile/c6b190fe-3afc-48a7-b1f8-4fb888581959.png', 0, 0, '0', '0', 'admin', '2025-11-12 21:43:14', '', NULL, NULL);
+INSERT INTO `class_forum_post` VALUES (130, 1, '33333', '/profile/5da4c852-917a-46d5-9e78-ead7e58c693c.jpg', 0, 0, '0', '0', 'admin', '2025-11-12 22:13:53', '', NULL, NULL);
+
+-- ----------------------------
 -- Table structure for class_homework
 -- ----------------------------
 DROP TABLE IF EXISTS `class_homework`;
@@ -262,7 +384,7 @@ CREATE TABLE `class_homework`  (
   INDEX `idx_course_id`(`course_id` ASC) USING BTREE,
   INDEX `idx_session_id`(`session_id` ASC) USING BTREE,
   INDEX `idx_deadline`(`deadline` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 23 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '作业主表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 26 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '作业主表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_homework
@@ -284,6 +406,9 @@ INSERT INTO `class_homework` VALUES (16, 1, 4, '第9周作业', '报告', NULL, 
 INSERT INTO `class_homework` VALUES (20, 1, 1, '第九周作业', '222', NULL, 100.00, '2025-11-10 00:00:00', '', NULL, '0', 'admin', '2025-11-09 12:41:20', '', NULL, NULL, NULL, NULL);
 INSERT INTO `class_homework` VALUES (21, 1, 1, '111', '11', NULL, 100.00, '2025-11-10 00:00:00', '', NULL, '0', 'admin', '2025-11-09 18:26:02', '', NULL, NULL, NULL, NULL);
 INSERT INTO `class_homework` VALUES (22, 1, 1, '444', '333', NULL, 100.00, '2025-11-10 00:00:00', '', NULL, '0', 'admin', '2025-11-09 19:57:24', '', NULL, NULL, NULL, NULL);
+INSERT INTO `class_homework` VALUES (23, 1, 1, 'QT', 'QT天气', NULL, 100.00, '2025-11-12 00:00:00', '/profile/upload/2025/11/11/Clion_20251111191517A001.png', NULL, '0', 'admin', '2025-11-11 19:15:20', '', NULL, NULL, NULL, NULL);
+INSERT INTO `class_homework` VALUES (24, 1, 1, '111', '1111', NULL, 100.00, '2025-11-12 00:00:00', '', NULL, '0', 'admin', '2025-11-11 19:18:17', '', NULL, NULL, NULL, NULL);
+INSERT INTO `class_homework` VALUES (25, 1, 1, 'pre', '', NULL, 100.00, '2025-11-22 00:00:00', '', NULL, '0', 'admin', '2025-11-11 20:19:40', '', NULL, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for class_login_log
@@ -300,7 +425,7 @@ CREATE TABLE `class_login_log`  (
   `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '提示消息',
   `login_time` datetime NULL DEFAULT NULL COMMENT '访问时间',
   PRIMARY KEY (`login_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_login_log
@@ -328,7 +453,7 @@ CREATE TABLE `class_oper_log`  (
   `error_msg` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '错误消息',
   `oper_time` datetime NULL DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`oper_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 34 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '操作日志记录' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 35 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_oper_log
@@ -366,6 +491,7 @@ INSERT INTO `class_oper_log` VALUES (30, '操作日志', 0, 'com.ruoyi.web.contr
 INSERT INTO `class_oper_log` VALUES (31, '操作日志', 0, 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', 1, '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', NULL, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"businessType\\\":0,\\\"deptName\\\":\\\"系统部门\\\",\\\"jsonResult\\\":\\\"{\\\\\\\"code\\\\\\\":200,\\\\\\\"msg\\\\\\\":\\\\\\\"查询成功\\\\\\\",\\\\\\\"rows\\\\\\\":[],\\\\\\\"total\\\\\\\":0}\\\",\\\"method\\\":\\\"com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()\\\",\\\"operId\\\":29,\\\"operIp\\\":\\\"127.0.0.1\\\",\\\"operName\\\":\\\"系统用户\\\",\\\"operParam\\\":\\\"{\\\\\\\"params\\\\\\\":{}}\\\",\\\"operTime\\\":\\\"2025-11-07 09:57:54\\\",\\\"operUrl\\\":\\\"/proj_cyq/loginlog/list\\\",\\\"operatorType\\\":1,\\\"params\\\":{},\\\"requestMethod\\\":\\\"GET\\\",\\\"status\\\":0,\\\"title\\\":\\\"登录日志\\\"},{\\\"businessType\\\":5,\\\"deptName\\\":\\\"系统部门\\\",\\\"method\\\":\\\"com.ruoyi.web.controller.proj_cyq.ClassOperLogController.export()\\\",\\\"operId\\\":28,\\\"operIp\\\":\\\"127.0.0.1\\\",\\\"operName\\\":\\\"系统用户\\\",\\\"operParam\\\":\\\"{\\\\\\\"params\\\\\\\":{}}\\\",\\\"operTime\\\":\\\"2025-11-07 09:57:25\\\",\\\"operUrl\\\":\\\"/proj_cyq/operlog/export\\\",\\\"operatorType\\\":1,\\\"params\\\":{},\\\"requestMethod\\\":\\\"GET\\\",\\\"status\\\":0,\\\"title\\\":\\\"操作日志\\\"},{\\\"businessType\\\":0,\\\"deptName\\\":\\\"系统部门\\\",\\\"jsonResult\\\":\\\"{\\\\\\\"code\\\\\\\":200,\\\\\\\"msg\\\\\\\":\\\\\\\"查询成功\\\\\\\",\\\\\\\"rows\\\\\\\":[{\\\\\\\"businessType\\\\\\\":0,\\\\\\\"deptName\\\\\\\":\\\\\\\"系统部门\\\\\\\",\\\\\\\"jsonResult\\\\\\\":\\\\\\\"{\\\\\\\\\\\\\\\"code\\\\\\\\\\\\\\\":200,\\\\\\\\\\\\\\\"msg\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"查询成功\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"rows\\\\\\\\\\\\\\\":[{\\\\\\\\\\\\\\\"businessType\\\\\\\\\\\\\\\":0,\\\\\\\\\\\\\\\"deptName\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"系统部门\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"jsonResult\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"code\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":200,\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"msg\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"查询成功\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"rows\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":[{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"businessType\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":0,\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"deptName\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"系统部门\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"jsonResult\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"code\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":200,\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"msg\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"查询成功\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"rows\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\', 0, NULL, '2025-11-07 10:03:14');
 INSERT INTO `class_oper_log` VALUES (32, '操作日志', 0, 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', 1, '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', NULL, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"businessType\\\":0,\\\"deptName\\\":\\\"系统部门\\\",\\\"jsonResult\\\":\\\"{\\\\\\\"code\\\\\\\":200,\\\\\\\"msg\\\\\\\":\\\\\\\"查询成功\\\\\\\",\\\\\\\"rows\\\\\\\":[{\\\\\\\"businessType\\\\\\\":0,\\\\\\\"deptName\\\\\\\":\\\\\\\"系统部门\\\\\\\",\\\\\\\"jsonResult\\\\\\\":\\\\\\\"{\\\\\\\\\\\\\\\"code\\\\\\\\\\\\\\\":200,\\\\\\\\\\\\\\\"msg\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"查询成功\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"rows\\\\\\\\\\\\\\\":[],\\\\\\\\\\\\\\\"total\\\\\\\\\\\\\\\":0}\\\\\\\",\\\\\\\"method\\\\\\\":\\\\\\\"com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()\\\\\\\",\\\\\\\"operId\\\\\\\":29,\\\\\\\"operIp\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"operName\\\\\\\":\\\\\\\"系统用户\\\\\\\",\\\\\\\"operParam\\\\\\\":\\\\\\\"{\\\\\\\\\\\\\\\"params\\\\\\\\\\\\\\\":{}}\\\\\\\",\\\\\\\"operTime\\\\\\\":\\\\\\\"2025-11-07 09:57:54\\\\\\\",\\\\\\\"operUrl\\\\\\\":\\\\\\\"/proj_cyq/loginlog/list\\\\\\\",\\\\\\\"operatorType\\\\\\\":1,\\\\\\\"params\\\\\\\":{},\\\\\\\"requestMethod\\\\\\\":\\\\\\\"GET\\\\\\\",\\\\\\\"status\\\\\\\":0,\\\\\\\"title\\\\\\\":\\\\\\\"登录日志\\\\\\\"},{\\\\\\\"businessType\\\\\\\":5,\\\\\\\"deptName\\\\\\\":\\\\\\\"系统部门\\\\\\\",\\\\\\\"method\\\\\\\":\\\\\\\"com.ruoyi.web.controller.proj_cyq.ClassOperLogController.export()\\\\\\\",\\\\\\\"operId\\\\\\\":28,\\\\\\\"operIp\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"operName\\\\\\\":\\\\\\\"系统用户\\\\\\\",\\\\\\\"operParam\\\\\\\":\\\\\\\"{\\\\\\\\\\\\\\\"params\\\\\\\\\\\\\\\":{}}\\\\\\\",\\\\\\\"operTime\\\\\\\":\\\\\\\"2025-11-07 09:57:25\\\\\\\",\\\\\\\"operUrl\\\\\\\":\\\\\\\"/proj_cyq/operlog/export\\\\\\\",\\\\\\\"operatorType\\\\\\\":1,\\\\\\\"params\\\\\\\":{},\\\\\\\"requestMethod\\\\\\\":\\\\\\\"GET\\\\\\\",\\\\\\\"status\\\\\\\":0,\\\\\\\"title\\\\\\\":\\\\\\\"操作日志\\\\\\\"},{\\\\\\\"businessType\\\\\\\":0,\\\\\\\"deptName\\\\\\\":\\\\\\\"系统部门\\\\\\\",\\\\\\\"jsonResult\\\\\\\":\\\\\\\"{\\\\\\\\\\\\\\\"code\\\\\\\\\\\\\\\":200,\\\\\\\\\\\\\\\"msg\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"查询成功\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"rows\\\\\\\\\\\\\\\":[{\\\\\\\\\\\\\\\"businessType\\\\\\\\\\\\\\\":0,\\\\\\\\\\\\\\\"deptName\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"系统部门\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"jsonResult\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"code\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":200,\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"msg\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"查询成功\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"rows\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":[{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"businessType\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":0,\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"deptName\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"系统部门\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"jsonResult\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\', 0, NULL, '2025-11-07 10:19:39');
 INSERT INTO `class_oper_log` VALUES (33, '操作日志', 0, 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', 1, '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', NULL, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"businessType\\\":0,\\\"deptName\\\":\\\"系统部门\\\",\\\"jsonResult\\\":\\\"{\\\\\\\"code\\\\\\\":200,\\\\\\\"msg\\\\\\\":\\\\\\\"查询成功\\\\\\\",\\\\\\\"rows\\\\\\\":[{\\\\\\\"businessType\\\\\\\":0,\\\\\\\"deptName\\\\\\\":\\\\\\\"系统部门\\\\\\\",\\\\\\\"jsonResult\\\\\\\":\\\\\\\"{\\\\\\\\\\\\\\\"code\\\\\\\\\\\\\\\":200,\\\\\\\\\\\\\\\"msg\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"查询成功\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"rows\\\\\\\\\\\\\\\":[{\\\\\\\\\\\\\\\"businessType\\\\\\\\\\\\\\\":0,\\\\\\\\\\\\\\\"deptName\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"系统部门\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"jsonResult\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"code\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":200,\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"msg\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"查询成功\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"rows\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":[],\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"total\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":0}\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"method\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operId\\\\\\\\\\\\\\\":29,\\\\\\\\\\\\\\\"operIp\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"127.0.0.1\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operName\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"系统用户\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operParam\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"params\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":{}}\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operTime\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"2025-11-07 09:57:54\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operUrl\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"/proj_cyq/loginlog/list\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operatorType\\\\\\\\\\\\\\\":1,\\\\\\\\\\\\\\\"params\\\\\\\\\\\\\\\":{},\\\\\\\\\\\\\\\"requestMethod\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"GET\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"status\\\\\\\\\\\\\\\":0,\\\\\\\\\\\\\\\"title\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"登录日志\\\\\\\\\\\\\\\"},{\\\\\\\\\\\\\\\"businessType\\\\\\\\\\\\\\\":5,\\\\\\\\\\\\\\\"deptName\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"系统部门\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"method\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"com.ruoyi.web.controller.proj_cyq.ClassOperLogController.export()\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operId\\\\\\\\\\\\\\\":28,\\\\\\\\\\\\\\\"operIp\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"127.0.0.1\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operName\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"系统用户\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operParam\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"params\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":{}}\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operTime\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"2025-11-07 09:57:25\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operUrl\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"/proj_cyq/operlog/export\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"operatorType\\\\\\\\\\\\\\\":1,\\\\\\\\\\\\\\\"params\\\\\\\\\\\\\\\":{},\\\\\\\\\\\\\\\"requestMethod\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"GET\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"status\\\\\\\\\\\\\\\":0,\\\\\\\\\\\\\\\"title\\\\\\\\', 0, NULL, '2025-11-07 10:29:30');
+INSERT INTO `class_oper_log` VALUES (34, '操作日志', 0, 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', 1, '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', NULL, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"businessType\\\":0,\\\"deptName\\\":\\\"系统部门\\\",\\\"jsonResult\\\":\\\"{\\\\\\\"code\\\\\\\":200,\\\\\\\"msg\\\\\\\":\\\\\\\"查询成功\\\\\\\",\\\\\\\"rows\\\\\\\":[{\\\\\\\"businessType\\\\\\\":0,\\\\\\\"deptName\\\\\\\":\\\\\\\"系统部门\\\\\\\",\\\\\\\"jsonResult\\\\\\\":\\\\\\\"{\\\\\\\\\\\\\\\"code\\\\\\\\\\\\\\\":200,\\\\\\\\\\\\\\\"msg\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"查询成功\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"rows\\\\\\\\\\\\\\\":[{\\\\\\\\\\\\\\\"businessType\\\\\\\\\\\\\\\":0,\\\\\\\\\\\\\\\"deptName\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"系统部门\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"jsonResult\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\"{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"code\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":200,\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"msg\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"查询成功\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"rows\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":[{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"businessType\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":0,\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"deptName\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"系统部门\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"jsonResult\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"code\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":200,\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"msg\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"查询成功\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"rows\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":[],\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"total\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":0}\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"method\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"operId\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":29,\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"operIp\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"127.0.0.1\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"operName\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"系统用户\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"operParam\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"{\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"params\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":{}}\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"operTime\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"2025-11-07 09:57:54\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"operUrl\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"/proj_cyq/loginlog/list\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"operatorType\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":1,\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"params\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\":{},\\\\\\\\\\\\', 0, NULL, '2025-11-11 18:52:47');
 
 -- ----------------------------
 -- Table structure for class_random_pick
@@ -605,7 +731,7 @@ CREATE TABLE `class_student_homework`  (
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_is_graded`(`is_graded` ASC) USING BTREE,
   INDEX `idx_corrected_time`(`corrected_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生作业表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生作业表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_student_homework
@@ -621,6 +747,7 @@ INSERT INTO `class_student_homework` VALUES (11, 9, 38, NULL, NULL, NULL, NULL, 
 INSERT INTO `class_student_homework` VALUES (12, 17, 38, '黎文靖', NULL, '测试作业.docx', NULL, NULL, '2025-11-08 01:15:02', 1, NULL, '', NULL, 'admin', '2025-11-08 00:45:52', 'admin', '2025-11-08 01:15:01', NULL, NULL, NULL, NULL, NULL, NULL);
 INSERT INTO `class_student_homework` VALUES (15, 20, 38, '黎文靖', NULL, '测试作业.docx', NULL, NULL, '2025-11-09 16:28:57', 1, NULL, '', '1', 'admin', '2025-11-09 16:28:57', '', NULL, 0, NULL, NULL, NULL, 0, '2023141460368');
 INSERT INTO `class_student_homework` VALUES (16, 22, 38, NULL, NULL, NULL, NULL, NULL, '2025-11-09 20:09:26', 1, 90.00, '基本完成', '2', 'admin', '2025-11-09 19:57:59', 'admin', '2025-11-09 20:09:26', NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `class_student_homework` VALUES (17, 25, 20, '岂皓月', NULL, 'Clion.png', NULL, NULL, '2025-11-11 20:21:05', 1, NULL, '', '1', 'admin', '2025-11-11 20:21:05', '', NULL, 0, NULL, NULL, NULL, 0, '2023141460349');
 
 -- ----------------------------
 -- Table structure for class_todo
@@ -1212,7 +1339,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 127 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 131 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -1244,6 +1371,10 @@ INSERT INTO `sys_logininfor` VALUES (123, 'admin', '127.0.0.1', '内网IP', 'Chr
 INSERT INTO `sys_logininfor` VALUES (124, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-06 21:58:04');
 INSERT INTO `sys_logininfor` VALUES (125, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-07 09:52:48');
 INSERT INTO `sys_logininfor` VALUES (126, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-07 10:16:54');
+INSERT INTO `sys_logininfor` VALUES (127, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-11 20:16:24');
+INSERT INTO `sys_logininfor` VALUES (128, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-11 21:10:54');
+INSERT INTO `sys_logininfor` VALUES (129, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:34:17');
+INSERT INTO `sys_logininfor` VALUES (130, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 20:27:44');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -1271,7 +1402,7 @@ CREATE TABLE `sys_menu`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '备注',
   PRIMARY KEY (`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2024 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 2025 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
@@ -1384,6 +1515,7 @@ INSERT INTO `sys_menu` VALUES (2020, '操作日志', 2014, 4, 'operlog', NULL, N
 INSERT INTO `sys_menu` VALUES (2021, '登录日志', 2014, 5, 'loginlog', NULL, NULL, '', 1, 0, 'C', '0', '0', NULL, 'tab', 'admin', '2025-11-06 20:17:18', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2022, '作业批改', 2000, 3, 'homework_grading', NULL, NULL, '', 1, 0, 'C', '0', '0', NULL, 'checkbox', 'admin', '2025-11-09 19:55:45', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2023, '提交列表', 2000, 4, 'homework_grading/list/:homeworkId', NULL, NULL, '', 1, 0, 'C', '1', '0', '', 'list', 'admin', '2025-11-09 19:56:17', 'admin', '2025-11-09 19:56:59', '');
+INSERT INTO `sys_menu` VALUES (2024, '论坛', 2011, 2, 'forum', NULL, NULL, '', 1, 0, 'M', '0', '0', NULL, 'message', 'admin', '2025-11-11 19:28:26', '', NULL, '');
 
 -- ----------------------------
 -- Table structure for sys_notice
@@ -1435,7 +1567,7 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 241 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 247 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -1581,6 +1713,12 @@ INSERT INTO `sys_oper_log` VALUES (237, '作业管理', 3, 'com.ruoyi.web.contro
 INSERT INTO `sys_oper_log` VALUES (238, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"333\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-10 00:00:00\",\"homeworkId\":22,\"params\":{},\"sessionId\":1,\"title\":\"444\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-09 19:57:24', 36);
 INSERT INTO `sys_oper_log` VALUES (239, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":22,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":16,\"studentId\":38,\"studentName\":\"黎文靖\",\"studentNo\":\"2023141460368\",\"submissionFiles\":\"测试作业.docx\",\"submitTime\":\"2025-11-09 19:57:59\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-09 19:57:59', 51);
 INSERT INTO `sys_oper_log` VALUES (240, '作业提交', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.updateSubmit()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"homeworkId\":22,\"params\":{},\"remark\":\"基本完成\",\"score\":90,\"status\":2,\"studentHomeworkId\":16,\"studentId\":38,\"submitTime\":\"2025-11-09 20:09:26\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-09 20:09:26', 28);
+INSERT INTO `sys_oper_log` VALUES (241, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/11/Clion_20251111191517A001.png\",\"content\":\"QT天气\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-12 00:00:00\",\"homeworkId\":23,\"params\":{},\"sessionId\":1,\"title\":\"QT\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-11 19:15:20', 20);
+INSERT INTO `sys_oper_log` VALUES (242, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"1111\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-12 00:00:00\",\"homeworkId\":24,\"params\":{},\"sessionId\":1,\"title\":\"111\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-11 19:18:17', 4);
+INSERT INTO `sys_oper_log` VALUES (243, '菜单管理', 1, 'com.ruoyi.web.controller.system.SysMenuController.add()', 'POST', 1, 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createBy\":\"admin\",\"icon\":\"message\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuName\":\"论坛\",\"menuType\":\"M\",\"orderNum\":2,\"params\":{},\"parentId\":2011,\"path\":\"forum\",\"status\":\"0\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-11 19:28:26', 352);
+INSERT INTO `sys_oper_log` VALUES (244, '作业管理', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"\",\"content\":\"\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-22 00:00:00\",\"homeworkId\":25,\"params\":{},\"sessionId\":1,\"title\":\"pre\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-11 20:19:40', 18);
+INSERT INTO `sys_oper_log` VALUES (245, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":25,\"params\":{},\"remark\":\"\",\"status\":1,\"studentHomeworkId\":17,\"studentId\":20,\"studentName\":\"岂皓月\",\"studentNo\":\"2023141460349\",\"submissionFiles\":\"Clion.png\",\"submitTime\":\"2025-11-11 20:21:05\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-11 20:21:05', 33);
+INSERT INTO `sys_oper_log` VALUES (246, '文章管理', 1, 'com.ruoyi.web.controller.proj_qhy.BbsArticleController.add()', 'POST', 1, 'admin', '研发部门', '/proj_qhy/article', '127.0.0.1', '内网IP', '{\"articleType\":\"技术\",\"author\":\"若依\",\"bookmarkCount\":0,\"commentCount\":0,\"cover\":\"/profile/upload/2025/11/11/屏幕截图 2023-11-08 200640_20251111212916A001.png\",\"hateCount\":0,\"id\":8,\"likeCount\":0,\"params\":{},\"status\":\"editting\",\"title\":\"1\",\"viewCount\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-11 21:29:31', 317);
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -1783,8 +1921,11 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-07 10:16:54', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
-INSERT INTO `sys_user` VALUES (2, 105, 'ry', '若依', '00', 'ry@qq.com', '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-10-30 17:06:55', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '测试员');
+INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-12 20:27:45', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
+INSERT INTO `sys_user` VALUES (2, 105, 'ry', '张三', '00', 'ry@qq.com', '15666666666', '1', 'https://img0.baidu.com/it/u=3661017254,2148146033&fm=253&app=138&f=JPEG?w=500&h=500', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-10-30 17:06:55', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '测试员');
+INSERT INTO `sys_user` VALUES (3, 103, 'student1', '李比', '00', 'student1@school.com', '13800138001', '0', 'https://img0.baidu.com/it/u=2660145230,331641081&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=625', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 10:30:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '学生');
+INSERT INTO `sys_user` VALUES (4, 105, 'teacher1', '王老师', '01', 'teacher1@school.com', '13900139001', '1', 'https://picsum.photos/200/200?random=2', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 11:20:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '教师');
+INSERT INTO `sys_user` VALUES (5, 103, 'student2', '赵六', '00', 'student2@school.com', '13700137001', '0', 'https://picsum.photos/200/200?random=3', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 09:15:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '学生');
 
 -- ----------------------------
 -- Table structure for sys_user_post
