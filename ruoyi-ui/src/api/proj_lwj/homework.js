@@ -75,7 +75,11 @@ export function getStudentSubmissions(studentNo) {
 
 // Convenience alias for grading (uses same backend endpoint as updateSubmission)
 export function gradeSubmission(data) {
-  return updateSubmission(data)
+  return request({
+    url: '/proj_lwj/homework/grade',
+    method: 'put',
+    data
+  })
 }
 
 export function deleteSubmission(id) {

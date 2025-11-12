@@ -110,6 +110,8 @@ public class ClassHomeworkController extends BaseController {
                 return AjaxResult.error("学号 " + sn + " 未找到对应的学生，请检查后重试。");
             }
             shw.setStudentId(cs.getStudentId());
+            // also ensure studentNo field is set to the canonical value from class_student
+            shw.setStudentNo(cs.getStudentNo());
         }
 
         // 如果前端没有传 studentId 或传的是空/无效，使用当前登录用户ID（确保与 sys_user.user_id 对应）
@@ -142,6 +144,8 @@ public class ClassHomeworkController extends BaseController {
         if (shw.getStatus() == null) {
             shw.setStatus(1); // 1=已提交
         }
+        // Debug log: show the submission object to verify studentNo/studentId before persisting
+        logger.info("submit - ClassStudentHomework payload before insert: {}", shw);
         int r = studentHomeworkService.insert(shw);
         return toAjax(r);
     }
@@ -164,7 +168,11 @@ public class ClassHomeworkController extends BaseController {
                 return AjaxResult.error(HttpStatus.NOT_FOUND, "学号 " + sn + " 未找到对应的学生，请检查后重试。");
             }
             shw.setStudentId(cs.getStudentId());
+            // ensure studentNo preserved/normalized from student record
+            shw.setStudentNo(cs.getStudentNo());
         }
+        // Debug log: show the submission object to verify studentNo/studentId before update
+        logger.info("updateSubmit - ClassStudentHomework payload before update: {}", shw);
 
         // check existing record: do not allow update if already graded
         try {
@@ -208,6 +216,10 @@ public class ClassHomeworkController extends BaseController {
         if (exist == null) {
             return AjaxResult.error(HttpStatus.NOT_FOUND, "提交记录不存在，无法批改");
         }
+
+        // Debug log: show grading payload and existing record to verify we won't overwrite submission files
+        logger.info("gradeSubmission payload: {}", shw);
+        logger.info("existing submission before grade: {}", exist);
 
         // Only update grading-related fields. Set corrected_by and corrected_time if not provided
         if (shw.getCorrectedBy() == null) {
