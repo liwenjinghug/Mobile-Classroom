@@ -39,19 +39,21 @@ export function delHomework(id, cascade) {
   })
 }
 
-export function submitHomework(data) {
+export function submitHomework(data, params) {
   return request({
     url: '/proj_lwj/homework/submit',
     method: 'post',
-    data
+    data,
+    params: params || {}
   })
 }
 
-export function updateSubmission(data) {
+export function updateSubmission(data, params) {
   return request({
     url: '/proj_lwj/homework/submit',
     method: 'put',
-    data
+    data,
+    params: params || {}
   })
 }
 

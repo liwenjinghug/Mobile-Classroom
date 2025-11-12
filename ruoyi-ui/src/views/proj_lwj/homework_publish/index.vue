@@ -8,7 +8,7 @@
       </el-form-item>
       <el-form-item label="课堂">
         <el-select v-model="form.sessionId" placeholder="请选择课堂">
-          <el-option v-for="s in sessions" :key="s.sessionId" :label="s.className" :value="s.sessionId" />
+          <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
         </el-select>
       </el-form-item>
       <el-form-item label="标题">
@@ -66,7 +66,7 @@
             <el-table-column label="操作" width="260">
               <template slot-scope="scope">
                 <el-button size="mini" type="primary" @click="startEdit(scope.row)" :disabled="scope.row.homeworkDeleted">修改</el-button>
-                <span v-if="scope.row.homeworkDeleted" style="color:#999;margin-left:8px">亦被老师删除</span>
+                <span v-if="scope.row.homeworkDeleted" style="color:#999;margin-left:8px">已被老师删除</span>
                 <el-button size="mini" type="danger" @click="confirmDelete(scope.row)" style="margin-left:6px">删除</el-button>
                 <el-button size="mini" @click="viewSubmissions(scope.row)" style="margin-left:6px">查看提交</el-button>
               </template>

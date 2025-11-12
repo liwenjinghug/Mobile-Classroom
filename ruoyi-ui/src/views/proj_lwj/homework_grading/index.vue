@@ -7,7 +7,7 @@
           <el-option v-for="c in courses" :key="c.courseId" :label="c.courseName" :value="c.courseId" />
         </el-select>
         <el-select v-model="form.sessionId" placeholder="选择课堂" filterable style="min-width:220px" @change="loadHomeworks">
-          <el-option v-for="s in sessions" :key="s.sessionId" :label="s.className" :value="s.sessionId" />
+          <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
         </el-select>
       </div>
     </div>

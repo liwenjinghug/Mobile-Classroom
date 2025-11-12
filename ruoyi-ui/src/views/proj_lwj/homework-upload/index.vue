@@ -16,7 +16,7 @@
         </el-select>
 
         <el-select v-model="formSessionId" placeholder="选择课堂" filterable @change="onSessionChange" style="min-width:260px">
-          <el-option v-for="s in sessions" :key="s.sessionId" :label="s.className" :value="s.sessionId" />
+          <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
         </el-select>
 
         <el-select v-model="selectedHomeworkId" placeholder="选择作业" style="min-width:340px">
@@ -61,8 +61,8 @@
       <div class="submission-section">
         <!-- name and studentNo -->
         <div style="margin-bottom:12px; display:flex; gap:8px; align-items:center">
-          <el-input v-model="studentName" placeholder="请输入姓名" style="width:200px"></el-input>
-          <el-input v-model="studentNo" placeholder="请输入学号" style="width:260px"></el-input>
+          <el-input v-model="studentName" placeholder="请输入姓名" style="width:180px"></el-input>
+          <el-input v-model="studentNo" placeholder="请输入学号" style="width:200px"></el-input>
           <el-button type="primary" size="mini" @click="confirmStudentId">确认学号</el-button>
           <div style="color:#888">(请先填写姓名和学号；确认后将显示您已提交的作业，并允许修改自己的提交)</div>
         </div>
@@ -107,6 +107,40 @@
           <el-button @click="$router.back()">返回</el-button>
         </div>
 
+        <!-- Edit dialog for modifying an existing submission -->
+        <el-dialog title="修改提交" :visible.sync="editDialogVisible" width="600px" @close="closeEditDialog">
+          <div>
+            <div style="margin-bottom:8px;font-weight:600">当前附件</div>
+            <div v-if="editUploadedFiles && editUploadedFiles.length">
+              <el-tag v-for="(f, idx) in editUploadedFiles" :key="idx" style="margin-right:8px;cursor:pointer" @click.native.prevent="previewFile(f)">{{ f }}</el-tag>
+            </div>
+            <div v-else style="color:#888;margin-bottom:8px">当前无附件，您可以上传新文件。</div>
+
+            <el-upload
+              ref="editUpload"
+              class="upload-demo"
+              :action="uploadUrl"
+              :headers="headers"
+              :on-success="editUploadSuccess"
+              :on-remove="editHandleRemove"
+              :file-list="editFileList"
+              :before-upload="beforeUpload"
+              multiple
+              list-type="text">
+              <el-button size="small" type="primary">选择文件</el-button>
+              <div slot="tip" class="el-upload__tip">上传后点击“保存修改”以提交变更。</div>
+            </el-upload>
+
+            <div style="margin-top:12px">
+              <el-input type="textarea" v-model="remark" placeholder="评语（可选）" rows="3"></el-input>
+            </div>
+          </div>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="closeEditDialog">取消</el-button>
+            <el-button type="primary" :loading="editSubmitLoading" @click="saveEditSubmission">保存修改</el-button>
+          </span>
+        </el-dialog>
+
         <!-- submissions table -->
         <el-card shadow="never" class="submissions-card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
@@ -138,7 +172,7 @@
               </el-table-column>
 
               <el-table-column prop="studentNo" label="学号" width="140">
-                <template #default="{ row }">{{ row.studentNo || row.student_no || row.studentId || '—' }}</template>
+                <template #default="{ row }">{{ row.student_no || '' }}</template>
               </el-table-column>
 
               <el-table-column prop="submissionFiles" label="附件">
@@ -170,13 +204,25 @@
 
               <el-table-column label="操作" width="140">
                 <template #default="{ row }">
-                  <el-button size="mini" type="primary" v-if="(studentConfirmed ? isRowOwn(row) : true) && canEditSubmission(row)" @click="editSubmission(row)">修改</el-button>
-                  <el-tooltip v-else-if="studentConfirmed && isRowOwn(row) && (row.homeworkDeleted || row.homework_deleted)" content="该作业已被老师删除，无法修改" placement="top">
+                  <!-- Deleted homework: show disabled '已删除' -->
+                  <el-tooltip v-if="row.homeworkDeleted || row.homework_deleted" content="该作业已被老师删除，无法修改" placement="top">
                     <el-button size="mini" type="primary" disabled>已删除</el-button>
                   </el-tooltip>
-                  <el-tooltip v-else-if="studentConfirmed && isRowOwn(row) && (row.gradedTime || row.is_graded || row.score !== null && row.score !== undefined)" content="该提交已被批改，无法修改" placement="top">
+
+                  <!-- Graded submissions: show disabled '已批改' -->
+                  <el-tooltip v-else-if="row.gradedTime || row.is_graded === 1 || (row.score !== null && row.score !== undefined)" content="该提交已被批改，无法修改" placement="top">
                     <el-button size="mini" type="primary" disabled>已批改</el-button>
                   </el-tooltip>
+
+                  <!-- Past-deadline: computed by isPastDeadline(row) -->
+                  <el-tooltip v-else-if="isPastDeadline(row)" content="已过截止时间，无法修改" placement="top">
+                    <el-button size="mini" type="primary" disabled>已过截止时间</el-button>
+                  </el-tooltip>
+
+                  <!-- Editable: show Modify button when allowed by canEditSubmission -->
+                  <el-button size="mini" type="primary" v-else-if="canEditSubmission(row)" @click="editSubmission(row)">修改</el-button>
+                  <!-- Allow the student to delete their own submission (confirm first). Only show when this row belongs to the current student and the homework isn't deleted -->
+                  <el-button size="mini" type="danger" v-if="isRowOwn(row) && !(row.homeworkDeleted || row.homework_deleted)" @click="confirmDelete(row)" style="margin-left:6px">删除</el-button>
                 </template>
               </el-table-column>
 
@@ -204,7 +250,8 @@ import {
   getSubmissions,
   listHomework,
   getStudentSubmissions,
-  updateSubmission
+  updateSubmission,
+  deleteSubmission
 } from '@/api/proj_lwj/homework'
 import { listCourse } from '@/api/proj_lw/course'
 import { getToken } from '@/utils/auth'
@@ -239,6 +286,8 @@ export default {
       studentName: '',
       studentNo: '',
       studentConfirmed: false,
+      // guard to prevent concurrent/rapid repeated loadMySubmissions calls
+      _loadingMySubmissions: false,
       // debounce timer id for auto-loading submissions when typing
       _loadMySubmissionsTimer: null,
 
@@ -258,6 +307,8 @@ export default {
       editUploadedFiles: [],
       editingSubmissionId: null,
       editSubmitLoading: false,
+      // edit remark input (for modification dialog)
+      remark: '',
 
       // meta
       resolvedStudentId: null,
@@ -276,21 +327,23 @@ export default {
       if (!this.uploadedFiles || this.uploadedFiles.length === 0) return true
       if (this.submitLoading) return true
       const existing = this.submissions && this.submissions.length ? this.submissions.find(s => String(s.homeworkId) === String(this.homeworkId)) : null
-      const graded = existing && ((existing.is_graded === 1) || existing.gradedTime || String(existing.status) === '2' || (existing.score !== null && existing.score !== undefined))
       const hwDeleted = !!(this.homework && (this.homework.homeworkDeleted || this.homework.homework_deleted))
-      // check deadline (if provided)
       const pastDeadline = this.homework && this.homework.deadline ? (new Date(this.homework.deadline).getTime() < Date.now()) : false
-      // If an existing (ungraded) submission belongs to the student, allow submission when the user is actively editing it
-      // i.e. when editingSubmissionId is set we should allow submitting an update; otherwise disable.
+      const graded = existing && (existing.gradedTime || existing.is_graded === 1 || existing.score !== null && existing.score !== undefined)
+
+      // If homework deleted or past deadline, always disable
+      if (hwDeleted || pastDeadline) return true
+
+      // If there is an existing submission, disallow new submission and disallow saving if it's graded
       if (existing) {
-        // if already graded or homework deleted or past deadline -> disable
-        if (graded || hwDeleted || pastDeadline) return true
-        // if there is an existing submission and the user is NOT in edit mode, disable the main "提交作业" button
+        if (graded) return true
+        // if there is an existing submission and user is not in edit mode, disable (prompt to use 修改)
         if (!this.editingSubmissionId) return true
-        // if user is in edit mode, allow (fall through)
       }
-      // Finally, if the component-level `submitted` flag is true and we're not editing, disable; otherwise enable
+
+      // if component-level submitted flag and not editing, disable
       if (this.submitted && !this.editingSubmissionId) return true
+
       return false
     },
     parsedHomeworkAttachments() {
@@ -306,20 +359,22 @@ export default {
        const mapped = source.map(s => {
           const obj = (s && typeof s === 'object') ? s : { __raw: s }
           return {
-            studentHomeworkId: obj.studentHomeworkId || obj.id || obj.student_homework_id || null,
-            homeworkId: obj.homeworkId || obj.homework_id || obj.homework || null,
-            homeworkTitle: obj.homeworkTitle || obj.title || (obj.__raw && obj.__raw.title) || '',
-            studentId: obj.studentId || obj.student_id || null,
-            studentNo: obj.studentNo || obj.student_no || obj.stu_no || '',
-            studentName: obj.studentName || obj.student_name || obj.student_name || '',
-            submissionFiles: obj.submissionFiles || obj.submission_files || obj.attachments || obj.files || '',
-            submitTime: obj.submitTime || obj.submit_time || obj.create_time || null,
-            gradedTime: obj.gradedTime || obj.gradeTime || obj.grade_time || obj.graded_at || obj.marked_at || obj.update_time || obj.updatedAt || null,
-            score: obj.score != null ? obj.score : (obj.grade != null ? obj.grade : null),
-            remark: obj.remark || obj.grade_comment || null,
-            homeworkDeleted: !!(obj.homeworkDeleted || obj.homework_deleted)
-          }
-       })
+             studentHomeworkId: obj.studentHomeworkId || obj.id || obj.student_homework_id || null,
+             homeworkId: obj.homeworkId || obj.homework_id || obj.homework || null,
+             homeworkTitle: obj.homeworkTitle || obj.title || (obj.__raw && obj.__raw.title) || '',
+             studentId: obj.studentId || obj.student_id || null,
+             // keep both forms: primary displayed student_no then fallback to studentNo
+             student_no: obj.student_no || obj.studentNo || obj.stu_no || '',
+             studentNo: obj.studentNo || obj.student_no || obj.stu_no || '',
+             studentName: obj.studentName || obj.student_name || obj.student_name || '',
+             submissionFiles: obj.submissionFiles || obj.submission_files || obj.attachments || obj.files || '',
+             submitTime: obj.submitTime || obj.submit_time || obj.create_time || null,
+             gradedTime: obj.gradedTime || obj.gradeTime || obj.grade_time || obj.graded_at || obj.marked_at || obj.update_time || obj.updatedAt || null,
+             score: obj.score != null ? obj.score : (obj.grade != null ? obj.grade : null),
+             remark: obj.remark || obj.grade_comment || null,
+             homeworkDeleted: !!(obj.homeworkDeleted || obj.homework_deleted)
+           }
+        })
 
       // If requested, only return submissions that have a score
       if (this.showOnlyGraded) {
@@ -652,21 +707,41 @@ export default {
       try {
         const payload = {
           studentHomeworkId: this.editingSubmissionId,
+          id: this.editingSubmissionId,
           homeworkId: this.homeworkId,
-          studentNo: this.studentNo,
-          studentName: this.studentName,
+          homework_id: this.homeworkId,
+          // student identifiers (send multiple variants to tolerate backend naming)
+          studentNo: this.studentNo || '',
+          student_no: this.studentNo || '',
+          stuNo: this.studentNo || '',
+          stu_no: this.studentNo || '',
+          // include resolved student id when available
+          studentId: this.resolvedStudentId || this.studentId || null,
+          student_id: this.resolvedStudentId || this.studentId || null,
+          studentName: this.studentName || '',
           submissionFiles: this.uploadedFiles.join(','),
           remark: ''
         }
+        // debug: print outgoing payload so we can verify student_no is present in the request
+        console.debug('submit payload:', payload)
+        this.debugLogs.push(`submit payload: ${JSON.stringify(payload)}`)
+
         let res
-        if (this.editingSubmissionId) res = await updateSubmission(payload)
-        else res = await submitHomework(payload)
+        // Also send student identifiers as URL params to be tolerant to backends expecting form/query params
+        const params = { student_no: this.studentNo || '', studentNo: this.studentNo || '', studentId: this.resolvedStudentId || this.studentId || null }
+        if (this.editingSubmissionId) res = await updateSubmission(payload, params)
+        else res = await submitHomework(payload, params)
+        console.debug('submit response:', res)
+        try { this.debugResp = `submit response:\n${JSON.stringify(res, null, 2)}` } catch (e) { this.debugResp = String(res) }
         const ok = (res && (res.code === 200 || res.code === 0 || res.success)) || res === 200
         if (ok) {
           this.$message.success('提交成功')
           this.resetUpload()
           await this.fetchSubmissions()
           await this.loadMySubmissions()
+          // If backend didn't persist student_no, patch local list to show 学号 in UI
+          const patched = this.patchLocalStudentNoForMySubmissions()
+          if (patched) this.$message.info('注意：学号在后台未保存，已在本地显示以便查看（请联系管理员修复后台持久化）')
           this.submitted = true
           this.editingSubmissionId = null
         } else {
@@ -687,30 +762,31 @@ export default {
       const r = raw || {}
       const studentNo = (r.studentNo || r.student_no || r.stu_no || '')
       const studentName = (r.studentName || r.student_name || r.nickName || r.nick_name || '')
-      const homeworkId = (r.homeworkId || r.homework_id || r.homework || null)
-      const studentId = (r.studentId || r.student_id || r.student || null)
-      const submissionFiles = (r.submissionFiles || r.submission_files || r.attachments || r.files || '')
-      const homeworkDeleted = !!(r.homeworkDeleted || r.homework_deleted)
-      const gradedTime = r.gradedTime || r.gradeTime || r.grade_time || r.graded_at || r.marked_at || r.update_time || r.updatedAt || null
-      const isGraded = !!(gradedTime || r.score != null || r.grade != null || r.is_graded === 1 || String(r.status) === '2')
-      return {
-        ...r,
-        studentHomeworkId: r.studentHomeworkId || r.student_homework_id || r.id || null,
-        homeworkId: homeworkId,
-        homeworkTitle: r.homeworkTitle || r.title || r.name || '',
-        studentId: studentId,
-        studentNo: studentNo ? String(studentNo).trim() : '',
-        studentName: studentName ? String(studentName).trim() : '',
-        submissionFiles: submissionFiles || '',
-        submitTime: r.submitTime || r.submit_time || r.create_time || null,
-        gradedTime: gradedTime,
-        is_graded: isGraded ? 1 : 0,
-        score: r.score != null ? r.score : (r.grade != null ? r.grade : null),
-        remark: r.remark || r.grade_comment || null,
-        homeworkDeleted: homeworkDeleted,
-        homework_deleted: homeworkDeleted
-      }
-    },
+       const homeworkId = (r.homeworkId || r.homework_id || r.homework || null)
+       const studentId = (r.studentId || r.student_id || r.student || null)
+       const submissionFiles = (r.submissionFiles || r.submission_files || r.attachments || r.files || '')
+       const homeworkDeleted = !!(r.homeworkDeleted || r.homework_deleted)
+       const gradedTime = r.gradedTime || r.gradeTime || r.grade_time || r.graded_at || r.marked_at || r.update_time || r.updatedAt || null
+       const isGraded = !!(gradedTime || r.score != null || r.grade != null || r.is_graded === 1 || String(r.status) === '2')
+       return {
+         ...r,
+         studentHomeworkId: r.studentHomeworkId || r.student_homework_id || r.id || null,
+         homeworkId: homeworkId,
+         homeworkTitle: r.homeworkTitle || r.title || r.name || '',
+         studentId: studentId,
+         studentNo: studentNo ? String(studentNo).trim() : '',
+         student_no: studentNo ? String(studentNo).trim() : '',
+         studentName: studentName ? String(studentName).trim() : '',
+         submissionFiles: submissionFiles || '',
+         submitTime: r.submitTime || r.submit_time || r.create_time || null,
+         gradedTime: gradedTime,
+         is_graded: isGraded ? 1 : 0,
+         score: r.score != null ? r.score : (r.grade != null ? r.grade : null),
+         remark: r.remark || r.grade_comment || null,
+         homeworkDeleted: homeworkDeleted,
+         homework_deleted: homeworkDeleted
+       }
+     },
 
     // confirm student identity and load personal submissions
     async confirmStudentId() {
@@ -769,6 +845,15 @@ export default {
         return
       }
 
+      // debounce short-circuit: prevent rapid repeated calls
+      if (this._loadMySubmissionsTimer) { clearTimeout(this._loadMySubmissionsTimer); this._loadMySubmissionsTimer = null }
+      // small debounce to collapse rapid inputs/calls
+      await new Promise(resolve => { this._loadMySubmissionsTimer = setTimeout(resolve, 120) })
+
+      // prevent concurrent execution
+      if (this._loadingMySubmissions) { this.debugLogs.push('loadMySubmissions: call ignored because another load is in progress'); return }
+      this._loadingMySubmissions = true
+
       const inputNo = (this.studentNo || '').toString().trim()
       const inputName = (this.studentName || '').toString().trim()
 
@@ -791,7 +876,7 @@ export default {
         }
 
         // filter for current student: prefer id, then exact studentNo, then name contains
-        const matched = (list || []).filter(s => {
+        let matched = (list || []).filter(s => {
           if (!s) return false;
           if (this.resolvedStudentId && s.studentId && String(s.studentId) === String(this.resolvedStudentId)) return true;
           if (s.studentId && String(s.studentId) === String(inputNo)) return true;
@@ -801,6 +886,15 @@ export default {
           if (inputName && s.studentName && (s.studentName === inputName || s.studentName.indexOf(inputName) !== -1)) return true;
           return false;
         })
+
+        // Deduplicate by studentHomeworkId (or fallback composite key)
+        const seen = new Set()
+        const unique = []
+        for (const s of matched) {
+          const key = String(s.studentHomeworkId || `${s.homeworkId || ''}_${s.studentId || s.studentNo || ''}`)
+          if (!seen.has(key)) { seen.add(key); unique.push(s) }
+        }
+        matched = unique
 
         this.debugLogs.push(`matched submissions count=${matched.length}`)
         console.log('loadMySubmissions matched', matched)
@@ -831,6 +925,8 @@ export default {
       } catch (e) {
         console.warn('getStudentSubmissions failed, falling back to local filtering', e)
         this.debugLogs.push(`getStudentSubmissions failed: ${e && e.message ? e.message : e}`)
+      } finally {
+        this._loadingMySubmissions = false
       }
 
       // final fallback: fetch current homework submissions and filter locally
@@ -846,7 +942,13 @@ export default {
             if (inputName && s.studentName && (s.studentName === inputName || s.studentName.indexOf(inputName) !== -1)) return true
             return false
           })
-          this.submissions = filtered
+          // dedupe filtered results
+          const seen2 = new Set(); const unique2 = []
+          for (const s of filtered) {
+            const key = String(s.studentHomeworkId || `${s.homeworkId || ''}_${s.studentId || s.studentNo || ''}`)
+            if (!seen2.has(key)) { seen2.add(key); unique2.push(s) }
+          }
+          this.submissions = unique2
           // force table refresh on fallback
           this.tableKey = `submissions-${Date.now()}-${(this.submissions || []).length}`
           if (this.submissions && this.submissions.length > 0) {
@@ -865,11 +967,15 @@ export default {
         this.debugLogs.push(`Fallback fetchSubmissions failed: ${e2 && e2.message ? e2.message : e}`)
         this.$message.error('加载学生提交失败')
         this.submissions = []
+      } finally {
+        this._loadingMySubmissions = false
       }
-    },
+     },
 
     editSubmission(row) {
       if (!row) return
+      // Prevent editing if the homework was deleted by teacher
+      if (row.homeworkDeleted || row.homework_deleted) { this.$message.error('该作业已被老师删除，无法修改'); return }
       // if student identity is confirmed, enforce own-submission restriction; otherwise allow editing unconfirmed entries (for convenience)
       if (this.studentConfirmed) {
         if (this.resolvedStudentId ? String(row.studentId) !== String(this.resolvedStudentId) : (row.studentNo && String(row.studentNo) !== String(this.studentNo))) {
@@ -879,28 +985,51 @@ export default {
 
       this.editingSubmissionId = row.studentHomeworkId
       this.homeworkId = this.getValidHomeworkId(row.homeworkId)
+      // Ensure the homework details are loaded (used for deadline checks); fetch asynchronously but still open dialog
       this.fetchHomework()
       // populate upload lists: show existing attachments in both main and edit contexts
       const attachments = this.parseAttachmentString(row.submissionFiles || row.attachments || row.files)
       this.uploadedFiles = attachments.slice()
       this.editUploadedFiles = attachments.slice()
       this.editFileList = []
+      // populate remark from the existing row
+      this.remark = row.remark || ''
+      // Open edit dialog to allow modifications
       this.editDialogVisible = true
       this.$nextTick(() => this.$message.success('已打开修改窗口，您可以添加或删除附件，然后保存'))
     },
 
+    closeEditDialog() {
+      this.editDialogVisible = false
+      this.editingSubmissionId = null
+      this.editFileList = []
+      this.editUploadedFiles = []
+      this.remark = ''
+    },
+
     canEditSubmission(row) {
       if (!row) return false
+      // Disallow if homework itself was deleted
       if (row.homeworkDeleted || row.homework_deleted) return false
-      // treat presence of gradedTime, is_graded, score or status=2 as graded
-      if (row.gradedTime || row.is_graded === 1 || String(row.status) === '2') return false
-      if (row.score !== null && row.score !== undefined) return false
-      // allow edit before deadline if not graded
-      if (this.homework && this.homework.deadline) {
-        const past = new Date(this.homework.deadline).getTime() < Date.now()
-        if (past) return false
-      }
+      // Disallow editing if the submission is already graded
+      if (row.gradedTime || row.is_graded === 1 || (row.score !== null && row.score !== undefined)) return false
+      // Disallow editing if past deadline
+      // NOTE: allow editing even if past deadline per requirement
       return true
+     },
+
+    isPastDeadline(row) {
+      if (!row) return false
+      // prefer row.deadline if present
+      let rowDeadline = row.deadline || null
+      // fallback: if row.homeworkId matches current homeworkId, use this.homework.deadline
+      if (!rowDeadline && row.homeworkId && String(row.homeworkId) === String(this.homeworkId) && this.homework && this.homework.deadline) rowDeadline = this.homework.deadline
+      if (!rowDeadline) return false
+      try {
+        return new Date(rowDeadline).getTime() < Date.now()
+      } catch (e) {
+        return false
+      }
     },
 
     async saveEditSubmission() {
@@ -910,21 +1039,60 @@ export default {
       if (!filesToSubmit || filesToSubmit.length === 0) { this.$message.error('请先上传至少一个文件'); return }
       this.editSubmitLoading = true
       try {
-        const payload = { studentHomeworkId: this.editingSubmissionId, homeworkId: this.homeworkId, studentNo: this.studentNo, studentName: this.studentName, submissionFiles: filesToSubmit.join(','), remark: '' }
+        // Build a payload shape tolerant to backend naming. Some backends expect 'id' instead of studentHomeworkId.
+        const payload = {
+          studentHomeworkId: this.editingSubmissionId,
+          id: this.editingSubmissionId,
+          homeworkId: this.homeworkId,
+          homework_id: this.homeworkId,
+          studentNo: this.studentNo || '',
+          student_no: this.studentNo || '',
+          stuNo: this.studentNo || '',
+          stu_no: this.studentNo || '',
+          studentId: this.resolvedStudentId || this.studentId || null,
+          student_id: this.resolvedStudentId || this.studentId || null,
+          studentName: this.studentName || '',
+          submissionFiles: (filesToSubmit || []).join(','),
+          attachments: (filesToSubmit || []).join(','),
+          remark: this.remark || ''
+        }
+
+        // Log payload for debugging (will appear in browser console)
+        console.debug('saveEditSubmission payload:', payload)
         const res = await updateSubmission(payload)
-        const ok = (res && (res.code === 200 || res.code === 0 || res.success)) || res === 200
+        console.debug('saveEditSubmission response:', res)
+
+        // set debugResp for internal troubleshooting (hidden by default)
+        try { this.debugResp = `updateSubmission response:\n${JSON.stringify(res, null, 2)}` } catch (e) { this.debugResp = String(res) }
+
+        // success checker: adapt to multiple common shapes
+        const ok = !!( (res && (res.code === 200 || res.code === 0 || res.success === true)) || res === 200 || (res && res.data && (res.data.updated || res.data.id)) )
         if (ok) {
           this.$message.success('修改提交成功')
           this.editDialogVisible = false
           this.resetUpload()
           await this.fetchSubmissions()
           await this.loadMySubmissions()
+          // Patch local submissions if backend didn't persist student_no
+          const patched2 = this.patchLocalStudentNoForMySubmissions()
+          if (patched2) this.$message.info('注意：学号在后台未保存，已在本地显示以便查看（请联系管理员修复后台持久化）')
           this.submitted = true
           this.editingSubmissionId = null
+          this.remark = ''
         } else {
-          this.$message.error((res && res.msg) || '修改提交失败')
+          // try to surface server-provided message
+          const serverMsg = (res && (res.msg || res.message)) || (res && res.data && (res.data.msg || res.data.message))
+          console.warn('updateSubmission failed', res)
+          if (serverMsg) this.$message.error(`修改提交失败：${serverMsg}`)
+          else this.$message.error('修改提交失败，请查看控制台或联系管理员')
         }
-      } catch (err) { console.error('修改提交失败', err); this.$message.error('修改提交失败') } finally { this.editSubmitLoading = false }
+      } catch (err) {
+        console.error('修改提交失败', err)
+        // if axios-style error with response, show response data
+        const info = err && err.response && err.response.data ? (err.response.data.msg || err.response.data.message || JSON.stringify(err.response.data)) : (err && err.message ? err.message : String(err))
+        try { this.debugResp = `updateSubmission error:\n${JSON.stringify(err && err.response ? err.response.data : err, null, 2)}` } catch (e) { this.debugResp = String(err) }
+        this.$message.error(`修改提交失败：${info}`)
+      } finally { this.editSubmitLoading = false }
     },
 
     // Determine whether the provided row belongs to the currently resolved student
@@ -937,7 +1105,63 @@ export default {
       // sometimes studentId may be in studentId field but we only have studentNo input
       if (this.resolvedStudentId && row.studentId == null && row.studentNo) return String(row.studentNo) === String(this.studentNo)
       return false
-    }
+    },
+
+    // If backend did not persist student_no, patch local submissions so the UI shows the 学号
+    patchLocalStudentNoForMySubmissions() {
+      try {
+        const myNo = (this.studentNo || '').toString().trim()
+        if (!myNo) return false
+        let updated = false
+        if (!this.submissions || !Array.isArray(this.submissions)) return false
+        this.submissions = (this.submissions || []).map(s => {
+          if (!s) return s
+          const copy = { ...s }
+          // If student_no missing, but this looks like the current student's record, fill it in locally
+          const isMatch = (copy.studentId && this.resolvedStudentId && String(copy.studentId) === String(this.resolvedStudentId))
+            || (copy.studentNo && String(copy.studentNo) === myNo)
+            || (!copy.studentNo && String(copy.homeworkId) === String(this.homeworkId))
+          if ((!copy.student_no || copy.student_no === '') && isMatch) {
+            copy.student_no = myNo
+            copy.studentNo = myNo
+            updated = true
+          }
+          return copy
+        })
+        if (updated) this.tableKey = `submissions-patched-${Date.now()}`
+        return updated
+      } catch (e) {
+        console.warn('patchLocalStudentNoForMySubmissions failed', e)
+        return false
+      }
+    },
+
+    // Confirm and delete a student's submission record
+    async confirmDelete(row) {
+      if (!row || !row.studentHomeworkId) return
+      try {
+        await this.$confirm('确定要删除该提交记录吗？此操作无法撤销。', '删除确认', { type: 'warning' })
+      } catch (e) { return }
+      this.$loading && this.$loading({ text: '正在删除，请稍候' })
+      try {
+        const res = await deleteSubmission(row.studentHomeworkId)
+        // handle common success shapes
+        const ok = !!( (res && (res.code === 200 || res.code === 0 || res.success)) || res === 200 )
+        if (ok) {
+          this.$message.success('删除成功')
+          await this.fetchSubmissions()
+          await this.loadMySubmissions()
+          return
+        }
+        this.$message.error((res && res.msg) || '删除失败')
+      } catch (err) {
+        console.error('删除提交失败', err)
+        this.$message.error('删除失败，请稍后重试')
+      } finally {
+        // close any global loading overlay
+        try { const l = document.querySelector('.el-loading-mask'); if (l) l.remove() } catch (e) {}
+      }
+    },
   }
 }
 </script>
