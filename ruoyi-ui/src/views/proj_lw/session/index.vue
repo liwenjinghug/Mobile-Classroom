@@ -23,15 +23,15 @@
             <div class="session-id">课堂ID: {{ session.sessionId }}</div>
           </div>
           <div class="session-actions">
-            <el-tag :type="getStatusType(session.status)">
-              {{ getStatusText(session.status) }}
+            <el-tag :type="getStatusType(session.calculatedStatus)">
+              {{ getStatusText(session.calculatedStatus) }}
             </el-tag>
             <el-button
               size="mini"
               type="text"
               icon="el-icon-video-play"
               @click="handleEnterClass(session)"
-              :disabled="session.status !== 1"
+              :disabled="session.calculatedStatus !== 1"
               v-hasPermi="['projlw:session:enter']"
             >进入课堂</el-button>
             <el-button
@@ -147,13 +147,7 @@
         <el-form-item label="课堂人数" prop="totalStudents">
           <el-input-number v-model="form.totalStudents" :min="1" :max="200" placeholder="请输入课堂人数" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="课堂状态" prop="status">
-          <el-radio-group v-model="form.status">
-            <el-radio :label="0">未开始</el-radio>
-            <el-radio :label="1">进行中</el-radio>
-            <el-radio :label="2">已结束</el-radio>
-          </el-radio-group>
-        </el-form-item>
+        <!-- 移除状态选择 -->
         <el-form-item label="课程ID">
           <el-input :value="courseId" disabled />
         </el-form-item>
@@ -173,23 +167,15 @@ export default {
   name: "ClassSession",
   data() {
     return {
-      // 遮罩层
       loading: false,
-      // 提交加载状态
       submitLoading: false,
-      // 课堂列表
       sessionList: [],
-      // 课程名称
       courseName: '',
-      // 课程ID
       courseId: null,
-      // 弹出层标题
       title: "",
-      // 是否显示弹出层
       open: false,
-      // 表单参数
+      statusTimer: null,
       form: {},
-      // 表单校验
       rules: {
         teacher: [
           { required: true, message: "授课老师不能为空", trigger: "blur" }
@@ -211,9 +197,6 @@ export default {
         ],
         totalStudents: [
           { required: true, message: "请输入课堂人数", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "请选择课堂状态", trigger: "change" }
         ]
       }
     };
@@ -222,6 +205,17 @@ export default {
     this.courseId = this.$route.query.courseId;
     this.courseName = this.$route.query.courseName;
     this.getList();
+  },
+  mounted() {
+    // 每分钟检查一次状态
+    this.statusTimer = setInterval(() => {
+      this.updateAllSessionStatus();
+    }, 60000);
+  },
+  beforeDestroy() {
+    if (this.statusTimer) {
+      clearInterval(this.statusTimer);
+    }
   },
   methods: {
     /** 查询课堂列表 */
@@ -232,6 +226,7 @@ export default {
       };
       listSession(queryParams).then(response => {
         this.sessionList = response.rows || [];
+        this.updateAllSessionStatus();
         this.loading = false;
       }).catch(error => {
         console.error("获取课堂列表失败:", error);
@@ -239,60 +234,123 @@ export default {
         this.loading = false;
       });
     },
+
+    /** 更新所有课堂状态 */
+    updateAllSessionStatus() {
+      this.sessionList.forEach(session => {
+        this.calculateSessionStatus(session);
+      });
+    },
+
+    /** 计算课堂状态 */
+    calculateSessionStatus(session) {
+      const now = new Date();
+      const currentWeekDay = now.getDay(); // 0-6, 0是周日
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+
+      // 转换星期格式
+      let systemWeekDay;
+      if (currentWeekDay === 0) {
+        systemWeekDay = '7'; // 周日
+      } else {
+        systemWeekDay = currentWeekDay.toString();
+      }
+
+      const sessionWeekDay = session.weekDay;
+
+      // 处理时间格式
+      let startTime = session.startTime || '';
+      let endTime = session.endTime || '';
+
+      if (startTime.includes(' ')) {
+        startTime = startTime.split(' ')[1].substring(0, 5);
+      }
+      if (endTime.includes(' ')) {
+        endTime = endTime.split(' ')[1].substring(0, 5);
+      }
+
+      const startMinutes = this.timeToMinutes(startTime);
+      const endMinutes = this.timeToMinutes(endTime);
+
+      // 状态判断
+      if (sessionWeekDay === systemWeekDay) {
+        if (currentTime >= startMinutes && currentTime <= endMinutes) {
+          session.calculatedStatus = 1; // 进行中
+        } else if (currentTime < startMinutes) {
+          session.calculatedStatus = 0; // 未开始
+        } else {
+          session.calculatedStatus = 2; // 已结束
+        }
+      } else {
+        const sessionDayNum = parseInt(sessionWeekDay);
+        const currentDayNum = parseInt(systemWeekDay);
+
+        if (sessionDayNum < currentDayNum) {
+          session.calculatedStatus = 2; // 已结束
+        } else {
+          session.calculatedStatus = 0; // 未开始
+        }
+      }
+    },
+
+    /** 时间字符串转换为分钟数 */
+    timeToMinutes(timeStr) {
+      if (!timeStr) return 0;
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours * 60 + minutes;
+    },
+
     /** 返回按钮操作 */
     handleBack() {
       this.$router.push('/proj_lw/course');
     },
+
     // 取消按钮
     cancel() {
       this.open = false;
       this.reset();
     },
+
     // 表单重置
     reset() {
       this.form = {
         sessionId: null,
-        className: this.courseName, // 直接使用课程名称
+        className: this.courseName,
         teacherId: 1,
         teacher: null,
         weekDay: null,
         startTime: null,
         endTime: null,
-        classDuration: 45, // 默认45分钟
-        status: 0,
+        classDuration: 45,
         totalStudents: 30,
-        courseId: this.courseId
+        courseId: this.courseId,
+        status: 0
       };
       this.resetForm("form");
     },
+
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
       this.open = true;
       this.title = "添加课堂";
     },
+
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
       const sessionId = row.sessionId;
       getSession(sessionId).then(response => {
         this.form = response.data;
-        // 确保数字字段有值
         this.form.totalStudents = this.form.totalStudents || 30;
         this.form.teacherId = this.form.teacherId || 1;
         this.form.classDuration = this.form.classDuration || 45;
 
-        // 处理时间格式
-        if (this.form.startTime) {
-          // 如果是从数据库获取的完整时间戳，提取时间部分
-          if (this.form.startTime.includes(' ')) {
-            this.form.startTime = this.form.startTime.split(' ')[1].substring(0, 5);
-          }
+        if (this.form.startTime && this.form.startTime.includes(' ')) {
+          this.form.startTime = this.form.startTime.split(' ')[1].substring(0, 5);
         }
-        if (this.form.endTime) {
-          if (this.form.endTime.includes(' ')) {
-            this.form.endTime = this.form.endTime.split(' ')[1].substring(0, 5);
-          }
+        if (this.form.endTime && this.form.endTime.includes(' ')) {
+          this.form.endTime = this.form.endTime.split(' ')[1].substring(0, 5);
         }
 
         this.open = true;
@@ -302,14 +360,14 @@ export default {
         this.$modal.msgError("获取课堂详情失败");
       });
     },
+
     /** 进入课堂按钮操作 */
     handleEnterClass(row) {
-      if (row.status !== 1) {
+      if (row.calculatedStatus !== 1) {
         this.$modal.msgWarning("只有进行中的课堂才能进入");
         return;
       }
 
-      // 跳转到上课界面
       this.$router.push({
         path: '/proj_lw/classroom',
         query: {
@@ -321,50 +379,40 @@ export default {
         }
       });
     },
+
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
           this.submitLoading = true;
 
-          // 确保数字字段有值
           this.form.totalStudents = this.form.totalStudents || 30;
           this.form.teacherId = this.form.teacherId || 1;
           this.form.classDuration = this.form.classDuration || 45;
           this.form.courseId = this.courseId;
-          this.form.className = this.courseName; // 直接使用课程名称
+          this.form.className = this.courseName;
+          this.form.status = 0; // 后端存储固定为0
 
-          // 创建深拷贝，避免修改原始数据
           const submitData = { ...this.form };
 
-          if (submitData.sessionId != null) {
-            // 修改操作
-            updateSession(submitData).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            }).catch(error => {
-              console.error("修改课堂失败:", error);
-              this.$modal.msgError("修改失败: " + (error.message || "请检查数据格式"));
-            }).finally(() => {
-              this.submitLoading = false;
-            });
-          } else {
-            // 新增操作
-            addSession(submitData).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            }).catch(error => {
-              console.error("新增课堂失败:", error);
-              this.$modal.msgError("新增失败: " + (error.message || "请检查数据格式"));
-            }).finally(() => {
-              this.submitLoading = false;
-            });
-          }
+          const request = submitData.sessionId != null
+            ? updateSession(submitData)
+            : addSession(submitData);
+
+          request.then(response => {
+            this.$modal.msgSuccess(submitData.sessionId != null ? "修改成功" : "新增成功");
+            this.open = false;
+            this.getList();
+          }).catch(error => {
+            console.error("操作失败:", error);
+            this.$modal.msgError("操作失败: " + (error.message || "请检查数据格式"));
+          }).finally(() => {
+            this.submitLoading = false;
+          });
         }
       });
     },
+
     /** 删除按钮操作 */
     handleDelete(row) {
       const sessionId = row.sessionId;
@@ -375,6 +423,7 @@ export default {
         this.$modal.msgSuccess("删除成功");
       }).catch(() => {});
     },
+
     /** 获取状态文本 */
     getStatusText(status) {
       const statusMap = {
@@ -384,6 +433,7 @@ export default {
       };
       return statusMap[status] || '未知';
     },
+
     /** 获取状态类型 */
     getStatusType(status) {
       const typeMap = {
@@ -393,6 +443,7 @@ export default {
       };
       return typeMap[status] || 'info';
     },
+
     /** 格式化课堂时间显示 */
     formatSessionTime(session) {
       const weekDayMap = {
@@ -409,7 +460,6 @@ export default {
       let startTime = session.startTime || '';
       let endTime = session.endTime || '';
 
-      // 如果时间包含日期部分，只取时间部分
       if (startTime.includes(' ')) {
         startTime = startTime.split(' ')[1].substring(0, 5);
       }
@@ -424,6 +474,7 @@ export default {
 </script>
 
 <style scoped>
+/* 保持原有样式不变 */
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -526,7 +577,6 @@ export default {
   margin-top: 4px;
 }
 
-/* 进入课堂按钮样式 */
 .el-button--text[disabled] {
   color: #c0c4cc !important;
   cursor: not-allowed !important;
