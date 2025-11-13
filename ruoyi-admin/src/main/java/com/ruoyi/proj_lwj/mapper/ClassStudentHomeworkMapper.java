@@ -19,6 +19,7 @@ public interface ClassStudentHomeworkMapper {
             "  csh.submit_time, " +
             "  csh.grade, " +
             "  csh.grade_comment, " +
+            "  csh.corrected_time, " +
             "  COALESCE(csh.status, '0') AS status, " +
             "  ch.title AS homework_title " +
             "FROM class_session_student css " +
@@ -39,6 +40,8 @@ public interface ClassStudentHomeworkMapper {
             @Result(property = "score", column = "grade"),
             // DB column is `grade_comment` -> map to property `remark`
             @Result(property = "remark", column = "grade_comment"),
+            // DB column `corrected_time` -> map to property `correctedTime`（批改时间）
+            @Result(property = "correctedTime", column = "corrected_time"),
             @Result(property = "status", column = "status"),
             @Result(property = "studentName", column = "student_name"),
             @Result(property = "homeworkTitle", column = "homework_title")
@@ -55,6 +58,7 @@ public interface ClassStudentHomeworkMapper {
             @Result(property = "submitTime", column = "submit_time"),
             @Result(property = "score", column = "grade"),
             @Result(property = "remark", column = "grade_comment"),
+            @Result(property = "correctedTime", column = "corrected_time"),
             @Result(property = "status", column = "status"),
             @Result(property = "studentName", column = "student_name"),
             @Result(property = "homeworkTitle", column = "homework_title")
@@ -71,6 +75,7 @@ public interface ClassStudentHomeworkMapper {
             @Result(property = "submitTime", column = "submit_time"),
             @Result(property = "score", column = "grade"),
             @Result(property = "remark", column = "grade_comment"),
+            @Result(property = "correctedTime", column = "corrected_time"),
             @Result(property = "status", column = "status"),
             @Result(property = "studentName", column = "student_name"),
             @Result(property = "homeworkTitle", column = "homework_title")
@@ -88,6 +93,7 @@ public interface ClassStudentHomeworkMapper {
             @Result(property = "submitTime", column = "submit_time"),
             @Result(property = "score", column = "grade"),
             @Result(property = "remark", column = "grade_comment"),
+            @Result(property = "correctedTime", column = "corrected_time"),
             @Result(property = "status", column = "status"),
             @Result(property = "studentName", column = "student_name"),
             @Result(property = "homeworkTitle", column = "homework_title")
@@ -105,6 +111,7 @@ public interface ClassStudentHomeworkMapper {
             @Result(property = "submitTime", column = "submit_time"),
             @Result(property = "score", column = "grade"),
             @Result(property = "remark", column = "grade_comment"),
+            @Result(property = "correctedTime", column = "corrected_time"),
             @Result(property = "status", column = "status"),
             @Result(property = "studentName", column = "student_name"),
             @Result(property = "homeworkTitle", column = "homework_title")
@@ -127,6 +134,8 @@ public interface ClassStudentHomeworkMapper {
     int deleteByHomeworkIds(Long[] homeworkIds);
 
     // 新增：专用的批改更新，只更新评分/评语/批改相关字段，避免覆盖学生提交内容
-    @Update("UPDATE class_student_homework SET grade=#{score}, grade_comment=#{remark}, is_graded=#{isGraded}, corrected_by=#{correctedBy}, corrected_time=#{correctedTime}, update_by=#{updateBy}, update_time=NOW() WHERE id=#{studentHomeworkId}")
+    // NOTE: `rubric_scores` 列在某些数据库实例可能不存在（见表结构），
+    // 因此此处不更新该列以避免 SQL 错误。若需要使用评分细则，请在数据库中添加该列或启用相应迁移。
+    @Update("UPDATE class_student_homework SET grade=#{score}, grade_comment=#{remark}, is_graded=#{isGraded}, corrected_by=#{correctedBy}, corrected_time=#{correctedTime}, grade_attachment=#{gradeAttachment}, word_count=#{wordCount}, update_by=#{updateBy}, update_time=NOW() WHERE id=#{studentHomeworkId}")
     int updateGrade(ClassStudentHomework shw);
 }

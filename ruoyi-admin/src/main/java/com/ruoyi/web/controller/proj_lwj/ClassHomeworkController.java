@@ -74,9 +74,13 @@ public class ClassHomeworkController extends BaseController {
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids, @RequestParam(required = false, defaultValue = "false") boolean cascade) {
         try {
-            if (cascade) {
-                // delete student submissions linked to these homework ids first
+            // Always attempt to delete student submissions linked to these homework ids first.
+            // This ensures student submission records are removed when a homework is deleted by teacher.
+            // Any exception during cascade delete is logged but will not prevent homework deletion.
+            try {
                 studentHomeworkService.deleteByHomeworkIds(ids);
+            } catch (Exception ex) {
+                logger.warn("Cascade delete of student submissions failed (non-fatal)", ex);
             }
         } catch (Exception ex) {
             logger.warn("Cascade delete of student submissions failed", ex);

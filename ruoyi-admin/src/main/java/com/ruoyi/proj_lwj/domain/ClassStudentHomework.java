@@ -19,6 +19,8 @@ public class ClassStudentHomework extends BaseEntity {
     // DB column `grade` is DECIMAL(5,2) — use BigDecimal in Java to preserve precision
     private BigDecimal score;
     private Integer status; // 0=未提交 1=已提交 2=已批改
+    // DB 列 `grade_comment` 对应此属性（批改评语）
+    // 注意：数据库列名为 grade_comment，Mapper 中以 column = "grade_comment" 映射到此属性 remark
     private String remark;
 
     // 新增字段：学生姓名（或学号显示用字段）

@@ -205,35 +205,52 @@
               <el-table-column label="操作" width="200">
                 <template #default="{ row }">
                   <div class="action-buttons">
-                    <!-- Keep order fixed and use hidden placeholders to avoid layout shift -->
+                    <!-- Render based on priority: 已删除 -> 仅删除按钮; 已批改 -> 已批改(禁用); 过期 -> 已过截止时间(禁用); 否则 显示 修改 + 删除(仅本人可删) -->
+                    <!-- Slot 1: primary state / deleted handling -->
                     <div class="action-slot">
-                      <el-tooltip v-if="row.homeworkDeleted || row.homework_deleted" content="该作业已被老师删除，无法修改" placement="top">
-                        <el-button class="action-btn" size="mini" type="primary" disabled>已删除</el-button>
-                      </el-tooltip>
-                      <span v-else-if="false" class="action-button-placeholder"></span>
-                    </div>
-
-                    <div class="action-slot">
-                      <el-tooltip v-if="row.gradedTime || row.is_graded === 1 || (row.score !== null && row.score !== undefined)" content="该提交已被批改，无法修改" placement="top">
-                        <el-button class="action-btn" size="mini" type="primary" disabled>已批改</el-button>
-                      </el-tooltip>
+                      <template v-if="row.homeworkDeleted || row.homework_deleted">
+                        <!-- If homework was deleted, show delete button only for the owner; others see a disabled label -->
+                        <el-button v-if="isRowOwn(row)" class="action-btn danger" size="mini" type="danger" @click="confirmDelete(row)">删除</el-button>
+                        <el-tooltip v-else content="该作业已被老师删除" placement="top">
+                          <el-button class="action-btn" size="mini" type="primary" disabled>已删除</el-button>
+                        </el-tooltip>
+                      </template>
                       <span v-else class="action-button-placeholder"></span>
                     </div>
 
+                    <!-- Slot 2: graded (disabled) -->
                     <div class="action-slot">
-                      <el-tooltip v-if="isPastDeadline(row)" content="已过截止时间，无法修改" placement="top">
-                        <el-button class="action-btn" size="mini" type="primary" disabled>已过截止时间</el-button>
-                      </el-tooltip>
+                      <template v-if="!row.homeworkDeleted && (row.gradedTime || row.is_graded === 1 || (row.score !== null && row.score !== undefined))">
+                        <el-tooltip content="该提交已被批改，无法修改" placement="top">
+                          <el-button class="action-btn" size="mini" type="primary" disabled>已批改</el-button>
+                        </el-tooltip>
+                      </template>
                       <span v-else class="action-button-placeholder"></span>
                     </div>
 
+                    <!-- Slot 3: past deadline (disabled) -->
                     <div class="action-slot">
-                      <el-button v-if="canEditSubmission(row)" class="action-btn" size="mini" type="primary" @click="editSubmission(row)">修改</el-button>
+                      <template v-if="!row.homeworkDeleted && ! (row.gradedTime || row.is_graded === 1 || (row.score !== null && row.score !== undefined)) && isPastDeadline(row)">
+                        <el-tooltip content="已过截止时间，无法修改" placement="top">
+                          <el-button class="action-btn" size="mini" type="primary" disabled>已过截止时间</el-button>
+                        </el-tooltip>
+                      </template>
                       <span v-else class="action-button-placeholder"></span>
                     </div>
 
+                    <!-- Slot 4: modify button (only when not deleted, not graded, and not past deadline) -->
                     <div class="action-slot">
-                      <el-button v-if="isRowOwn(row) && !(row.homeworkDeleted || row.homework_deleted)" class="action-btn danger" size="mini" type="danger" @click="confirmDelete(row)">删除</el-button>
+                      <template v-if="!row.homeworkDeleted && ! (row.gradedTime || row.is_graded === 1 || (row.score !== null && row.score !== undefined)) && !isPastDeadline(row) && canEditSubmission(row)">
+                        <el-button class="action-btn" size="mini" type="primary" @click="editSubmission(row)">修改</el-button>
+                      </template>
+                      <span v-else class="action-button-placeholder"></span>
+                    </div>
+
+                    <!-- Slot 5: delete button for non-deleted homework (only owner) -->
+                    <div class="action-slot">
+                      <template v-if="!row.homeworkDeleted && isRowOwn(row)">
+                        <el-button class="action-btn danger" size="mini" type="danger" @click="confirmDelete(row)">删除</el-button>
+                      </template>
                       <span v-else class="action-button-placeholder"></span>
                     </div>
                   </div>
@@ -335,19 +352,17 @@ export default {
   },
   computed: {
     submitDisabled() {
-      // need studentNo, at least one file, not already submitted or graded, and homework exists & not deleted & before deadline
+      // need studentNo, either at least one new file OR existing unsubmitted attachments, not already submitted or graded,
+      // and homework exists & not deleted & before deadline
       if (!this.homeworkId) return true
       if (!this.studentNo) return true
-      if (!this.uploadedFiles || this.uploadedFiles.length === 0) return true
       if (this.submitLoading) return true
       const existing = this.submissions && this.submissions.length ? this.submissions.find(s => String(s.homeworkId) === String(this.homeworkId)) : null
-      const hwDeleted = !!(this.homework && (this.homework.homeworkDeleted || this.homework.homework_deleted))
-      const pastDeadline = this.homework && this.homework.deadline ? (new Date(this.homework.deadline).getTime() < Date.now()) : false
+      // Determine whether we have files to send: either newly uploadedFiles OR existing record already contains attachments
+      const hasNewFiles = this.uploadedFiles && this.uploadedFiles.length > 0
+      const existingHasFiles = existing && ( (existing.submissionFiles && String(existing.submissionFiles).trim() !== '') || (existing.attachments && String(existing.attachments).trim() !== '') || (existing.files && String(existing.files).trim() !== '') )
+      if (!hasNewFiles && !existingHasFiles && !this.editingSubmissionId) return true
 
-      // If homework deleted or past deadline, always disable
-      if (hwDeleted || pastDeadline) return true
-
-      // If there is an existing submission record for this student/homework, check whether it's already submitted/graded.
       if (existing) {
         const isActuallySubmitted = Boolean((existing.submitTime && String(existing.submitTime).trim() !== '') || (existing.status && String(existing.status) === '2') || (existing.score !== null && existing.score !== undefined) || (existing.gradedTime))
         // If it is already submitted/graded, disallow creating a new submission; require edit mode to modify
@@ -390,19 +405,23 @@ export default {
              studentName: obj.studentName || obj.student_name || obj.student_name || '',
              submissionFiles: obj.submissionFiles || obj.submission_files || obj.attachments || obj.files || '',
              submitTime: obj.submitTime || obj.submit_time || obj.create_time || null,
-             gradedTime: obj.gradedTime || obj.gradeTime || obj.grade_time || obj.graded_at || obj.marked_at || obj.update_time || obj.updatedAt || null,
+             // include corrected_time / correctedTime as a source for gradedTime (批改时间)
+             gradedTime: obj.gradedTime || obj.correctedTime || obj.corrected_time || obj.gradeTime || obj.grade_time || obj.graded_at || obj.marked_at || obj.update_time || obj.updatedAt || null,
              score: obj.score != null ? obj.score : (obj.grade != null ? obj.grade : null),
              remark: obj.remark || obj.grade_comment || null,
              homeworkDeleted: !!(obj.homeworkDeleted || obj.homework_deleted)
            }
         })
 
+      // Remove records whose homework has been deleted by the teacher — do not show them in the submissions list
+      const visible = (mapped || []).filter(r => !(r && r.homeworkDeleted))
+
       // If requested, only return submissions that have a score
       if (this.showOnlyGraded) {
-        return mapped.filter(r => r.score !== null && r.score !== undefined)
+        return visible.filter(r => r.score !== null && r.score !== undefined)
       }
 
-      return mapped
+      return visible
      },
      submissionsCount() {
       // Only show submission counts for the identified student (require both name and studentNo)
@@ -928,6 +947,9 @@ export default {
         }
         matched = unique
 
+        // Filter out submissions whose homework has been deleted by the teacher
+        matched = (matched || []).filter(s => !(s && s.homeworkDeleted))
+
         this.debugLogs.push(`matched submissions count=${matched.length}`)
         console.log('loadMySubmissions matched', matched)
 
@@ -979,7 +1001,8 @@ export default {
             const key = String(s.studentHomeworkId || `${s.homeworkId || ''}_${s.studentId || s.studentNo || ''}`)
             if (!seen2.has(key)) { seen2.add(key); unique2.push(s) }
           }
-          this.submissions = unique2
+          // Filter out submissions whose homework has been deleted by the teacher
+          this.submissions = (unique2 || []).filter(s => !(s && s.homeworkDeleted))
           // force table refresh on fallback
           this.tableKey = `submissions-${Date.now()}-${(this.submissions || []).length}`
           if (this.submissions && this.submissions.length > 0) {
