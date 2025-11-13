@@ -291,6 +291,13 @@ export const constantRoutes = [
         name: 'SystemRole',
         meta: { title: '角色管理', icon: 'peoples', permissions: ['system:role:list'] }
       },
+      // 在 proj_cyq 的 children 中添加
+      {
+        path: 'notice',
+        component: () => import('@/views/proj_cyq/notice/index'),
+        name: 'ClassNotice',
+        meta: { title: '通告管理', icon: 'message', permissions: ['proj_cyq:notice:view'] }
+      },
       // ========== 结束新增 ==========
       {
         path: 'operlog',
