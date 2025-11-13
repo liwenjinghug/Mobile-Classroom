@@ -16,6 +16,20 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import com.ruoyi.common.config.RuoYiConfig;
+import com.ruoyi.common.constant.Constants;
+import com.ruoyi.common.utils.file.FileUtils;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/proj_lwj/homework")
@@ -258,6 +272,8 @@ public class ClassHomeworkController extends BaseController {
                 sh.setHomeworkTitle(hw.getTitle());
             }
         }
+        // resolve any stored filenames to resource-prefixed paths so frontend download works
+        resolveSubmissionFilePaths(list);
         return AjaxResult.success(list);
     }
 
@@ -283,6 +299,7 @@ public class ClassHomeworkController extends BaseController {
                 if (sh.getHomeworkTitle() == null || sh.getHomeworkTitle().trim().isEmpty()) sh.setHomeworkTitle(hw.getTitle());
             }
         }
+        resolveSubmissionFilePaths(list);
         return AjaxResult.success(list);
     }
 
@@ -299,6 +316,7 @@ public class ClassHomeworkController extends BaseController {
         // If we resolved a studentId, return by studentId (preferred)
         if (sid != null) {
             List<ClassStudentHomework> list = studentHomeworkService.selectByStudentId(sid);
+            resolveSubmissionFilePaths(list);
             return AjaxResult.success(list);
         }
 
@@ -308,6 +326,7 @@ public class ClassHomeworkController extends BaseController {
             try {
                 List<ClassStudentHomework> list = studentHomeworkService.selectByStudentNo(studentNo.trim());
                 if (list != null && !list.isEmpty()) {
+                    resolveSubmissionFilePaths(list);
                     return AjaxResult.success(list);
                 }
             } catch (Exception ex) {
@@ -320,6 +339,7 @@ public class ClassHomeworkController extends BaseController {
             try {
                 List<ClassStudentHomework> list = studentHomeworkService.selectByStudentIdentifier(studentName.trim());
                 if (list != null && !list.isEmpty()) {
+                    resolveSubmissionFilePaths(list);
                     return AjaxResult.success(list);
                 }
             } catch (Exception ex) {
@@ -342,4 +362,127 @@ public class ClassHomeworkController extends BaseController {
             return AjaxResult.error("删除提交失败：" + e.getMessage());
         }
     }
+
+    /**
+     * Helper: resolve submission file names (which may be stored as plain file names) to resource-prefixed paths
+     * so the frontend download helper can use /common/download/resource or /common/download correctly.
+     * This function mutates the provided list by replacing submissionFiles with comma-separated resource paths.
+     */
+    private void resolveSubmissionFilePaths(List<ClassStudentHomework> list) {
+        if (list == null || list.isEmpty()) return;
+        String profile = RuoYiConfig.getProfile();
+        if (profile == null) profile = "";
+        Path profilePath = Paths.get(profile).toAbsolutePath();
+        Path uploadBase = profilePath.resolve("upload");
+        String resourcePrefix = Constants.RESOURCE_PREFIX; // typically "/profile"
+        final DateTimeFormatter DATE_PATH_FMT = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+        for (ClassStudentHomework sh : list) {
+            String submission = sh.getSubmissionFiles();
+            if (submission == null || submission.trim().isEmpty()) continue;
+            String[] parts = submission.split(",");
+            List<String> resolved = new ArrayList<>();
+            for (String raw : parts) {
+                String name = raw == null ? "" : raw.trim();
+                if (name.isEmpty()) continue;
+                // if already looks like a resource path (/profile/...) or absolute HTTP URL, keep as-is
+                if (name.startsWith(resourcePrefix + "/") || name.startsWith("http://") || name.startsWith("https://")) {
+                    resolved.add(name);
+                    continue;
+                }
+
+                // Derive baseName/ext for pattern matching baseName_* .ext
+                String baseName = name;
+                String ext = "";
+                int dot = name.lastIndexOf('.');
+                if (dot > 0 && dot < name.length() - 1) {
+                    baseName = name.substring(0, dot);
+                    ext = name.substring(dot + 1);
+                }
+                // create effectively-final copies for lambda usage
+                final String fBase = baseName;
+                final String fExt = ext;
+                final String fName = name;
+
+                String expectedDatePath = null;
+                if (sh.getSubmitTime() != null) {
+                    try {
+                        LocalDate ld = Instant.ofEpochMilli(sh.getSubmitTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+                        expectedDatePath = DATE_PATH_FMT.format(ld); // yyyy/MM/dd
+                    } catch (Exception ignore) {}
+                }
+
+                String foundResource = null;
+                // 1) Prefer searching inside expected date directory using pattern baseName_* .ext
+                try {
+                    if (Files.exists(uploadBase)) {
+                        if (expectedDatePath != null) {
+                            Path dateDir = uploadBase.resolve(expectedDatePath);
+                            File dateFolder = dateDir.toFile();
+                            if (dateFolder.exists() && dateFolder.isDirectory()) {
+                                File[] candidates = dateFolder.listFiles(f -> f.isFile() &&
+                                        f.getName().toLowerCase().startsWith((fBase + "_").toLowerCase()) &&
+                                        (fExt.isEmpty() || f.getName().toLowerCase().endsWith(("." + fExt).toLowerCase())));
+                                if (candidates != null && candidates.length > 0) {
+                                    // pick the latest modified as best guess
+                                    File best = candidates[0];
+                                    for (File c : candidates) {
+                                        if (c.lastModified() > best.lastModified()) best = c;
+                                    }
+                                    Path rel = profilePath.relativize(best.toPath().toAbsolutePath());
+                                    String relStr = rel.toString().replace(File.separatorChar, '/');
+                                    if (!relStr.startsWith("/")) relStr = "/" + relStr;
+                                    foundResource = resourcePrefix + relStr;
+                                }
+                            }
+                        }
+                        // 2) If not found, broaden search within limited depth for pattern baseName_* .ext
+                        if (foundResource == null) {
+                            try {
+                                Path found = Files.walk(uploadBase, 6)
+                                        .filter(p -> Files.isRegularFile(p))
+                                        .filter(p -> {
+                                            String fn = p.getFileName().toString();
+                                            boolean prefix = fn.toLowerCase().startsWith((fBase + "_").toLowerCase()) || fn.equalsIgnoreCase(fName);
+                                            boolean extOk = fExt.isEmpty() || fn.toLowerCase().endsWith(("." + fExt).toLowerCase());
+                                            return prefix && extOk;
+                                        })
+                                        // pick the newest by lastModified
+                                        .sorted((a, b) -> {
+                                            try {
+                                                long la = Files.getLastModifiedTime(a).toMillis();
+                                                long lb = Files.getLastModifiedTime(b).toMillis();
+                                                return Long.compare(lb, la);
+                                            } catch (IOException e) { return 0; }
+                                        })
+                                        .findFirst().orElse(null);
+                                if (found != null) {
+                                    Path rel = profilePath.relativize(found.toAbsolutePath());
+                                    String relStr = rel.toString().replace(File.separatorChar, '/');
+                                    if (!relStr.startsWith("/")) relStr = "/" + relStr;
+                                    foundResource = resourcePrefix + relStr;
+                                }
+                            } catch (IOException e) {
+                                logger.debug("resolveSubmissionFilePaths: filesystem broad search failed for {}", fName, e);
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    logger.debug("resolveSubmissionFilePaths: error while trying to locate file {}", fName, ex);
+                }
+
+                // 3) Final fallback (should rarely be used): /profile/upload/<original name>
+                if (foundResource == null) {
+                    String best = resourcePrefix + "/upload/" + name;
+                    resolved.add(best);
+                } else {
+                    resolved.add(foundResource);
+                }
+            }
+            if (!resolved.isEmpty()) {
+                sh.setSubmissionFiles(resolved.stream().collect(Collectors.joining(",")));
+            }
+        }
+    }
+
 }

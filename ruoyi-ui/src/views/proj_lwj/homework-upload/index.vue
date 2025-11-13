@@ -605,6 +605,47 @@ export default {
       }
     },
 
+    // Helper to robustly extract the uploaded file path/name returned by the backend.
+    // Handles shapes like:
+    // 1) { url, fileName, newFileName }
+    // 2) { code:200, data: { url, fileName, newFileName } }
+    // 3) { data: { data: { fileName: '...' } } }
+    // Returns a string or null.
+    extractUploadedFileName(resp) {
+      if (!resp) return null
+      try {
+        // If element-ui upload gives the raw parsed body, use it directly
+        const top = resp
+        // unwrap common shapes
+        // case: { code,msg,data:{...} }
+        const maybeData = (top && top.data) ? top.data : null
+        const candidate = (maybeData && typeof maybeData === 'object') ? maybeData : top
+        // candidate could be nested again
+        const inner = (candidate && candidate.data && typeof candidate.data === 'object') ? candidate.data : candidate
+        // Possible keys that may contain the returned file path
+        const keys = ['fileName', 'file_name', 'filename', 'newFileName', 'newFileName', 'url', 'file']
+        for (let k of keys) {
+          if (inner && Object.prototype.hasOwnProperty.call(inner, k) && inner[k]) {
+            // if it's an object (unlikely) try to stringify or pick fileName inside
+            if (typeof inner[k] === 'string') return inner[k]
+            if (typeof inner[k] === 'object' && inner[k].fileName) return inner[k].fileName
+            // last resort
+            try { return String(inner[k]) } catch (e) { continue }
+          }
+        }
+        // As a fallback, if top contains fileName at top-level
+        for (let k of keys) {
+          if (top && Object.prototype.hasOwnProperty.call(top, k) && top[k]) {
+            if (typeof top[k] === 'string') return top[k]
+            try { return String(top[k]) } catch (e) { continue }
+          }
+        }
+      } catch (e) {
+        console.debug('extractUploadedFileName error', e)
+      }
+      return null
+    },
+
     // upload hooks
     uploadSuccess(response, file) {
       // robustly extract filename from a few possible response shapes
@@ -613,15 +654,15 @@ export default {
           this.$message.error('上传返回为空，请重试')
           return
         }
-        // If backend returns an AjaxResult wrapper (code/msg/data)
-        const payload = (response.data && (typeof response.data === 'object')) ? response.data : response
-        // try multiple fields
-        const nameFromResponse = payload.fileName || payload.filename || payload.name || payload.file || payload.data || null
-        const name = nameFromResponse || (file && file.name)
+        // Prefer backend-returned resource path (e.g. /profile/...) when available
+        const nameFromResponse = this.extractUploadedFileName(response)
+        // fallback to file object name
+        const name = nameFromResponse || (file && file.name) || null
         if (!name) {
           this.$message.error('上传后未返回文件名，可能上传失败')
           return
         }
+        // ensure we store the returned resource path (which may include /profile/...), not only the original filename
         if (this.uploadedFiles.indexOf(name) === -1) this.uploadedFiles.push(name)
         const exists = this.fileList && this.fileList.some(f => (f.name === (file && file.name)) || (f.uid && file && file.uid && f.uid === file.uid))
         if (!exists && file) this.fileList = (this.fileList || []).concat(file)
@@ -634,8 +675,7 @@ export default {
     editUploadSuccess(response, file) {
       try {
         if (!response) { this.$message.error('上传返回为空，请重试'); return }
-        const payload = (response.data && (typeof response.data === 'object')) ? response.data : response
-        const nameFromResponse = payload.fileName || payload.filename || payload.name || payload.file || payload.data || null
+        const nameFromResponse = this.extractUploadedFileName(response)
         const name = nameFromResponse || (file && file.name)
         if (!name) { this.$message.error('上传后未返回文件名，可能上传失败'); return }
         if (this.editUploadedFiles.indexOf(name) === -1) this.editUploadedFiles.push(name)
@@ -717,18 +757,17 @@ export default {
     },
 
     previewFile(fileName) {
-      const prefix = (process.env && process.env.VUE_APP_BASE_API) ? process.env.VUE_APP_BASE_API : ''
-      const url = `${prefix}/common/download?fileName=${encodeURIComponent(fileName)}`
-      const request = require('@/utils/request').default
-      request({ url, method: 'get', responseType: 'blob', headers: { isToken: true, Authorization: 'Bearer ' + getToken() } }).then(blobData => {
-        try {
-          const blob = blobData instanceof Blob ? blobData : new Blob([blobData])
-          const mime = blob.type || ''
-          const objectUrl = URL.createObjectURL(blob)
-          if (mime.startsWith('image/') || mime === 'application/pdf') window.open(objectUrl, '_blank')
-          else { const a = document.createElement('a'); a.href = objectUrl; a.download = fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a) }
-        } catch (e) { console.error('预览失败', e); this.$message.error('预览出错，请下载后查看') }
-      }).catch(err => { console.error('下载/预览失败', err); this.$message.error('下载/预览失败') })
+      if (!fileName) return
+      const dl = require('@/plugins/download').default
+      const f = String(fileName)
+      try {
+        if (/^https?:\/\//i.test(f)) { window.open(f, '_blank'); return }
+        if (f.indexOf('/profile') !== -1 || f.startsWith('profile')) { dl.resource(f); return }
+        dl.name(f, false)
+      } catch (e) {
+        console.error('previewFile failed', e)
+        this.$message && this.$message.error && this.$message.error('下载/预览失败')
+      }
     },
 
     // submit flow
