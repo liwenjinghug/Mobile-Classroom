@@ -272,7 +272,7 @@ export const constantRoutes = [
         path: 'article',
         component: () => import('@/views/proj_qhy/article/index.vue'),
         name: 'Article',
-        meta: { title: '文章管理', icon: 'documentation' }
+        meta: { title: '文章管理', icon: 'documentation',permissions: ['proj_qhy:article:list'] }
       },
       {
         path: 'article/detail/:id',
