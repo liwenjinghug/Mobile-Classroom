@@ -207,6 +207,30 @@ export const constantRoutes = [
       }
     ]
   },
+  // 新增在线考试（与作业管理同级）
+  {
+    path: '/proj_lwj_exam',
+    component: Layout,
+    redirect: '/proj_lwj_exam/exam_publish',
+    name: 'proj_lwj_exam',
+    meta: { title: '在线考试', icon: 'education' },
+    children: [
+      {
+        path: 'exam_publish',
+        component: () => import('@/views/proj_lwj/exam_publish/index.vue'),
+        name: 'ExamPublish',
+        meta: { title: '考试发布', icon: 'list' }
+      },
+      {
+        path: 'exam_questions/:examId',
+        component: () => import('@/views/proj_lwj/exam_questions/index.vue'),
+        name: 'ExamQuestionsPage',
+        meta: { title: '题目配置', icon: 'edit' },
+        props: true,
+        hidden: true
+      }
+    ]
+  },
   //学情数据
   // 学情数据路由配置
   {
