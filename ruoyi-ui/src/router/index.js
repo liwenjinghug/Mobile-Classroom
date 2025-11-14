@@ -46,6 +46,15 @@ export const constantRoutes = [
     component: () => import('@/views/login'),
     hidden: true
   },
+
+  // ========== 新增路由 ==========
+  {
+    path: '/reset-password',
+    component: () => import('@/views/proj_cyq/ResetPassword'), // 指向您模块的新页面
+    hidden: true
+  },
+  // ========== 结束新增 ==========
+
   {
     path: '/register',
     component: () => import('@/views/register'),

@@ -38,6 +38,11 @@
         </div>
       </el-form-item>
       <el-checkbox v-model="loginForm.rememberMe" style="margin:0px 0px 25px 0px;">记住密码</el-checkbox>
+<!--      cyq新增-->
+      <div style="float: right; margin-top: 3px; margin-right: 5px;">
+        <router-link class="link-type" :to="'/reset-password'">忘记密码？</router-link>
+      </div>
+<!--新增结束-->
       <el-form-item style="width:100%;">
         <el-button
           :loading="loading"

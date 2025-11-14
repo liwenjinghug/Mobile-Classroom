@@ -88,6 +88,28 @@ spring:
         # #连接池最大阻塞等待时间（使用负值表示没有限制）
         max-wait: -1ms
 
+  # ========== ↓↓↓ 用此块完整替换您的 mail 配置 ↓↓↓ ==========
+  mail:
+    # 邮箱服务器地址
+    host: smtp.qq.com
+    # 【必须】端口改为 587
+    port: 587
+    # 账号和授权码不变
+    username: 1370954919@qq.com
+    password: trpxvbxyflivgfbf
+    # 【必须】修改 properties
+    properties:
+      mail.smtp:
+        # 认证
+        auth: true
+        # 【必须】添加这行 (或者确保它存在且为 true)
+        starttls.enable: true
+        # (确保没有 ssl.enable: true 这一行)
+
+        # (超时可以保留)
+        timeout: 5000
+  # ========== ↑↑↑ 替换结束 ↑↑↑ ==========
+
 # token配置
 token:
   # 令牌自定义标识
