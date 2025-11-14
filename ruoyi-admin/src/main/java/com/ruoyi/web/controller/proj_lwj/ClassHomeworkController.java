@@ -261,7 +261,6 @@ public class ClassHomeworkController extends BaseController {
     @GetMapping("/submissions/{homeworkId}")
     public AjaxResult submissions(@PathVariable Long homeworkId) {
         List<ClassStudentHomework> list = studentHomeworkService.selectByHomeworkId(homeworkId);
-        // if the homework is deleted, mark each submission accordingly
         ClassHomework hw = homeworkService.selectHomeworkById(homeworkId);
         boolean deleted = (hw == null);
         for (ClassStudentHomework sh : list) {
@@ -272,7 +271,7 @@ public class ClassHomeworkController extends BaseController {
                 sh.setHomeworkTitle(hw.getTitle());
             }
         }
-        // resolve any stored filenames to resource-prefixed paths so frontend download works
+        ensureStudentNames(list); // ensure studentName present
         resolveSubmissionFilePaths(list);
         return AjaxResult.success(list);
     }
@@ -299,6 +298,7 @@ public class ClassHomeworkController extends BaseController {
                 if (sh.getHomeworkTitle() == null || sh.getHomeworkTitle().trim().isEmpty()) sh.setHomeworkTitle(hw.getTitle());
             }
         }
+        ensureStudentNames(list); // ensure studentName present
         resolveSubmissionFilePaths(list);
         return AjaxResult.success(list);
     }
@@ -316,6 +316,7 @@ public class ClassHomeworkController extends BaseController {
         // If we resolved a studentId, return by studentId (preferred)
         if (sid != null) {
             List<ClassStudentHomework> list = studentHomeworkService.selectByStudentId(sid);
+            ensureStudentNames(list);
             resolveSubmissionFilePaths(list);
             return AjaxResult.success(list);
         }
@@ -326,6 +327,7 @@ public class ClassHomeworkController extends BaseController {
             try {
                 List<ClassStudentHomework> list = studentHomeworkService.selectByStudentNo(studentNo.trim());
                 if (list != null && !list.isEmpty()) {
+                    ensureStudentNames(list);
                     resolveSubmissionFilePaths(list);
                     return AjaxResult.success(list);
                 }
@@ -339,6 +341,7 @@ public class ClassHomeworkController extends BaseController {
             try {
                 List<ClassStudentHomework> list = studentHomeworkService.selectByStudentIdentifier(studentName.trim());
                 if (list != null && !list.isEmpty()) {
+                    ensureStudentNames(list);
                     resolveSubmissionFilePaths(list);
                     return AjaxResult.success(list);
                 }
@@ -485,4 +488,24 @@ public class ClassHomeworkController extends BaseController {
         }
     }
 
+    private void ensureStudentNames(List<ClassStudentHomework> list) {
+        if (list == null || list.isEmpty()) return;
+        for (ClassStudentHomework sh : list) {
+            if (sh == null) continue;
+            String currentName = sh.getStudentName();
+            if (currentName != null && !currentName.trim().isEmpty()) continue; // already has name
+            String studentNo = sh.getStudentNo();
+            if (studentNo == null || studentNo.trim().isEmpty()) continue;
+            try {
+                com.ruoyi.proj_lwj.domain.ClassStudent cs = classStudentMapper.selectByStudentNo(studentNo.trim());
+                if (cs != null && cs.getStudentName() != null && !cs.getStudentName().trim().isEmpty()) {
+                    sh.setStudentName(cs.getStudentName().trim());
+                }
+            } catch (Exception ex) {
+                logger.debug("ensureStudentNames: failed resolving name for studentNo {}", studentNo, ex);
+            }
+        }
+    }
+
+    // NOTE: submission responses now include courseId/courseName mapped in mapper; no extra join needed here.
 }

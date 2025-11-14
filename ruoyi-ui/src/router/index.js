@@ -189,6 +189,7 @@ export const constantRoutes = [
       },
       {
         path: 'homework_upload',
+        alias: ['homework-upload','upload'],
         component: () => import('@/views/proj_lwj/homework-upload/index.vue'),
         name: 'HomeworkUpload',
         meta: { title: '作业上传', icon: 'upload' }
@@ -449,7 +450,7 @@ Router.prototype.replace = function push(location) {
 }
 
 export default new Router({
-  mode: 'history', // 去掉url中的#
+  mode: 'hash', // 改为 hash 避免后端未配置 history fallback 导致直接访问 404
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRoutes
 })

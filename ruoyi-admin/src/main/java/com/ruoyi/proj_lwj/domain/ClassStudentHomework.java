@@ -32,6 +32,10 @@ public class ClassStudentHomework extends BaseEntity {
     // 新增字段：作业标题，供提交记录显示
     private String homeworkTitle;
 
+    // 新增: 课程ID与课程名称（供前端显示课程列）
+    private Long courseId;
+    private String courseName;
+
     // 新增的批改/统计字段
     /** 是否已批改：0-未批改 1-已批改 */
     private Integer isGraded;
@@ -82,6 +86,10 @@ public class ClassStudentHomework extends BaseEntity {
 
     public String getHomeworkTitle() { return homeworkTitle; }
     public void setHomeworkTitle(String homeworkTitle) { this.homeworkTitle = homeworkTitle; }
+    public Long getCourseId() { return courseId; }
+    public void setCourseId(Long courseId) { this.courseId = courseId; }
+    public String getCourseName() { return courseName; }
+    public void setCourseName(String courseName) { this.courseName = courseName; }
 
     public Integer getIsGraded() { return isGraded; }
     public void setIsGraded(Integer isGraded) { this.isGraded = isGraded; }

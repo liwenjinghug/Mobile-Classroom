@@ -57,7 +57,7 @@
               <el-table-column prop="submissionFiles" label="附件">
                 <template #default="{ row }">
                   <div v-if="row.submissionFiles">
-                    <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" href="javascript:void(0)" @click.prevent="previewOrDownload(f)" style="margin-right:8px">{{ f }}</a>
+                    <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
                   </div>
                   <div v-else>—</div>
                 </template>
@@ -115,7 +115,7 @@
           <el-table-column prop="submissionFiles" label="附件">
             <template #default="{ row }">
               <div v-if="row.submissionFiles">
-                <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" href="javascript:void(0)" @click.prevent="previewOrDownload(f)" style="margin-right:8px">{{ f }}</a>
+                <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
               </div>
               <div v-else>—</div>
             </template>
@@ -153,7 +153,7 @@
         <div v-if="gradingRow.corrected_time || gradingRow.correctedTime || gradingRow.gradedAt || gradingRow.gradeTime" style="margin-bottom:8px"><strong>批改时间：</strong>{{ formatTime(gradingRow.corrected_time || gradingRow.correctedTime || gradingRow.gradedAt || gradingRow.gradeTime) || '—' }}</div>
         <div style="margin-bottom:8px"><strong>附件：</strong>
           <div v-if="gradingRow.submissionFiles">
-            <a v-for="(f, idx) in parseAttachments(gradingRow.submissionFiles)" :key="idx" href="javascript:void(0)" @click.prevent="previewOrDownload(f)" style="margin-right:8px">{{ f }}</a>
+            <a v-for="(f, idx) in parseAttachments(gradingRow.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
           </div>
           <div v-else>—</div>
         </div>
@@ -201,7 +201,7 @@
           <el-table-column prop="submissionFiles" label="附件">
             <template #default="{ row }">
               <div v-if="row.submissionFiles">
-                <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" href="javascript:void(0)" @click.prevent="previewOrDownload(f)" style="margin-right:8px">{{ f }}</a>
+                <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
               </div>
               <div v-else>—</div>
             </template>
@@ -411,12 +411,15 @@ export default {
     },
     parseAttachments(str) { if (!str) return []; return String(str).split(',').map(s=>s.trim()).filter(Boolean) },
     downloadUrl(fileName) {
+      const base = process.env.VUE_APP_BASE_API || ''
       if (!fileName) return ''
       const f = String(fileName)
+      // If the stored value is a resource path (starts with the backend resource prefix), use resource download
       if (f.startsWith('/profile') || f.startsWith('profile')) {
-        return '/common/download/resource?resource=' + encodeURIComponent(f)
+        return base + '/common/download/resource?resource=' + encodeURIComponent(f)
       }
-      return '/common/download?fileName=' + encodeURIComponent(f)
+      // Otherwise use the regular fileName-based download
+      return base + '/common/download?fileName=' + encodeURIComponent(f)
     },
     startGrade(row) {
       if (this.readOnlyView) return
@@ -518,16 +521,6 @@ export default {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
       this.$message.success('导出已开始')
-    },
-    previewOrDownload(fileName) {
-      if (!fileName) return
-      const dl = require('@/plugins/download').default
-      const f = String(fileName)
-      try {
-        if (/^https?:\/\//i.test(f)) { window.open(f, '_blank'); return }
-        if (f.indexOf('/profile') !== -1 || f.startsWith('profile')) { dl.resource(f); return }
-        dl.name(f, false)
-      } catch (e) { console.error('previewOrDownload failed', e); this.$message && this.$message.error && this.$message.error('下载/预览失败') }
     },
     printSubmissions() {
       if (!this.submissions || !this.submissions.length) { this.$message.info('没有可打印的数据'); return }

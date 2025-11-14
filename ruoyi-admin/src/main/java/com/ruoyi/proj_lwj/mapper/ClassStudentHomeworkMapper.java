@@ -12,6 +12,8 @@ public interface ClassStudentHomeworkMapper {
     @Select("SELECT " +
             "  csh.id, " +
             "  COALESCE(csh.homework_id, #{homeworkId}) AS homework_id, " +
+            "  ch.course_id AS course_id, " +
+            "  cc.course_name AS course_name, " +
             "  s.student_id AS student_id, " +
             "  s.student_no AS student_no, " +
             "  COALESCE(s.student_name, su.nick_name) AS student_name, " +
@@ -26,12 +28,15 @@ public interface ClassStudentHomeworkMapper {
             "JOIN class_student s ON css.student_id = s.student_id " +
             "LEFT JOIN sys_user su ON s.student_id = su.user_id " +
             "JOIN class_homework ch ON ch.homework_id = #{homeworkId} AND ch.session_id = css.session_id " +
+            "LEFT JOIN class_course cc ON ch.course_id = cc.course_id " +
             "LEFT JOIN (SELECT student_id, MAX(id) AS max_id FROM class_student_homework WHERE homework_id = #{homeworkId} GROUP BY student_id) t ON t.student_id = s.student_id " +
             "LEFT JOIN class_student_homework csh ON csh.id = t.max_id " +
             "ORDER BY s.student_name ASC")
     @Results({
             @Result(property = "studentHomeworkId", column = "id"),
             @Result(property = "homeworkId", column = "homework_id"),
+            @Result(property = "courseId", column = "course_id"),
+            @Result(property = "courseName", column = "course_name"),
             @Result(property = "studentId", column = "student_id"),
             @Result(property = "studentNo", column = "student_no"),
             @Result(property = "submissionFiles", column = "submission_files"),
@@ -48,10 +53,12 @@ public interface ClassStudentHomeworkMapper {
     })
     List<ClassStudentHomework> selectByHomeworkId(Long homeworkId);
 
-    @Select("SELECT csh.*, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id WHERE csh.id = #{id}")
+    @Select("SELECT csh.*, ch.course_id AS course_id, cc.course_name AS course_name, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id LEFT JOIN class_course cc ON ch.course_id = cc.course_id WHERE csh.id = #{id}")
     @Results({
             @Result(property = "studentHomeworkId", column = "id"),
             @Result(property = "homeworkId", column = "homework_id"),
+            @Result(property = "courseId", column = "course_id"),
+            @Result(property = "courseName", column = "course_name"),
             @Result(property = "studentId", column = "student_id"),
             @Result(property = "studentNo", column = "student_no"),
             @Result(property = "submissionFiles", column = "submission_files"),
@@ -65,10 +72,12 @@ public interface ClassStudentHomeworkMapper {
     })
     ClassStudentHomework selectById(Long id);
 
-    @Select("SELECT csh.*, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id WHERE csh.student_id = #{studentId} ORDER BY csh.submit_time DESC")
+    @Select("SELECT csh.*, ch.course_id AS course_id, cc.course_name AS course_name, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id LEFT JOIN class_course cc ON ch.course_id = cc.course_id WHERE csh.student_id = #{studentId} ORDER BY csh.submit_time DESC")
     @Results({
             @Result(property = "studentHomeworkId", column = "id"),
             @Result(property = "homeworkId", column = "homework_id"),
+            @Result(property = "courseId", column = "course_id"),
+            @Result(property = "courseName", column = "course_name"),
             @Result(property = "studentId", column = "student_id"),
             @Result(property = "studentNo", column = "student_no"),
             @Result(property = "submissionFiles", column = "submission_files"),
@@ -83,10 +92,12 @@ public interface ClassStudentHomeworkMapper {
     List<ClassStudentHomework> selectByStudentId(Long studentId);
 
     // select submissions by student number - join class_student and filter on s.student_no
-    @Select("SELECT csh.*, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id WHERE s.student_no = #{studentNo} ORDER BY csh.submit_time DESC")
+    @Select("SELECT csh.*, ch.course_id AS course_id, cc.course_name AS course_name, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id LEFT JOIN class_course cc ON ch.course_id = cc.course_id WHERE s.student_no = #{studentNo} ORDER BY csh.submit_time DESC")
     @Results({
             @Result(property = "studentHomeworkId", column = "id"),
             @Result(property = "homeworkId", column = "homework_id"),
+            @Result(property = "courseId", column = "course_id"),
+            @Result(property = "courseName", column = "course_name"),
             @Result(property = "studentId", column = "student_id"),
             @Result(property = "studentNo", column = "student_no"),
             @Result(property = "submissionFiles", column = "submission_files"),
@@ -101,10 +112,12 @@ public interface ClassStudentHomeworkMapper {
     List<ClassStudentHomework> selectByStudentNo(String studentNo);
 
     // select by identifier (either student_no or student_name) - check values in class_student
-    @Select("SELECT csh.*, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id WHERE (s.student_no = #{ident} OR s.student_name = #{ident}) ORDER BY csh.submit_time DESC")
+    @Select("SELECT csh.*, ch.course_id AS course_id, cc.course_name AS course_name, COALESCE(csh.student_name, su.nick_name) AS student_name, ch.title AS homework_title, s.student_no AS student_no FROM class_student_homework csh LEFT JOIN sys_user su ON csh.student_id = su.user_id LEFT JOIN class_student s ON csh.student_id = s.student_id LEFT JOIN class_homework ch ON csh.homework_id = ch.homework_id LEFT JOIN class_course cc ON ch.course_id = cc.course_id WHERE (s.student_no = #{ident} OR s.student_name = #{ident}) ORDER BY csh.submit_time DESC")
     @Results({
             @Result(property = "studentHomeworkId", column = "id"),
             @Result(property = "homeworkId", column = "homework_id"),
+            @Result(property = "courseId", column = "course_id"),
+            @Result(property = "courseName", column = "course_name"),
             @Result(property = "studentId", column = "student_id"),
             @Result(property = "studentNo", column = "student_no"),
             @Result(property = "submissionFiles", column = "submission_files"),

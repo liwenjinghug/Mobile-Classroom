@@ -58,7 +58,7 @@
             <el-table-column label="附件">
               <template slot-scope="scope">
                 <div v-if="scope.row.attachments">
-                  <a v-for="(f, idx) in parseAttachments(scope.row.attachments)" :key="idx" href="javascript:void(0)" @click.prevent="previewOrDownload(f)" style="margin-right:8px">{{ f }}</a>
+                  <a v-for="(f, idx) in parseAttachments(scope.row.attachments)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
                 </div>
                 <div v-else>—</div>
               </template>
@@ -88,7 +88,7 @@
           <el-table-column prop="submissionFiles" label="附件">
             <template #default="{ row }">
               <div v-if="row.submissionFiles">
-                <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" href="javascript:void(0)" @click.prevent="previewOrDownload(f)" style="margin-right:8px">{{ f }}</a>
+                <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
               </div>
               <div v-else>—</div>
             </template>
@@ -462,33 +462,17 @@ export default {
       if (!str) return []
       return String(str).split(',').map(s => s.trim()).filter(Boolean)
     },
-    previewOrDownload(fileName) {
-      if (!fileName) return
-      const dl = require('@/plugins/download').default
-      const f = String(fileName)
-      try {
-        if (/^https?:\/\//i.test(f)) {
-          window.open(f, '_blank')
-          return
-        }
-        if (f.indexOf('/profile') !== -1 || f.startsWith('profile')) {
-          dl.resource(f)
-          return
-        }
-        dl.name(f, false)
-      } catch (e) {
-        console.error('previewOrDownload failed', e)
-        this.$message && this.$message.error && this.$message.error('下载/预览失败')
-      }
-    },
     downloadUrl(fileName) {
+      const base = process.env.VUE_APP_BASE_API || ''
       if (!fileName) return ''
       const f = String(fileName)
-      // return relative URLs so request() will apply baseURL once
+      // if resource path exposed by backend (starts with resource prefix), call resource download
       if (f.startsWith('/profile') || f.startsWith('profile')) {
-        return '/common/download/resource?resource=' + encodeURIComponent(f)
+        return base + '/common/download/resource?resource=' + encodeURIComponent(f)
       }
-      return '/common/download?fileName=' + encodeURIComponent(f)
+      const token = require('@/utils/auth').getToken()
+      const baseQuery = base + '/common/download?fileName=' + encodeURIComponent(f)
+      return token ? (baseQuery + '&token=' + token) : baseQuery
     },
     async onDeleteSubmission(row) {
       if (!row || !(row.studentHomeworkId || row.id)) return
