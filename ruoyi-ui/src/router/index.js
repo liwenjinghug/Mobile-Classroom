@@ -207,7 +207,8 @@ export const constantRoutes = [
       }
     ]
   },
-  //作业看板
+  //学情数据
+  // 学情数据路由配置
   {
     path: '/proj_fz',
     component: Layout,
@@ -218,8 +219,20 @@ export const constantRoutes = [
       {
         path: 'homework_dashboard',
         component: () => import('@/views/proj_fz/homeworkDashboard/index.vue'),
-        name: 'HomeworkDashboard',
+        name: 'ProjFz_HomeworkDashboard',
         meta: { title: '作业看板', icon: 'dashboard' }
+      },
+      {
+        path: 'attendanceReport',
+        component: () => import('@/views/proj_fz/attendanceReport/index'),
+        name: 'ProjFz_AttendanceReport',
+        meta: { title: '考勤报表', icon: 'form' }
+      },
+      {
+        path: 'dashboard',
+        component: () => import('@/views/proj_fz/dashboard/index'),
+        name: 'ProjFz_Dashboard',
+        meta: { title: '驾驶舱', icon: 'dashboard' }
       }
     ]
   },
