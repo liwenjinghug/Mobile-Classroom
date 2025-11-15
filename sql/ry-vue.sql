@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : ry-vue
+ Source Server         : 01tech
  Source Server Type    : MySQL
  Source Server Version : 80042 (8.0.42)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 15/11/2025 18:10:35
+ Date: 16/11/2025 07:08:02
 */
 
 SET NAMES utf8mb4;
@@ -82,6 +82,117 @@ CREATE TABLE `class_article_like`  (
 DROP TABLE IF EXISTS `class_attendance`;
 CREATE TABLE `class_attendance`  (
   `attendance_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到记录唯一ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID（抽人/课堂级统计依赖）',
+  `task_id` bigint NOT NULL COMMENT '签到任务ID（对应某次签到动作）',
+  `student_id` bigint NOT NULL COMMENT '关联的学生ID',
+  `attendance_time` datetime NULL DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
+  `attendance_status` tinyint NOT NULL DEFAULT 0 COMMENT '签到状态: 0未签到 1已签到 2迟到 3请假 4早退',
+  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '签到设备IP地址',
+  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
+  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '签到地理位置',
+  PRIMARY KEY (`attendance_id`) USING BTREE,
+  UNIQUE INDEX `uq_task_student`(`task_id` ASC, `student_id` ASC) USING BTREE,
+  INDEX `idx_session`(`session_id` ASC) USING BTREE,
+  INDEX `idx_task`(`task_id` ASC) USING BTREE,
+  INDEX `idx_student`(`student_id` ASC) USING BTREE,
+  INDEX `idx_status`(`attendance_status` ASC) USING BTREE,
+  INDEX `idx_attendance_time`(`attendance_time` ASC) USING BTREE,
+  CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_attendance_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 82 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '学生课堂签到记录表（含 session_id + task_id）' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of class_attendance
+-- ----------------------------
+INSERT INTO `class_attendance` VALUES (1, 1, 1, 1, '2021-09-29 12:14:27', 1, '2002-10-20 19:19:57', '2025-10-27 19:38:07', '', '', '');
+INSERT INTO `class_attendance` VALUES (2, 1, 1, 2, '2025-11-07 20:42:22', 1, '2016-03-30 23:49:38', '2025-11-02 20:42:31', '', '', '');
+INSERT INTO `class_attendance` VALUES (3, 1, 1, 3, '2019-12-19 06:16:26', 1, '2007-08-18 19:37:31', '2025-10-27 19:38:09', '', '', '');
+INSERT INTO `class_attendance` VALUES (4, 1, 1, 4, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (5, 1, 1, 5, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (6, 1, 1, 6, NULL, 2, '2025-10-27 19:44:56', '2025-11-16 03:11:49', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (7, 1, 1, 7, NULL, 2, '2025-10-27 19:44:56', '2025-11-16 03:11:52', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (8, 1, 1, 8, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (9, 1, 1, 9, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (10, 1, 1, 10, NULL, 2, '2025-10-27 19:44:56', '2025-11-16 03:11:54', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (11, 1, 1, 11, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (12, 1, 1, 12, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (13, 1, 1, 13, NULL, 3, '2025-10-27 19:44:56', '2025-11-16 03:11:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (14, 1, 1, 14, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (15, 1, 1, 15, NULL, 3, '2025-10-27 19:44:56', '2025-11-16 03:11:59', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (16, 1, 1, 16, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (17, 1, 1, 17, NULL, 0, '2025-10-27 19:44:56', '2025-11-02 20:42:46', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (18, 1, 1, 18, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (19, 1, 1, 19, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (20, 1, 1, 20, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (21, 1, 1, 21, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (22, 1, 1, 22, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (23, 1, 1, 23, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (24, 1, 1, 24, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (25, 1, 1, 25, NULL, 4, '2025-10-27 19:44:56', '2025-11-16 03:12:01', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (26, 1, 1, 26, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (27, 1, 1, 27, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (28, 1, 1, 28, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (29, 1, 1, 29, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (30, 1, 1, 30, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (31, 1, 1, 31, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (32, 1, 1, 32, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (33, 1, 1, 33, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (34, 1, 1, 34, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (35, 1, 1, 35, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (36, 1, 1, 36, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (37, 1, 1, 37, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (38, 1, 1, 38, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (39, 1, 1, 39, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (40, 1, 1, 40, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (41, 1, 11, 1, NULL, 1, '2025-11-16 00:59:20', '2025-11-16 02:57:53', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (44, 1, 11, 28, NULL, 4, '2025-11-16 04:13:03', '2025-11-16 04:13:51', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (45, 1, 11, 2, NULL, 2, '2025-11-16 04:14:05', '2025-11-16 04:14:06', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (46, 1, 11, 11, '2025-11-16 04:14:21', 1, '2025-11-16 04:14:21', '2025-11-16 04:14:21', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (47, 1, 11, 19, '2025-11-16 04:14:22', 1, '2025-11-16 04:14:22', '2025-11-16 04:14:22', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (48, 1, 17, 14, '2025-11-16 04:17:06', 1, '2025-11-16 04:17:06', '2025-11-16 04:17:06', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (49, 1, 17, 16, '2025-11-16 04:17:07', 1, '2025-11-16 04:17:07', '2025-11-16 04:17:07', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (50, 1, 17, 28, '2025-11-16 04:17:09', 1, '2025-11-16 04:17:09', '2025-11-16 04:17:09', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (51, 1, 17, 31, '2025-11-16 04:17:11', 1, '2025-11-16 04:17:11', '2025-11-16 04:17:11', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (52, 1, 17, 23, '2025-11-16 04:17:22', 1, '2025-11-16 04:17:22', '2025-11-16 04:17:22', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (53, 1, 17, 1, '2025-11-16 04:28:34', 1, '2025-11-16 04:28:34', '2025-11-16 04:28:34', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (54, 1, 17, 9, NULL, 2, '2025-11-16 04:28:35', '2025-11-16 04:28:36', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (55, 2, 18, 5, '2025-11-16 04:30:01', 1, '2025-11-16 04:30:01', '2025-11-16 04:30:01', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (56, 1, 17, 21, '2025-11-16 04:30:22', 1, '2025-11-16 04:30:22', '2025-11-16 04:30:22', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (57, 1, 17, 10, '2025-11-16 04:30:25', 1, '2025-11-16 04:30:25', '2025-11-16 04:30:25', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (58, 1, 17, 20, '2025-11-16 04:30:26', 1, '2025-11-16 04:30:26', '2025-11-16 04:30:26', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (59, 1, 17, 19, '2025-11-16 04:30:27', 1, '2025-11-16 04:30:27', '2025-11-16 04:30:27', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (60, 1, 17, 7, '2025-11-16 04:30:28', 1, '2025-11-16 04:30:28', '2025-11-16 04:30:28', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (61, 1, 17, 2, '2025-11-16 04:30:29', 1, '2025-11-16 04:30:29', '2025-11-16 04:30:29', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (62, 1, 17, 39, NULL, 4, '2025-11-16 04:30:32', '2025-11-16 04:30:35', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (63, 1, 19, 6, '2025-11-16 06:24:12', 2, '2025-11-16 05:52:30', '2025-11-16 06:24:12', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (64, 1, 19, 35, '2025-11-16 06:04:18', 1, '2025-11-16 06:04:18', '2025-11-16 06:04:18', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (65, 1, 19, 32, NULL, 3, '2025-11-16 06:04:19', '2025-11-16 06:24:40', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (66, 1, 19, 13, '2025-11-16 06:04:20', 1, '2025-11-16 06:04:20', '2025-11-16 06:04:20', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (67, 1, 19, 37, '2025-11-16 06:04:20', 1, '2025-11-16 06:04:20', '2025-11-16 06:04:20', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (68, 1, 19, 26, NULL, 4, '2025-11-16 06:05:18', '2025-11-16 06:05:21', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (69, 1, 19, 25, '2025-11-16 06:05:22', 1, '2025-11-16 06:05:22', '2025-11-16 06:05:22', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (70, 1, 19, 9, '2025-11-16 06:24:13', 2, '2025-11-16 06:05:23', '2025-11-16 06:24:13', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (71, 1, 19, 1, NULL, 3, '2025-11-16 06:05:24', '2025-11-16 06:23:41', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (72, 1, 19, 10, '2025-11-16 06:05:24', 1, '2025-11-16 06:05:24', '2025-11-16 06:05:24', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (73, 1, 19, 30, '2025-11-16 06:05:25', 1, '2025-11-16 06:05:25', '2025-11-16 06:05:25', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (74, 1, 19, 16, '2025-11-16 06:05:25', 1, '2025-11-16 06:05:25', '2025-11-16 06:05:25', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (75, 1, 19, 18, '2025-11-16 06:05:26', 1, '2025-11-16 06:05:26', '2025-11-16 06:05:26', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (76, 1, 19, 11, '2025-11-16 06:05:27', 1, '2025-11-16 06:05:27', '2025-11-16 06:05:27', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (77, 1, 19, 14, NULL, 3, '2025-11-16 06:05:31', '2025-11-16 06:05:32', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (78, 1, 19, 2, NULL, 3, '2025-11-16 06:05:34', '2025-11-16 06:05:35', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (79, 1, 19, 40, '2025-11-16 06:28:33', 2, '2025-11-16 06:28:11', '2025-11-16 06:28:33', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (80, 1, 19, 15, '2025-11-16 06:28:39', 1, '2025-11-16 06:28:39', '2025-11-16 06:28:39', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (81, 2, 20, 2, '2025-11-16 06:31:58', 1, '2025-11-16 06:31:58', '2025-11-16 06:31:58', NULL, NULL, NULL);
+
+-- ----------------------------
+-- Table structure for class_attendance_bak
+-- ----------------------------
+DROP TABLE IF EXISTS `class_attendance_bak`;
+CREATE TABLE `class_attendance_bak`  (
+  `attendance_id` bigint NOT NULL DEFAULT 0 COMMENT '签到记录唯一ID',
   `session_id` bigint NOT NULL COMMENT '关联的课堂ID',
   `student_id` bigint NOT NULL COMMENT '关联的学生ID',
   `attendance_time` datetime NULL DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
@@ -90,60 +201,53 @@ CREATE TABLE `class_attendance`  (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
   `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '签到设备IP地址',
   `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
-  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '签到地理位置',
-  PRIMARY KEY (`attendance_id`) USING BTREE,
-  UNIQUE INDEX `uq_session_student`(`session_id` ASC, `student_id` ASC) USING BTREE,
-  INDEX `idx_session`(`session_id` ASC) USING BTREE,
-  INDEX `idx_student`(`student_id` ASC) USING BTREE,
-  INDEX `idx_status`(`attendance_status` ASC) USING BTREE,
-  INDEX `idx_attendance_time`(`attendance_time` ASC) USING BTREE,
-  CONSTRAINT `class_attendance_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `class_attendance_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 41 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '学生课堂签到记录表' ROW_FORMAT = DYNAMIC;
+  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '签到地理位置'
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Records of class_attendance
+-- Records of class_attendance_bak
 -- ----------------------------
-INSERT INTO `class_attendance` VALUES (1, 1, 1, '2021-09-29 12:14:27', 1, '2002-10-20 19:19:57', '2025-10-27 19:38:07', '', '', '');
-INSERT INTO `class_attendance` VALUES (2, 1, 2, '2025-11-07 20:42:22', 1, '2016-03-30 23:49:38', '2025-11-02 20:42:31', '', '', '');
-INSERT INTO `class_attendance` VALUES (3, 1, 3, '2019-12-19 06:16:26', 1, '2007-08-18 19:37:31', '2025-10-27 19:38:09', '', '', '');
-INSERT INTO `class_attendance` VALUES (4, 1, 4, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (5, 1, 5, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (6, 1, 6, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (7, 1, 7, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (8, 1, 8, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (9, 1, 9, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (10, 1, 10, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (11, 1, 11, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (12, 1, 12, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (13, 1, 13, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (14, 1, 14, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (15, 1, 15, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (16, 1, 16, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (17, 1, 17, NULL, 0, '2025-10-27 19:44:56', '2025-11-02 20:42:46', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (18, 1, 18, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (19, 1, 19, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (20, 1, 20, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (21, 1, 21, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (22, 1, 22, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (23, 1, 23, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (24, 1, 24, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (25, 1, 25, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (26, 1, 26, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (27, 1, 27, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (28, 1, 28, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (29, 1, 29, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (30, 1, 30, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (31, 1, 31, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (32, 1, 32, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (33, 1, 33, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (34, 1, 34, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (35, 1, 35, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (36, 1, 36, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (37, 1, 37, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (38, 1, 38, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (39, 1, 39, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (40, 1, 40, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (1, 1, 1, '2021-09-29 12:14:27', 1, '2002-10-20 19:19:57', '2025-10-27 19:38:07', '', '', '');
+INSERT INTO `class_attendance_bak` VALUES (2, 1, 2, '2025-11-07 20:42:22', 1, '2016-03-30 23:49:38', '2025-11-02 20:42:31', '', '', '');
+INSERT INTO `class_attendance_bak` VALUES (3, 1, 3, '2019-12-19 06:16:26', 1, '2007-08-18 19:37:31', '2025-10-27 19:38:09', '', '', '');
+INSERT INTO `class_attendance_bak` VALUES (4, 1, 4, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (5, 1, 5, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (6, 1, 6, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (7, 1, 7, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (8, 1, 8, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (9, 1, 9, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (10, 1, 10, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (11, 1, 11, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (12, 1, 12, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (13, 1, 13, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (14, 1, 14, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (15, 1, 15, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (16, 1, 16, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (17, 1, 17, NULL, 0, '2025-10-27 19:44:56', '2025-11-02 20:42:46', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (18, 1, 18, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (19, 1, 19, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (20, 1, 20, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (21, 1, 21, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (22, 1, 22, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (23, 1, 23, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (24, 1, 24, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (25, 1, 25, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (26, 1, 26, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (27, 1, 27, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (28, 1, 28, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (29, 1, 29, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (30, 1, 30, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (31, 1, 31, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (32, 1, 32, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (33, 1, 33, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (34, 1, 34, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (35, 1, 35, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (36, 1, 36, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (37, 1, 37, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (38, 1, 38, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (39, 1, 39, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (40, 1, 40, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES (41, 2, 1, NULL, 1, '2025-11-16 00:59:20', '2025-11-16 00:59:20', NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for class_attendance_qr
@@ -162,12 +266,69 @@ CREATE TABLE `class_attendance_qr`  (
   UNIQUE INDEX `uq_token`(`token` ASC) USING BTREE,
   INDEX `idx_task_qr`(`task_id` ASC) USING BTREE,
   CONSTRAINT `fk_qr_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到二维码/token 表（用于动态二维码与失效控制）' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 59 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到二维码/token 表（用于动态二维码与失效控制）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_attendance_qr
 -- ----------------------------
 INSERT INTO `class_attendance_qr` VALUES (1, 3, 'TEST-TOKEN-123456', 1800, '2025-11-02 20:12:04', 0, 'admin', '2025-11-02 19:42:04');
+INSERT INTO `class_attendance_qr` VALUES (2, 7, 'a36d96283a3349fc85f6d714ae802099', 60, '2025-11-15 23:55:48', 0, 'admin', '2025-11-15 23:54:47');
+INSERT INTO `class_attendance_qr` VALUES (3, 9, '623f6fa6e295457cafb5db5a4bc43bbe', 600, '2025-11-16 00:19:32', 0, 'admin', '2025-11-16 00:09:32');
+INSERT INTO `class_attendance_qr` VALUES (4, 10, '46b6241e9185427d89496aae532de376', 600, '2025-11-16 00:47:33', 0, 'admin', '2025-11-16 00:37:32');
+INSERT INTO `class_attendance_qr` VALUES (5, 11, 'baaddf8ddcdb428f92d3e2c8fce3a880', 600, '2025-11-16 00:48:11', 0, 'admin', '2025-11-16 00:38:11');
+INSERT INTO `class_attendance_qr` VALUES (6, 12, 'da74da6cf9c54fe28735fcf092ac256d', 600, '2025-11-16 00:50:49', 0, 'admin', '2025-11-16 00:40:49');
+INSERT INTO `class_attendance_qr` VALUES (7, 13, 'dc43784ae30c47cdb2658ed4e32e2072', 600, '2025-11-16 00:55:53', 0, 'admin', '2025-11-16 00:45:53');
+INSERT INTO `class_attendance_qr` VALUES (8, 14, '4d8b13a381d84d278a5b2f556fbe09cf', 600, '2025-11-16 00:58:08', 0, 'admin', '2025-11-16 00:48:08');
+INSERT INTO `class_attendance_qr` VALUES (9, 15, 'abd1570435aa4ab08adca0d26da73367', 600, '2025-11-16 00:59:39', 0, 'admin', '2025-11-16 00:49:39');
+INSERT INTO `class_attendance_qr` VALUES (10, 16, '974b44193191480d85db4ec8b01f2677', 600, '2025-11-16 01:04:52', 0, 'admin', '2025-11-16 00:54:51');
+INSERT INTO `class_attendance_qr` VALUES (11, 16, 'f9b7dc33329844d3b8e3f5c202b256d0', 600, '2025-11-16 01:09:38', 0, 'admin', '2025-11-16 00:59:38');
+INSERT INTO `class_attendance_qr` VALUES (12, 15, 'baab9e0d9e7a48e4a309103e0f2583f0', 600, '2025-11-16 01:09:41', 0, 'admin', '2025-11-16 00:59:40');
+INSERT INTO `class_attendance_qr` VALUES (13, 14, 'dafaa8bf82a44dd48c4e7a65f2d117cc', 600, '2025-11-16 01:09:42', 0, 'admin', '2025-11-16 00:59:42');
+INSERT INTO `class_attendance_qr` VALUES (14, 13, '66c1da1077214278ae53684179303088', 600, '2025-11-16 01:09:44', 0, 'admin', '2025-11-16 00:59:44');
+INSERT INTO `class_attendance_qr` VALUES (15, 12, 'c8839ba1d04846cdb3c31feee2910b41', 600, '2025-11-16 01:09:46', 0, 'admin', '2025-11-16 00:59:45');
+INSERT INTO `class_attendance_qr` VALUES (16, 13, '57e0ca4a92384c2b9906f81edb61fa27', 600, '2025-11-16 01:09:48', 0, 'admin', '2025-11-16 00:59:47');
+INSERT INTO `class_attendance_qr` VALUES (17, 16, 'ffdd8f74c8e4484ea1d1b768143fc7a8', 600, '2025-11-16 01:09:50', 0, 'admin', '2025-11-16 00:59:50');
+INSERT INTO `class_attendance_qr` VALUES (18, 16, '5705d4dd85fc4304827b23ea8045a486', 600, '2025-11-16 01:10:14', 0, 'admin', '2025-11-16 01:00:13');
+INSERT INTO `class_attendance_qr` VALUES (19, 14, '036d55f732a441eeb5a566838f99be21', 600, '2025-11-16 01:10:23', 0, 'admin', '2025-11-16 01:00:23');
+INSERT INTO `class_attendance_qr` VALUES (20, 13, '0eb3c4205a4643a396ea37623998cfd8', 600, '2025-11-16 01:10:25', 0, 'admin', '2025-11-16 01:00:25');
+INSERT INTO `class_attendance_qr` VALUES (21, 15, 'd6bcec1cc43541579d75bcd14d3155fc', 600, '2025-11-16 01:10:59', 0, 'admin', '2025-11-16 01:00:58');
+INSERT INTO `class_attendance_qr` VALUES (22, 16, 'e9fc6f4124814d64bd1ed880164b53cd', 600, '2025-11-16 01:11:02', 0, 'admin', '2025-11-16 01:01:01');
+INSERT INTO `class_attendance_qr` VALUES (23, 15, '07e13c98eb9049b7ae96cdb60637cf55', 600, '2025-11-16 01:11:03', 0, 'admin', '2025-11-16 01:01:03');
+INSERT INTO `class_attendance_qr` VALUES (24, 14, 'f9f2f8711a644990887ebad6125bd0fb', 600, '2025-11-16 01:11:05', 0, 'admin', '2025-11-16 01:01:05');
+INSERT INTO `class_attendance_qr` VALUES (25, 13, 'f6c0c0bda4204dcfa9eba3665b62fa8f', 600, '2025-11-16 01:11:07', 0, 'admin', '2025-11-16 01:01:06');
+INSERT INTO `class_attendance_qr` VALUES (26, 12, '6d7afe6975b942ee995e8e1590a06f67', 600, '2025-11-16 01:11:08', 0, 'admin', '2025-11-16 01:01:08');
+INSERT INTO `class_attendance_qr` VALUES (27, 16, '49da1ece5a3e40978eee47a9e5f62e19', 600, '2025-11-16 01:11:24', 0, 'admin', '2025-11-16 01:01:24');
+INSERT INTO `class_attendance_qr` VALUES (28, 16, '2dabf455367f43419ad6cf088f821764', 600, '2025-11-16 01:11:38', 0, 'admin', '2025-11-16 01:01:38');
+INSERT INTO `class_attendance_qr` VALUES (29, 15, 'cd3571d340eb417992df2ccec599a694', 600, '2025-11-16 01:11:40', 0, 'admin', '2025-11-16 01:01:39');
+INSERT INTO `class_attendance_qr` VALUES (30, 14, 'ee9ff95b2246412cb0df7ad6712b9428', 600, '2025-11-16 01:11:42', 0, 'admin', '2025-11-16 01:01:42');
+INSERT INTO `class_attendance_qr` VALUES (31, 16, '4532adaf6c98443ea438cb7251da7af7', 600, '2025-11-16 01:11:47', 0, 'admin', '2025-11-16 01:01:47');
+INSERT INTO `class_attendance_qr` VALUES (32, 12, 'da2b99d78d374022adc97735bfc0abc2', 600, '2025-11-16 01:11:50', 0, 'admin', '2025-11-16 01:01:50');
+INSERT INTO `class_attendance_qr` VALUES (33, 15, '1ec9ea9be4c346c4b707438bc80413bc', 600, '2025-11-16 01:11:55', 0, 'admin', '2025-11-16 01:01:54');
+INSERT INTO `class_attendance_qr` VALUES (34, 14, 'edfce37fc8e44cdca509d2123a119ad3', 600, '2025-11-16 01:11:57', 0, 'admin', '2025-11-16 01:01:56');
+INSERT INTO `class_attendance_qr` VALUES (35, 11, 'e05fdd9f41c6442c82a39f9dba69ca71', 600, '2025-11-16 01:20:36', 0, 'admin', '2025-11-16 01:10:35');
+INSERT INTO `class_attendance_qr` VALUES (36, 9, '88c83b7cea784696b1da5dbcd425956e', 600, '2025-11-16 01:20:38', 0, 'admin', '2025-11-16 01:10:38');
+INSERT INTO `class_attendance_qr` VALUES (37, 7, '14b3bd9f6eba4367b8cbb6eab7da262b', 600, '2025-11-16 01:20:40', 0, 'admin', '2025-11-16 01:10:39');
+INSERT INTO `class_attendance_qr` VALUES (38, 11, 'b00044d27a32424882f81bf9abe20ac7', 600, '2025-11-16 01:31:27', 0, 'admin', '2025-11-16 01:21:26');
+INSERT INTO `class_attendance_qr` VALUES (39, 9, '26f3d5bd088b47e697d538f9a34e81b6', 600, '2025-11-16 01:31:29', 0, 'admin', '2025-11-16 01:21:29');
+INSERT INTO `class_attendance_qr` VALUES (40, 16, '151a4db29b80432293531a63d7627c46', 600, '2025-11-16 01:33:40', 0, 'admin', '2025-11-16 01:23:39');
+INSERT INTO `class_attendance_qr` VALUES (41, 16, '8e52331bd9a94d47890b304c4752ecde', 600, '2025-11-16 01:34:07', 0, 'admin', '2025-11-16 01:24:06');
+INSERT INTO `class_attendance_qr` VALUES (42, 11, '9c1663e14a4c44ff830043f9d708c173', 600, '2025-11-16 01:40:03', 0, 'admin', '2025-11-16 01:30:03');
+INSERT INTO `class_attendance_qr` VALUES (43, 9, '4124218177ca4212a316c7ce1fa622c6', 600, '2025-11-16 01:40:07', 0, 'admin', '2025-11-16 01:30:06');
+INSERT INTO `class_attendance_qr` VALUES (44, 11, '655ec6d01a9e467c8b1870c8c28a6f90', 600, '2025-11-16 03:23:28', 0, 'admin', '2025-11-16 03:13:28');
+INSERT INTO `class_attendance_qr` VALUES (45, 18, '982e1862dadc46e49449f29449ce83dd', 600, '2025-11-16 04:39:14', 0, 'admin', '2025-11-16 04:29:13');
+INSERT INTO `class_attendance_qr` VALUES (46, 18, 'a19fae6e8c094006a8f113cf2d2c71f0', 600, '2025-11-16 04:39:36', 0, 'admin', '2025-11-16 04:29:36');
+INSERT INTO `class_attendance_qr` VALUES (47, 18, '812a3c72e75743d6bfc2dac75331cc14', 600, '2025-11-16 04:39:56', 0, 'admin', '2025-11-16 04:29:56');
+INSERT INTO `class_attendance_qr` VALUES (48, 18, '229db2e65291449db99e9d17e6344f74', 600, '2025-11-16 05:52:06', 0, 'admin', '2025-11-16 05:42:05');
+INSERT INTO `class_attendance_qr` VALUES (49, 18, 'effea0b9fc8345cc8c424667013f56c0', 600, '2025-11-16 05:55:19', 0, 'admin', '2025-11-16 05:45:18');
+INSERT INTO `class_attendance_qr` VALUES (50, 18, '96e8a394e05a480cab2a2bc5827db723', 600, '2025-11-16 05:55:58', 0, 'admin', '2025-11-16 05:45:57');
+INSERT INTO `class_attendance_qr` VALUES (51, 18, '2b7cf8f24fd746beaab7966f6f81a224', 600, '2025-11-16 06:02:38', 0, 'admin', '2025-11-16 05:52:37');
+INSERT INTO `class_attendance_qr` VALUES (52, 18, '7c2d828d29ca4e89b162f18792943fd1', 600, '2025-11-16 06:07:14', 0, 'admin', '2025-11-16 05:57:13');
+INSERT INTO `class_attendance_qr` VALUES (53, 18, 'f005821d7c6d4d60a54181b04250b986', 600, '2025-11-16 06:13:42', 0, 'admin', '2025-11-16 06:03:41');
+INSERT INTO `class_attendance_qr` VALUES (54, 18, '5ff02d722a8d40618615f7552224902f', 600, '2025-11-16 06:17:45', 0, 'admin', '2025-11-16 06:07:45');
+INSERT INTO `class_attendance_qr` VALUES (55, 20, '735d19defa6c473c95c7bd3864280f85', 180, '2025-11-16 06:33:14', 0, 'admin', '2025-11-16 06:30:13');
+INSERT INTO `class_attendance_qr` VALUES (56, 20, '3a181cc93be343dc8c369845b9eeda1b', 600, '2025-11-16 06:49:13', 0, 'admin', '2025-11-16 06:39:13');
+INSERT INTO `class_attendance_qr` VALUES (57, 21, 'ceba5b865d764172b6c326f3c87cbdef', 600, '2025-11-16 06:55:11', 0, 'admin', '2025-11-16 06:45:11');
+INSERT INTO `class_attendance_qr` VALUES (58, 21, 'e254971ee3584d638318d4f7e4725956', 600, '2025-11-16 06:55:18', 0, 'admin', '2025-11-16 06:45:17');
 
 -- ----------------------------
 -- Table structure for class_attendance_task
@@ -190,7 +351,7 @@ CREATE TABLE `class_attendance_task`  (
   INDEX `idx_task_session`(`session_id` ASC) USING BTREE,
   INDEX `idx_task_status`(`status` ASC) USING BTREE,
   CONSTRAINT `fk_task_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到任务表（记录签到活动：位置/二维码等）' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到任务表（记录签到活动：位置/二维码等）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_attendance_task
@@ -201,6 +362,21 @@ INSERT INTO `class_attendance_task` VALUES (3, 3, 'qr', NULL, NULL, NULL, NULL, 
 INSERT INTO `class_attendance_task` VALUES (4, 3, 'location', 1, 1, 500, NULL, NULL, NULL, 1, 'admin', '2025-11-02 19:42:59');
 INSERT INTO `class_attendance_task` VALUES (5, 3, 'location', 1, 1, 500, NULL, '2025-11-02 20:06:30', '2025-11-02 20:06:31', 1, 'admin', '2025-11-02 20:06:32');
 INSERT INTO `class_attendance_task` VALUES (6, 1, 'location', 1, 1, 500, NULL, '2025-11-02 20:20:54', '2025-11-04 20:20:55', 1, 'admin', '2025-11-02 20:20:59');
+INSERT INTO `class_attendance_task` VALUES (7, 1, 'qr', 123, NULL, 500, NULL, '2025-11-07 00:00:00', '2025-11-13 00:00:00', 1, 'admin', '2025-11-15 23:54:47');
+INSERT INTO `class_attendance_task` VALUES (8, 1, 'location', 1, 1, 500, NULL, '2025-11-16 00:04:01', '2025-11-16 02:04:06', 1, 'admin', '2025-11-16 00:04:15');
+INSERT INTO `class_attendance_task` VALUES (9, 1, 'qr', 1, 1, 500, NULL, '2025-11-16 00:04:01', '2025-11-16 02:04:06', 1, 'admin', '2025-11-16 00:09:31');
+INSERT INTO `class_attendance_task` VALUES (10, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:37:24', '2025-11-16 03:40:27', 1, 'admin', '2025-11-16 00:37:32');
+INSERT INTO `class_attendance_task` VALUES (11, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:37:24', '2025-11-16 03:40:27', 1, 'admin', '2025-11-16 00:38:10');
+INSERT INTO `class_attendance_task` VALUES (12, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:40:41', '2025-11-16 00:52:42', 1, 'admin', '2025-11-16 00:40:49');
+INSERT INTO `class_attendance_task` VALUES (13, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:45:45', '2025-11-16 00:51:47', 1, 'admin', '2025-11-16 00:45:53');
+INSERT INTO `class_attendance_task` VALUES (14, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:47:48', '2025-11-16 00:51:00', 1, 'admin', '2025-11-16 00:48:08');
+INSERT INTO `class_attendance_task` VALUES (15, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:49:03', '2025-11-16 00:49:05', 1, 'admin', '2025-11-16 00:49:38');
+INSERT INTO `class_attendance_task` VALUES (16, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:54:48', '2025-11-16 00:54:50', 1, 'admin', '2025-11-16 00:54:51');
+INSERT INTO `class_attendance_task` VALUES (17, 1, 'location', 2, 1, 500, NULL, '2025-11-16 04:15:06', '2025-11-16 07:15:08', 1, 'admin', '2025-11-16 04:15:14');
+INSERT INTO `class_attendance_task` VALUES (18, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 04:29:05', '2025-12-04 00:00:00', 1, 'admin', '2025-11-16 04:29:13');
+INSERT INTO `class_attendance_task` VALUES (19, 1, 'location', 1, 1, 500, NULL, '2025-11-16 04:37:20', '2025-11-16 10:37:21', 1, 'admin', '2025-11-16 04:37:25');
+INSERT INTO `class_attendance_task` VALUES (20, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 06:30:04', '2025-11-25 00:00:00', 1, 'admin', '2025-11-16 06:30:13');
+INSERT INTO `class_attendance_task` VALUES (21, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 06:44:53', '2025-11-16 06:54:06', 1, 'admin', '2025-11-16 06:45:10');
 
 -- ----------------------------
 -- Table structure for class_course
@@ -271,7 +447,7 @@ CREATE TABLE `class_exam`  (
   INDEX `idx_session_id`(`session_id` ASC) USING BTREE,
   INDEX `idx_status`(`status` ASC) USING BTREE,
   INDEX `idx_start_time`(`start_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试基本信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试基本信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_exam
@@ -309,7 +485,7 @@ CREATE TABLE `class_exam_answer`  (
   INDEX `idx_question_id`(`question_id` ASC) USING BTREE,
   INDEX `idx_corrector_id`(`corrector_id` ASC) USING BTREE,
   INDEX `idx_student_id`(`student_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生答案表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生答案表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_exam_answer
@@ -348,7 +524,7 @@ CREATE TABLE `class_exam_participant`  (
   INDEX `idx_participant_status`(`participant_status` ASC) USING BTREE,
   INDEX `idx_student_id`(`student_id` ASC) USING BTREE,
   INDEX `idx_submit_time`(`submit_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试参与记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试参与记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_exam_participant
@@ -381,7 +557,7 @@ CREATE TABLE `class_exam_question`  (
   INDEX `idx_question_type`(`question_type` ASC) USING BTREE,
   INDEX `idx_difficulty`(`difficulty` ASC) USING BTREE,
   INDEX `idx_exam_question_subject`(`exam_id` ASC, `subject` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '题目表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '题目表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_exam_question
@@ -587,7 +763,7 @@ CREATE TABLE `class_login_log`  (
   `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '提示消息',
   `login_time` datetime NULL DEFAULT NULL COMMENT '访问时间',
   PRIMARY KEY (`login_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 103 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 110 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_login_log
@@ -694,6 +870,13 @@ INSERT INTO `class_login_log` VALUES (99, 'admin', '127.0.0.1', '内网IP', 'Mic
 INSERT INTO `class_login_log` VALUES (100, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-14 23:59:52');
 INSERT INTO `class_login_log` VALUES (101, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-15 16:23:24');
 INSERT INTO `class_login_log` VALUES (102, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-15 17:43:23');
+INSERT INTO `class_login_log` VALUES (103, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-15 23:52:58');
+INSERT INTO `class_login_log` VALUES (104, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-16 00:37:01');
+INSERT INTO `class_login_log` VALUES (105, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-16 03:08:04');
+INSERT INTO `class_login_log` VALUES (106, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-16 04:12:57');
+INSERT INTO `class_login_log` VALUES (107, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 1, '验证码错误', '2025-11-16 05:23:59');
+INSERT INTO `class_login_log` VALUES (108, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 1, '验证码错误', '2025-11-16 05:24:01');
+INSERT INTO `class_login_log` VALUES (109, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-16 05:24:04');
 
 -- ----------------------------
 -- Table structure for class_material
@@ -740,7 +923,7 @@ CREATE TABLE `class_notice`  (
   `update_time` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `del_flag` tinyint(1) NULL DEFAULT 0 COMMENT '0=存在,1=已删除',
   PRIMARY KEY (`notice_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '课堂模块：通告表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '课堂模块：通告表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_notice
@@ -973,7 +1156,7 @@ CREATE TABLE `class_random_pick`  (
   INDEX `class_rpick`(`student_id` ASC) USING BTREE,
   CONSTRAINT `class_rpick` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `class_rpick1` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 26 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_random_pick
@@ -981,17 +1164,11 @@ CREATE TABLE `class_random_pick`  (
 INSERT INTO `class_random_pick` VALUES (5, 1, 0, 4, '2025-10-27 19:45:55', NULL, NULL);
 INSERT INTO `class_random_pick` VALUES (6, 1, 0, 27, '2025-10-27 19:46:04', NULL, NULL);
 INSERT INTO `class_random_pick` VALUES (9, 1, 0, 18, '2025-10-27 19:57:14', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (10, 1, 0, 21, '2025-10-27 19:57:23', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (11, 1, 0, 23, '2025-10-27 19:59:42', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (12, 1, 0, 36, '2025-10-27 19:59:46', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (13, 1, 0, 24, '2025-10-27 19:59:48', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (14, 1, 0, 6, '2025-10-27 19:59:49', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (15, 1, 0, 37, '2025-10-31 21:58:52', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (16, 1, 0, 16, '2025-11-01 00:42:03', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (17, 1, 0, 26, '2025-11-04 22:58:06', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (18, 1, 0, 9, '2025-11-04 22:58:09', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (19, 1, 0, 20, '2025-11-07 09:58:44', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (20, 1, 0, 13, '2025-11-12 23:07:45', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (21, 1, 0, 24, '2025-11-16 02:39:10', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (22, 1, 0, 37, '2025-11-16 02:39:14', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (23, 1, 0, 23, '2025-11-16 02:39:17', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (24, 1, 0, 28, '2025-11-16 06:41:55', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (25, 1, 0, 7, '2025-11-16 06:42:08', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for class_session
@@ -1023,10 +1200,10 @@ CREATE TABLE `class_session`  (
 -- Records of class_session
 -- ----------------------------
 INSERT INTO `class_session` VALUES (1, '研究与开发实践01', 1, 1, 50, 'A', 1, '', NULL, '', NULL, 1, '1', 45, '20:50', '20:50');
+INSERT INTO `class_session` VALUES (2, '数据库01', 1, 0, 30, '111', 2, 'admin', '2025-11-04 20:22:11', '', NULL, 5, '1', 45, '00:00', '20:22');
 INSERT INTO `class_session` VALUES (3, '计算机金融应用', 3, 0, 30, 'C', 3, '', NULL, 'admin', '2025-10-31 21:49:01', 3, '1', 45, '20:57', '20:57');
 INSERT INTO `class_session` VALUES (4, '研究与开发实践02', 2, 2, 42, 'B', 1, 'admin', '2025-10-31 21:55:44', 'admin', '2025-10-31 21:56:17', 1, '1', 45, '21:55', '21:55');
 INSERT INTO `class_session` VALUES (7, '研究与开发实践03', 1, 0, 32, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-11-04 20:42:55', 1, '1', 45, '12:00', '22:00');
-INSERT INTO `class_session` VALUES (8, '数据库01', 1, 0, 30, '111', 2, 'admin', '2025-11-04 20:22:11', '', NULL, 5, '1', 45, '00:00', '20:22');
 INSERT INTO `class_session` VALUES (9, '金融01', 1, 1, 37, '1', 3, 'admin', '2025-11-04 20:41:53', '', NULL, 6, '4', 60, '20:37', '20:57');
 INSERT INTO `class_session` VALUES (10, '12111', 1, 0, 30, '121', NULL, 'admin', '2025-11-04 21:09:42', '', NULL, 7, '1', 45, '21:08', '21:11');
 INSERT INTO `class_session` VALUES (11, '123123', 1, 0, 30, '111', NULL, 'admin', '2025-11-04 22:22:22', '', NULL, 8, '3', 50, '22:22', '22:28');
@@ -1089,6 +1266,11 @@ INSERT INTO `class_session_student` VALUES (1, 37, '2025-11-02 20:20:16');
 INSERT INTO `class_session_student` VALUES (1, 38, '2025-11-02 20:20:16');
 INSERT INTO `class_session_student` VALUES (1, 39, '2025-11-02 20:20:16');
 INSERT INTO `class_session_student` VALUES (1, 40, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (1, 41, '2025-11-16 06:02:59');
+INSERT INTO `class_session_student` VALUES (2, 1, '2025-11-16 00:40:12');
+INSERT INTO `class_session_student` VALUES (2, 2, '2025-11-16 00:40:18');
+INSERT INTO `class_session_student` VALUES (2, 4, '2025-11-16 00:40:31');
+INSERT INTO `class_session_student` VALUES (2, 5, '2025-11-16 00:40:26');
 
 -- ----------------------------
 -- Table structure for class_student
@@ -1806,7 +1988,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 329 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 337 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -2040,6 +2222,14 @@ INSERT INTO `sys_logininfor` VALUES (325, 'admin', '127.0.0.1', '内网IP', 'Chr
 INSERT INTO `sys_logininfor` VALUES (326, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 23:59:51');
 INSERT INTO `sys_logininfor` VALUES (327, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-15 16:23:24');
 INSERT INTO `sys_logininfor` VALUES (328, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-15 17:43:23');
+INSERT INTO `sys_logininfor` VALUES (329, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-15 23:52:58');
+INSERT INTO `sys_logininfor` VALUES (330, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 00:37:01');
+INSERT INTO `sys_logininfor` VALUES (331, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-16 03:07:16');
+INSERT INTO `sys_logininfor` VALUES (332, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 03:08:04');
+INSERT INTO `sys_logininfor` VALUES (333, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 04:12:56');
+INSERT INTO `sys_logininfor` VALUES (334, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-16 05:23:59');
+INSERT INTO `sys_logininfor` VALUES (335, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-16 05:24:00');
+INSERT INTO `sys_logininfor` VALUES (336, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 05:24:03');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -2249,7 +2439,7 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 506 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 511 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -2660,6 +2850,11 @@ INSERT INTO `sys_oper_log` VALUES (502, '作业提交', 2, 'com.ruoyi.web.contro
 INSERT INTO `sys_oper_log` VALUES (503, '作业提交', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.updateSubmit()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"homeworkId\":52,\"params\":{},\"studentHomeworkId\":34,\"submissionFiles\":\"/profile/upload/2025/11/15/考试管理_20251115171126A001.txt\",\"submitTime\":\"2025-11-15 17:11:27\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-15 17:11:27', 66);
 INSERT INTO `sys_oper_log` VALUES (504, '作业提交', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.updateSubmit()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"homeworkId\":52,\"params\":{},\"studentHomeworkId\":34,\"submissionFiles\":\"/profile/upload/2025/11/15/考试管理_20251115171126A001.txt,/profile/upload/2025/11/15/考试相关数据表_20251115171152A002.txt\",\"submitTime\":\"2025-11-15 17:12:57\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-15 17:12:57', 16);
 INSERT INTO `sys_oper_log` VALUES (505, '作业批改', 2, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.gradeSubmission()', 'PUT', 1, 'admin', '研发部门', '/proj_lwj/homework/grade', '127.0.0.1', '内网IP', '{\"correctedBy\":1,\"correctedTime\":\"2025-11-15 17:18:12\",\"homeworkId\":52,\"isGraded\":1,\"params\":{},\"remark\":\"111\",\"score\":90,\"status\":2,\"studentHomeworkId\":34,\"studentId\":38,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-15 17:18:12', 32);
+INSERT INTO `sys_oper_log` VALUES (506, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-16 02:39:10.344\",\"sessionId\":1,\"studentId\":24,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-16 02:39:10', 22);
+INSERT INTO `sys_oper_log` VALUES (507, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-16 02:39:13.821\",\"sessionId\":1,\"studentId\":37,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-16 02:39:13', 3);
+INSERT INTO `sys_oper_log` VALUES (508, '随机抽人', 0, 'com.ruoyi.web.controller.proj_myx.RandomPickController.pickRandom()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/random', '127.0.0.1', '内网IP', '{\"teacherId\":\"0\",\"sessionId\":\"1\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"pickTime\":\"2025-11-16 02:39:16.954\",\"sessionId\":1,\"studentId\":23,\"studentName\":\"邹雨航\",\"studentNo\":\"2023141460353\",\"teacherId\":0}}', 0, NULL, '2025-11-16 02:39:16', 7);
+INSERT INTO `sys_oper_log` VALUES (509, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-16 06:41:54.577\",\"sessionId\":1,\"studentId\":28,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-16 06:41:54', 8);
+INSERT INTO `sys_oper_log` VALUES (510, '随机抽人', 0, 'com.ruoyi.web.controller.proj_myx.RandomPickController.pickRandom()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/random', '127.0.0.1', '内网IP', '{\"teacherId\":\"0\",\"sessionId\":\"1\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"pickTime\":\"2025-11-16 06:42:07.55\",\"sessionId\":1,\"studentId\":7,\"studentName\":\"李卓航\",\"studentNo\":\"2023141460334\",\"teacherId\":0}}', 0, NULL, '2025-11-16 06:42:07', 7);
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -3128,7 +3323,7 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-15 17:43:23', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
+INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-16 05:24:04', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
 INSERT INTO `sys_user` VALUES (2, 105, 'ry', '张三', '00', 'ry@qq.com', '15666666666', '1', 'https://img0.baidu.com/it/u=3661017254,2148146033&fm=253&app=138&f=JPEG?w=500&h=500', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-14 15:25:34', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '测试员');
 INSERT INTO `sys_user` VALUES (3, 103, 'student1', '李比', '00', 'student1@school.com', '13800138001', '0', 'https://img0.baidu.com/it/u=2660145230,331641081&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=625', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 10:30:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '学生');
 INSERT INTO `sys_user` VALUES (4, 105, 'teacher1', '王老师', '01', 'teacher1@school.com', '13900139001', '1', 'https://picsum.photos/200/200?random=2', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 11:20:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '教师');
