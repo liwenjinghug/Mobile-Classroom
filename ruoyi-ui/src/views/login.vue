@@ -61,7 +61,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2018-2025 ruoyi.vip All Rights Reserved.</span>
+<!--      <span>Copyright © 2018-2025 ruoyi.vip All Rights Reserved.</span>-->
     </div>
   </div>
 </template>
@@ -173,25 +173,95 @@ export default {
 .title {
   margin: 0px auto 30px auto;
   text-align: center;
-  color: #707070;
+  color: #F2F6FC;
+  font-size: 30px;     /* 文字大小，按需调整 */
+  font-weight: 600;    /* 加粗 */
+  letter-spacing: 1px; /* 可选：字间距 */
 }
 
 .login-form {
   border-radius: 6px;
-  background: #ffffff;
+  /* 使用 rgba 调整透明度（0.0 - 1.0），示例为 0.85 */
+  background: rgba(0, 0, 0, 0.35);
+  /* 可选：给玻璃效果 */
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   width: 400px;
   padding: 25px 25px 5px 25px;
   z-index: 1;
   .el-input {
     height: 38px;
+
     input {
       height: 38px;
+      //新增
+      background: transparent; // 背景透明
+      border: none; // 移除默认边框
+      border-bottom: 3px solid #FFFFFF; // 只保留深色底线
+      border-radius: 0; // 移除圆角
+      color: #ffffff; // 输入文字颜色
+      // 修改 placeholder 颜色
+      &::placeholder {
+        color: #ffffff;
+        //新增结束
+      }
     }
   }
   .input-icon {
     height: 39px;
     width: 14px;
     margin-left: 2px;
+    color: #ffffff; // 图标颜色
+  }
+
+  //新增
+  // --- 关键修改 2: 登录按钮样式 (参考图1) ---
+  .el-form-item .el-button--primary {
+    width: 100% !important;
+    background: linear-gradient(90deg, #f05d49, #4285f4) !important;
+    border: none !important;
+    border-radius: 18px !important;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  // --- 关键修改 3: 统一其他元素颜色 ---
+  .el-checkbox {
+    // (A) "记住密码" 文字的颜色
+    .el-checkbox__label {
+      color: #ffffff;
+    }
+
+    // (B) 未勾选时，方框的边框颜色
+    .el-checkbox__inner {
+      border-color: #ffffff;
+      background: transparent; // 确保方框也是透明的
+    }
+
+    // (C) 勾选后，方框的背景色和边框色
+    .el-checkbox__input.is-checked .el-checkbox__inner {
+      background-color: #c3d770; // 改为按钮的红色
+      border-color: #c3d770; // 边框也改为红色
+    }
+
+    // (D) 勾选后，那个 "√" 勾的颜色
+    .el-checkbox__input.is-checked .el-checkbox__inner::after {
+      border-color: #ffffff; // 勾改为白色
+    }
+    // --- (E) 【本次新增】勾选后，"记住密码" 文字的颜色 ---
+    // .is-checked + .el-checkbox__label 意思是:
+    // 找到 "is-checked" 的输入框，然后改变它后面紧跟着的 label 文字
+    .el-checkbox__input.is-checked + .el-checkbox__label {
+      color: #c3d770; // 勾选后文字也变为红色 (你也可以改成 #FFFFFF 或其他颜色)
+    }
+  }
+  .link-type {
+    color: #ffffff; // "忘记密码"
+    &:hover {
+      color: #c3d770; // 悬浮时变为按钮的蓝色
+    }
   }
 }
 .login-tip {

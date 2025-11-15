@@ -257,52 +257,99 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-/* 复用 login.vue 的样式 */
+/* 1. 容器 - 复用 login.vue 的样式 */
 .reset-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
+  /* 确保背景图路径正确，~@ 表示 src 目录 */
   background-image: url("~@/assets/images/login-background.jpg");
   background-size: cover;
 }
+
+/* 2. 标题 ("找回密码") */
 .title {
   margin: 0px auto 30px auto;
   text-align: center;
-  color: #707070;
+  color: #F2F6FC; /* 改为白色 */
+  font-size: 30px; /* 额外添加，使其与 login 一致 */
+  font-weight: 600;
+  letter-spacing: 1px;
 }
+
+/* 3. 提示文字 (例如 "请输入您的新密码") */
 .tips {
   font-size: 14px;
-  color: #606266;
+  color: #ffffff; /* 改为白色 */
   margin-bottom: 20px;
   text-align: center;
   line-height: 1.5;
 }
+
+/* 4. 表单容器 - 应用玻璃效果 */
 .reset-form {
   border-radius: 6px;
-  background: #ffffff;
+  background: rgba(0, 0, 0, 0.35); /* 玻璃背景 */
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   width: 400px;
   padding: 25px 25px 25px 25px;
-  .el-input {
+  z-index: 1; /* 确保在背景之上 */
+
+  /* * 关键: 因为 <style> 标签有 "scoped" 属性,
+   * 我们必须使用 ::v-deep 来 "穿透" 并修改 Element UI 的子组件
+   */
+
+  /* 5. 输入框 */
+  ::v-deep .el-input {
     height: 38px;
     input {
       height: 38px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid #FFFFFF; /* 白色下划线 */
+      border-radius: 0;
+      color: #ffffff; /* 输入文字白色 */
+      &::placeholder {
+        color: #ffffff; /* 提示文字白色 */
+      }
     }
   }
-  .input-icon {
+
+  /* 6. 输入框图标 */
+  ::v-deep .input-icon {
     height: 39px;
     width: 14px;
     margin-left: 2px;
+    color: #ffffff; /* 图标白色 */
+  }
+
+  /* 7. 按钮 (发送/重置) - 应用渐变样式 */
+  /* (这个选择器 .el-button--primary 是我们上次成功的关键) */
+  ::v-deep .el-button--primary {
+    width: 100% !important;
+    background: linear-gradient(90deg, #f05d49, #4285f4) !important;
+    border: none !important;
+    border-radius: 18px !important;
+
+    &:hover {
+      opacity: 0.9;
+    }
   }
 }
+
+/* 8. "返回登录" 链接 */
 .link-type {
-  color: #409eff;
+  color: #ffffff; /* 改为白色 */
   text-decoration: none;
   &:hover {
     text-decoration: underline;
   }
 }
-.el-login-footer { /* */
+
+/* 9. 底部版权 */
+.el-login-footer {
   height: 40px;
   line-height: 40px;
   position: fixed;
