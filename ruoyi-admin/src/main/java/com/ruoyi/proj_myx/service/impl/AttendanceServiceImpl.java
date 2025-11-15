@@ -58,7 +58,42 @@ public class AttendanceServiceImpl implements IAttendanceService {
         // reuse existing mapper to fetch all students for the session (include signed and unsigned)
         AttendanceTask t = taskMapper.selectById(taskId);
         if (t == null) return Collections.emptyList();
-        return attendanceMapper.selectAllBySession(t.getSessionId());
+        return attendanceMapper.selectAllByTask(taskId);
+    }
+
+
+    @Transactional
+    public int setAttendanceStatus(Long sessionId, Long studentId, Integer status) {
+        if (sessionId == null || studentId == null || status == null) return 0;
+        Date now = new Date();
+        // Try to find existing attendance record for session+student
+        Attendance existing = attendanceMapper.selectBySessionAndStudent(sessionId, studentId);
+        if (existing == null) {
+            Attendance a = new Attendance();
+            a.setSessionId(sessionId);
+            a.setStudentId(studentId);
+            a.setAttendanceStatus(status);
+            // Get the latest task for the session and associate it with the attendance record
+            AttendanceTask latestTask = taskMapper.selectLatestTaskBySession(sessionId);
+            if (latestTask != null) {
+                a.setTaskId(latestTask.getTaskId());
+            }
+            if (status != null && status == 1) {
+                a.setAttendanceTime(now);
+            }
+            a.setCreatedAt(now);
+            a.setUpdatedAt(now);
+            return attendanceMapper.insertAttendance(a);
+        } else {
+            existing.setAttendanceStatus(status);
+            if (status != null && status == 1) {
+                existing.setAttendanceTime(now);
+            } else if (status != null && status == 0) {
+                existing.setAttendanceTime(null);
+            }
+            existing.setUpdatedAt(now);
+            return attendanceMapper.updateAttendance(existing);
+        }
     }
 
     @Override
@@ -94,18 +129,50 @@ public class AttendanceServiceImpl implements IAttendanceService {
         return upsertAttendanceRecord(taskId, studentId, new Date(), 1, String.format("%f,%f", lat, lng));
     }
 
-    // helper: insert or update class_attendance unique by session_id + student_id
+    @Override
+    @Transactional
+    public int updateAttendanceStatus(Long taskId, Long studentId, Integer status) {
+        if (taskId == null || studentId == null || status == null) return 0;
+        Attendance existing = attendanceMapper.selectByTaskAndStudent(taskId, studentId);
+        Date now = new Date();
+        if (existing != null) {
+            existing.setAttendanceStatus(status);
+            // 1=已签到, 2=迟到 都应有签到时间；0=未签到 清空时间；其它状态保留原时间
+            if (status == 1 || status == 2) {
+                existing.setAttendanceTime(now);
+            } else if (status == 0 || status == 3 || status == 4) {
+                existing.setAttendanceTime(null);
+            }
+            existing.setUpdatedAt(now);
+            return attendanceMapper.updateAttendance(existing);
+        } else {
+            Attendance a = new Attendance();
+            a.setTaskId(taskId);
+            a.setStudentId(studentId);
+            a.setAttendanceStatus(status);
+            a.setCreatedAt(now);
+            a.setUpdatedAt(now);
+            if (status == 1 || status == 2) {
+                a.setAttendanceTime(now);
+            }
+            // also set session_id from task
+            AttendanceTask t = taskMapper.selectById(taskId);
+            if (t != null) a.setSessionId(t.getSessionId());
+            return attendanceMapper.insertAttendance(a);
+        }
+    }
+
+    // helper: insert or update class_attendance unique by task_id + student_id
     private int upsertAttendanceRecord(Long taskId, Long studentId, Date attendanceTime, int status, String location) {
-        // find session from task
-        AttendanceTask t = taskMapper.selectById(taskId);
-        if (t == null) return 0;
-        Long sessionId = t.getSessionId();
-        // check existing attendance record
-        Attendance existing = attendanceMapper.selectBySessionAndStudent(sessionId, studentId);
+        // check existing attendance record by taskId + studentId
+        Attendance existing = attendanceMapper.selectByTaskAndStudent(taskId, studentId);
         if (existing == null) {
             // insert new
             Attendance a = new Attendance();
-            a.setSessionId(sessionId);
+            a.setTaskId(taskId);
+            // also set session_id from task
+            AttendanceTask t = taskMapper.selectById(taskId);
+            if (t != null) a.setSessionId(t.getSessionId());
             a.setStudentId(studentId);
             a.setAttendanceTime(attendanceTime);
             a.setAttendanceStatus(status);
@@ -118,6 +185,9 @@ public class AttendanceServiceImpl implements IAttendanceService {
             existing.setAttendanceStatus(status);
             existing.setUpdatedAt(attendanceTime);
             existing.setLocation(location);
+            // also set session_id from task
+            AttendanceTask t = taskMapper.selectById(taskId);
+            if (t != null) existing.setSessionId(t.getSessionId());
             return attendanceMapper.updateAttendance(existing);
         }
     }

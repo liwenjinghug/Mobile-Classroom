@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.Options;
 
 import java.util.Date;
 
@@ -12,6 +13,7 @@ import java.util.Date;
 public interface AttendanceQrMapper {
 
     @Insert("INSERT INTO class_attendance_qr(task_id, token, ttl_seconds, expire_time, used, create_by, create_time) VALUES(#{taskId}, #{token}, #{ttlSeconds}, #{expireTime}, #{used}, #{createBy}, NOW())")
+    @Options(useGeneratedKeys = true, keyProperty = "qrId", keyColumn = "qr_id")
     int insertQr(AttendanceQr qr);
 
     @Select("SELECT * FROM class_attendance_qr WHERE token = #{token}")
@@ -23,4 +25,3 @@ public interface AttendanceQrMapper {
     @Update("UPDATE class_attendance_qr SET used = #{used} WHERE qr_id = #{qrId}")
     int updateUsed(AttendanceQr qr);
 }
-

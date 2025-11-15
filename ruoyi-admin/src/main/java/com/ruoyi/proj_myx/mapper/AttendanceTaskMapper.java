@@ -26,6 +26,9 @@ public interface AttendanceTaskMapper {
     @Update("UPDATE class_attendance_task SET status = #{status}, end_time = #{endTime} WHERE task_id = #{taskId}")
     int updateStatus(AttendanceTask task);
 
+    @Select("SELECT * FROM class_attendance_task WHERE session_id = #{sessionId} ORDER BY create_time DESC LIMIT 1")
+    AttendanceTask selectLatestTaskBySession(Long sessionId);
+
     @Delete("DELETE FROM class_attendance_task WHERE task_id = #{taskId}")
     int deleteById(Long taskId);
 }

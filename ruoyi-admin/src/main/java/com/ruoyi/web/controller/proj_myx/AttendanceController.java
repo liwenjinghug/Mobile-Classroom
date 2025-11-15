@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.net.URLEncoder;
 
 @RestController
 @RequestMapping("/proj_myx/attendance")
@@ -92,7 +93,13 @@ public class AttendanceController extends BaseController {
         if (qr == null) return AjaxResult.error("生成二维码失败");
         Map<String, Object> data = new HashMap<>();
         data.put("token", qr.getToken());
-        String qrUrl = "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" + qr.getToken();
+        // Use a reliable QR image service and URL-encode the token
+        String qrUrl;
+        try {
+            qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + URLEncoder.encode(qr.getToken(), "UTF-8");
+        } catch (Exception e) {
+            qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + qr.getToken();
+        }
         data.put("qrUrl", qrUrl);
         data.put("expireTime", qr.getExpireTime());
         return AjaxResult.success(data);
@@ -141,6 +148,25 @@ public class AttendanceController extends BaseController {
         return rows > 0 ? AjaxResult.success("签到成功") : AjaxResult.error("签到失败，可能在范围外或任务不是位置签到");
     }
 
+    @PreAuthorize("@ss.hasPermi('proj_myx:attendance:edit')")
+    @PostMapping("/task/status")
+    public AjaxResult updateStatus(@RequestBody Map<String, Object> body) {
+        String taskIdRaw = body.get("taskId") == null ? null : body.get("taskId").toString();
+        String studentIdRaw = body.get("studentId") == null ? null : body.get("studentId").toString();
+        String statusRaw = body.get("status") == null ? null : body.get("status").toString();
+        if (!StringUtils.hasText(taskIdRaw) || !StringUtils.hasText(studentIdRaw) || !StringUtils.hasText(statusRaw)) {
+            return AjaxResult.error("参数不完整");
+        }
+        try {
+            Long taskId = Long.parseLong(taskIdRaw);
+            Long studentId = Long.parseLong(studentIdRaw);
+            Integer status = Integer.parseInt(statusRaw);
+            int rows = attendanceService.updateAttendanceStatus(taskId, studentId, status);
+            return rows > 0 ? AjaxResult.success("更新成功") : AjaxResult.error("更新失败");
+        } catch (NumberFormatException e) {
+            return AjaxResult.error("参数格式不正确");
+        }
+    }
     // helper: get current username from BaseController context
     public String getUsername() {
         try {

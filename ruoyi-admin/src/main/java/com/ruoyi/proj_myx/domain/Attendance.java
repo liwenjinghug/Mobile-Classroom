@@ -11,6 +11,7 @@ public class Attendance implements Serializable {
 
     private Long attendanceId;
     private Long sessionId;
+    private Long taskId;
     private Long studentId;
     private Date attendanceTime;
     private Integer attendanceStatus; // 0 未签到 1 已签到 ...
@@ -38,6 +39,14 @@ public class Attendance implements Serializable {
 
     public void setSessionId(Long sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
     }
 
     public Long getStudentId() {

@@ -38,12 +38,15 @@
       </el-form-item>
     </el-form>
 
-    <el-dialog title="二维码" :visible.sync="showQr" width="360px">
+    <el-dialog title="二维码" :visible.sync="showQr" width="360px" @close="onQrClose">
       <div v-if="qrData">
         <img :src="qrData.qrUrl" alt="qr" style="width:300px;height:300px;display:block;margin:0 auto" />
         <p style="word-break:break-all;">Token: {{ qrData.token }}</p>
         <p>过期时间: {{ qrData.expireTime }}</p>
       </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="onQrClose">查看签到详情</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -58,7 +61,8 @@ export default {
     return {
       form: { type: 'location', centerLat: null, centerLng: null, radius: 500, qrTtl: 10, startTime: null, endTime: null },
       showQr: false,
-      qrData: null
+      qrData: null,
+      pendingCreated: null // store created payload until QR dialog is closed
     }
   },
   methods: {
@@ -71,7 +75,6 @@ export default {
         if (res && res.code === 200) {
           const created = res.data
           this.$message.success('签到创建成功!')
-          // emit created object to parent so it can open details (contains taskId)
           // if qr type, request backend to generate token and show QR
           if (this.form.type === 'qr' && created && created.taskId) {
             try {
@@ -79,14 +82,18 @@ export default {
               if (gen && gen.code === 200) {
                 this.qrData = gen.data
                 this.showQr = true
-                this.$emit('created', created)
+                // do NOT emit 'created' yet — wait until user closes the QR dialog
+                this.pendingCreated = created
               } else {
                 this.$message.error('生成二维码失败: ' + (gen && gen.msg))
+                // emit so parent can open details even if QR generation failed
                 this.$emit('created', created)
               }
             } catch (e) {
               console.error('生成二维码出错', e)
-              this.$message.error('生成二维码出错: ' + (e && e.message ? e.message : '请检查后端'))
+              const serverMsg = e && e.response && e.response.data && (e.response.data.msg || e.response.data.message)
+              this.$message.error('生成二维码出错: ' + (serverMsg || (e && e.message ? e.message : '请检查后端')))
+              // emit so parent can open details even if QR generation failed
               this.$emit('created', created)
             }
           } else {
@@ -97,8 +104,19 @@ export default {
         }
       } catch (err) {
         console.error('创建签到失败', err)
-        // request 拦截器会在响应非200时 reject 错误，Message 已在 request 拦截里处理，但这里也显示更明确信息
         this.$message.error('创建签到失败: ' + (err && err.message ? err.message : '请检查后端或权限'))
+      }
+    },
+
+    // called when user closes the QR dialog
+    onQrClose() {
+      try {
+        if (this.pendingCreated) {
+          this.$emit('created', this.pendingCreated)
+          this.pendingCreated = null
+        }
+      } catch (e) {
+        console.error('onQrClose error', e)
       }
     }
   }

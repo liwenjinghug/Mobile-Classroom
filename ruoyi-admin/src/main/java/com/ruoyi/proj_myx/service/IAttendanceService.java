@@ -17,4 +17,6 @@ public interface IAttendanceService {
     // 学生签到接口：二维码签到与位置签到
     int signByQr(Long taskId, Long studentId, String token);
     int signByLocation(Long taskId, Long studentId, Double lat, Double lng);
+
+    int updateAttendanceStatus(Long taskId, Long studentId, Integer status);
 }

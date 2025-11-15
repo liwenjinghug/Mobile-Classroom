@@ -39,3 +39,11 @@ export function signByQr(payload) {
 export function signByLocation(payload) {
   return request({ url: '/proj_myx/attendance/sign/location', method: 'post', data: payload })
 }
+
+export function updateStudentStatus(taskId, studentId, status) {
+  return request({
+    url: '/proj_myx/attendance/task/status',
+    method: 'post',
+    data: { taskId, studentId, status }
+  })
+}
