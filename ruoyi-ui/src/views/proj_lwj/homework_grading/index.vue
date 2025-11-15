@@ -41,6 +41,9 @@
                 <el-button size="mini" type="primary" @click="refreshSubmissions">刷新</el-button>
               </div>
             </div>
+            <div v-if="submissions && submissions.length" class="stats-bar">
+              <el-alert :closable="false" type="info" :title="`统计：应到 ${gradingStats.total}；已提交 ${gradingStats.submitted}（${formatPercent(gradingStats.submitRate)}）; 已批改 ${gradingStats.graded}（${formatPercent(gradingStats.gradedRate)}）; 未提交 ${gradingStats.unsubmitted}；平均分 ${gradingStats.avgScore}${gradingStats.ext}`" />
+            </div>
             <el-table :data="sortedSubmissions" style="width:100%" v-loading="submissionsLoading">
               <el-table-column label="序号ID" width="110">
                 <template #default="{ row }">{{ row.student_id || row.studentId || row.studentId || row.id || '' }}</template>
@@ -98,6 +101,9 @@
             <el-button size="mini" type="info" @click="printSubmissions" :disabled="!submissions || submissions.length===0">打印</el-button>
             <el-button size="mini" type="primary" @click="refreshSubmissions">刷新</el-button>
           </div>
+        </div>
+        <div v-if="submissions && submissions.length" class="stats-bar">
+          <el-alert :closable="false" type="info" :title="`统计：应到 ${gradingStats.total}；已提交 ${gradingStats.submitted}（${formatPercent(gradingStats.submitRate)}）; 已批改 ${gradingStats.graded}（${formatPercent(gradingStats.gradedRate)}）; 未提交 ${gradingStats.unsubmitted}；平均分 ${gradingStats.avgScore}${gradingStats.ext}`" />
         </div>
         <el-table :data="sortedSubmissions" style="width:100%" v-loading="submissionsLoading">
           <el-table-column label="序号ID" width="110">
@@ -184,6 +190,9 @@
             <el-button size="mini" type="info" @click="printSubmissions" :disabled="!submissions || submissions.length===0">打印</el-button>
             <el-button size="mini" type="primary" @click="refreshSubmissions">刷新</el-button>
           </div>
+        </div>
+        <div v-if="submissions && submissions.length" class="stats-bar">
+          <el-alert :closable="false" type="info" :title="`统计：应到 ${gradingStats.total}；已提交 ${gradingStats.submitted}（${formatPercent(gradingStats.submitRate)}）; 已批改 ${gradingStats.graded}（${formatPercent(gradingStats.gradedRate)}）; 未提交 ${gradingStats.unsubmitted}；平均分 ${gradingStats.avgScore}${gradingStats.ext}`" />
         </div>
         <el-table :data="sortedSubmissions" style="width:100%" v-loading="submissionsLoading">
           <el-table-column label="序号ID" width="110">
@@ -291,6 +300,28 @@ export default {
         const bs = String(b.student_no || b.studentNo || b.studentName || b.student_id || b.studentId || '')
         return as.localeCompare(bs, undefined, { numeric: true })
       })
+    },
+    gradingStats() {
+      const list = Array.isArray(this.submissions) ? this.submissions : []
+      const total = list.length
+      if (!total) return { total: 0, submitted: 0, unsubmitted: 0, graded: 0, ungraded: 0, submitRate: 0, gradedRate: 0, avgScore: 0, maxScore: null, minScore: null, ext: '' }
+      let submitted = 0, graded = 0
+      let scoreSum = 0, scoreCnt = 0
+      let maxScore = null, minScore = null
+      list.forEach(r => {
+        const hasSubmit = !!(r.submitTime || (r.submissionFiles && String(r.submissionFiles).trim() !== '') || r.status === '1' || r.status === '2')
+        if (hasSubmit) submitted += 1
+        if (this.rowIsGraded(r)) graded += 1
+        const s = (r.score !== null && r.score !== undefined) ? Number(r.score) : (r.grade !== null && r.grade !== undefined ? Number(r.grade) : NaN)
+        if (!isNaN(s)) { scoreSum += s; scoreCnt++; maxScore = (maxScore==null? s : Math.max(maxScore, s)); minScore = (minScore==null? s : Math.min(minScore, s)) }
+      })
+      const unsubmitted = total - submitted
+      const ungraded = submitted - graded
+      const submitRate = total ? submitted / total : 0
+      const gradedRate = submitted ? graded / submitted : 0
+      const avgScore = scoreCnt ? (scoreSum / scoreCnt).toFixed(1) : 0
+      const ext = (scoreCnt ? `；最高 ${maxScore}；最低 ${minScore}` : '')
+      return { total, submitted, unsubmitted, graded, ungraded, submitRate, gradedRate, avgScore, maxScore, minScore, ext }
     }
   },
   created() {
@@ -522,6 +553,7 @@ export default {
       URL.revokeObjectURL(url)
       this.$message.success('导出已开始')
     },
+    formatPercent(n) { if (!n) return '0%'; return (n*100).toFixed(1) + '%' },
     printSubmissions() {
       if (!this.submissions || !this.submissions.length) { this.$message.info('没有可打印的数据'); return }
       const title = this.selectedHomework && (this.selectedHomework.title || this.selectedHomework.homeworkTitle) ? (this.selectedHomework.title || this.selectedHomework.homeworkTitle) : ('作业提交')
@@ -531,15 +563,18 @@ export default {
       const session = (this.sessions || []).find(s => String(s.sessionId) === String(this.form.sessionId))
       const sessionName = session ? (session.className || '') : (this.selectedHomework && this.selectedHomework.className ? this.selectedHomework.className : '')
 
+      const stats = this.gradingStats
+
       // build HTML with print-friendly CSS (header, footer, page breaks)
       let html = `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><style>
         body{font-family:Arial,Helvetica,sans-serif;color:#222}
         .print-header{position:fixed;top:0;left:0;right:0;padding:10px 20px;border-bottom:1px solid #ddd;background:#fff}
         .print-footer{position:fixed;bottom:0;left:0;right:0;padding:6px 20px;border-top:1px solid #ddd;background:#fff;font-size:12px;color:#666}
-        .print-content{margin:120px 20px 60px 20px}
+        .print-content{margin:140px 20px 60px 20px}
         table{border-collapse:collapse;width:100%;font-size:13px}
         th,td{border:1px solid #ddd;padding:8px;text-align:left}
         th{background:#f5f7fa}
+        .meta{margin-top:6px;color:#666}
         @media print {
           .print-header, .print-footer { position: fixed }
           .no-print { display: none }
@@ -547,11 +582,11 @@ export default {
         }
       </style></head><body>`
 
-      html += `<div class="print-header"><div style="font-size:16px;font-weight:600">${title}</div><div style="margin-top:6px;color:#666">${courseName ? '课程：' + courseName : ''}${courseName && sessionName ? ' / ' : ''}${sessionName ? '课堂：' + sessionName : ''}</div></div>`
+      html += `<div class="print-header"><div style="font-size:16px;font-weight:600">${title}</div><div class="meta">${courseName ? '课程：' + courseName : ''}${courseName && sessionName ? ' / ' : ''}${sessionName ? '课堂：' + sessionName : ''}</div><div class="meta">统计：应到 ${stats.total}；已提交 ${stats.submitted}（${this.formatPercent(stats.submitRate)}）; 已批改 ${stats.graded}（${this.formatPercent(stats.gradedRate)}）; 未提交 ${stats.unsubmitted}；平均分 ${stats.avgScore}${stats.ext}</div></div>`
       html += `<div class="print-footer">打印时间：${new Date().toLocaleString()}</div>`
       html += `<div class="print-content"><table><thead><tr><th style="width:90px">序号ID</th><th style="width:90px">学号</th><th style="width:140px">姓名</th><th>附件</th><th style="width:150px">提交时间</th><th style="width:150px">批改时间</th><th style="width:90px">状态</th><th style="width:90px">成绩</th><th style="width:200px">评语</th></tr></thead><tbody>`
 
-      (this.sortedSubmissions || []).forEach(r => {
+      ;(this.sortedSubmissions || []).forEach(r => {
         const files = (r.submissionFiles || '').replace(/,/g, ';')
         const idVal = r.student_id || r.studentId || r.id || ''
         const no = r.student_no || r.studentNo || ''
@@ -566,7 +601,6 @@ export default {
         w.document.open()
         w.document.write(html)
         w.document.close()
-        // trigger print from opener context to avoid embedding scripts in the written HTML
         setTimeout(() => { try { w.focus(); w.print(); } catch (e) { console.error('print failed', e) } }, 300)
       } else {
         this.$message.error('弹出窗口被拦截，请允许弹窗或使用导出功能')
@@ -610,6 +644,6 @@ export default {
   transition: transform 0.3s ease;
   /* Optional: Add a transition for smoothness */
 }
-
+.stats-bar { margin: 6px 0 10px }
 /* Add any additional styles for the right panel here */
 </style>

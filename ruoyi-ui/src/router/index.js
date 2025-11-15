@@ -232,10 +232,24 @@ export const constantRoutes = [
         meta: { title: '考试发布', icon: 'list' }
       },
       {
+        path: 'exam_portal',
+        component: () => import('@/views/proj_lwj/exam_portal/index.vue'),
+        name: 'ExamPortal',
+        meta: { title: '考试入口', icon: 'guide' }
+      },
+      {
         path: 'exam_questions/:examId',
         component: () => import('@/views/proj_lwj/exam_questions/index.vue'),
         name: 'ExamQuestionsPage',
         meta: { title: '题目配置', icon: 'edit' },
+        props: true,
+        hidden: true
+      },
+      {
+        path: 'exam_take/:examId',
+        component: () => import('@/views/proj_lwj/exam_take/index.vue'),
+        name: 'ExamTake',
+        meta: { title: '进行考试', icon: 'edit' },
         props: true,
         hidden: true
       }

@@ -149,12 +149,18 @@
           <el-form-item>
             <span class="filter-count">匹配 {{ filteredSubmissions.length }} / 总 {{ mySubmissions.length }}</span>
           </el-form-item>
+          <el-form-item>
+            <el-button size="mini" icon="el-icon-printer" @click="printSubmissions" :disabled="!filteredSubmissions.length">打印</el-button>
+          </el-form-item>
         </el-form>
+        <div class="stats-row" v-if="submissionStats">
+          <el-alert :closable="false" type="info" :title="`统计：共 ${submissionStats.total} 条；已批改 ${submissionStats.graded}；已过期 ${submissionStats.expired}；平均成绩 ${submissionStats.avgScore}`" />
+        </div>
       </div>
       <div v-if="!studentConfirmed" class="blocked-panel">
         <el-alert type="info" :closable="false" show-icon title="请先确认学号" description="确认后将显示您所有相关的提交记录。" />
       </div>
-      <el-table v-else :data="filteredSubmissions" size="small" stripe v-loading="mySubmissionsLoading" @selection-change="onSelectionChange" @sort-change="onSortChange">
+      <el-table v-else :data="filteredSubmissions" size="small" stripe v-loading="mySubmissionsLoading" @selection-change="onSelectionChange" @sort-change="onSortChange" :row-key="submissionRowKey">
         <el-table-column type="selection" width="42" reserve-selection />
         <el-table-column prop="courseName" label="课程" min-width="140" :sortable="true" />
         <el-table-column prop="homeworkTitle" label="作业" min-width="200" :sortable="true" />
@@ -351,6 +357,23 @@ export default {
         });
       }
       return arr;
+    },
+    submissionStats() {
+      const list = this.filteredSubmissions || []
+      const total = list.length
+      if (!total) return { total: 0, graded: 0, expired: 0, avgScore: 0 }
+      let graded = 0
+      let expired = 0
+      let scoreSum = 0
+      let scoreCnt = 0
+      list.forEach(r => {
+        if (this.isRowGraded(r)) graded += 1
+        if (this.isRowExpired(r)) expired += 1
+        const s = (r.score == null || r.score === '') ? NaN : Number(r.score)
+        if (!isNaN(s)) { scoreSum += s; scoreCnt += 1 }
+      })
+      const avgScore = scoreCnt ? (scoreSum / scoreCnt).toFixed(1) : 0
+      return { total, graded, expired, avgScore }
     }
   },
   created() {
@@ -845,6 +868,76 @@ export default {
       const d = new Date();
       const pad = n => String(n).padStart(2,'0');
       return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds());
+    },
+    buildFullPath(raw) {
+      // Normalize to a path usable by /common/download or /common/download/resource
+      try {
+        if (!raw) return ''
+        let s = String(raw).trim()
+        // if it's already a full URL or a /profile resource, keep it
+        if (/^https?:\/\//i.test(s)) return s
+        if (s.startsWith('/profile/')) return s
+        // if starts with upload or date folder, prefix /profile/
+        if (s.startsWith('/upload/')) return '/profile' + s
+        // common ruoyi: fileName may be like 2025/11/14/xxx.ext
+        if (/^\d{4}\//.test(s)) return '/profile/upload/' + s
+        // fallback: if it already contains profile/upload without leading slash
+        if (s.startsWith('profile/upload/')) return '/' + s
+        // if it already contains upload/ without leading slash
+        if (s.startsWith('upload/')) return '/profile/' + s
+        // otherwise treat as plain filename under /profile/upload
+        return '/profile/upload/' + s
+      } catch { return String(raw || '') }
+    },
+    submissionRowKey(row) {
+      return row && (row.studentHomeworkId || row.id || `${row.homeworkId || 'hw'}-${row.studentNo || this.studentNo || ''}-${row.submitTime || ''}`)
+    },
+    printSubmissions() {
+      const rows = this.selectedRows.length ? this.selectedRows : this.filteredSubmissions
+      if (!rows || !rows.length) { this.$message.info('没有可打印的数据'); return }
+      const esc = s => String(s == null ? '' : s).replace(/</g,'&lt;')
+      const tr = rows.map(r => {
+        const files = (r.submissionFiles ? r.submissionFiles.split(',').map(f=>f.split('/').pop()).join('; ') : '')
+        const graded = this.isRowGraded(r) ? '已批改' : '未批改'
+        const expired = this.isRowExpired(r) ? '已过期' : '未过期'
+        return `<tr>
+          <td>${esc(r.studentNo || '')}</td>
+          <td>${esc(r.courseName || '')}</td>
+          <td>${esc(r.homeworkTitle || '')}</td>
+          <td>${esc(this.formatTime(r.submitTime) || '')}</td>
+          <td>${esc(r.score == null ? '' : r.score + '分')}</td>
+          <td>${graded}</td>
+          <td>${expired}</td>
+          <td>${esc(files)}</td>
+        </tr>`
+      }).join('')
+      const stats = this.submissionStats
+      const win = window.open('', '_blank')
+      if (!win) { this.$message.error('打印窗口被拦截'); return }
+      win.document.write(`
+        <html><head><title>我的提交记录</title>
+        <meta charset="utf-8" />
+        <style>
+          body{font-family:Arial,Helvetica,'Microsoft YaHei';padding:12px}
+          table{border-collapse:collapse;width:100%}
+          th,td{border:1px solid #999;padding:6px;text-align:left}
+          h2{margin:0 0 12px}
+          .meta{margin:6px 0 12px;color:#666}
+        </style>
+        </head><body>
+        <h2>我的提交记录</h2>
+        <div class="meta">统计：共 ${stats.total} 条；已批改 ${stats.graded}；已过期 ${stats.expired}；平均成绩 ${stats.avgScore}</div>
+        <table>
+          <thead><tr>
+            <th>学号</th><th>课程</th><th>作业</th><th>提交时间</th><th>成绩</th><th>批改状态</th><th>是否过期</th><th>附件</th>
+          </tr></thead>
+          <tbody>${tr}</tbody>
+        </table>
+        </body></html>
+      `)
+      win.document.close()
+      win.focus()
+      win.print()
     }
   }
 }
@@ -878,4 +971,5 @@ export default {
 .dialog-tip { font-size:12px; color:#606266; margin-bottom:6px }
 .filter-bar { background:#fafafa; padding:8px 12px 2px; border:1px solid #ebeef5; border-radius:4px; margin-bottom:8px }
 .filter-count { font-size:12px; color:#606266; }
+.stats-row { margin-top: 8px; }
 </style>

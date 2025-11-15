@@ -35,8 +35,30 @@
       </el-form-item>
     </el-form>
 
-    <!-- Published homeworks list for the selected classroom -->
-    <div style="margin-top:24px">
+    <!-- 工具栏：查询/导出/打印/统计 -->
+    <el-card class="box-card" style="margin-top: 10px" v-if="form.sessionId">
+      <div slot="header" class="clearfix">
+        <span>作业发布列表工具栏</span>
+      </div>
+      <div class="toolbar-row">
+        <el-input v-model="filters.keyword" placeholder="按标题/内容搜索" clearable style="width:240px" @keyup.enter.native="applyFilters" />
+        <el-date-picker v-model="filters.deadlineRange" type="datetimerange" start-placeholder="截止开始" end-placeholder="截止结束" style="margin-left:8px" @change="applyFilters" />
+        <el-select v-model="filters.withAttachments" placeholder="附件筛选" clearable style="width: 140px; margin-left:8px" @change="applyFilters">
+          <el-option :value="true" label="仅有附件" />
+          <el-option :value="false" label="仅无附件" />
+        </el-select>
+        <el-button type="primary" icon="el-icon-search" style="margin-left:8px" @click="applyFilters">查询</el-button>
+        <el-button @click="resetFilters" style="margin-left:6px">重置</el-button>
+        <el-button type="success" icon="el-icon-download" style="margin-left:12px" @click="exportCSV">导出CSV</el-button>
+        <el-button type="info" icon="el-icon-printer" style="margin-left:6px" @click="printList">打印</el-button>
+      </div>
+      <div class="stats-row" v-if="stats">
+        <el-alert :closable="false" type="info" :title="`统计：共 ${stats.total} 条；已过期 ${stats.overdue}；含附件 ${stats.withAttach}；平均分值 ${stats.avgScore}`" />
+      </div>
+    </el-card>
+
+    <!-- 已发布列表 -->
+    <div style="margin-top:16px">
       <el-card>
         <div slot="header" style="display:flex;align-items:center;justify-content:space-between">
           <span>已发布作业（当前课堂）</span>
@@ -47,23 +69,23 @@
 
         <div v-if="!form.sessionId" style="padding:16px">请选择课堂以查看已发布作业</div>
         <div v-else>
-          <el-table :data="homeworkList" style="width:100%" v-loading="listLoading">
-            <el-table-column prop="title" label="标题" />
-            <el-table-column label="截止时间">
+          <el-table :data="sortedAndFilteredList" style="width:100%" v-loading="listLoading" @sort-change="onSortChange" :default-sort="defaultSort" show-summary :summary-method="summaryMethod">
+            <el-table-column prop="title" label="标题" sortable="custom" />
+            <el-table-column label="截止时间" sortable="custom" prop="deadline">
               <template slot-scope="scope">
                 {{ formatTime(scope.row.deadline) || '—' }}
               </template>
             </el-table-column>
-            <el-table-column prop="totalScore" label="分值" width="80" />
+            <el-table-column prop="totalScore" label="分值" width="100" sortable="custom" />
             <el-table-column label="附件">
               <template slot-scope="scope">
                 <div v-if="scope.row.attachments">
-                  <a v-for="(f, idx) in parseAttachments(scope.row.attachments)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
+                  <a v-for="(f, idx) in parseAttachments(scope.row.attachments)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ shortName(f) }}</a>
                 </div>
                 <div v-else>—</div>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="260">
+            <el-table-column label="操作" width="320">
               <template slot-scope="scope">
                 <el-button size="mini" type="primary" @click="startEdit(scope.row)" :disabled="scope.row.homeworkDeleted">修改</el-button>
                 <span v-if="scope.row.homeworkDeleted" style="color:#999;margin-left:8px">已被老师删除</span>
@@ -72,7 +94,7 @@
               </template>
             </el-table-column>
           </el-table>
-          <div v-if="(!homeworkList || homeworkList.length === 0) && !listLoading" style="padding:12px">当前课堂暂无已发布作业</div>
+          <div v-if="(!sortedAndFilteredList || sortedAndFilteredList.length === 0) && !listLoading" style="padding:12px">当前课堂暂无已发布作业</div>
         </div>
       </el-card>
     </div>
@@ -88,7 +110,7 @@
           <el-table-column prop="submissionFiles" label="附件">
             <template #default="{ row }">
               <div v-if="row.submissionFiles">
-                <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
+                <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ shortName(f) }}</a>
               </div>
               <div v-else>—</div>
             </template>
@@ -145,7 +167,13 @@ export default {
       submissionsDialogVisible: false,
       pubSubmissions: [],
       pubSelectedHomework: null,
-      // Note: submissions and grading moved to the dedicated grading page
+      // 过滤与排序
+      filters: {
+        keyword: '',
+        deadlineRange: [],
+        withAttachments: null
+      },
+      sort: { prop: 'deadline', order: 'descending' }
     }
   },
   created() {
@@ -185,6 +213,81 @@ export default {
       } else {
         this.homeworkList = []
       }
+    }
+  },
+  computed: {
+    defaultSort() {
+      return { prop: this.sort.prop, order: this.sort.order }
+    },
+    // 过滤后的列表
+    filteredList() {
+      let list = Array.isArray(this.homeworkList) ? this.homeworkList.slice() : []
+      const kw = (this.filters.keyword || '').toString().trim().toLowerCase()
+      if (kw) {
+        list = list.filter(h => {
+          const t = (h.title || '').toString().toLowerCase()
+          const c = (h.content || '').toString().toLowerCase()
+          return t.includes(kw) || c.includes(kw)
+        })
+      }
+      // 截止时间范围
+      if (this.filters.deadlineRange && this.filters.deadlineRange.length === 2) {
+        const [start, end] = this.filters.deadlineRange
+        const st = start ? new Date(start).getTime() : NaN
+        const et = end ? new Date(end).getTime() : NaN
+        list = list.filter(h => {
+          const ht = h.deadline ? new Date(h.deadline).getTime() : NaN
+          if (isNaN(ht)) return false
+          if (!isNaN(st) && ht < st) return false
+          if (!isNaN(et) && ht > et) return false
+          return true
+        })
+      }
+      // 附件有无
+      if (this.filters.withAttachments === true) {
+        list = list.filter(h => !!(h.attachments && String(h.attachments).trim()))
+      } else if (this.filters.withAttachments === false) {
+        list = list.filter(h => !(h.attachments && String(h.attachments).trim()))
+      }
+      return list
+    },
+    // 排序 + 过滤后的最终数据
+    sortedAndFilteredList() {
+      const list = this.filteredList.slice()
+      const { prop, order } = this.sort || {}
+      if (!prop || !order || order === 'normal') return list
+      const desc = order === 'descending'
+      return list.sort((a, b) => {
+        let av = a[prop]
+        let bv = b[prop]
+        if (prop === 'deadline') {
+          av = a.deadline ? new Date(a.deadline).getTime() : 0
+          bv = b.deadline ? new Date(b.deadline).getTime() : 0
+        }
+        if (typeof av === 'string') av = av.toLowerCase()
+        if (typeof bv === 'string') bv = bv.toLowerCase()
+        if (av === bv) return 0
+        return desc ? (av > bv ? -1 : 1) : (av > bv ? 1 : -1)
+      })
+    },
+    // 简单统计
+    stats() {
+      const list = this.filteredList
+      const total = list.length
+      if (total === 0) return { total: 0, overdue: 0, withAttach: 0, avgScore: 0 }
+      const now = Date.now()
+      let overdue = 0
+      let withAttach = 0
+      let scoreSum = 0
+      list.forEach(h => {
+        const t = h.deadline ? new Date(h.deadline).getTime() : NaN
+        if (!isNaN(t) && t < now) overdue += 1
+        if (h.attachments && String(h.attachments).trim()) withAttach += 1
+        const s = Number(h.totalScore)
+        if (!isNaN(s)) scoreSum += s
+      })
+      const avgScore = (scoreSum / total).toFixed(1)
+      return { total, overdue, withAttach, avgScore }
     }
   },
   methods: {
@@ -474,6 +577,12 @@ export default {
       const baseQuery = base + '/common/download?fileName=' + encodeURIComponent(f)
       return token ? (baseQuery + '&token=' + token) : baseQuery
     },
+    shortName(path) {
+      const p = (path || '').toString()
+      const idx = Math.max(p.lastIndexOf('/'), p.lastIndexOf('\\'))
+      return idx >= 0 ? p.slice(idx + 1) : p
+    },
+
     async onDeleteSubmission(row) {
       if (!row || !(row.studentHomeworkId || row.id)) return
       const id = row.studentHomeworkId || row.id
@@ -529,6 +638,131 @@ export default {
         return false
       }
     },
+
+    // 查询/筛选/排序交互
+    applyFilters() {
+      // 仅依赖 computed，触发视图更新
+      this.$forceUpdate()
+    },
+    resetFilters() {
+      this.filters.keyword = ''
+      this.filters.deadlineRange = []
+      this.filters.withAttachments = null
+      this.sort = { prop: 'deadline', order: 'descending' }
+    },
+    onSortChange({ prop, order }) {
+      // element 自定义排序回调
+      this.sort = { prop, order }
+    },
+
+    // 导出 CSV（客户端）
+    exportCSV() {
+      const rows = this.sortedAndFilteredList
+      if (!rows || rows.length === 0) {
+        this.$message.info('没有可导出的数据')
+        return
+      }
+      const headers = ['作业ID','课程ID','课堂ID','标题','分值','截止时间','附件']
+      const data = rows.map(h => [
+        h.homeworkId || h.id || '',
+        h.courseId || '',
+        h.sessionId || '',
+        (h.title || '').toString().replace(/\n/g,' '),
+        h.totalScore || '',
+        this.formatTime(h.deadline) || '',
+        (h.attachments || '').toString()
+      ])
+      const csv = this.buildCSV([headers, ...data])
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const fileName = `作业发布列表_${this.todayString()}.csv`
+      this.saveBlob(blob, fileName)
+    },
+    buildCSV(rows) {
+      return rows.map(r => r.map(cell => this.csvCell(cell)).join(',')).join('\r\n')
+    },
+    csvCell(val) {
+      if (val == null) return ''
+      const s = String(val)
+      // 如果包含逗号/引号/换行，加双引号并转义引号
+      if (/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"'
+      return s
+    },
+    todayString() {
+      const d = new Date()
+      const Y = d.getFullYear()
+      const M = String(d.getMonth() + 1).padStart(2, '0')
+      const D = String(d.getDate()).padStart(2, '0')
+      const h = String(d.getHours()).padStart(2, '0')
+      const m = String(d.getMinutes()).padStart(2, '0')
+      return `${Y}${M}${D}_${h}${m}`
+    },
+    saveBlob(blob, filename) {
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      setTimeout(() => {
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+      }, 0)
+    },
+
+    // 打印列表（简单打印当前过滤后的表格数据）
+    printList() {
+      const rows = this.sortedAndFilteredList
+      const htmlRows = rows.map(h => `
+        <tr>
+          <td>${h.homeworkId || h.id || ''}</td>
+          <td>${h.courseId || ''}</td>
+          <td>${h.sessionId || ''}</td>
+          <td>${(h.title || '').toString().replace(/</g,'&lt;')}</td>
+          <td>${h.totalScore || ''}</td>
+          <td>${this.formatTime(h.deadline) || ''}</td>
+          <td>${(h.attachments || '').toString().replace(/</g,'&lt;')}</td>
+        </tr>
+      `).join('')
+      const win = window.open('', '_blank')
+      if (!win) { this.$message.error('浏览器拦截了打印窗口'); return }
+      win.document.write(`
+        <html><head><title>作业发布列表</title>
+        <style>body{font-family:Arial,Helvetica,'Microsoft YaHei';padding:12px} table{border-collapse:collapse;width:100%} th,td{border:1px solid #999;padding:6px;text-align:left} h2{margin:0 0 12px}</style>
+        </head><body>
+        <h2>作业发布列表（${this.formatTime(new Date())}）</h2>
+        <table>
+          <thead><tr><th>作业ID</th><th>课程ID</th><th>课堂ID</th><th>标题</th><th>分值</th><th>截止时间</th><th>附件</th></tr></thead>
+          <tbody>${htmlRows}</tbody>
+        </table>
+        </body></html>
+      `)
+      win.document.close()
+      win.focus()
+      win.print()
+    },
+
+    // 表尾合计
+    summaryMethod({ columns, data }) {
+      const sums = []
+      columns.forEach((col, index) => {
+        if (index === 0) { sums[index] = '合计'; return }
+        if (col.property === 'totalScore') {
+          const total = data.reduce((acc, item) => {
+            const v = Number(item.totalScore)
+            return acc + (isNaN(v) ? 0 : v)
+          }, 0)
+          sums[index] = total
+        } else {
+          sums[index] = ''
+        }
+      })
+      return sums
+    }
   }
 }
 </script>
+
+<style scoped>
+.toolbar-row { display:flex; align-items:center; flex-wrap: wrap; }
+.stats-row { margin-top: 10px; }
+</style>

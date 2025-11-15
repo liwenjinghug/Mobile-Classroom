@@ -1,33 +1,28 @@
 package com.ruoyi.proj_lwj.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
-/**
- * 题目表 class_exam_question
- */
+/** 题目实体 */
 public class ClassExamQuestion extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
-    private Long id;
+    private Long id; // question id
     private Long examId;
     private Integer questionType; // 1单选 2多选 3判断 4填空 5简答 6文件
-    private String questionContent;
-    private String questionOptions; // JSON 字符串
-    private String correctAnswer;   // JSON 或文本
-    private String analysis;
-    private BigDecimal score;
-    private Integer difficulty; // 1简单 2一般 3困难
-    private Integer sortOrder;
-    private String subject; // 学科分类
+    private String questionContent; // 题目内容
+    private String questionOptions; // 选项 JSON
+    private String correctAnswer; // 正确答案
+    private String analysis; // 解析
+    private BigDecimal score; // 分值
+    private Integer difficulty; // 难度(1简单 2一般 3困难)
+    private Integer sortOrder; // 排序序号
+    private String subject; // 学科/分类
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date createTime;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date updateTime;
+    // 快照扩展（当需要保留历史）暂时不使用单独表，在 answer 中复制
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -51,8 +46,4 @@ public class ClassExamQuestion extends BaseEntity {
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
     public String getSubject() { return subject; }
     public void setSubject(String subject) { this.subject = subject; }
-    public Date getCreateTime() { return createTime; }
-    public void setCreateTime(Date createTime) { this.createTime = createTime; }
-    public Date getUpdateTime() { return updateTime; }
-    public void setUpdateTime(Date updateTime) { this.updateTime = updateTime; }
 }

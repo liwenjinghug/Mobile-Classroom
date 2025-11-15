@@ -136,8 +136,23 @@ public interface ClassStudentHomeworkMapper {
     @Options(useGeneratedKeys = true, keyProperty = "studentHomeworkId")
     int insert(ClassStudentHomework shw);
 
-    // update — keep to columns that exist in the database
-    @Update("UPDATE class_student_homework SET student_id=#{studentId}, student_no=#{studentNo}, student_name=#{studentName}, submission_files=#{submissionFiles}, submit_time=#{submitTime}, status=#{status}, grade=#{score}, grade_comment=#{remark}, update_by=#{updateBy}, update_time=NOW() WHERE id=#{studentHomeworkId}")
+    // update — only set fields that are provided; avoid overwriting student_id with NULL
+    @Update("<script>\n"
+            + "UPDATE class_student_homework\n"
+            + "<set>\n"
+            + "  <if test='studentId != null'>student_id = #{studentId},</if>\n"
+            + "  <if test='studentNo != null and studentNo != \"\"'>student_no = #{studentNo},</if>\n"
+            + "  <if test='studentName != null and studentName != \"\"'>student_name = #{studentName},</if>\n"
+            + "  <if test='submissionFiles != null'>submission_files = #{submissionFiles},</if>\n"
+            + "  <if test='submitTime != null'>submit_time = #{submitTime},</if>\n"
+            + "  <if test='status != null'>status = #{status},</if>\n"
+            + "  <if test='score != null'>grade = #{score},</if>\n"
+            + "  <if test='remark != null'>grade_comment = #{remark},</if>\n"
+            + "  update_by = #{updateBy},\n"
+            + "  update_time = NOW()\n"
+            + "</set>\n"
+            + "WHERE id = #{studentHomeworkId}\n"
+            + "</script>")
     int update(ClassStudentHomework shw);
 
     @Delete("DELETE FROM class_student_homework WHERE id = #{id}")

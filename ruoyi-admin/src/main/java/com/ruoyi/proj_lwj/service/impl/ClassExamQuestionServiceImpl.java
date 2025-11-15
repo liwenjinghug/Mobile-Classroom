@@ -15,24 +15,43 @@ public class ClassExamQuestionServiceImpl implements IClassExamQuestionService {
     private ClassExamQuestionMapper mapper;
 
     @Override
-    public List<ClassExamQuestion> list(ClassExamQuestion q) { return mapper.list(q); }
+    public List<ClassExamQuestion> selectQuestionList(ClassExamQuestion q) {
+        return mapper.selectQuestionList(q);
+    }
 
     @Override
-    public ClassExamQuestion get(Long id) { return mapper.get(id); }
+    public ClassExamQuestion selectById(Long id) {
+        return mapper.selectById(id);
+    }
 
     @Override
-    public int insert(ClassExamQuestion q) { return mapper.insert(q); }
+    public int insertQuestion(ClassExamQuestion q) {
+        return mapper.insertQuestion(q);
+    }
 
     @Override
-    public int update(ClassExamQuestion q) { return mapper.update(q); }
+    public int updateQuestion(ClassExamQuestion q) {
+        return mapper.updateQuestion(q);
+    }
 
     @Override
-    public int delete(Long id) { return mapper.delete(id); }
+    public int deleteQuestionById(Long id) {
+        return mapper.deleteQuestionById(id);
+    }
 
     @Override
-    public int deleteBatch(Long[] ids) { return mapper.deleteBatch(ids); }
+    public int deleteQuestionByIds(Long[] ids) {
+        return mapper.deleteQuestionByIds(ids);
+    }
 
     @Override
-    public int batchReorder(List<ClassExamQuestion> items) { return mapper.batchReorder(items); }
+    public int countByExamId(Long examId) {
+        return mapper.countByExamId(examId);
+    }
+
+    @Override
+    public int batchReorder(List<ClassExamQuestion> items) {
+        if (items == null || items.isEmpty()) return 0;
+        return mapper.batchUpdateSortOrder(items);
+    }
 }
-
