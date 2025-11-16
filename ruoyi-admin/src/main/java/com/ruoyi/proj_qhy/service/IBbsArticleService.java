@@ -49,4 +49,14 @@ public interface IBbsArticleService {
      * 查询热门文章列表
      */
     public List<BbsArticle> selectHotArticleList(BbsArticle bbsArticle);
+
+    /**
+     * (新增) 批量查询文章管理
+     */
+    public List<BbsArticle> selectBbsArticleByIds(Long[] ids);
+
+    /**
+     * (新增) 导出文章为 PDF
+     */
+    public List<String> exportArticlesToPdf(Long[] ids) throws Exception;
 }

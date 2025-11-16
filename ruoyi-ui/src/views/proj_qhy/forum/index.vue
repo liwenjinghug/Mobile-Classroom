@@ -1,35 +1,28 @@
 <template>
   <div class="forum-container">
-    <!-- 顶部按钮区 -->
     <div class="top-buttons">
       <el-button type="primary" @click="showNoticeDialog" icon="el-icon-bell">通知</el-button>
       <el-button type="success" @click="showPublishDialog" icon="el-icon-edit">发帖</el-button>
       <el-button type="info" @click="refreshPosts" icon="el-icon-refresh" :loading="refreshLoading">刷新</el-button>
     </div>
 
-    <!-- 帖子列表 -->
     <div class="post-list">
       <div v-for="post in posts" :key="post.postId" class="post-item">
-        <!-- 帖子内容 -->
         <div class="post-content">
-          <!-- 头像 -->
           <div class="avatar-container">
             <img
-              :src="post.avatar || defaultAvatar"
+              :src="post.avatar ? getImageUrl(post.avatar) : defaultAvatar"
               alt="用户头像"
               class="avatar"
+              @error="handleImageError"
             >
           </div>
 
-          <!-- 帖子主体 -->
           <div class="post-main">
-            <!-- 用户名 -->
             <div class="username">{{ post.nickName }}</div>
 
-            <!-- 帖子文字内容 -->
             <div class="post-text">{{ post.content }}</div>
 
-            <!-- 帖子图片 -->
             <div v-if="post.imageUrls && post.imageUrls.trim()" class="post-images">
               <div
                 v-for="(img, index) in post.imageUrls.split(',')"
@@ -37,24 +30,49 @@
                 class="image-item"
                 v-if="img.trim()"
               >
-                <img :src="getImageUrl(img)" alt="帖子图片" class="post-img" @error="handleImageError($event, img)">
+                <el-image
+                  :src="getImageUrl(img)"
+                  alt="帖子图片"
+                  class="post-img"
+                  fit="cover"
+                  :preview-src-list="getPreviewList(post.imageUrls, img)"
+                  @error="handleImageError"
+                >
+                  <div slot="error" class="image-slot">
+                    <i class="el-icon-picture-outline"></i>
+                  </div>
+                </el-image>
               </div>
             </div>
 
-            <!-- 发布时间和操作按钮 -->
             <div class="post-footer">
               <span class="post-time">{{ formatTime(post.createTime) }}</span>
               <div class="post-actions">
-                <!-- 点赞按钮 -->
+                <el-button
+                  v-if="Number(post.userId) === Number(currentUserId)"
+                  type="text"
+                  class="action-btn edit-btn"
+                  @click="showEditDialog(post)"
+                >
+                  编辑
+                </el-button>
+                <el-button
+                  v-if="Number(post.userId) === Number(currentUserId)"
+                  type="text"
+                  class="action-btn delete-btn"
+                  @click="handleDelete(post)"
+                >
+                  删除
+                </el-button>
+
                 <el-button
                   :class="post.isLiked ? 'liked-btn' : 'like-btn'"
                   @click="handleLike(post)"
-                  :loading="likeLoading"
+                  :loading="likeLoading[post.postId]"
                 >
                   {{ post.isLiked ? '已赞' : '点赞' }}
                 </el-button>
 
-                <!-- 评论按钮 -->
                 <el-button
                   class="comment-btn"
                   @click="showCommentDialog(post)"
@@ -66,9 +84,7 @@
           </div>
         </div>
 
-        <!-- 点赞和评论区 -->
-        <div class="post-interactions">
-          <!-- 点赞列表 -->
+        <div class="post-interactions" v-if="post.likeCount > 0 || post.commentCount > 0">
           <div v-if="post.likeCount > 0" class="likes-list">
             <span class="heart-icon">♡</span>
             <span class="like-names">
@@ -76,8 +92,7 @@
             </span>
           </div>
 
-          <!-- 评论列表 -->
-          <div class="comments-list">
+          <div v-if="post.commentCount > 0" class="comments-list">
             <div
               v-for="comment in getComments(post.postId)"
               :key="comment.commentId"
@@ -92,48 +107,92 @@
           </div>
         </div>
 
-        <!-- 分隔线 -->
         <div class="divider"></div>
       </div>
     </div>
 
-    <!-- 发帖弹窗 -->
     <el-dialog
       title="发布帖子"
       :visible.sync="publishDialogVisible"
       width="600px"
       :close-on-click-modal="false"
+      @close="resetPublishForm"
     >
-      <el-input
-        type="textarea"
-        v-model="publishContent"
-        placeholder="请输入帖子内容"
-        rows="6"
-        class="publish-textarea"
-      ></el-input>
-      <el-upload
-        class="upload-images"
-        action=""
-        :auto-upload="false"
-        :on-change="handleImageChange"
-        :file-list="imageFileList"
-        list-type="picture-preview"
-      >
-        <el-button size="small" type="primary">选择图片</el-button>
-      </el-upload>
+      <el-form :model="publishForm">
+        <el-input
+          type="textarea"
+          v-model="publishForm.content"
+          placeholder="分享新鲜事..."
+          rows="6"
+          class="publish-textarea"
+        ></el-input>
+        <el-upload
+          ref="publishUpload"
+          action="#"
+          :auto-upload="false"
+          :on-change="handlePublishImageChange"
+          :file-list="publishForm.imageFileList"
+          list-type="picture-card"
+          :on-remove="handlePublishImageChange"
+          accept="image/*"
+        >
+          <i class="el-icon-plus"></i>
+        </el-upload>
+      </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="publishDialogVisible = false">取消</el-button>
         <el-button
           type="success"
           @click="submitPost"
-          :disabled="!publishContent.trim()"
+          :disabled="!publishForm.content.trim()"
+          :loading="publishLoading"
         >
           发布
         </el-button>
       </div>
     </el-dialog>
 
-    <!-- 评论弹窗 -->
+    <el-dialog
+      title="修改帖子"
+      :visible.sync="editDialogVisible"
+      width="600px"
+      :close-on-click-modal="false"
+      @close="resetEditForm"
+    >
+      <el-form :model="editForm">
+        <el-input
+          type="textarea"
+          v-model="editForm.content"
+          placeholder="请输入帖子内容"
+          rows="6"
+          class="publish-textarea"
+        ></el-input>
+        <el-upload
+          ref="editUpload"
+          action="#"
+          :auto-upload="false"
+          :on-change="handleEditImageChange"
+          :file-list="editForm.imageFileList"
+          list-type="picture-card"
+          :on-remove="handleEditImageChange"
+          accept="image/*"
+        >
+          <i class="el-icon-plus"></i>
+        </el-upload>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button
+          type="success"
+          @click="submitEdit"
+          :disabled="!editForm.content.trim()"
+          :loading="editLoading"
+        >
+          保存
+        </el-button>
+      </div>
+    </el-dialog>
+
     <el-dialog
       :title="currentCommentParentId ? '回复评论' : '发表评论'"
       :visible.sync="commentDialogVisible"
@@ -158,25 +217,26 @@
       </div>
     </el-dialog>
 
-    <!-- 通知弹窗 -->
     <el-dialog
       title="通知"
       :visible.sync="noticeDialogVisible"
       width="500px"
       :close-on-click-modal="false"
+      class="notice-dialog"
     >
       <div v-if="notices.length === 0" class="no-notice">暂无通知</div>
       <div v-else class="notice-list">
         <div
-          v-for="notice in notices"
-          :key="notice.noticeId"
+          v-for="(notice, index) in notices"
+          :key="index"
           class="notice-item"
         >
           <div class="notice-avatar">
             <img
-              :src="notice.operatorAvatar || defaultAvatar"
+              :src="notice.operatorAvatar ? getImageUrl(notice.operatorAvatar) : defaultAvatar"
               alt="用户头像"
               class="avatar"
+              @error="handleImageError"
             >
           </div>
           <div class="notice-content">
@@ -194,42 +254,56 @@
         </div>
       </div>
     </el-dialog>
+
   </div>
 </template>
 
 <script>
 import forumApi from '@/api/proj_qhy/forum'
-import { Loading } from 'element-ui'
-import { getImageUrl, handleImageError as utilsHandleImageError } from '@/utils/forumImage'
+// 引入 store 获取当前用户信息
+import store from '@/store'
 
-// 时间格式化函数
+// 时间格式化函数 (若您已有全局方法，请替换)
 function formatDate(date, fmt) {
-  if (typeof date === 'string') {
-    date = new Date(date.replace(/-/g, '/'))
-  }
-  if (isNaN(date.getTime())) {
+  // 1. 安全检查：如果date是null或undefined，返回空字符串
+  if (!date) {
     return ''
   }
 
+  // 2. 确保date是Date对象
+  let dateObj
+  if (typeof date === 'string') {
+    // 替换'-'为'/'以兼容iOS/Safari
+    dateObj = new Date(date.replace(/-/g, '/'))
+  } else if (date instanceof Date) {
+    dateObj = date
+  } else {
+    // 如果是数字时间戳等，也尝试转换
+    dateObj = new Date(date)
+  }
+
+  // 3. 检查转换结果是否有效
+  if (isNaN(dateObj.getTime())) {
+    return '' // 返回空字符串，而不是 "Invalid Date"
+  }
+
+  // 4. 开始格式化
   if (/(y+)/.test(fmt)) {
-    fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
+    fmt = fmt.replace(RegExp.$1, (dateObj.getFullYear() + '').substr(4 - RegExp.$1.length))
   }
-
   const o = {
-    'M+': date.getMonth() + 1,
-    'd+': date.getDate(),
-    'H+': date.getHours(),
-    'm+': date.getMinutes(),
-    's+': date.getSeconds()
+    'M+': dateObj.getMonth() + 1,
+    'd+': dateObj.getDate(),
+    'H+': dateObj.getHours(),
+    'm+': dateObj.getMinutes(),
+    's+': dateObj.getSeconds()
   }
-
   for (const k in o) {
     if (new RegExp(`(${k})`).test(fmt)) {
       const str = o[k] + ''
       fmt = fmt.replace(RegExp.$1, RegExp.$1.length === 1 ? str : ('00' + str).substr(str.length))
     }
   }
-
   return fmt
 }
 
@@ -237,6 +311,9 @@ export default {
   name: 'Forum',
   data() {
     return {
+      // 当前登录用户ID
+      //currentUserId: store.getters.userId,
+
       // 帖子列表
       posts: [],
       // 点赞列表缓存
@@ -248,8 +325,20 @@ export default {
 
       // 发帖弹窗相关
       publishDialogVisible: false,
-      publishContent: '',
-      imageFileList: [],
+      publishForm: {
+        content: '',
+        imageFileList: []
+      },
+      publishLoading: false,
+
+      // 新增：修改弹窗相关
+      editDialogVisible: false,
+      editForm: {
+        postId: null,
+        content: '',
+        imageFileList: []
+      },
+      editLoading: false,
 
       // 评论弹窗相关
       commentDialogVisible: false,
@@ -263,25 +352,54 @@ export default {
       notices: [],
 
       // 加载状态
-      likeLoading: false,
+      likeLoading: {},
       refreshLoading: false
     }
   },
   created() {
     this.loadPosts()
   },
+  // --- 新增这个 computed 块 ---
+  computed: {
+    currentUserId() {
+      // 这样写，currentUserId 就会在 store.getters.userId 变化时自动更新
+      return store.getters.userId
+    }
+  },
   methods: {
-    getImageUrl,
+    // 基础路径处理
+    getImageUrl(url) {
+      if (!url) return this.defaultAvatar
+      // 若依的头像/profile路径已经是完整的，不需要再加
+      if (url.startsWith('/profile')) {
+        return process.env.VUE_APP_BASE_API + url
+      }
+      // 如果是http/https开头，直接返回
+      if (url.startsWith('http')) {
+        return url
+      }
+      // 兜底（如果用户头像是相对路径）
+      if (url.startsWith('/')) {
+        return process.env.VUE_APP_BASE_API + url
+      }
+      return url
+    },
+
     // 加载帖子列表
     loadPosts() {
       forumApi.getPostList().then(response => {
         this.posts = response.data || []
+        // 自动加载每个帖子的点赞和评论
         this.posts.forEach(post => {
-          this.loadLikes(post.postId)
-          this.loadComments(post.postId)
+          if (post.likeCount > 0) {
+            this.loadLikes(post.postId)
+          }
+          if (post.commentCount > 0) {
+            this.loadComments(post.postId)
+          }
         })
       }).catch(error => {
-        this.$message.error('加载帖子失败：' + (error.message || '网络错误'))
+        this.$message.error('加载帖子失败')
       })
     },
 
@@ -290,7 +408,7 @@ export default {
       forumApi.getLikesByPostId(postId).then(response => {
         this.$set(this.likesMap, postId, response.data || [])
       }).catch(error => {
-        console.error('加载点赞失败：', error)
+        console.warn(`加载点赞失败 (PostID: ${postId}):`, error)
       })
     },
 
@@ -299,7 +417,7 @@ export default {
       forumApi.getCommentsByPostId(postId).then(response => {
         this.$set(this.commentsMap, postId, response.data || [])
       }).catch(error => {
-        console.error('加载评论失败：', error)
+        console.warn(`加载评论失败 (PostID: ${postId}):`, error)
       })
     },
 
@@ -309,12 +427,16 @@ export default {
       forumApi.refreshPosts().then(response => {
         this.posts = response.data || []
         this.posts.forEach(post => {
-          this.loadLikes(post.postId)
-          this.loadComments(post.postId)
+          if (post.likeCount > 0) {
+            this.loadLikes(post.postId)
+          }
+          if (post.commentCount > 0) {
+            this.loadComments(post.postId)
+          }
         })
         this.$message.success('刷新成功')
       }).catch(error => {
-        this.$message.error('刷新失败：' + (error.message || '网络错误'))
+        this.$message.error('刷新失败')
       }).finally(() => {
         this.refreshLoading = false
       })
@@ -322,40 +444,25 @@ export default {
 
     // 处理点赞/取消点赞
     handleLike(post) {
-      if (this.likeLoading) return
-      this.likeLoading = true
+      this.$set(this.likeLoading, post.postId, true)
 
-      if (post.isLiked) {
-        // 取消点赞
-        forumApi.cancelLike(post.postId).then(response => {
-          if (response.data) {
-            post.isLiked = false
-            post.likeCount = Math.max(0, post.likeCount - 1)
-            this.loadLikes(post.postId)
-          } else {
-            this.$message.warning('取消点赞失败')
-          }
-        }).catch(error => {
-          this.$message.error('操作失败：' + (error.message || '网络错误'))
-        }).finally(() => {
-          this.likeLoading = false
-        })
-      } else {
-        // 点赞
-        forumApi.likePost(post.postId).then(response => {
-          if (response.data) {
-            post.isLiked = true
-            post.likeCount += 1
-            this.loadLikes(post.postId)
-          } else {
-            this.$message.warning('点赞失败，可能已点赞')
-          }
-        }).catch(error => {
-          this.$message.error('操作失败：' + (error.message || '网络错误'))
-        }).finally(() => {
-          this.likeLoading = false
-        })
-      }
+      const action = post.isLiked ? forumApi.cancelLike : forumApi.likePost
+
+      action(post.postId).then(response => {
+        if (response.data) {
+          // 更新UI
+          post.isLiked = !post.isLiked
+          post.likeCount += post.isLiked ? 1 : -1
+          // 重新加载点赞列表
+          this.loadLikes(post.postId)
+        } else {
+          this.$message.warning(post.isLiked ? '取消点赞失败' : '点赞失败')
+        }
+      }).catch(error => {
+        this.$message.error('操作失败')
+      }).finally(() => {
+        this.$set(this.likeLoading, post.postId, false)
+      })
     },
 
     // 显示评论弹窗
@@ -385,10 +492,7 @@ export default {
     // 提交评论
     submitComment() {
       const content = this.commentContent.trim()
-      if (!content) {
-        this.$message.warning('评论内容不能为空')
-        return
-      }
+      if (!content) return
 
       const comment = {
         postId: this.currentPostId,
@@ -400,6 +504,7 @@ export default {
       forumApi.addComment(comment).then(response => {
         if (response.data) {
           this.closeCommentDialog()
+          // 重新加载评论并更新评论数
           this.loadComments(this.currentPostId)
           const post = this.posts.find(p => p.postId === this.currentPostId)
           if (post) {
@@ -410,350 +515,434 @@ export default {
           this.$message.warning('评论失败')
         }
       }).catch(error => {
-        this.$message.error('评论失败：' + (error.message || '网络错误'))
+        this.$message.error('评论失败')
       })
     },
 
-    // 显示发布弹窗
+    // ---------------------------------
+    // 发帖相关
+    // ---------------------------------
     showPublishDialog() {
-      this.publishContent = ''
-      this.imageFileList = []
       this.publishDialogVisible = true
     },
-
-    // 处理图片选择
-    handleImageChange(file, fileList) {
-      this.imageFileList = fileList.filter(f => !f.removed)
-    },
-
-    // 提交发布帖子
-    submitPost() {
-      const content = this.publishContent.trim()
-      if (!content) {
-        this.$message.warning('帖子内容不能为空')
-        return
+    resetPublishForm() {
+      this.publishForm.content = ''
+      this.publishForm.imageFileList = []
+      if (this.$refs.publishUpload) {
+        this.$refs.publishUpload.clearFiles()
       }
+    },
+    handlePublishImageChange(file, fileList) {
+      this.publishForm.imageFileList = fileList
+    },
+    submitPost() {
+      this.publishLoading = true
 
-      const files = this.imageFileList.map(file => file.raw)
+      const postData = {
+        content: this.publishForm.content
+      }
+      // files 列表
+      const files = this.publishForm.imageFileList.map(f => f.raw)
 
-      forumApi.publishPost({ content: content }, files).then(response => {
+      forumApi.publishPost(postData, files).then(response => {
         if (response.data) {
-          this.publishDialogVisible = false
-          this.refreshPosts()
           this.$message.success('发布成功')
+          this.publishDialogVisible = false
+          this.refreshPosts() // 刷新列表
         } else {
           this.$message.warning('发布失败')
         }
       }).catch(error => {
-        this.$message.error('发布失败：' + (error.message || '网络错误'))
+        this.$message.error('发布失败')
+      }).finally(() => {
+        this.publishLoading = false
       })
     },
 
-    // 显示通知弹窗
+    // ---------------------------------
+    // 新增：修改帖子相关
+    // ---------------------------------
+    showEditDialog(post) {
+      this.editForm.postId = post.postId
+      this.editForm.content = post.content
+      // 将已有的图片URL转换为 el-upload 需要的格式
+      this.editForm.imageFileList = (post.imageUrls || '').split(',')
+        .filter(Boolean)
+        .map(url => ({
+          name: url, // 存储原始相对路径
+          url: this.getImageUrl(url), // 完整的显示路径
+          status: 'success', // 标记为已上传
+          uid: url // 唯一标识
+        }))
+      this.editDialogVisible = true
+    },
+    resetEditForm() {
+      this.editForm.postId = null
+      this.editForm.content = ''
+      this.editForm.imageFileList = []
+      if (this.$refs.editUpload) {
+        this.$refs.editUpload.clearFiles()
+      }
+    },
+    handleEditImageChange(file, fileList) {
+      // 当on-change 和 on-remove 触发时，都用 fileList 更新
+      this.editForm.imageFileList = fileList
+    },
+    submitEdit() {
+      this.editLoading = true
+
+      // 1. 分离出需要保留的旧图片URL和新上传的文件
+      const oldUrlsToKeep = []
+      const newFilesToUpload = []
+
+      this.editForm.imageFileList.forEach(file => {
+        if (file.status === 'success') {
+          // 'success' 状态的是我们初始化的旧图片
+          oldUrlsToKeep.push(file.name) // name 存的是原始相对路径
+        } else if (file.raw) {
+          // 带有 raw 属性的是新选择的文件
+          newFilesToUpload.push(file.raw)
+        }
+      })
+
+      // 2. 准备提交的数据
+      const postData = {
+        postId: this.editForm.postId,
+        content: this.editForm.content,
+        imageUrls: oldUrlsToKeep.join(',') // 需要保留的旧图片URL列表
+      }
+
+      // 3. 调用API
+      forumApi.updatePost(postData, newFilesToUpload).then(response => {
+        if (response.data) {
+          this.$message.success('修改成功')
+          this.editDialogVisible = false
+          // 刷新帖子列表（或只更新当前帖子）
+          this.refreshPosts()
+        } else {
+          this.$message.warning('修改失败')
+        }
+      }).catch(error => {
+        this.$message.error('修改失败')
+      }).finally(() => {
+        this.editLoading = false
+      })
+    },
+
+    // ---------------------------------
+    // 新增：删除帖子相关
+    // ---------------------------------
+    handleDelete(post) {
+      this.$confirm('此操作将永久删除该帖子及其所有评论和点赞, 是否继续?', '警告', {
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // 执行删除
+        forumApi.deletePost(post.postId).then(() => {
+          this.$message.success('删除成功')
+          // 从列表中移除
+          const index = this.posts.findIndex(p => p.postId === post.postId)
+          if (index > -1) {
+            this.posts.splice(index, 1)
+          }
+        }).catch(error => {
+          this.$message.error('删除失败')
+        })
+      }).catch(() => {
+        // 取消
+        this.$message.info('已取消删除')
+      })
+    },
+
+    // ---------------------------------
+    // 通知相关
+    // ---------------------------------
     showNoticeDialog() {
       forumApi.getUserNotices().then(response => {
         this.notices = response.data || []
         this.noticeDialogVisible = true
       }).catch(error => {
-        this.$message.error('加载通知失败：' + (error.message || '网络错误'))
+        this.$message.error('加载通知失败')
       })
     },
 
-    // 格式化时间
+    // ---------------------------------
+    // 工具方法
+    // ---------------------------------
     formatTime(time) {
       return formatDate(time, 'yyyy/MM/dd HH:mm')
     },
-
-    // 图片加载失败处理
-    handleImageError(event, imgUrl) {
-      // 使用 utils 的错误回退（会把图片替换为项目内默认占位图），并记录日志
-      try {
-        utilsHandleImageError(event)
-      } catch (e) {
-        // 兜底：如果 utils 出错仍然使用组件默认头像
-        event.target.src = this.defaultAvatar
-      }
-      console.error(`图片加载失败: ${imgUrl}`)
+    handleImageError(event) {
+      event.target.src = this.defaultAvatar
     },
-
-    // 获取点赞用户名称
     getLikeNames(postId) {
       const likes = this.likesMap[postId] || []
       return likes.map(like => like.nickName).join('，')
     },
-
-    // 获取评论列表
     getComments(postId) {
       return this.commentsMap[postId] || []
+    },
+    // 为 el-image 预览生成列表
+    getPreviewList(imageUrls, currentImg) {
+      const fullList = (imageUrls || '').split(',')
+        .filter(Boolean)
+        .map(url => this.getImageUrl(url))
+
+      // 切换当前预览的图片到第一张（体验更好）
+      const currentIndex = fullList.indexOf(this.getImageUrl(currentImg))
+      if (currentIndex > 0) {
+        const current = fullList.splice(currentIndex, 1)
+        return [...current, ...fullList]
+      }
+      return fullList
     }
   }
 }
 </script>
 
 <style scoped>
+/* (样式与您之前提供的基本一致，只增加了修改/删除按钮的样式) */
 .forum-container {
   padding: 20px;
   background-color: #fff;
   min-height: calc(100vh - 140px);
 }
-
-/* 顶部按钮 */
 .top-buttons {
   margin-bottom: 20px;
   display: flex;
   gap: 10px;
 }
-
-/* 帖子列表 */
 .post-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
 }
-
 .post-item {
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  padding: 15px 15px 0 15px; /* 移除底部 padding，由 divider 控制 */
   background-color: #fff;
 }
-
-/* 帖子内容 */
 .post-content {
   display: flex;
   gap: 10px;
 }
-
 .avatar-container {
-  width: 50px;
-  height: 50px;
+  width: 45px;
+  height: 45px;
   flex-shrink: 0;
   overflow: hidden;
-  border-radius: 50%;
-  border: 1px solid #eee;
+  border-radius: 6px; /* 遵从您的圆角正方形要求 */
 }
-
 .avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
 .post-main {
   flex-grow: 1;
 }
-
 .username {
   font-weight: bold;
-  color: #1890ff;
-  margin-bottom: 5px;
-  font-size: 14px;
+  color: #0A5393; /* 深蓝色 */
+  margin-bottom: 8px;
+  font-size: 15px;
 }
-
 .post-text {
   margin-bottom: 10px;
   line-height: 1.6;
   color: #333;
   font-size: 14px;
+  white-space: pre-wrap; /* 保留换行 */
 }
-
-/* 帖子图片 */
 .post-images {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
   margin-bottom: 10px;
 }
-
 .image-item {
-  width: calc(20% - 4px);
-  aspect-ratio: 1/1;
+  width: calc(20% - 4px); /* 一行5张图 */
+  aspect-ratio: 1/1; /* 保持正方形 */
   overflow: hidden;
   border-radius: 4px;
 }
-
 .post-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.2s;
+  object-fit: cover; /* 裁剪中间，不拉伸 */
 }
-
-.post-img:hover {
-  transform: scale(1.05);
+.image-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: #f5f7fa;
+  color: #909399;
 }
-
-/* 帖子底部 */
 .post-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   color: #888;
-  font-size: 12px;
+  font-size: 13px;
+  margin-top: 10px;
 }
-
 .post-actions {
   display: flex;
   gap: 10px;
+  align-items: center;
+}
+.action-btn {
+  color: #888;
+  font-size: 13px;
+  padding: 0;
+}
+.action-btn:hover {
+  color: #1890ff;
+}
+.delete-btn:hover {
+  color: #f56c6c;
 }
 
-.like-btn {
+.like-btn, .comment-btn {
   background-color: #f5f5f5;
   color: #333;
   border: none;
-  padding: 4px 12px;
-  border-radius: 4px;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 12px;
 }
-
 .liked-btn {
   background-color: #f56c6c;
   color: white;
   border: none;
-  padding: 4px 12px;
-  border-radius: 4px;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 12px;
 }
-
-.comment-btn {
-  background-color: #f5f5f5;
-  color: #333;
-  border: none;
-  padding: 4px 12px;
-  border-radius: 4px;
-}
-
-/* 互动区域 */
 .post-interactions {
-  background-color: #f0f7ff;
+  background-color: #f7f8fc; /* 浅蓝色底色 */
   border-radius: 4px;
   padding: 10px;
   margin-top: 10px;
-  margin-left: 60px;
+  margin-left: 55px; /* (45px头像 + 10px gap) */
 }
-
-/* 点赞列表 */
 .likes-list {
   margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eef2f8;
   display: flex;
   align-items: center;
   gap: 5px;
   flex-wrap: wrap;
 }
-
+.likes-list:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
 .heart-icon {
-  color: #f56c6c;
+  color: #555;
   font-size: 14px;
 }
-
 .like-names {
-  color: #666;
+  color: #0A5393;
   font-size: 13px;
+  font-weight: 500;
 }
-
-/* 评论列表 */
 .comments-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-
 .comment-item {
-  padding: 5px 0;
-  border-bottom: 1px solid #e6f7ff;
+  padding: 2px 0;
   cursor: pointer;
   font-size: 13px;
+  line-height: 1.5;
 }
-
-.comment-item:hover {
-  background-color: rgba(255,255,255,0.5);
-}
-
 .comment-username {
-  color: #1890ff;
+  color: #0A5393;
   font-weight: 500;
 }
-
 .reply-to {
   color: #666;
 }
-
 .comment-colon {
   color: #666;
 }
-
 .comment-content {
   color: #333;
 }
-
-/* 分隔线 */
 .divider {
   height: 1px;
-  background-color: #eee;
-  margin: 15px 0;
+  background-color: #f0f2f5; /* 淡灰色分隔线 */
+  margin: 15px 0 0 0;
 }
-
-/* 弹窗样式 */
 .publish-textarea {
   margin-bottom: 15px;
   width: 100%;
 }
-
-.upload-images {
-  margin-bottom: 10px;
-}
-
-/* 通知样式 */
 .notice-list {
   max-height: 400px;
   overflow-y: auto;
   padding-right: 10px;
 }
-
 .notice-item {
   display: flex;
   gap: 10px;
   padding: 10px 0;
   border-bottom: 1px solid #eee;
 }
-
 .notice-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 6px; /* 圆角 */
   overflow: hidden;
   flex-shrink: 0;
 }
-
 .notice-content {
   flex-grow: 1;
 }
-
 .notice-username {
   font-weight: 500;
   margin-bottom: 3px;
   font-size: 14px;
+  color: #0A5393;
 }
-
 .notice-text {
   color: #333;
   margin-bottom: 3px;
   font-size: 13px;
 }
-
 .notice-time {
   font-size: 12px;
   color: #888;
 }
-
 .no-notice {
   text-align: center;
   padding: 20px;
   color: #888;
 }
 
-/* 适配小屏幕 */
-@media (max-width: 768px) {
-  .image-item {
-    width: calc(33.33% - 4px);
-  }
+/* * 通知弹窗标题居中加粗
+ * 我们使用 ::v-deep 来穿透 Element UI 的组件样式
+ */
+.notice-dialog ::v-deep .el-dialog__title {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px; /* 稍微放大一点以匹配“加粗”的视觉感 */
+}
+
+/* 覆盖el-upload样式 */
+::v-deep .el-upload--picture-card {
+  width: 100px;
+  height: 100px;
+  line-height: 110px;
+}
+::v-deep .el-upload-list--picture-card .el-upload-list-item {
+  width: 100px;
+  height: 100px;
 }
 </style>

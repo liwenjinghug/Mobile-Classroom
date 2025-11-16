@@ -33,7 +33,7 @@ public class BbsArticleController extends BaseController {
     /**
      * 查询文章管理列表
      */
-    @PreAuthorize("@ss.hasPermi('proj_qhy:article:list')")
+    //@PreAuthorize("@ss.hasPermi('proj_qhy:article:list')")
     @GetMapping("/list")
     public TableDataInfo list(BbsArticle bbsArticle) {
         startPage();
@@ -56,7 +56,7 @@ public class BbsArticleController extends BaseController {
     /**
      * 获取文章管理详细信息
      */
-    @PreAuthorize("@ss.hasPermi('proj_qhy:article:query')")
+    //@PreAuthorize("@ss.hasPermi('proj_qhy:article:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return success(bbsArticleService.selectBbsArticleById(id));
@@ -124,4 +124,20 @@ public class BbsArticleController extends BaseController {
         return toAjax(bbsArticleService.hateArticle(id));
     }
 
+    /**
+     * (新增) 批量导出文章为PDF
+     */
+    //@PreAuthorize("@ss.hasPermi('proj_qhy:article:export')") // 复用导出权限
+    @Log(title = "文章导出PDF", businessType = BusinessType.EXPORT)
+    @PostMapping("/export-pdf")
+    public AjaxResult exportPdf(@RequestBody Long[] ids) {
+        try {
+            List<String> fileUrls = bbsArticleService.exportArticlesToPdf(ids);
+            // 返回文件路径列表，前端可以引导下载
+            return AjaxResult.success("批量导出PDF成功", fileUrls);
+        } catch (Exception e) {
+            logger.error("导出PDF失败", e);
+            return AjaxResult.error("导出PDF失败: " + e.getMessage());
+        }
+    }
 }

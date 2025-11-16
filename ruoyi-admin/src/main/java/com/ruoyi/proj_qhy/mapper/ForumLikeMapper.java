@@ -53,14 +53,22 @@ public interface ForumLikeMapper {
     int cancelLike(@Param("postId") Long postId, @Param("userId") Long userId, @Param("updateBy") String updateBy);
 
     /**
-     * 查询用户的点赞通知
+     * 根据帖子ID逻辑删除所有点赞
      */
-    @Select("SELECT l.like_id AS noticeId, l.post_id, u.user_id AS operatorUserId, u.nick_name AS operatorNickName, " +
-            "u.avatar AS operatorAvatar, 1 AS noticeType, l.create_time " +
+    @Update("UPDATE class_forum_like SET del_flag = '2', update_by = #{updateBy}, update_time = NOW() " +
+            "WHERE post_id = #{postId} AND del_flag = '0'")
+    int deleteLikesByPostId(@Param("postId") Long postId, @Param("updateBy") String updateBy);
+
+    /**
+     * 查询给用户的点赞通知（查询别人点赞了我的帖子的记录）
+     */
+    @Select("SELECT l.like_id AS noticeId, l.post_id AS postId, " +
+            "l.user_id AS operatorUserId, u.nick_name AS operatorNickName, u.avatar AS operatorAvatar, " +
+            "1 AS noticeType, NULL AS commentContent, l.create_time AS createTime " +
             "FROM class_forum_like l " +
-            "LEFT JOIN class_forum_post p ON l.post_id = p.post_id " +
-            "LEFT JOIN sys_user u ON l.user_id = u.user_id " +
-            "WHERE p.user_id = #{userId} AND l.user_id != #{userId} AND l.del_flag = '0' " +
+            "JOIN sys_user u ON l.user_id = u.user_id " +
+            "JOIN class_forum_post p ON l.post_id = p.post_id " +
+            "WHERE p.user_id = #{userId} AND l.user_id != #{userId} AND l.del_flag = '0' AND p.del_flag = '0' " +
             "ORDER BY l.create_time DESC")
     List<ForumNotice> selectLikeNoticeByUserId(@Param("userId") Long userId);
 }

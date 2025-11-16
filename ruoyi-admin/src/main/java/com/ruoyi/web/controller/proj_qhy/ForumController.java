@@ -46,9 +46,11 @@ public class ForumController {
 
     /**
      * 发布帖子
+     * (注意：这里使用 POST + Form-Data 混合接收)
      */
     @PostMapping("/post/publish")
     public AjaxResult publishPost(ForumPost post, @RequestParam(value = "files", required = false) MultipartFile[] files) {
+        // service层已处理用户信息
         return AjaxResult.success(postService.publishPost(post, files));
     }
 
@@ -60,6 +62,28 @@ public class ForumController {
         Long userId = SecurityUtils.getUserId();
         return AjaxResult.success(postService.refreshPostList(userId));
     }
+
+    /**
+     * 修改帖子
+     * (注意：这里使用 PUT + Form-Data 混合接收)
+     */
+    @PutMapping("/post/update")
+    public AjaxResult updatePost(ForumPost post, @RequestParam(value = "files", required = false) MultipartFile[] files) {
+        // service层已处理用户信息和鉴权
+        return AjaxResult.success(postService.updatePost(post, files));
+    }
+
+    /**
+     * 删除帖子
+     */
+    @DeleteMapping("/post/delete/{postId}")
+    public AjaxResult deletePost(@PathVariable Long postId) {
+        // service层已处理用户信息和鉴权
+        return AjaxResult.success(postService.deletePost(postId));
+    }
+
+
+    // --- 以下是点赞、评论、通知的API (保持不变) ---
 
     /**
      * 获取帖子的点赞列表

@@ -1,75 +1,74 @@
 /*
- Navicat Premium Dump SQL
+Navicat MySQL Data Transfer
 
- Source Server         : 01tech
- Source Server Type    : MySQL
- Source Server Version : 80042 (8.0.42)
- Source Host           : localhost:3306
- Source Schema         : ry-vue
+Source Server         : localhost
+Source Server Version : 80042
+Source Host           : localhost:3306
+Source Database       : ry-vue
 
 Target Server Type    : MYSQL
 Target Server Version : 80042
 File Encoding         : 65001
 
- Date: 16/11/2025 07:08:02
+Date: 2025-11-16 08:25:58
 */
 
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
+SET FOREIGN_KEY_CHECKS=0;
 
 -- ----------------------------
 -- Table structure for class_article
 -- ----------------------------
 DROP TABLE IF EXISTS `class_article`;
 CREATE TABLE `class_article` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '文章ID',
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文章标题',
-  `digest` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '文章摘要',
-  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '文章内容',
-  `cover` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '封面图片',
-  `article_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '技术' COMMENT '文章分类',
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'editting' COMMENT '状态：editting-编辑中,published-已发布,draft-草稿',
-  `view_count` bigint DEFAULT '0' COMMENT '阅读数',
-  `comment_count` bigint DEFAULT '0' COMMENT '评论数',
-  `like_count` bigint DEFAULT '0' COMMENT '点赞数',
-  `hate_count` bigint DEFAULT '0' COMMENT '点踩数',
-  `bookmark_count` bigint DEFAULT '0' COMMENT '收藏数',
-  `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '作者',
-  `user_id` bigint DEFAULT NULL COMMENT '用户ID',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `idx_title` (`title`) USING BTREE,
-  KEY `idx_author` (`author`) USING BTREE,
-  KEY `idx_create_time` (`create_time`) USING BTREE,
-  KEY `idx_article_type` (`article_type`) USING BTREE,
-  KEY `idx_status` (`status`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章表';
+                                 `id` bigint NOT NULL AUTO_INCREMENT COMMENT '文章ID',
+                                 `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文章标题',
+                                 `digest` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '文章摘要',
+                                 `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '文章内容',
+                                 `cover` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '封面图片',
+                                 `article_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '技术' COMMENT '文章分类',
+                                 `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'editting' COMMENT '状态：editting-编辑中,published-已发布,draft-草稿',
+                                 `view_count` bigint DEFAULT '0' COMMENT '阅读数',
+                                 `comment_count` bigint DEFAULT '0' COMMENT '评论数',
+                                 `like_count` bigint DEFAULT '0' COMMENT '点赞数',
+                                 `hate_count` bigint DEFAULT '0' COMMENT '点踩数',
+                                 `bookmark_count` bigint DEFAULT '0' COMMENT '收藏数',
+                                 `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '作者',
+                                 `user_id` bigint DEFAULT NULL COMMENT '用户ID',
+                                 `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                                 `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                 `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                                 `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                 `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+                                 PRIMARY KEY (`id`) USING BTREE,
+                                 KEY `idx_title` (`title`) USING BTREE,
+                                 KEY `idx_author` (`author`) USING BTREE,
+                                 KEY `idx_create_time` (`create_time`) USING BTREE,
+                                 KEY `idx_article_type` (`article_type`) USING BTREE,
+                                 KEY `idx_status` (`status`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章表';
 
 -- ----------------------------
 -- Records of class_article
 -- ----------------------------
-INSERT INTO `class_article` VALUES ('1', 'Spring Boot 入门教程', '本文介绍Spring Boot的基本使用和配置', '<h1><img src=\"/dev-api/profile/upload/2025/11/02/屏幕截图 2024-06-06 011230_20251102021029A001.png\">入门</h1>', 'https://picsum.photos/id/1029/600/400', '技术', 'published', '170', '12', '59', '12', '0', '岂皓月', '1', 'admin', '2025-11-01 23:24:22', '', '2025-11-07 10:31:31', null);
+INSERT INTO `class_article` VALUES ('1', 'Spring Boot 入门教程', '本文介绍Spring Boot的基本使用和配置', '<h1><img src=\"/dev-api/profile/upload/2025/11/02/屏幕截图 2024-06-06 011230_20251102021029A001.png\">入门</h1>', 'https://picsum.photos/id/1029/600/400', '技术', 'published', '171', '12', '59', '12', '0', '岂皓月', '1', 'admin', '2025-11-01 23:24:22', '', '2025-11-16 06:04:58', null);
 INSERT INTO `class_article` VALUES ('2', '生活中的小确幸', '记录生活中的美好瞬间，( •̀ ω •́ )y', '<p>生活中总有一些小确幸让我们感到温暖...美好！</p>', 'https://picsum.photos/id/1035/600/400', '生活', 'published', '92', '8', '34', '1', '0', '岂皓月', '1', 'admin', '2025-11-01 23:24:22', '', '2025-11-07 10:17:14', null);
-INSERT INTO `class_article` VALUES ('3', 'Java编程思想', '深入理解Java编程思想', '<p>Java编程思想是每个Java开发者都应该掌握的...</p>', 'https://picsum.photos/id/1/600/400', '技术', 'published', '204', '25', '78', '0', '0', '岂皓月', '1', 'admin', '2025-11-01 23:24:22', '', '2025-11-02 02:39:34', null);
-INSERT INTO `class_article` VALUES ('9', '1', null, '<p>111</p>', '/profile/upload/2025/11/12/一．文件和文件系统_20251112231007A001.png', '技术', 'editting', '2', '0', '2', '1', '0', '若依', null, null, '2025-11-12 23:10:11', '', '2025-11-14 10:47:21', null);
+INSERT INTO `class_article` VALUES ('3', 'Java编程思想', '深入理解Java编程思想', '<p>Java编程思想是每个Java开发者都应该掌握的...</p>', 'https://picsum.photos/id/1/600/400', '技术', 'published', '205', '25', '78', '0', '0', '岂皓月', '1', 'admin', '2025-11-01 23:24:22', '', '2025-11-16 06:05:06', null);
+INSERT INTO `class_article` VALUES ('9', '1', null, '<p>111</p>', '/profile/upload/2025/11/12/一．文件和文件系统_20251112231007A001.png', '技术', 'editting', '4', '0', '0', '0', '0', '若依', null, null, '2025-11-12 23:10:11', '', '2025-11-16 05:40:46', null);
+INSERT INTO `class_article` VALUES ('10', '计算机网络', '1', '<p><img src=\"/dev-api/profile/upload/2025/11/16/屏幕截图 2025-11-06 110411_20251116060547A001.png\"></p>', '/profile/upload/2025/11/16/屏幕截图 2025-11-13 105252_20251116060620A002.png', '技术', 'published', '1', '0', '0', '0', '0', 'admin', '1', null, '2025-11-16 06:06:22', '', '2025-11-16 06:18:42', null);
 
 -- ----------------------------
 -- Table structure for class_article_like
 -- ----------------------------
 DROP TABLE IF EXISTS `class_article_like`;
 CREATE TABLE `class_article_like` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `article_id` bigint NOT NULL,
-  `user_id` bigint NOT NULL,
-  `like_status` int NOT NULL COMMENT '1-点赞, -1-点踩, 0-无',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
-  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `uk_article_user` (`article_id`,`user_id`) USING BTREE
+                                      `id` bigint NOT NULL AUTO_INCREMENT,
+                                      `article_id` bigint NOT NULL,
+                                      `user_id` bigint NOT NULL,
+                                      `like_status` int NOT NULL COMMENT '1-点赞, -1-点踩, 0-无',
+                                      `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                                      `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                      PRIMARY KEY (`id`) USING BTREE,
+                                      UNIQUE KEY `uk_article_user` (`article_id`,`user_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
@@ -80,411 +79,411 @@ CREATE TABLE `class_article_like` (
 -- Table structure for class_attendance
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance`;
-CREATE TABLE `class_attendance`  (
-  `attendance_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到记录唯一ID',
-  `session_id` bigint NOT NULL COMMENT '课堂ID（抽人/课堂级统计依赖）',
-  `task_id` bigint NOT NULL COMMENT '签到任务ID（对应某次签到动作）',
-  `student_id` bigint NOT NULL COMMENT '关联的学生ID',
-  `attendance_time` datetime NULL DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
-  `attendance_status` tinyint NOT NULL DEFAULT 0 COMMENT '签到状态: 0未签到 1已签到 2迟到 3请假 4早退',
-  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
-  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-  `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '签到设备IP地址',
-  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
-  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '签到地理位置',
-  PRIMARY KEY (`attendance_id`) USING BTREE,
-  UNIQUE INDEX `uq_task_student`(`task_id` ASC, `student_id` ASC) USING BTREE,
-  INDEX `idx_session`(`session_id` ASC) USING BTREE,
-  INDEX `idx_task`(`task_id` ASC) USING BTREE,
-  INDEX `idx_student`(`student_id` ASC) USING BTREE,
-  INDEX `idx_status`(`attendance_status` ASC) USING BTREE,
-  INDEX `idx_attendance_time`(`attendance_time` ASC) USING BTREE,
-  CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_attendance_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 82 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '学生课堂签到记录表（含 session_id + task_id）' ROW_FORMAT = Dynamic;
+CREATE TABLE `class_attendance` (
+                                    `attendance_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到记录唯一ID',
+                                    `session_id` bigint NOT NULL COMMENT '课堂ID（抽人/课堂级统计依赖）',
+                                    `task_id` bigint NOT NULL COMMENT '签到任务ID（对应某次签到动作）',
+                                    `student_id` bigint NOT NULL COMMENT '关联的学生ID',
+                                    `attendance_time` datetime DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
+                                    `attendance_status` tinyint NOT NULL DEFAULT '0' COMMENT '签到状态: 0未签到 1已签到 2迟到 3请假 4早退',
+                                    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+                                    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+                                    `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到设备IP地址',
+                                    `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
+                                    `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到地理位置',
+                                    PRIMARY KEY (`attendance_id`) USING BTREE,
+                                    UNIQUE KEY `uq_task_student` (`task_id`,`student_id`) USING BTREE,
+                                    KEY `idx_session` (`session_id`) USING BTREE,
+                                    KEY `idx_task` (`task_id`) USING BTREE,
+                                    KEY `idx_student` (`student_id`) USING BTREE,
+                                    KEY `idx_status` (`attendance_status`) USING BTREE,
+                                    KEY `idx_attendance_time` (`attendance_time`) USING BTREE,
+                                    CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+                                    CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+                                    CONSTRAINT `fk_attendance_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='学生课堂签到记录表（含 session_id + task_id）';
 
 -- ----------------------------
 -- Records of class_attendance
 -- ----------------------------
-INSERT INTO `class_attendance` VALUES (1, 1, 1, 1, '2021-09-29 12:14:27', 1, '2002-10-20 19:19:57', '2025-10-27 19:38:07', '', '', '');
-INSERT INTO `class_attendance` VALUES (2, 1, 1, 2, '2025-11-07 20:42:22', 1, '2016-03-30 23:49:38', '2025-11-02 20:42:31', '', '', '');
-INSERT INTO `class_attendance` VALUES (3, 1, 1, 3, '2019-12-19 06:16:26', 1, '2007-08-18 19:37:31', '2025-10-27 19:38:09', '', '', '');
-INSERT INTO `class_attendance` VALUES (4, 1, 1, 4, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (5, 1, 1, 5, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (6, 1, 1, 6, NULL, 2, '2025-10-27 19:44:56', '2025-11-16 03:11:49', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (7, 1, 1, 7, NULL, 2, '2025-10-27 19:44:56', '2025-11-16 03:11:52', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (8, 1, 1, 8, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (9, 1, 1, 9, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (10, 1, 1, 10, NULL, 2, '2025-10-27 19:44:56', '2025-11-16 03:11:54', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (11, 1, 1, 11, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (12, 1, 1, 12, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (13, 1, 1, 13, NULL, 3, '2025-10-27 19:44:56', '2025-11-16 03:11:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (14, 1, 1, 14, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (15, 1, 1, 15, NULL, 3, '2025-10-27 19:44:56', '2025-11-16 03:11:59', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (16, 1, 1, 16, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (17, 1, 1, 17, NULL, 0, '2025-10-27 19:44:56', '2025-11-02 20:42:46', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (18, 1, 1, 18, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (19, 1, 1, 19, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (20, 1, 1, 20, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (21, 1, 1, 21, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (22, 1, 1, 22, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (23, 1, 1, 23, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (24, 1, 1, 24, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (25, 1, 1, 25, NULL, 4, '2025-10-27 19:44:56', '2025-11-16 03:12:01', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (26, 1, 1, 26, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (27, 1, 1, 27, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (28, 1, 1, 28, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (29, 1, 1, 29, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (30, 1, 1, 30, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (31, 1, 1, 31, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (32, 1, 1, 32, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (33, 1, 1, 33, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (34, 1, 1, 34, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (35, 1, 1, 35, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (36, 1, 1, 36, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (37, 1, 1, 37, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (38, 1, 1, 38, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (39, 1, 1, 39, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (40, 1, 1, 40, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (41, 1, 11, 1, NULL, 1, '2025-11-16 00:59:20', '2025-11-16 02:57:53', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (44, 1, 11, 28, NULL, 4, '2025-11-16 04:13:03', '2025-11-16 04:13:51', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (45, 1, 11, 2, NULL, 2, '2025-11-16 04:14:05', '2025-11-16 04:14:06', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (46, 1, 11, 11, '2025-11-16 04:14:21', 1, '2025-11-16 04:14:21', '2025-11-16 04:14:21', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (47, 1, 11, 19, '2025-11-16 04:14:22', 1, '2025-11-16 04:14:22', '2025-11-16 04:14:22', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (48, 1, 17, 14, '2025-11-16 04:17:06', 1, '2025-11-16 04:17:06', '2025-11-16 04:17:06', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (49, 1, 17, 16, '2025-11-16 04:17:07', 1, '2025-11-16 04:17:07', '2025-11-16 04:17:07', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (50, 1, 17, 28, '2025-11-16 04:17:09', 1, '2025-11-16 04:17:09', '2025-11-16 04:17:09', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (51, 1, 17, 31, '2025-11-16 04:17:11', 1, '2025-11-16 04:17:11', '2025-11-16 04:17:11', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (52, 1, 17, 23, '2025-11-16 04:17:22', 1, '2025-11-16 04:17:22', '2025-11-16 04:17:22', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (53, 1, 17, 1, '2025-11-16 04:28:34', 1, '2025-11-16 04:28:34', '2025-11-16 04:28:34', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (54, 1, 17, 9, NULL, 2, '2025-11-16 04:28:35', '2025-11-16 04:28:36', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (55, 2, 18, 5, '2025-11-16 04:30:01', 1, '2025-11-16 04:30:01', '2025-11-16 04:30:01', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (56, 1, 17, 21, '2025-11-16 04:30:22', 1, '2025-11-16 04:30:22', '2025-11-16 04:30:22', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (57, 1, 17, 10, '2025-11-16 04:30:25', 1, '2025-11-16 04:30:25', '2025-11-16 04:30:25', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (58, 1, 17, 20, '2025-11-16 04:30:26', 1, '2025-11-16 04:30:26', '2025-11-16 04:30:26', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (59, 1, 17, 19, '2025-11-16 04:30:27', 1, '2025-11-16 04:30:27', '2025-11-16 04:30:27', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (60, 1, 17, 7, '2025-11-16 04:30:28', 1, '2025-11-16 04:30:28', '2025-11-16 04:30:28', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (61, 1, 17, 2, '2025-11-16 04:30:29', 1, '2025-11-16 04:30:29', '2025-11-16 04:30:29', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (62, 1, 17, 39, NULL, 4, '2025-11-16 04:30:32', '2025-11-16 04:30:35', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (63, 1, 19, 6, '2025-11-16 06:24:12', 2, '2025-11-16 05:52:30', '2025-11-16 06:24:12', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (64, 1, 19, 35, '2025-11-16 06:04:18', 1, '2025-11-16 06:04:18', '2025-11-16 06:04:18', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (65, 1, 19, 32, NULL, 3, '2025-11-16 06:04:19', '2025-11-16 06:24:40', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (66, 1, 19, 13, '2025-11-16 06:04:20', 1, '2025-11-16 06:04:20', '2025-11-16 06:04:20', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (67, 1, 19, 37, '2025-11-16 06:04:20', 1, '2025-11-16 06:04:20', '2025-11-16 06:04:20', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (68, 1, 19, 26, NULL, 4, '2025-11-16 06:05:18', '2025-11-16 06:05:21', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (69, 1, 19, 25, '2025-11-16 06:05:22', 1, '2025-11-16 06:05:22', '2025-11-16 06:05:22', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (70, 1, 19, 9, '2025-11-16 06:24:13', 2, '2025-11-16 06:05:23', '2025-11-16 06:24:13', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (71, 1, 19, 1, NULL, 3, '2025-11-16 06:05:24', '2025-11-16 06:23:41', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (72, 1, 19, 10, '2025-11-16 06:05:24', 1, '2025-11-16 06:05:24', '2025-11-16 06:05:24', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (73, 1, 19, 30, '2025-11-16 06:05:25', 1, '2025-11-16 06:05:25', '2025-11-16 06:05:25', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (74, 1, 19, 16, '2025-11-16 06:05:25', 1, '2025-11-16 06:05:25', '2025-11-16 06:05:25', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (75, 1, 19, 18, '2025-11-16 06:05:26', 1, '2025-11-16 06:05:26', '2025-11-16 06:05:26', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (76, 1, 19, 11, '2025-11-16 06:05:27', 1, '2025-11-16 06:05:27', '2025-11-16 06:05:27', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (77, 1, 19, 14, NULL, 3, '2025-11-16 06:05:31', '2025-11-16 06:05:32', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (78, 1, 19, 2, NULL, 3, '2025-11-16 06:05:34', '2025-11-16 06:05:35', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (79, 1, 19, 40, '2025-11-16 06:28:33', 2, '2025-11-16 06:28:11', '2025-11-16 06:28:33', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (80, 1, 19, 15, '2025-11-16 06:28:39', 1, '2025-11-16 06:28:39', '2025-11-16 06:28:39', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (81, 2, 20, 2, '2025-11-16 06:31:58', 1, '2025-11-16 06:31:58', '2025-11-16 06:31:58', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES ('1', '1', '1', '1', '2021-09-29 12:14:27', '1', '2002-10-20 19:19:57', '2025-10-27 19:38:07', '', '', '');
+INSERT INTO `class_attendance` VALUES ('2', '1', '1', '2', '2025-11-07 20:42:22', '1', '2016-03-30 23:49:38', '2025-11-02 20:42:31', '', '', '');
+INSERT INTO `class_attendance` VALUES ('3', '1', '1', '3', '2019-12-19 06:16:26', '1', '2007-08-18 19:37:31', '2025-10-27 19:38:09', '', '', '');
+INSERT INTO `class_attendance` VALUES ('4', '1', '1', '4', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('5', '1', '1', '5', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('6', '1', '1', '6', null, '2', '2025-10-27 19:44:56', '2025-11-16 03:11:49', null, null, null);
+INSERT INTO `class_attendance` VALUES ('7', '1', '1', '7', null, '2', '2025-10-27 19:44:56', '2025-11-16 03:11:52', null, null, null);
+INSERT INTO `class_attendance` VALUES ('8', '1', '1', '8', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('9', '1', '1', '9', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('10', '1', '1', '10', null, '2', '2025-10-27 19:44:56', '2025-11-16 03:11:54', null, null, null);
+INSERT INTO `class_attendance` VALUES ('11', '1', '1', '11', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('12', '1', '1', '12', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('13', '1', '1', '13', null, '3', '2025-10-27 19:44:56', '2025-11-16 03:11:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('14', '1', '1', '14', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('15', '1', '1', '15', null, '3', '2025-10-27 19:44:56', '2025-11-16 03:11:59', null, null, null);
+INSERT INTO `class_attendance` VALUES ('16', '1', '1', '16', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('17', '1', '1', '17', null, '0', '2025-10-27 19:44:56', '2025-11-02 20:42:46', null, null, null);
+INSERT INTO `class_attendance` VALUES ('18', '1', '1', '18', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('19', '1', '1', '19', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('20', '1', '1', '20', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('21', '1', '1', '21', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('22', '1', '1', '22', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('23', '1', '1', '23', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('24', '1', '1', '24', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('25', '1', '1', '25', null, '4', '2025-10-27 19:44:56', '2025-11-16 03:12:01', null, null, null);
+INSERT INTO `class_attendance` VALUES ('26', '1', '1', '26', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('27', '1', '1', '27', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('28', '1', '1', '28', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('29', '1', '1', '29', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('30', '1', '1', '30', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('31', '1', '1', '31', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('32', '1', '1', '32', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('33', '1', '1', '33', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('34', '1', '1', '34', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('35', '1', '1', '35', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('36', '1', '1', '36', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('37', '1', '1', '37', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('38', '1', '1', '38', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('39', '1', '1', '39', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('40', '1', '1', '40', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance` VALUES ('41', '1', '11', '1', null, '1', '2025-11-16 00:59:20', '2025-11-16 02:57:53', null, null, null);
+INSERT INTO `class_attendance` VALUES ('44', '1', '11', '28', null, '4', '2025-11-16 04:13:03', '2025-11-16 04:13:51', null, null, null);
+INSERT INTO `class_attendance` VALUES ('45', '1', '11', '2', null, '2', '2025-11-16 04:14:05', '2025-11-16 04:14:06', null, null, null);
+INSERT INTO `class_attendance` VALUES ('46', '1', '11', '11', '2025-11-16 04:14:21', '1', '2025-11-16 04:14:21', '2025-11-16 04:14:21', null, null, null);
+INSERT INTO `class_attendance` VALUES ('47', '1', '11', '19', '2025-11-16 04:14:22', '1', '2025-11-16 04:14:22', '2025-11-16 04:14:22', null, null, null);
+INSERT INTO `class_attendance` VALUES ('48', '1', '17', '14', '2025-11-16 04:17:06', '1', '2025-11-16 04:17:06', '2025-11-16 04:17:06', null, null, null);
+INSERT INTO `class_attendance` VALUES ('49', '1', '17', '16', '2025-11-16 04:17:07', '1', '2025-11-16 04:17:07', '2025-11-16 04:17:07', null, null, null);
+INSERT INTO `class_attendance` VALUES ('50', '1', '17', '28', '2025-11-16 04:17:09', '1', '2025-11-16 04:17:09', '2025-11-16 04:17:09', null, null, null);
+INSERT INTO `class_attendance` VALUES ('51', '1', '17', '31', '2025-11-16 04:17:11', '1', '2025-11-16 04:17:11', '2025-11-16 04:17:11', null, null, null);
+INSERT INTO `class_attendance` VALUES ('52', '1', '17', '23', '2025-11-16 04:17:22', '1', '2025-11-16 04:17:22', '2025-11-16 04:17:22', null, null, null);
+INSERT INTO `class_attendance` VALUES ('53', '1', '17', '1', '2025-11-16 04:28:34', '1', '2025-11-16 04:28:34', '2025-11-16 04:28:34', null, null, null);
+INSERT INTO `class_attendance` VALUES ('54', '1', '17', '9', null, '2', '2025-11-16 04:28:35', '2025-11-16 04:28:36', null, null, null);
+INSERT INTO `class_attendance` VALUES ('55', '2', '18', '5', '2025-11-16 04:30:01', '1', '2025-11-16 04:30:01', '2025-11-16 04:30:01', null, null, null);
+INSERT INTO `class_attendance` VALUES ('56', '1', '17', '21', '2025-11-16 04:30:22', '1', '2025-11-16 04:30:22', '2025-11-16 04:30:22', null, null, null);
+INSERT INTO `class_attendance` VALUES ('57', '1', '17', '10', '2025-11-16 04:30:25', '1', '2025-11-16 04:30:25', '2025-11-16 04:30:25', null, null, null);
+INSERT INTO `class_attendance` VALUES ('58', '1', '17', '20', '2025-11-16 04:30:26', '1', '2025-11-16 04:30:26', '2025-11-16 04:30:26', null, null, null);
+INSERT INTO `class_attendance` VALUES ('59', '1', '17', '19', '2025-11-16 04:30:27', '1', '2025-11-16 04:30:27', '2025-11-16 04:30:27', null, null, null);
+INSERT INTO `class_attendance` VALUES ('60', '1', '17', '7', '2025-11-16 04:30:28', '1', '2025-11-16 04:30:28', '2025-11-16 04:30:28', null, null, null);
+INSERT INTO `class_attendance` VALUES ('61', '1', '17', '2', '2025-11-16 04:30:29', '1', '2025-11-16 04:30:29', '2025-11-16 04:30:29', null, null, null);
+INSERT INTO `class_attendance` VALUES ('62', '1', '17', '39', null, '4', '2025-11-16 04:30:32', '2025-11-16 04:30:35', null, null, null);
+INSERT INTO `class_attendance` VALUES ('63', '1', '19', '6', '2025-11-16 06:24:12', '2', '2025-11-16 05:52:30', '2025-11-16 06:24:12', null, null, null);
+INSERT INTO `class_attendance` VALUES ('64', '1', '19', '35', '2025-11-16 06:04:18', '1', '2025-11-16 06:04:18', '2025-11-16 06:04:18', null, null, null);
+INSERT INTO `class_attendance` VALUES ('65', '1', '19', '32', null, '3', '2025-11-16 06:04:19', '2025-11-16 06:24:40', null, null, null);
+INSERT INTO `class_attendance` VALUES ('66', '1', '19', '13', '2025-11-16 06:04:20', '1', '2025-11-16 06:04:20', '2025-11-16 06:04:20', null, null, null);
+INSERT INTO `class_attendance` VALUES ('67', '1', '19', '37', '2025-11-16 06:04:20', '1', '2025-11-16 06:04:20', '2025-11-16 06:04:20', null, null, null);
+INSERT INTO `class_attendance` VALUES ('68', '1', '19', '26', null, '4', '2025-11-16 06:05:18', '2025-11-16 06:05:21', null, null, null);
+INSERT INTO `class_attendance` VALUES ('69', '1', '19', '25', '2025-11-16 06:05:22', '1', '2025-11-16 06:05:22', '2025-11-16 06:05:22', null, null, null);
+INSERT INTO `class_attendance` VALUES ('70', '1', '19', '9', '2025-11-16 06:24:13', '2', '2025-11-16 06:05:23', '2025-11-16 06:24:13', null, null, null);
+INSERT INTO `class_attendance` VALUES ('71', '1', '19', '1', null, '3', '2025-11-16 06:05:24', '2025-11-16 06:23:41', null, null, null);
+INSERT INTO `class_attendance` VALUES ('72', '1', '19', '10', '2025-11-16 06:05:24', '1', '2025-11-16 06:05:24', '2025-11-16 06:05:24', null, null, null);
+INSERT INTO `class_attendance` VALUES ('73', '1', '19', '30', '2025-11-16 06:05:25', '1', '2025-11-16 06:05:25', '2025-11-16 06:05:25', null, null, null);
+INSERT INTO `class_attendance` VALUES ('74', '1', '19', '16', '2025-11-16 06:05:25', '1', '2025-11-16 06:05:25', '2025-11-16 06:05:25', null, null, null);
+INSERT INTO `class_attendance` VALUES ('75', '1', '19', '18', '2025-11-16 06:05:26', '1', '2025-11-16 06:05:26', '2025-11-16 06:05:26', null, null, null);
+INSERT INTO `class_attendance` VALUES ('76', '1', '19', '11', '2025-11-16 06:05:27', '1', '2025-11-16 06:05:27', '2025-11-16 06:05:27', null, null, null);
+INSERT INTO `class_attendance` VALUES ('77', '1', '19', '14', null, '3', '2025-11-16 06:05:31', '2025-11-16 06:05:32', null, null, null);
+INSERT INTO `class_attendance` VALUES ('78', '1', '19', '2', null, '3', '2025-11-16 06:05:34', '2025-11-16 06:05:35', null, null, null);
+INSERT INTO `class_attendance` VALUES ('79', '1', '19', '40', '2025-11-16 06:28:33', '2', '2025-11-16 06:28:11', '2025-11-16 06:28:33', null, null, null);
+INSERT INTO `class_attendance` VALUES ('80', '1', '19', '15', '2025-11-16 06:28:39', '1', '2025-11-16 06:28:39', '2025-11-16 06:28:39', null, null, null);
+INSERT INTO `class_attendance` VALUES ('81', '2', '20', '2', '2025-11-16 06:31:58', '1', '2025-11-16 06:31:58', '2025-11-16 06:31:58', null, null, null);
 
 -- ----------------------------
 -- Table structure for class_attendance_bak
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance_bak`;
-CREATE TABLE `class_attendance_bak`  (
-  `attendance_id` bigint NOT NULL DEFAULT 0 COMMENT '签到记录唯一ID',
-  `session_id` bigint NOT NULL COMMENT '关联的课堂ID',
-  `student_id` bigint NOT NULL COMMENT '关联的学生ID',
-  `attendance_time` datetime NULL DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
-  `attendance_status` tinyint NOT NULL DEFAULT 0 COMMENT '签到状态: 0-未签到 1-已签到 2-迟到 3-请假 4-早退',
-  `created_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
-  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-  `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '签到设备IP地址',
-  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
-  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '签到地理位置'
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+CREATE TABLE `class_attendance_bak` (
+                                        `attendance_id` bigint NOT NULL DEFAULT '0' COMMENT '签到记录唯一ID',
+                                        `session_id` bigint NOT NULL COMMENT '关联的课堂ID',
+                                        `student_id` bigint NOT NULL COMMENT '关联的学生ID',
+                                        `attendance_time` datetime DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
+                                        `attendance_status` tinyint NOT NULL DEFAULT '0' COMMENT '签到状态: 0-未签到 1-已签到 2-迟到 3-请假 4-早退',
+                                        `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+                                        `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+                                        `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到设备IP地址',
+                                        `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
+                                        `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到地理位置'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
 -- Records of class_attendance_bak
 -- ----------------------------
-INSERT INTO `class_attendance_bak` VALUES (1, 1, 1, '2021-09-29 12:14:27', 1, '2002-10-20 19:19:57', '2025-10-27 19:38:07', '', '', '');
-INSERT INTO `class_attendance_bak` VALUES (2, 1, 2, '2025-11-07 20:42:22', 1, '2016-03-30 23:49:38', '2025-11-02 20:42:31', '', '', '');
-INSERT INTO `class_attendance_bak` VALUES (3, 1, 3, '2019-12-19 06:16:26', 1, '2007-08-18 19:37:31', '2025-10-27 19:38:09', '', '', '');
-INSERT INTO `class_attendance_bak` VALUES (4, 1, 4, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (5, 1, 5, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (6, 1, 6, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (7, 1, 7, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (8, 1, 8, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (9, 1, 9, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (10, 1, 10, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (11, 1, 11, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (12, 1, 12, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (13, 1, 13, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (14, 1, 14, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (15, 1, 15, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (16, 1, 16, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (17, 1, 17, NULL, 0, '2025-10-27 19:44:56', '2025-11-02 20:42:46', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (18, 1, 18, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (19, 1, 19, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (20, 1, 20, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (21, 1, 21, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (22, 1, 22, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (23, 1, 23, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (24, 1, 24, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (25, 1, 25, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (26, 1, 26, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (27, 1, 27, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (28, 1, 28, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (29, 1, 29, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (30, 1, 30, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (31, 1, 31, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (32, 1, 32, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (33, 1, 33, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (34, 1, 34, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (35, 1, 35, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (36, 1, 36, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (37, 1, 37, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (38, 1, 38, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (39, 1, 39, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (40, 1, 40, NULL, 1, '2025-10-27 19:44:56', '2025-10-27 19:44:56', NULL, NULL, NULL);
-INSERT INTO `class_attendance_bak` VALUES (41, 2, 1, NULL, 1, '2025-11-16 00:59:20', '2025-11-16 00:59:20', NULL, NULL, NULL);
+INSERT INTO `class_attendance_bak` VALUES ('1', '1', '1', '2021-09-29 12:14:27', '1', '2002-10-20 19:19:57', '2025-10-27 19:38:07', '', '', '');
+INSERT INTO `class_attendance_bak` VALUES ('2', '1', '2', '2025-11-07 20:42:22', '1', '2016-03-30 23:49:38', '2025-11-02 20:42:31', '', '', '');
+INSERT INTO `class_attendance_bak` VALUES ('3', '1', '3', '2019-12-19 06:16:26', '1', '2007-08-18 19:37:31', '2025-10-27 19:38:09', '', '', '');
+INSERT INTO `class_attendance_bak` VALUES ('4', '1', '4', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('5', '1', '5', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('6', '1', '6', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('7', '1', '7', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('8', '1', '8', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('9', '1', '9', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('10', '1', '10', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('11', '1', '11', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('12', '1', '12', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('13', '1', '13', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('14', '1', '14', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('15', '1', '15', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('16', '1', '16', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('17', '1', '17', null, '0', '2025-10-27 19:44:56', '2025-11-02 20:42:46', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('18', '1', '18', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('19', '1', '19', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('20', '1', '20', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('21', '1', '21', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('22', '1', '22', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('23', '1', '23', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('24', '1', '24', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('25', '1', '25', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('26', '1', '26', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('27', '1', '27', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('28', '1', '28', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('29', '1', '29', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('30', '1', '30', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('31', '1', '31', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('32', '1', '32', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('33', '1', '33', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('34', '1', '34', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('35', '1', '35', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('36', '1', '36', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('37', '1', '37', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('38', '1', '38', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('39', '1', '39', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('40', '1', '40', null, '1', '2025-10-27 19:44:56', '2025-10-27 19:44:56', null, null, null);
+INSERT INTO `class_attendance_bak` VALUES ('41', '2', '1', null, '1', '2025-11-16 00:59:20', '2025-11-16 00:59:20', null, null, null);
 
 -- ----------------------------
 -- Table structure for class_attendance_qr
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance_qr`;
-CREATE TABLE `class_attendance_qr`  (
-  `qr_id` bigint NOT NULL AUTO_INCREMENT COMMENT '二维码 token 主键',
-  `task_id` bigint NOT NULL COMMENT '关联的签到任务 task_id',
-  `token` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '二维码 token（可为 UUID 或其他）',
-  `ttl_seconds` int NULL DEFAULT NULL COMMENT '有效期（秒），null 意味着使用 task.end_time 作为判定',
-  `expire_time` datetime NULL DEFAULT NULL COMMENT '到期时间（可根据 ttl_seconds 计算填入）',
-  `used` tinyint NOT NULL DEFAULT 0 COMMENT '是否已被使用（可选，用于一次性二维码）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
-  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`qr_id`) USING BTREE,
-  UNIQUE INDEX `uq_token`(`token` ASC) USING BTREE,
-  INDEX `idx_task_qr`(`task_id` ASC) USING BTREE,
-  CONSTRAINT `fk_qr_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 59 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到二维码/token 表（用于动态二维码与失效控制）' ROW_FORMAT = DYNAMIC;
+CREATE TABLE `class_attendance_qr` (
+                                       `qr_id` bigint NOT NULL AUTO_INCREMENT COMMENT '二维码 token 主键',
+                                       `task_id` bigint NOT NULL COMMENT '关联的签到任务 task_id',
+                                       `token` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '二维码 token（可为 UUID 或其他）',
+                                       `ttl_seconds` int DEFAULT NULL COMMENT '有效期（秒），null 意味着使用 task.end_time 作为判定',
+                                       `expire_time` datetime DEFAULT NULL COMMENT '到期时间（可根据 ttl_seconds 计算填入）',
+                                       `used` tinyint NOT NULL DEFAULT '0' COMMENT '是否已被使用（可选，用于一次性二维码）',
+                                       `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                       `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                                       PRIMARY KEY (`qr_id`) USING BTREE,
+                                       UNIQUE KEY `uq_token` (`token`) USING BTREE,
+                                       KEY `idx_task_qr` (`task_id`) USING BTREE,
+                                       CONSTRAINT `fk_qr_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='签到二维码/token 表（用于动态二维码与失效控制）';
 
 -- ----------------------------
 -- Records of class_attendance_qr
 -- ----------------------------
-INSERT INTO `class_attendance_qr` VALUES (1, 3, 'TEST-TOKEN-123456', 1800, '2025-11-02 20:12:04', 0, 'admin', '2025-11-02 19:42:04');
-INSERT INTO `class_attendance_qr` VALUES (2, 7, 'a36d96283a3349fc85f6d714ae802099', 60, '2025-11-15 23:55:48', 0, 'admin', '2025-11-15 23:54:47');
-INSERT INTO `class_attendance_qr` VALUES (3, 9, '623f6fa6e295457cafb5db5a4bc43bbe', 600, '2025-11-16 00:19:32', 0, 'admin', '2025-11-16 00:09:32');
-INSERT INTO `class_attendance_qr` VALUES (4, 10, '46b6241e9185427d89496aae532de376', 600, '2025-11-16 00:47:33', 0, 'admin', '2025-11-16 00:37:32');
-INSERT INTO `class_attendance_qr` VALUES (5, 11, 'baaddf8ddcdb428f92d3e2c8fce3a880', 600, '2025-11-16 00:48:11', 0, 'admin', '2025-11-16 00:38:11');
-INSERT INTO `class_attendance_qr` VALUES (6, 12, 'da74da6cf9c54fe28735fcf092ac256d', 600, '2025-11-16 00:50:49', 0, 'admin', '2025-11-16 00:40:49');
-INSERT INTO `class_attendance_qr` VALUES (7, 13, 'dc43784ae30c47cdb2658ed4e32e2072', 600, '2025-11-16 00:55:53', 0, 'admin', '2025-11-16 00:45:53');
-INSERT INTO `class_attendance_qr` VALUES (8, 14, '4d8b13a381d84d278a5b2f556fbe09cf', 600, '2025-11-16 00:58:08', 0, 'admin', '2025-11-16 00:48:08');
-INSERT INTO `class_attendance_qr` VALUES (9, 15, 'abd1570435aa4ab08adca0d26da73367', 600, '2025-11-16 00:59:39', 0, 'admin', '2025-11-16 00:49:39');
-INSERT INTO `class_attendance_qr` VALUES (10, 16, '974b44193191480d85db4ec8b01f2677', 600, '2025-11-16 01:04:52', 0, 'admin', '2025-11-16 00:54:51');
-INSERT INTO `class_attendance_qr` VALUES (11, 16, 'f9b7dc33329844d3b8e3f5c202b256d0', 600, '2025-11-16 01:09:38', 0, 'admin', '2025-11-16 00:59:38');
-INSERT INTO `class_attendance_qr` VALUES (12, 15, 'baab9e0d9e7a48e4a309103e0f2583f0', 600, '2025-11-16 01:09:41', 0, 'admin', '2025-11-16 00:59:40');
-INSERT INTO `class_attendance_qr` VALUES (13, 14, 'dafaa8bf82a44dd48c4e7a65f2d117cc', 600, '2025-11-16 01:09:42', 0, 'admin', '2025-11-16 00:59:42');
-INSERT INTO `class_attendance_qr` VALUES (14, 13, '66c1da1077214278ae53684179303088', 600, '2025-11-16 01:09:44', 0, 'admin', '2025-11-16 00:59:44');
-INSERT INTO `class_attendance_qr` VALUES (15, 12, 'c8839ba1d04846cdb3c31feee2910b41', 600, '2025-11-16 01:09:46', 0, 'admin', '2025-11-16 00:59:45');
-INSERT INTO `class_attendance_qr` VALUES (16, 13, '57e0ca4a92384c2b9906f81edb61fa27', 600, '2025-11-16 01:09:48', 0, 'admin', '2025-11-16 00:59:47');
-INSERT INTO `class_attendance_qr` VALUES (17, 16, 'ffdd8f74c8e4484ea1d1b768143fc7a8', 600, '2025-11-16 01:09:50', 0, 'admin', '2025-11-16 00:59:50');
-INSERT INTO `class_attendance_qr` VALUES (18, 16, '5705d4dd85fc4304827b23ea8045a486', 600, '2025-11-16 01:10:14', 0, 'admin', '2025-11-16 01:00:13');
-INSERT INTO `class_attendance_qr` VALUES (19, 14, '036d55f732a441eeb5a566838f99be21', 600, '2025-11-16 01:10:23', 0, 'admin', '2025-11-16 01:00:23');
-INSERT INTO `class_attendance_qr` VALUES (20, 13, '0eb3c4205a4643a396ea37623998cfd8', 600, '2025-11-16 01:10:25', 0, 'admin', '2025-11-16 01:00:25');
-INSERT INTO `class_attendance_qr` VALUES (21, 15, 'd6bcec1cc43541579d75bcd14d3155fc', 600, '2025-11-16 01:10:59', 0, 'admin', '2025-11-16 01:00:58');
-INSERT INTO `class_attendance_qr` VALUES (22, 16, 'e9fc6f4124814d64bd1ed880164b53cd', 600, '2025-11-16 01:11:02', 0, 'admin', '2025-11-16 01:01:01');
-INSERT INTO `class_attendance_qr` VALUES (23, 15, '07e13c98eb9049b7ae96cdb60637cf55', 600, '2025-11-16 01:11:03', 0, 'admin', '2025-11-16 01:01:03');
-INSERT INTO `class_attendance_qr` VALUES (24, 14, 'f9f2f8711a644990887ebad6125bd0fb', 600, '2025-11-16 01:11:05', 0, 'admin', '2025-11-16 01:01:05');
-INSERT INTO `class_attendance_qr` VALUES (25, 13, 'f6c0c0bda4204dcfa9eba3665b62fa8f', 600, '2025-11-16 01:11:07', 0, 'admin', '2025-11-16 01:01:06');
-INSERT INTO `class_attendance_qr` VALUES (26, 12, '6d7afe6975b942ee995e8e1590a06f67', 600, '2025-11-16 01:11:08', 0, 'admin', '2025-11-16 01:01:08');
-INSERT INTO `class_attendance_qr` VALUES (27, 16, '49da1ece5a3e40978eee47a9e5f62e19', 600, '2025-11-16 01:11:24', 0, 'admin', '2025-11-16 01:01:24');
-INSERT INTO `class_attendance_qr` VALUES (28, 16, '2dabf455367f43419ad6cf088f821764', 600, '2025-11-16 01:11:38', 0, 'admin', '2025-11-16 01:01:38');
-INSERT INTO `class_attendance_qr` VALUES (29, 15, 'cd3571d340eb417992df2ccec599a694', 600, '2025-11-16 01:11:40', 0, 'admin', '2025-11-16 01:01:39');
-INSERT INTO `class_attendance_qr` VALUES (30, 14, 'ee9ff95b2246412cb0df7ad6712b9428', 600, '2025-11-16 01:11:42', 0, 'admin', '2025-11-16 01:01:42');
-INSERT INTO `class_attendance_qr` VALUES (31, 16, '4532adaf6c98443ea438cb7251da7af7', 600, '2025-11-16 01:11:47', 0, 'admin', '2025-11-16 01:01:47');
-INSERT INTO `class_attendance_qr` VALUES (32, 12, 'da2b99d78d374022adc97735bfc0abc2', 600, '2025-11-16 01:11:50', 0, 'admin', '2025-11-16 01:01:50');
-INSERT INTO `class_attendance_qr` VALUES (33, 15, '1ec9ea9be4c346c4b707438bc80413bc', 600, '2025-11-16 01:11:55', 0, 'admin', '2025-11-16 01:01:54');
-INSERT INTO `class_attendance_qr` VALUES (34, 14, 'edfce37fc8e44cdca509d2123a119ad3', 600, '2025-11-16 01:11:57', 0, 'admin', '2025-11-16 01:01:56');
-INSERT INTO `class_attendance_qr` VALUES (35, 11, 'e05fdd9f41c6442c82a39f9dba69ca71', 600, '2025-11-16 01:20:36', 0, 'admin', '2025-11-16 01:10:35');
-INSERT INTO `class_attendance_qr` VALUES (36, 9, '88c83b7cea784696b1da5dbcd425956e', 600, '2025-11-16 01:20:38', 0, 'admin', '2025-11-16 01:10:38');
-INSERT INTO `class_attendance_qr` VALUES (37, 7, '14b3bd9f6eba4367b8cbb6eab7da262b', 600, '2025-11-16 01:20:40', 0, 'admin', '2025-11-16 01:10:39');
-INSERT INTO `class_attendance_qr` VALUES (38, 11, 'b00044d27a32424882f81bf9abe20ac7', 600, '2025-11-16 01:31:27', 0, 'admin', '2025-11-16 01:21:26');
-INSERT INTO `class_attendance_qr` VALUES (39, 9, '26f3d5bd088b47e697d538f9a34e81b6', 600, '2025-11-16 01:31:29', 0, 'admin', '2025-11-16 01:21:29');
-INSERT INTO `class_attendance_qr` VALUES (40, 16, '151a4db29b80432293531a63d7627c46', 600, '2025-11-16 01:33:40', 0, 'admin', '2025-11-16 01:23:39');
-INSERT INTO `class_attendance_qr` VALUES (41, 16, '8e52331bd9a94d47890b304c4752ecde', 600, '2025-11-16 01:34:07', 0, 'admin', '2025-11-16 01:24:06');
-INSERT INTO `class_attendance_qr` VALUES (42, 11, '9c1663e14a4c44ff830043f9d708c173', 600, '2025-11-16 01:40:03', 0, 'admin', '2025-11-16 01:30:03');
-INSERT INTO `class_attendance_qr` VALUES (43, 9, '4124218177ca4212a316c7ce1fa622c6', 600, '2025-11-16 01:40:07', 0, 'admin', '2025-11-16 01:30:06');
-INSERT INTO `class_attendance_qr` VALUES (44, 11, '655ec6d01a9e467c8b1870c8c28a6f90', 600, '2025-11-16 03:23:28', 0, 'admin', '2025-11-16 03:13:28');
-INSERT INTO `class_attendance_qr` VALUES (45, 18, '982e1862dadc46e49449f29449ce83dd', 600, '2025-11-16 04:39:14', 0, 'admin', '2025-11-16 04:29:13');
-INSERT INTO `class_attendance_qr` VALUES (46, 18, 'a19fae6e8c094006a8f113cf2d2c71f0', 600, '2025-11-16 04:39:36', 0, 'admin', '2025-11-16 04:29:36');
-INSERT INTO `class_attendance_qr` VALUES (47, 18, '812a3c72e75743d6bfc2dac75331cc14', 600, '2025-11-16 04:39:56', 0, 'admin', '2025-11-16 04:29:56');
-INSERT INTO `class_attendance_qr` VALUES (48, 18, '229db2e65291449db99e9d17e6344f74', 600, '2025-11-16 05:52:06', 0, 'admin', '2025-11-16 05:42:05');
-INSERT INTO `class_attendance_qr` VALUES (49, 18, 'effea0b9fc8345cc8c424667013f56c0', 600, '2025-11-16 05:55:19', 0, 'admin', '2025-11-16 05:45:18');
-INSERT INTO `class_attendance_qr` VALUES (50, 18, '96e8a394e05a480cab2a2bc5827db723', 600, '2025-11-16 05:55:58', 0, 'admin', '2025-11-16 05:45:57');
-INSERT INTO `class_attendance_qr` VALUES (51, 18, '2b7cf8f24fd746beaab7966f6f81a224', 600, '2025-11-16 06:02:38', 0, 'admin', '2025-11-16 05:52:37');
-INSERT INTO `class_attendance_qr` VALUES (52, 18, '7c2d828d29ca4e89b162f18792943fd1', 600, '2025-11-16 06:07:14', 0, 'admin', '2025-11-16 05:57:13');
-INSERT INTO `class_attendance_qr` VALUES (53, 18, 'f005821d7c6d4d60a54181b04250b986', 600, '2025-11-16 06:13:42', 0, 'admin', '2025-11-16 06:03:41');
-INSERT INTO `class_attendance_qr` VALUES (54, 18, '5ff02d722a8d40618615f7552224902f', 600, '2025-11-16 06:17:45', 0, 'admin', '2025-11-16 06:07:45');
-INSERT INTO `class_attendance_qr` VALUES (55, 20, '735d19defa6c473c95c7bd3864280f85', 180, '2025-11-16 06:33:14', 0, 'admin', '2025-11-16 06:30:13');
-INSERT INTO `class_attendance_qr` VALUES (56, 20, '3a181cc93be343dc8c369845b9eeda1b', 600, '2025-11-16 06:49:13', 0, 'admin', '2025-11-16 06:39:13');
-INSERT INTO `class_attendance_qr` VALUES (57, 21, 'ceba5b865d764172b6c326f3c87cbdef', 600, '2025-11-16 06:55:11', 0, 'admin', '2025-11-16 06:45:11');
-INSERT INTO `class_attendance_qr` VALUES (58, 21, 'e254971ee3584d638318d4f7e4725956', 600, '2025-11-16 06:55:18', 0, 'admin', '2025-11-16 06:45:17');
+INSERT INTO `class_attendance_qr` VALUES ('1', '3', 'TEST-TOKEN-123456', '1800', '2025-11-02 20:12:04', '0', 'admin', '2025-11-02 19:42:04');
+INSERT INTO `class_attendance_qr` VALUES ('2', '7', 'a36d96283a3349fc85f6d714ae802099', '60', '2025-11-15 23:55:48', '0', 'admin', '2025-11-15 23:54:47');
+INSERT INTO `class_attendance_qr` VALUES ('3', '9', '623f6fa6e295457cafb5db5a4bc43bbe', '600', '2025-11-16 00:19:32', '0', 'admin', '2025-11-16 00:09:32');
+INSERT INTO `class_attendance_qr` VALUES ('4', '10', '46b6241e9185427d89496aae532de376', '600', '2025-11-16 00:47:33', '0', 'admin', '2025-11-16 00:37:32');
+INSERT INTO `class_attendance_qr` VALUES ('5', '11', 'baaddf8ddcdb428f92d3e2c8fce3a880', '600', '2025-11-16 00:48:11', '0', 'admin', '2025-11-16 00:38:11');
+INSERT INTO `class_attendance_qr` VALUES ('6', '12', 'da74da6cf9c54fe28735fcf092ac256d', '600', '2025-11-16 00:50:49', '0', 'admin', '2025-11-16 00:40:49');
+INSERT INTO `class_attendance_qr` VALUES ('7', '13', 'dc43784ae30c47cdb2658ed4e32e2072', '600', '2025-11-16 00:55:53', '0', 'admin', '2025-11-16 00:45:53');
+INSERT INTO `class_attendance_qr` VALUES ('8', '14', '4d8b13a381d84d278a5b2f556fbe09cf', '600', '2025-11-16 00:58:08', '0', 'admin', '2025-11-16 00:48:08');
+INSERT INTO `class_attendance_qr` VALUES ('9', '15', 'abd1570435aa4ab08adca0d26da73367', '600', '2025-11-16 00:59:39', '0', 'admin', '2025-11-16 00:49:39');
+INSERT INTO `class_attendance_qr` VALUES ('10', '16', '974b44193191480d85db4ec8b01f2677', '600', '2025-11-16 01:04:52', '0', 'admin', '2025-11-16 00:54:51');
+INSERT INTO `class_attendance_qr` VALUES ('11', '16', 'f9b7dc33329844d3b8e3f5c202b256d0', '600', '2025-11-16 01:09:38', '0', 'admin', '2025-11-16 00:59:38');
+INSERT INTO `class_attendance_qr` VALUES ('12', '15', 'baab9e0d9e7a48e4a309103e0f2583f0', '600', '2025-11-16 01:09:41', '0', 'admin', '2025-11-16 00:59:40');
+INSERT INTO `class_attendance_qr` VALUES ('13', '14', 'dafaa8bf82a44dd48c4e7a65f2d117cc', '600', '2025-11-16 01:09:42', '0', 'admin', '2025-11-16 00:59:42');
+INSERT INTO `class_attendance_qr` VALUES ('14', '13', '66c1da1077214278ae53684179303088', '600', '2025-11-16 01:09:44', '0', 'admin', '2025-11-16 00:59:44');
+INSERT INTO `class_attendance_qr` VALUES ('15', '12', 'c8839ba1d04846cdb3c31feee2910b41', '600', '2025-11-16 01:09:46', '0', 'admin', '2025-11-16 00:59:45');
+INSERT INTO `class_attendance_qr` VALUES ('16', '13', '57e0ca4a92384c2b9906f81edb61fa27', '600', '2025-11-16 01:09:48', '0', 'admin', '2025-11-16 00:59:47');
+INSERT INTO `class_attendance_qr` VALUES ('17', '16', 'ffdd8f74c8e4484ea1d1b768143fc7a8', '600', '2025-11-16 01:09:50', '0', 'admin', '2025-11-16 00:59:50');
+INSERT INTO `class_attendance_qr` VALUES ('18', '16', '5705d4dd85fc4304827b23ea8045a486', '600', '2025-11-16 01:10:14', '0', 'admin', '2025-11-16 01:00:13');
+INSERT INTO `class_attendance_qr` VALUES ('19', '14', '036d55f732a441eeb5a566838f99be21', '600', '2025-11-16 01:10:23', '0', 'admin', '2025-11-16 01:00:23');
+INSERT INTO `class_attendance_qr` VALUES ('20', '13', '0eb3c4205a4643a396ea37623998cfd8', '600', '2025-11-16 01:10:25', '0', 'admin', '2025-11-16 01:00:25');
+INSERT INTO `class_attendance_qr` VALUES ('21', '15', 'd6bcec1cc43541579d75bcd14d3155fc', '600', '2025-11-16 01:10:59', '0', 'admin', '2025-11-16 01:00:58');
+INSERT INTO `class_attendance_qr` VALUES ('22', '16', 'e9fc6f4124814d64bd1ed880164b53cd', '600', '2025-11-16 01:11:02', '0', 'admin', '2025-11-16 01:01:01');
+INSERT INTO `class_attendance_qr` VALUES ('23', '15', '07e13c98eb9049b7ae96cdb60637cf55', '600', '2025-11-16 01:11:03', '0', 'admin', '2025-11-16 01:01:03');
+INSERT INTO `class_attendance_qr` VALUES ('24', '14', 'f9f2f8711a644990887ebad6125bd0fb', '600', '2025-11-16 01:11:05', '0', 'admin', '2025-11-16 01:01:05');
+INSERT INTO `class_attendance_qr` VALUES ('25', '13', 'f6c0c0bda4204dcfa9eba3665b62fa8f', '600', '2025-11-16 01:11:07', '0', 'admin', '2025-11-16 01:01:06');
+INSERT INTO `class_attendance_qr` VALUES ('26', '12', '6d7afe6975b942ee995e8e1590a06f67', '600', '2025-11-16 01:11:08', '0', 'admin', '2025-11-16 01:01:08');
+INSERT INTO `class_attendance_qr` VALUES ('27', '16', '49da1ece5a3e40978eee47a9e5f62e19', '600', '2025-11-16 01:11:24', '0', 'admin', '2025-11-16 01:01:24');
+INSERT INTO `class_attendance_qr` VALUES ('28', '16', '2dabf455367f43419ad6cf088f821764', '600', '2025-11-16 01:11:38', '0', 'admin', '2025-11-16 01:01:38');
+INSERT INTO `class_attendance_qr` VALUES ('29', '15', 'cd3571d340eb417992df2ccec599a694', '600', '2025-11-16 01:11:40', '0', 'admin', '2025-11-16 01:01:39');
+INSERT INTO `class_attendance_qr` VALUES ('30', '14', 'ee9ff95b2246412cb0df7ad6712b9428', '600', '2025-11-16 01:11:42', '0', 'admin', '2025-11-16 01:01:42');
+INSERT INTO `class_attendance_qr` VALUES ('31', '16', '4532adaf6c98443ea438cb7251da7af7', '600', '2025-11-16 01:11:47', '0', 'admin', '2025-11-16 01:01:47');
+INSERT INTO `class_attendance_qr` VALUES ('32', '12', 'da2b99d78d374022adc97735bfc0abc2', '600', '2025-11-16 01:11:50', '0', 'admin', '2025-11-16 01:01:50');
+INSERT INTO `class_attendance_qr` VALUES ('33', '15', '1ec9ea9be4c346c4b707438bc80413bc', '600', '2025-11-16 01:11:55', '0', 'admin', '2025-11-16 01:01:54');
+INSERT INTO `class_attendance_qr` VALUES ('34', '14', 'edfce37fc8e44cdca509d2123a119ad3', '600', '2025-11-16 01:11:57', '0', 'admin', '2025-11-16 01:01:56');
+INSERT INTO `class_attendance_qr` VALUES ('35', '11', 'e05fdd9f41c6442c82a39f9dba69ca71', '600', '2025-11-16 01:20:36', '0', 'admin', '2025-11-16 01:10:35');
+INSERT INTO `class_attendance_qr` VALUES ('36', '9', '88c83b7cea784696b1da5dbcd425956e', '600', '2025-11-16 01:20:38', '0', 'admin', '2025-11-16 01:10:38');
+INSERT INTO `class_attendance_qr` VALUES ('37', '7', '14b3bd9f6eba4367b8cbb6eab7da262b', '600', '2025-11-16 01:20:40', '0', 'admin', '2025-11-16 01:10:39');
+INSERT INTO `class_attendance_qr` VALUES ('38', '11', 'b00044d27a32424882f81bf9abe20ac7', '600', '2025-11-16 01:31:27', '0', 'admin', '2025-11-16 01:21:26');
+INSERT INTO `class_attendance_qr` VALUES ('39', '9', '26f3d5bd088b47e697d538f9a34e81b6', '600', '2025-11-16 01:31:29', '0', 'admin', '2025-11-16 01:21:29');
+INSERT INTO `class_attendance_qr` VALUES ('40', '16', '151a4db29b80432293531a63d7627c46', '600', '2025-11-16 01:33:40', '0', 'admin', '2025-11-16 01:23:39');
+INSERT INTO `class_attendance_qr` VALUES ('41', '16', '8e52331bd9a94d47890b304c4752ecde', '600', '2025-11-16 01:34:07', '0', 'admin', '2025-11-16 01:24:06');
+INSERT INTO `class_attendance_qr` VALUES ('42', '11', '9c1663e14a4c44ff830043f9d708c173', '600', '2025-11-16 01:40:03', '0', 'admin', '2025-11-16 01:30:03');
+INSERT INTO `class_attendance_qr` VALUES ('43', '9', '4124218177ca4212a316c7ce1fa622c6', '600', '2025-11-16 01:40:07', '0', 'admin', '2025-11-16 01:30:06');
+INSERT INTO `class_attendance_qr` VALUES ('44', '11', '655ec6d01a9e467c8b1870c8c28a6f90', '600', '2025-11-16 03:23:28', '0', 'admin', '2025-11-16 03:13:28');
+INSERT INTO `class_attendance_qr` VALUES ('45', '18', '982e1862dadc46e49449f29449ce83dd', '600', '2025-11-16 04:39:14', '0', 'admin', '2025-11-16 04:29:13');
+INSERT INTO `class_attendance_qr` VALUES ('46', '18', 'a19fae6e8c094006a8f113cf2d2c71f0', '600', '2025-11-16 04:39:36', '0', 'admin', '2025-11-16 04:29:36');
+INSERT INTO `class_attendance_qr` VALUES ('47', '18', '812a3c72e75743d6bfc2dac75331cc14', '600', '2025-11-16 04:39:56', '0', 'admin', '2025-11-16 04:29:56');
+INSERT INTO `class_attendance_qr` VALUES ('48', '18', '229db2e65291449db99e9d17e6344f74', '600', '2025-11-16 05:52:06', '0', 'admin', '2025-11-16 05:42:05');
+INSERT INTO `class_attendance_qr` VALUES ('49', '18', 'effea0b9fc8345cc8c424667013f56c0', '600', '2025-11-16 05:55:19', '0', 'admin', '2025-11-16 05:45:18');
+INSERT INTO `class_attendance_qr` VALUES ('50', '18', '96e8a394e05a480cab2a2bc5827db723', '600', '2025-11-16 05:55:58', '0', 'admin', '2025-11-16 05:45:57');
+INSERT INTO `class_attendance_qr` VALUES ('51', '18', '2b7cf8f24fd746beaab7966f6f81a224', '600', '2025-11-16 06:02:38', '0', 'admin', '2025-11-16 05:52:37');
+INSERT INTO `class_attendance_qr` VALUES ('52', '18', '7c2d828d29ca4e89b162f18792943fd1', '600', '2025-11-16 06:07:14', '0', 'admin', '2025-11-16 05:57:13');
+INSERT INTO `class_attendance_qr` VALUES ('53', '18', 'f005821d7c6d4d60a54181b04250b986', '600', '2025-11-16 06:13:42', '0', 'admin', '2025-11-16 06:03:41');
+INSERT INTO `class_attendance_qr` VALUES ('54', '18', '5ff02d722a8d40618615f7552224902f', '600', '2025-11-16 06:17:45', '0', 'admin', '2025-11-16 06:07:45');
+INSERT INTO `class_attendance_qr` VALUES ('55', '20', '735d19defa6c473c95c7bd3864280f85', '180', '2025-11-16 06:33:14', '0', 'admin', '2025-11-16 06:30:13');
+INSERT INTO `class_attendance_qr` VALUES ('56', '20', '3a181cc93be343dc8c369845b9eeda1b', '600', '2025-11-16 06:49:13', '0', 'admin', '2025-11-16 06:39:13');
+INSERT INTO `class_attendance_qr` VALUES ('57', '21', 'ceba5b865d764172b6c326f3c87cbdef', '600', '2025-11-16 06:55:11', '0', 'admin', '2025-11-16 06:45:11');
+INSERT INTO `class_attendance_qr` VALUES ('58', '21', 'e254971ee3584d638318d4f7e4725956', '600', '2025-11-16 06:55:18', '0', 'admin', '2025-11-16 06:45:17');
 
 -- ----------------------------
 -- Table structure for class_attendance_task
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance_task`;
-CREATE TABLE `class_attendance_task`  (
-  `task_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到任务主键ID',
-  `session_id` bigint NOT NULL COMMENT '关联的课堂 session_id (class_session.session_id)',
-  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'location' COMMENT '签到方式：location 或 qr',
-  `center_lat` double NULL DEFAULT NULL COMMENT '位置签到中心纬度（仅 type=location 有效）',
-  `center_lng` double NULL DEFAULT NULL COMMENT '位置签到中心经度（仅 type=location 有效）',
-  `radius` int NULL DEFAULT NULL COMMENT '有效半径（米）（仅 type=location 有效）',
-  `qr_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '二维码静态 token 或默认值（可为空，复杂场景用 class_attendance_qr 存多 token）',
-  `start_time` datetime NULL DEFAULT NULL COMMENT '签到开始时间',
-  `end_time` datetime NULL DEFAULT NULL COMMENT '签到结束时间',
-  `status` tinyint NOT NULL DEFAULT 0 COMMENT '任务状态：0=未开始 1=进行中 2=已结束',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '创建者用户名',
-  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`task_id`) USING BTREE,
-  INDEX `idx_task_session`(`session_id` ASC) USING BTREE,
-  INDEX `idx_task_status`(`status` ASC) USING BTREE,
-  CONSTRAINT `fk_task_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到任务表（记录签到活动：位置/二维码等）' ROW_FORMAT = DYNAMIC;
+CREATE TABLE `class_attendance_task` (
+                                         `task_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到任务主键ID',
+                                         `session_id` bigint NOT NULL COMMENT '关联的课堂 session_id (class_session.session_id)',
+                                         `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'location' COMMENT '签到方式：location 或 qr',
+                                         `center_lat` double DEFAULT NULL COMMENT '位置签到中心纬度（仅 type=location 有效）',
+                                         `center_lng` double DEFAULT NULL COMMENT '位置签到中心经度（仅 type=location 有效）',
+                                         `radius` int DEFAULT NULL COMMENT '有效半径（米）（仅 type=location 有效）',
+                                         `qr_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '二维码静态 token 或默认值（可为空，复杂场景用 class_attendance_qr 存多 token）',
+                                         `start_time` datetime DEFAULT NULL COMMENT '签到开始时间',
+                                         `end_time` datetime DEFAULT NULL COMMENT '签到结束时间',
+                                         `status` tinyint NOT NULL DEFAULT '0' COMMENT '任务状态：0=未开始 1=进行中 2=已结束',
+                                         `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '创建者用户名',
+                                         `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                         PRIMARY KEY (`task_id`) USING BTREE,
+                                         KEY `idx_task_session` (`session_id`) USING BTREE,
+                                         KEY `idx_task_status` (`status`) USING BTREE,
+                                         CONSTRAINT `fk_task_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='签到任务表（记录签到活动：位置/二维码等）';
 
 -- ----------------------------
 -- Records of class_attendance_task
 -- ----------------------------
-INSERT INTO `class_attendance_task` VALUES (1, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-02 19:19:34', '2025-11-02 19:19:37', 1, 'admin', '2025-11-02 19:19:38');
-INSERT INTO `class_attendance_task` VALUES (2, 3, 'location', 1, 1, 500, NULL, '2025-11-02 19:20:59', '2025-11-03 00:00:00', 1, 'admin', '2025-11-02 19:21:03');
-INSERT INTO `class_attendance_task` VALUES (3, 3, 'qr', NULL, NULL, NULL, NULL, '2025-11-02 19:42:04', '2025-11-02 20:12:04', 1, 'admin', '2025-11-02 19:42:04');
-INSERT INTO `class_attendance_task` VALUES (4, 3, 'location', 1, 1, 500, NULL, NULL, NULL, 1, 'admin', '2025-11-02 19:42:59');
-INSERT INTO `class_attendance_task` VALUES (5, 3, 'location', 1, 1, 500, NULL, '2025-11-02 20:06:30', '2025-11-02 20:06:31', 1, 'admin', '2025-11-02 20:06:32');
-INSERT INTO `class_attendance_task` VALUES (6, 1, 'location', 1, 1, 500, NULL, '2025-11-02 20:20:54', '2025-11-04 20:20:55', 1, 'admin', '2025-11-02 20:20:59');
-INSERT INTO `class_attendance_task` VALUES (7, 1, 'qr', 123, NULL, 500, NULL, '2025-11-07 00:00:00', '2025-11-13 00:00:00', 1, 'admin', '2025-11-15 23:54:47');
-INSERT INTO `class_attendance_task` VALUES (8, 1, 'location', 1, 1, 500, NULL, '2025-11-16 00:04:01', '2025-11-16 02:04:06', 1, 'admin', '2025-11-16 00:04:15');
-INSERT INTO `class_attendance_task` VALUES (9, 1, 'qr', 1, 1, 500, NULL, '2025-11-16 00:04:01', '2025-11-16 02:04:06', 1, 'admin', '2025-11-16 00:09:31');
-INSERT INTO `class_attendance_task` VALUES (10, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:37:24', '2025-11-16 03:40:27', 1, 'admin', '2025-11-16 00:37:32');
-INSERT INTO `class_attendance_task` VALUES (11, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:37:24', '2025-11-16 03:40:27', 1, 'admin', '2025-11-16 00:38:10');
-INSERT INTO `class_attendance_task` VALUES (12, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:40:41', '2025-11-16 00:52:42', 1, 'admin', '2025-11-16 00:40:49');
-INSERT INTO `class_attendance_task` VALUES (13, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:45:45', '2025-11-16 00:51:47', 1, 'admin', '2025-11-16 00:45:53');
-INSERT INTO `class_attendance_task` VALUES (14, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:47:48', '2025-11-16 00:51:00', 1, 'admin', '2025-11-16 00:48:08');
-INSERT INTO `class_attendance_task` VALUES (15, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:49:03', '2025-11-16 00:49:05', 1, 'admin', '2025-11-16 00:49:38');
-INSERT INTO `class_attendance_task` VALUES (16, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:54:48', '2025-11-16 00:54:50', 1, 'admin', '2025-11-16 00:54:51');
-INSERT INTO `class_attendance_task` VALUES (17, 1, 'location', 2, 1, 500, NULL, '2025-11-16 04:15:06', '2025-11-16 07:15:08', 1, 'admin', '2025-11-16 04:15:14');
-INSERT INTO `class_attendance_task` VALUES (18, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 04:29:05', '2025-12-04 00:00:00', 1, 'admin', '2025-11-16 04:29:13');
-INSERT INTO `class_attendance_task` VALUES (19, 1, 'location', 1, 1, 500, NULL, '2025-11-16 04:37:20', '2025-11-16 10:37:21', 1, 'admin', '2025-11-16 04:37:25');
-INSERT INTO `class_attendance_task` VALUES (20, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 06:30:04', '2025-11-25 00:00:00', 1, 'admin', '2025-11-16 06:30:13');
-INSERT INTO `class_attendance_task` VALUES (21, 2, 'qr', NULL, NULL, 500, NULL, '2025-11-16 06:44:53', '2025-11-16 06:54:06', 1, 'admin', '2025-11-16 06:45:10');
+INSERT INTO `class_attendance_task` VALUES ('1', '1', 'qr', null, null, '500', null, '2025-11-02 19:19:34', '2025-11-02 19:19:37', '1', 'admin', '2025-11-02 19:19:38');
+INSERT INTO `class_attendance_task` VALUES ('2', '3', 'location', '1', '1', '500', null, '2025-11-02 19:20:59', '2025-11-03 00:00:00', '1', 'admin', '2025-11-02 19:21:03');
+INSERT INTO `class_attendance_task` VALUES ('3', '3', 'qr', null, null, null, null, '2025-11-02 19:42:04', '2025-11-02 20:12:04', '1', 'admin', '2025-11-02 19:42:04');
+INSERT INTO `class_attendance_task` VALUES ('4', '3', 'location', '1', '1', '500', null, null, null, '1', 'admin', '2025-11-02 19:42:59');
+INSERT INTO `class_attendance_task` VALUES ('5', '3', 'location', '1', '1', '500', null, '2025-11-02 20:06:30', '2025-11-02 20:06:31', '1', 'admin', '2025-11-02 20:06:32');
+INSERT INTO `class_attendance_task` VALUES ('6', '1', 'location', '1', '1', '500', null, '2025-11-02 20:20:54', '2025-11-04 20:20:55', '1', 'admin', '2025-11-02 20:20:59');
+INSERT INTO `class_attendance_task` VALUES ('7', '1', 'qr', '123', null, '500', null, '2025-11-07 00:00:00', '2025-11-13 00:00:00', '1', 'admin', '2025-11-15 23:54:47');
+INSERT INTO `class_attendance_task` VALUES ('8', '1', 'location', '1', '1', '500', null, '2025-11-16 00:04:01', '2025-11-16 02:04:06', '1', 'admin', '2025-11-16 00:04:15');
+INSERT INTO `class_attendance_task` VALUES ('9', '1', 'qr', '1', '1', '500', null, '2025-11-16 00:04:01', '2025-11-16 02:04:06', '1', 'admin', '2025-11-16 00:09:31');
+INSERT INTO `class_attendance_task` VALUES ('10', '1', 'qr', null, null, '500', null, '2025-11-16 00:37:24', '2025-11-16 03:40:27', '1', 'admin', '2025-11-16 00:37:32');
+INSERT INTO `class_attendance_task` VALUES ('11', '1', 'qr', null, null, '500', null, '2025-11-16 00:37:24', '2025-11-16 03:40:27', '1', 'admin', '2025-11-16 00:38:10');
+INSERT INTO `class_attendance_task` VALUES ('12', '2', 'qr', null, null, '500', null, '2025-11-16 00:40:41', '2025-11-16 00:52:42', '1', 'admin', '2025-11-16 00:40:49');
+INSERT INTO `class_attendance_task` VALUES ('13', '2', 'qr', null, null, '500', null, '2025-11-16 00:45:45', '2025-11-16 00:51:47', '1', 'admin', '2025-11-16 00:45:53');
+INSERT INTO `class_attendance_task` VALUES ('14', '2', 'qr', null, null, '500', null, '2025-11-16 00:47:48', '2025-11-16 00:51:00', '1', 'admin', '2025-11-16 00:48:08');
+INSERT INTO `class_attendance_task` VALUES ('15', '2', 'qr', null, null, '500', null, '2025-11-16 00:49:03', '2025-11-16 00:49:05', '1', 'admin', '2025-11-16 00:49:38');
+INSERT INTO `class_attendance_task` VALUES ('16', '2', 'qr', null, null, '500', null, '2025-11-16 00:54:48', '2025-11-16 00:54:50', '1', 'admin', '2025-11-16 00:54:51');
+INSERT INTO `class_attendance_task` VALUES ('17', '1', 'location', '2', '1', '500', null, '2025-11-16 04:15:06', '2025-11-16 07:15:08', '1', 'admin', '2025-11-16 04:15:14');
+INSERT INTO `class_attendance_task` VALUES ('18', '2', 'qr', null, null, '500', null, '2025-11-16 04:29:05', '2025-12-04 00:00:00', '1', 'admin', '2025-11-16 04:29:13');
+INSERT INTO `class_attendance_task` VALUES ('19', '1', 'location', '1', '1', '500', null, '2025-11-16 04:37:20', '2025-11-16 10:37:21', '1', 'admin', '2025-11-16 04:37:25');
+INSERT INTO `class_attendance_task` VALUES ('20', '2', 'qr', null, null, '500', null, '2025-11-16 06:30:04', '2025-11-25 00:00:00', '1', 'admin', '2025-11-16 06:30:13');
+INSERT INTO `class_attendance_task` VALUES ('21', '2', 'qr', null, null, '500', null, '2025-11-16 06:44:53', '2025-11-16 06:54:06', '1', 'admin', '2025-11-16 06:45:10');
 
 -- ----------------------------
 -- Table structure for class_course
 -- ----------------------------
 DROP TABLE IF EXISTS `class_course`;
-CREATE TABLE `class_course`  (
-  `course_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课程ID',
-  `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程名称',
-  `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程编号',
-  `course_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '课程类型',
-  `college` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '所属学院',
-  `credit` decimal(3, 1) NULL DEFAULT NULL COMMENT '学分',
-  `introduction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '课程简介',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '状态（0正常 1停用）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
-  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
-  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
-  `class_number` int NULL DEFAULT NULL,
-  PRIMARY KEY (`course_id`) USING BTREE,
-  UNIQUE INDEX `idx_course_code`(`course_code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '课程信息表' ROW_FORMAT = DYNAMIC;
+CREATE TABLE `class_course` (
+                                `course_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课程ID',
+                                `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程名称',
+                                `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程编号',
+                                `course_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '课程类型',
+                                `college` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '所属学院',
+                                `credit` decimal(3,1) DEFAULT NULL COMMENT '学分',
+                                `introduction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '课程简介',
+                                `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',
+                                `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                                `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                                `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+                                `class_number` int DEFAULT NULL,
+                                PRIMARY KEY (`course_id`) USING BTREE,
+                                UNIQUE KEY `idx_course_code` (`course_code`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='课程信息表';
 
 -- ----------------------------
 -- Records of class_course
 -- ----------------------------
-INSERT INTO `class_course` VALUES (1, '研究与开发实践', '1', '必修', '计算机学院', 2.0, '2024-2025秋季学期开设', '0', 'admin', '2025-10-29 17:50:59', 'admin', '2025-11-01 15:50:35', '1', 1);
-INSERT INTO `class_course` VALUES (2, '计算机网络123', 'LZNU135465', '必修', '计算机学院', 3.0, '一门课aaaaaaaa\n', '1', 'admin', '2025-10-29 17:54:33', 'admin', '2025-10-29 18:37:45', '2', 2);
-INSERT INTO `class_course` VALUES (3, '计算机金融应用', 'MSNU32546', '选修', '经济学院', 3.5, '锻炼学生实践能力', '0', 'admin', '2025-10-29 18:22:47', 'admin', '2025-10-31 21:39:29', NULL, 3);
-INSERT INTO `class_course` VALUES (5, '数据库', '7', NULL, NULL, 2.0, '1', '0', 'admin', '2025-11-01 15:48:47', '', NULL, NULL, 1);
-INSERT INTO `class_course` VALUES (6, '金融', '6', '12', '124', 1.0, '11', '0', 'admin', '2025-11-04 20:22:51', '', NULL, NULL, 4);
-INSERT INTO `class_course` VALUES (7, '121', '12', '1', '222', 0.0, '1', '0', 'admin', '2025-11-04 21:09:23', '', NULL, NULL, 1);
-INSERT INTO `class_course` VALUES (8, '123123', '112', '212', '11', 0.0, '111', '0', 'admin', '2025-11-04 22:22:02', '', NULL, NULL, 1);
+INSERT INTO `class_course` VALUES ('1', '研究与开发实践', '1', '必修', '计算机学院', '2.0', '2024-2025秋季学期开设', '0', 'admin', '2025-10-29 17:50:59', 'admin', '2025-11-01 15:50:35', '1', '1');
+INSERT INTO `class_course` VALUES ('2', '计算机网络123', 'LZNU135465', '必修', '计算机学院', '3.0', '一门课aaaaaaaa\n', '1', 'admin', '2025-10-29 17:54:33', 'admin', '2025-10-29 18:37:45', '2', '2');
+INSERT INTO `class_course` VALUES ('3', '计算机金融应用', 'MSNU32546', '选修', '经济学院', '3.5', '锻炼学生实践能力', '0', 'admin', '2025-10-29 18:22:47', 'admin', '2025-10-31 21:39:29', null, '3');
+INSERT INTO `class_course` VALUES ('5', '数据库', '7', null, null, '2.0', '1', '0', 'admin', '2025-11-01 15:48:47', '', null, null, '1');
+INSERT INTO `class_course` VALUES ('6', '金融', '6', '12', '124', '1.0', '11', '0', 'admin', '2025-11-04 20:22:51', '', null, null, '4');
+INSERT INTO `class_course` VALUES ('7', '121', '12', '1', '222', '0.0', '1', '0', 'admin', '2025-11-04 21:09:23', '', null, null, '1');
+INSERT INTO `class_course` VALUES ('8', '123123', '112', '212', '11', '0.0', '111', '0', 'admin', '2025-11-04 22:22:02', '', null, null, '1');
 
 -- ----------------------------
 -- Table structure for class_exam
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam`;
-CREATE TABLE `class_exam`  (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '考试ID',
-  `exam_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '考试名称',
-  `exam_type` tinyint NOT NULL COMMENT '考试类型(1期中 2期末 3测验 4模拟考 5课堂测验)',
-  `course_id` bigint NOT NULL COMMENT '课程ID',
-  `session_id` bigint NOT NULL COMMENT '课堂ID',
-  `total_score` decimal(5, 2) NOT NULL COMMENT '考试总分',
-  `pass_score` decimal(5, 2) NOT NULL COMMENT '及格分数',
-  `exam_duration` int NOT NULL COMMENT '考试时长(分钟)',
-  `start_time` datetime NOT NULL COMMENT '考试开始时间',
-  `end_time` datetime NOT NULL COMMENT '考试结束时间',
-  `exam_mode` tinyint NULL DEFAULT 1 COMMENT '考试模式(1定时考试 2随到随考)',
-  `anti_cheat` tinyint NULL DEFAULT 0 COMMENT '防作弊设置(0关闭 1开启)',
-  `question_order` tinyint NULL DEFAULT 0 COMMENT '题目顺序(0正常 1随机)',
-  `show_answer` tinyint NULL DEFAULT 0 COMMENT '显示答案(0不显示 1立即显示 2考试结束后)',
-  `status` tinyint NULL DEFAULT 0 COMMENT '状态(0草稿 1已发布 2进行中 3已结束)',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
-  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
-  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '备注',
-  `late_submit` tinyint(1) NULL DEFAULT 0 COMMENT '是否允许迟交',
-  `late_time` int NULL DEFAULT 0 COMMENT '迟交时间（分钟）',
-  `auto_submit` tinyint(1) NULL DEFAULT 1 COMMENT '是否自动提交',
-  `student_count` int NULL DEFAULT 0 COMMENT '学生数量',
-  `question_count` int NULL DEFAULT 0 COMMENT '题目数量',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_course_id`(`course_id` ASC) USING BTREE,
-  INDEX `idx_session_id`(`session_id` ASC) USING BTREE,
-  INDEX `idx_status`(`status` ASC) USING BTREE,
-  INDEX `idx_start_time`(`start_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试基本信息表' ROW_FORMAT = DYNAMIC;
+CREATE TABLE `class_exam` (
+                              `id` bigint NOT NULL AUTO_INCREMENT COMMENT '考试ID',
+                              `exam_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '考试名称',
+                              `exam_type` tinyint NOT NULL COMMENT '考试类型(1期中 2期末 3测验 4模拟考 5课堂测验)',
+                              `course_id` bigint NOT NULL COMMENT '课程ID',
+                              `session_id` bigint NOT NULL COMMENT '课堂ID',
+                              `total_score` decimal(5,2) NOT NULL COMMENT '考试总分',
+                              `pass_score` decimal(5,2) NOT NULL COMMENT '及格分数',
+                              `exam_duration` int NOT NULL COMMENT '考试时长(分钟)',
+                              `start_time` datetime NOT NULL COMMENT '考试开始时间',
+                              `end_time` datetime NOT NULL COMMENT '考试结束时间',
+                              `exam_mode` tinyint DEFAULT '1' COMMENT '考试模式(1定时考试 2随到随考)',
+                              `anti_cheat` tinyint DEFAULT '0' COMMENT '防作弊设置(0关闭 1开启)',
+                              `question_order` tinyint DEFAULT '0' COMMENT '题目顺序(0正常 1随机)',
+                              `show_answer` tinyint DEFAULT '0' COMMENT '显示答案(0不显示 1立即显示 2考试结束后)',
+                              `status` tinyint DEFAULT '0' COMMENT '状态(0草稿 1已发布 2进行中 3已结束)',
+                              `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                              `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                              `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                              `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                              `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '备注',
+                              `late_submit` tinyint(1) DEFAULT '0' COMMENT '是否允许迟交',
+                              `late_time` int DEFAULT '0' COMMENT '迟交时间（分钟）',
+                              `auto_submit` tinyint(1) DEFAULT '1' COMMENT '是否自动提交',
+                              `student_count` int DEFAULT '0' COMMENT '学生数量',
+                              `question_count` int DEFAULT '0' COMMENT '题目数量',
+                              PRIMARY KEY (`id`) USING BTREE,
+                              KEY `idx_course_id` (`course_id`) USING BTREE,
+                              KEY `idx_session_id` (`session_id`) USING BTREE,
+                              KEY `idx_status` (`status`) USING BTREE,
+                              KEY `idx_start_time` (`start_time`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='考试基本信息表';
 
 -- ----------------------------
 -- Records of class_exam
 -- ----------------------------
-INSERT INTO `class_exam` VALUES (2, '研开测试', 5, 1, 1, 100.00, 60.00, 60, '2025-11-14 20:00:00', '2025-11-14 23:00:00', 2, 1, 1, 2, 1, 'admin', '2025-11-14 18:09:49', '', '2025-11-14 18:09:49', NULL, 0, 0, 1, NULL, NULL);
-INSERT INTO `class_exam` VALUES (3, '研开1', 5, 1, 1, 100.00, 60.00, 60, '2025-11-14 00:00:00', '2025-11-14 14:00:00', 1, 1, 0, 0, 2, 'admin', '2025-11-14 18:22:38', 'admin', '2025-11-14 18:29:32', NULL, 0, 0, 1, NULL, NULL);
-INSERT INTO `class_exam` VALUES (4, '0000', 3, 1, 1, 4.00, 2.00, 6, '2025-11-14 00:00:00', '2025-11-22 00:00:00', 1, 1, 0, 0, 1, 'admin', '2025-11-15 01:09:36', '', '2025-11-15 01:09:36', '', 0, 0, 1, NULL, NULL);
+INSERT INTO `class_exam` VALUES ('2', '研开测试', '5', '1', '1', '100.00', '60.00', '60', '2025-11-14 20:00:00', '2025-11-14 23:00:00', '2', '1', '1', '2', '1', 'admin', '2025-11-14 18:09:49', '', '2025-11-14 18:09:49', null, '0', '0', '1', null, null);
+INSERT INTO `class_exam` VALUES ('3', '研开1', '5', '1', '1', '100.00', '60.00', '60', '2025-11-14 00:00:00', '2025-11-14 14:00:00', '1', '1', '0', '0', '2', 'admin', '2025-11-14 18:22:38', 'admin', '2025-11-14 18:29:32', null, '0', '0', '1', null, null);
+INSERT INTO `class_exam` VALUES ('4', '0000', '3', '1', '1', '4.00', '2.00', '6', '2025-11-14 00:00:00', '2025-11-22 00:00:00', '1', '1', '0', '0', '1', 'admin', '2025-11-15 01:09:36', '', '2025-11-15 01:09:36', '', '0', '0', '1', null, null);
 
 -- ----------------------------
 -- Table structure for class_exam_answer
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_answer`;
-CREATE TABLE `class_exam_answer`  (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '答案ID',
-  `exam_id` bigint NOT NULL COMMENT '考试ID',
-  `student_id` bigint NOT NULL COMMENT '学生ID',
-  `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
-  `question_id` bigint NOT NULL COMMENT '题目ID',
-  `student_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '学生答案',
-  `answer_files` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件文件(多个用逗号分隔)',
-  `is_correct` tinyint DEFAULT NULL COMMENT '是否正确(客观题)',
-  `score` decimal(5,2) DEFAULT '0.00' COMMENT '得分',
-  `corrector_id` bigint DEFAULT NULL COMMENT '批改人ID',
-  `correct_time` datetime DEFAULT NULL COMMENT '批改时间',
-  `correct_comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '批改评语',
-  `answer_duration` int DEFAULT '0' COMMENT '答题耗时(秒)',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目内容快照',
-  `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目选项快照(JSON)',
-  `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '正确答案快照',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `uk_exam_student_question` (`exam_id`,`student_id`,`question_id`) USING BTREE,
-  KEY `idx_student_no` (`student_no`) USING BTREE,
-  KEY `idx_question_id` (`question_id`) USING BTREE,
-  KEY `idx_corrector_id` (`corrector_id`) USING BTREE,
-  KEY `idx_student_id` (`student_id`) USING BTREE
+CREATE TABLE `class_exam_answer` (
+                                     `id` bigint NOT NULL AUTO_INCREMENT COMMENT '答案ID',
+                                     `exam_id` bigint NOT NULL COMMENT '考试ID',
+                                     `student_id` bigint NOT NULL COMMENT '学生ID',
+                                     `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
+                                     `question_id` bigint NOT NULL COMMENT '题目ID',
+                                     `student_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '学生答案',
+                                     `answer_files` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件文件(多个用逗号分隔)',
+                                     `is_correct` tinyint DEFAULT NULL COMMENT '是否正确(客观题)',
+                                     `score` decimal(5,2) DEFAULT '0.00' COMMENT '得分',
+                                     `corrector_id` bigint DEFAULT NULL COMMENT '批改人ID',
+                                     `correct_time` datetime DEFAULT NULL COMMENT '批改时间',
+                                     `correct_comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '批改评语',
+                                     `answer_duration` int DEFAULT '0' COMMENT '答题耗时(秒)',
+                                     `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                     `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                     `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目内容快照',
+                                     `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目选项快照(JSON)',
+                                     `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '正确答案快照',
+                                     PRIMARY KEY (`id`) USING BTREE,
+                                     UNIQUE KEY `uk_exam_student_question` (`exam_id`,`student_id`,`question_id`) USING BTREE,
+                                     KEY `idx_student_no` (`student_no`) USING BTREE,
+                                     KEY `idx_question_id` (`question_id`) USING BTREE,
+                                     KEY `idx_corrector_id` (`corrector_id`) USING BTREE,
+                                     KEY `idx_student_id` (`student_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='学生答案表';
 
 -- ----------------------------
@@ -500,30 +499,30 @@ INSERT INTO `class_exam_answer` VALUES ('4', '4', '1', '2022141460087', '13', 'f
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_participant`;
 CREATE TABLE `class_exam_participant` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '记录ID',
-  `exam_id` bigint NOT NULL COMMENT '考试ID',
-  `student_id` bigint NOT NULL COMMENT '学生ID',
-  `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
-  `student_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学生姓名',
-  `participant_status` tinyint DEFAULT '0' COMMENT '参与状态(0未开始 1进行中 2已完成 3缺考)',
-  `start_time` datetime DEFAULT NULL COMMENT '开始时间',
-  `submit_time` datetime DEFAULT NULL COMMENT '提交时间',
-  `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IP地址',
-  `device_info` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '设备信息',
-  `total_score` decimal(5,2) DEFAULT '0.00' COMMENT '总得分',
-  `time_used` int DEFAULT '0' COMMENT '用时(秒)',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `objective_score` decimal(5,2) DEFAULT '0.00' COMMENT '客观题得分',
-  `subjective_score` decimal(5,2) DEFAULT '0.00' COMMENT '主观题得分',
-  `correct_status` tinyint DEFAULT '0' COMMENT '批改状态(0未批改 1已批改)',
-  `pass_status` tinyint DEFAULT '0' COMMENT '及格状态(0不及格 1及格)',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `uk_exam_student` (`exam_id`,`student_id`) USING BTREE,
-  KEY `idx_student_no` (`student_no`) USING BTREE,
-  KEY `idx_participant_status` (`participant_status`) USING BTREE,
-  KEY `idx_student_id` (`student_id`) USING BTREE,
-  KEY `idx_submit_time` (`submit_time`) USING BTREE
+                                          `id` bigint NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+                                          `exam_id` bigint NOT NULL COMMENT '考试ID',
+                                          `student_id` bigint NOT NULL COMMENT '学生ID',
+                                          `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
+                                          `student_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学生姓名',
+                                          `participant_status` tinyint DEFAULT '0' COMMENT '参与状态(0未开始 1进行中 2已完成 3缺考)',
+                                          `start_time` datetime DEFAULT NULL COMMENT '开始时间',
+                                          `submit_time` datetime DEFAULT NULL COMMENT '提交时间',
+                                          `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IP地址',
+                                          `device_info` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '设备信息',
+                                          `total_score` decimal(5,2) DEFAULT '0.00' COMMENT '总得分',
+                                          `time_used` int DEFAULT '0' COMMENT '用时(秒)',
+                                          `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                          `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                          `objective_score` decimal(5,2) DEFAULT '0.00' COMMENT '客观题得分',
+                                          `subjective_score` decimal(5,2) DEFAULT '0.00' COMMENT '主观题得分',
+                                          `correct_status` tinyint DEFAULT '0' COMMENT '批改状态(0未批改 1已批改)',
+                                          `pass_status` tinyint DEFAULT '0' COMMENT '及格状态(0不及格 1及格)',
+                                          PRIMARY KEY (`id`) USING BTREE,
+                                          UNIQUE KEY `uk_exam_student` (`exam_id`,`student_id`) USING BTREE,
+                                          KEY `idx_student_no` (`student_no`) USING BTREE,
+                                          KEY `idx_participant_status` (`participant_status`) USING BTREE,
+                                          KEY `idx_student_id` (`student_id`) USING BTREE,
+                                          KEY `idx_submit_time` (`submit_time`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='考试参与记录表';
 
 -- ----------------------------
@@ -537,26 +536,26 @@ INSERT INTO `class_exam_participant` VALUES ('2', '4', '38', '2023141460368', '�
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_question`;
 CREATE TABLE `class_exam_question` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '题目ID',
-  `exam_id` bigint NOT NULL COMMENT '考试ID',
-  `question_type` tinyint NOT NULL COMMENT '题型(1单选 2多选 3判断 4填空 5简答 6文件)',
-  `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '题目内容',
-  `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '选项(JSON格式: ["选项A","选项B","选项C","选项D"])',
-  `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '正确答案',
-  `analysis` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目解析',
-  `score` decimal(5,2) NOT NULL COMMENT '题目分值',
-  `difficulty` tinyint DEFAULT '1' COMMENT '难度系数(1简单 2一般 3困难)',
-  `sort_order` int DEFAULT '0' COMMENT '排序序号',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `subject` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '学科分类(如: 数学/英语/物理)',
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `idx_exam_id` (`exam_id`) USING BTREE,
-  KEY `idx_question_type` (`question_type`) USING BTREE,
-  KEY `idx_difficulty` (`difficulty`) USING BTREE,
-  KEY `idx_exam_question_subject` (`exam_id`,`subject`) USING BTREE
+                                       `id` bigint NOT NULL AUTO_INCREMENT COMMENT '题目ID',
+                                       `exam_id` bigint NOT NULL COMMENT '考试ID',
+                                       `question_type` tinyint NOT NULL COMMENT '题型(1单选 2多选 3判断 4填空 5简答 6文件)',
+                                       `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '题目内容',
+                                       `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '选项(JSON格式: ["选项A","选项B","选项C","选项D"])',
+                                       `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '正确答案',
+                                       `analysis` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目解析',
+                                       `score` decimal(5,2) NOT NULL COMMENT '题目分值',
+                                       `difficulty` tinyint DEFAULT '1' COMMENT '难度系数(1简单 2一般 3困难)',
+                                       `sort_order` int DEFAULT '0' COMMENT '排序序号',
+                                       `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                                       `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                       `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                                       `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                       `subject` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '学科分类(如: 数学/英语/物理)',
+                                       PRIMARY KEY (`id`) USING BTREE,
+                                       KEY `idx_exam_id` (`exam_id`) USING BTREE,
+                                       KEY `idx_question_type` (`question_type`) USING BTREE,
+                                       KEY `idx_difficulty` (`difficulty`) USING BTREE,
+                                       KEY `idx_exam_question_subject` (`exam_id`,`subject`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='题目表';
 
 -- ----------------------------
@@ -580,23 +579,23 @@ INSERT INTO `class_exam_question` VALUES ('13', '4', '3', '4', '', 'true', '', '
 -- ----------------------------
 DROP TABLE IF EXISTS `class_forum_comment`;
 CREATE TABLE `class_forum_comment` (
-  `comment_id` bigint NOT NULL AUTO_INCREMENT COMMENT '评论ID',
-  `post_id` bigint NOT NULL COMMENT '帖子ID',
-  `user_id` bigint NOT NULL COMMENT '评论用户ID',
-  `parent_id` bigint DEFAULT '0' COMMENT '父评论ID（0表示顶级评论）',
-  `reply_to_user_id` bigint DEFAULT NULL COMMENT '回复目标用户ID',
-  `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '评论内容',
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`comment_id`) USING BTREE,
-  KEY `idx_comment_post_id` (`post_id`) USING BTREE,
-  KEY `idx_comment_user_id` (`user_id`) USING BTREE,
-  KEY `idx_parent_id` (`parent_id`) USING BTREE,
-  CONSTRAINT `fk_comment_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+                                       `comment_id` bigint NOT NULL AUTO_INCREMENT COMMENT '评论ID',
+                                       `post_id` bigint NOT NULL COMMENT '帖子ID',
+                                       `user_id` bigint NOT NULL COMMENT '评论用户ID',
+                                       `parent_id` bigint DEFAULT '0' COMMENT '父评论ID（0表示顶级评论）',
+                                       `reply_to_user_id` bigint DEFAULT NULL COMMENT '回复目标用户ID',
+                                       `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '评论内容',
+                                       `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+                                       `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                                       `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                       `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                                       `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                       PRIMARY KEY (`comment_id`) USING BTREE,
+                                       KEY `idx_comment_post_id` (`post_id`) USING BTREE,
+                                       KEY `idx_comment_user_id` (`user_id`) USING BTREE,
+                                       KEY `idx_parent_id` (`parent_id`) USING BTREE,
+                                       CONSTRAINT `fk_comment_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+                                       CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=117 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='论坛评论表';
 
 -- ----------------------------
@@ -615,7 +614,7 @@ INSERT INTO `class_forum_comment` VALUES ('109', '4', '4', '108', '5', '会的�
 INSERT INTO `class_forum_comment` VALUES ('110', '4', '2', '0', null, '期待！', '0', 'ry', '2025-11-06 16:00:00', '', null);
 INSERT INTO `class_forum_comment` VALUES ('111', '5', '1', '0', null, '求链接！', '0', 'admin', '2025-11-06 16:50:00', '', null);
 INSERT INTO `class_forum_comment` VALUES ('112', '4', '1', '106', null, '蹲蹲！', '0', 'admin', '2025-11-06 21:02:46', '', null);
-INSERT INTO `class_forum_comment` VALUES ('114', '119', '1', '0', null, '好！', '0', 'admin', '2025-11-11 19:30:02', '', null);
+INSERT INTO `class_forum_comment` VALUES ('114', '119', '1', '0', null, '好！', '2', 'admin', '2025-11-11 19:30:02', 'admin', '2025-11-14 08:44:12');
 INSERT INTO `class_forum_comment` VALUES ('115', '4', '1', '108', '5', '好！', '0', 'admin', '2025-11-11 19:30:14', '', null);
 INSERT INTO `class_forum_comment` VALUES ('116', '123', '1', '0', null, '111', '0', 'admin', '2025-11-12 23:07:37', '', null);
 
@@ -624,20 +623,20 @@ INSERT INTO `class_forum_comment` VALUES ('116', '123', '1', '0', null, '111', '
 -- ----------------------------
 DROP TABLE IF EXISTS `class_forum_like`;
 CREATE TABLE `class_forum_like` (
-  `like_id` bigint NOT NULL AUTO_INCREMENT COMMENT '点赞ID',
-  `post_id` bigint NOT NULL COMMENT '帖子ID',
-  `user_id` bigint NOT NULL COMMENT '点赞用户ID',
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`like_id`) USING BTREE,
-  UNIQUE KEY `idx_post_user` (`post_id`,`user_id`) USING BTREE,
-  KEY `idx_like_user_id` (`user_id`) USING BTREE,
-  CONSTRAINT `fk_like_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `fk_like_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=120 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='论坛点赞表';
+                                    `like_id` bigint NOT NULL AUTO_INCREMENT COMMENT '点赞ID',
+                                    `post_id` bigint NOT NULL COMMENT '帖子ID',
+                                    `user_id` bigint NOT NULL COMMENT '点赞用户ID',
+                                    `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+                                    `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                                    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                    `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                                    `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                    PRIMARY KEY (`like_id`) USING BTREE,
+                                    UNIQUE KEY `idx_post_user` (`post_id`,`user_id`) USING BTREE,
+                                    KEY `idx_like_user_id` (`user_id`) USING BTREE,
+                                    CONSTRAINT `fk_like_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+                                    CONSTRAINT `fk_like_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB AUTO_INCREMENT=122 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='论坛点赞表';
 
 -- ----------------------------
 -- Records of class_forum_like
@@ -655,31 +654,33 @@ INSERT INTO `class_forum_like` VALUES ('110', '100', '1', '0', 'admin', '2025-11
 INSERT INTO `class_forum_like` VALUES ('111', '107', '1', '2', 'admin', null, '', null);
 INSERT INTO `class_forum_like` VALUES ('113', '3', '1', '0', 'admin', null, 'admin', '2025-11-07 09:38:57');
 INSERT INTO `class_forum_like` VALUES ('116', '118', '1', '2', 'admin', '2025-11-11 18:45:49', 'admin', '2025-11-11 18:47:52');
-INSERT INTO `class_forum_like` VALUES ('117', '119', '1', '0', 'admin', '2025-11-11 19:29:55', '', null);
+INSERT INTO `class_forum_like` VALUES ('117', '119', '1', '2', 'admin', '2025-11-11 19:29:55', 'admin', '2025-11-14 08:44:12');
 INSERT INTO `class_forum_like` VALUES ('118', '123', '1', '0', 'admin', '2025-11-12 23:07:32', '', null);
-INSERT INTO `class_forum_like` VALUES ('119', '123', '2', '0', 'ry', '2025-11-14 10:16:03', '', null);
+INSERT INTO `class_forum_like` VALUES ('119', '124', '2', '0', 'ry', '2025-11-14 09:36:21', '', null);
+INSERT INTO `class_forum_like` VALUES ('120', '124', '101', '0', 'student_li', '2025-11-14 10:02:19', '', null);
+INSERT INTO `class_forum_like` VALUES ('121', '100', '101', '0', 'student_li', '2025-11-16 05:16:09', '', null);
 
 -- ----------------------------
 -- Table structure for class_forum_post
 -- ----------------------------
 DROP TABLE IF EXISTS `class_forum_post`;
 CREATE TABLE `class_forum_post` (
-  `post_id` bigint NOT NULL AUTO_INCREMENT COMMENT '帖子ID',
-  `user_id` bigint NOT NULL COMMENT '发布用户ID',
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '帖子内容',
-  `image_urls` varchar(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '图片URL列表，逗号分隔',
-  `like_count` int DEFAULT '0' COMMENT '点赞数',
-  `comment_count` int DEFAULT '0' COMMENT '评论数',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`post_id`) USING BTREE,
-  KEY `idx_user_id` (`user_id`) USING BTREE,
-  CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+                                    `post_id` bigint NOT NULL AUTO_INCREMENT COMMENT '帖子ID',
+                                    `user_id` bigint NOT NULL COMMENT '发布用户ID',
+                                    `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '帖子内容',
+                                    `image_urls` varchar(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '图片URL列表，逗号分隔',
+                                    `like_count` int DEFAULT '0' COMMENT '点赞数',
+                                    `comment_count` int DEFAULT '0' COMMENT '评论数',
+                                    `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
+                                    `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+                                    `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                                    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                    `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                                    `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                    `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+                                    PRIMARY KEY (`post_id`) USING BTREE,
+                                    KEY `idx_user_id` (`user_id`) USING BTREE,
+                                    CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=125 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='论坛帖子表';
 
 -- ----------------------------
@@ -690,43 +691,201 @@ INSERT INTO `class_forum_post` VALUES ('2', '2', '今天学习了Spring Security
 INSERT INTO `class_forum_post` VALUES ('3', '3', '有没有同学知道Vue的双向绑定原理？想请教一下~', 'https://picsum.photos/400/300?random=10,https://picsum.photos/400/300?random=11', '2', '3', '0', '0', 'student1', '2025-11-06 14:00:00', '', null, null);
 INSERT INTO `class_forum_post` VALUES ('4', '4', '下周将讲解Spring Boot实战案例，大家提前准备好环境哦！', '', '3', '5', '0', '0', 'teacher1', '2025-11-06 15:30:00', '', null, null);
 INSERT INTO `class_forum_post` VALUES ('5', '5', '分享一个好用的学习资源网站，里面有很多Java教程~', 'https://picsum.photos/400/300?random=12', '2', '1', '0', '0', 'student2', '2025-11-06 16:45:00', '', null, null);
-INSERT INTO `class_forum_post` VALUES ('100', '1', '计网好难啊！！！！！', '', '1', '0', '0', '0', 'admin', '2025-11-06 17:02:38', '', null, null);
-INSERT INTO `class_forum_post` VALUES ('107', '1', 'test', 'https://picsum.photos/400/300?random=13', '0', '0', '0', '0', 'admin', '2025-11-06 20:00:09', '', null, null);
-INSERT INTO `class_forum_post` VALUES ('118', '1', '', '@/assets/xxsq_images/e8286666-285e-44fe-b353-fc100185fe27.png', '0', '0', '0', '0', 'admin', '2025-11-11 18:45:44', '', null, null);
-INSERT INTO `class_forum_post` VALUES ('119', '1', '1111', '@/assets/xxsq_images/4d556801-572b-4320-99d3-0aaf287e92a8.png', '1', '1', '0', '0', 'admin', '2025-11-11 19:29:51', '', null, null);
-INSERT INTO `class_forum_post` VALUES ('120', '1', '11', '@/assets/xxsq_images/e73ae82f-9424-4d96-9867-484eef3ddb28.png', '0', '0', '0', '0', 'admin', '2025-11-11 21:12:42', '', null, null);
-INSERT INTO `class_forum_post` VALUES ('121', '1', '1', '@/assets/xxsq_images/4b717c8f-114b-48f1-b8e4-e2b2aa4c5307.png', '0', '0', '0', '0', 'admin', '2025-11-11 21:16:35', '', null, null);
-INSERT INTO `class_forum_post` VALUES ('122', '1', '11', '@/assets/xxsq_images/5e197d17-f461-4aa4-af1e-07a947494141.png', '0', '0', '0', '0', 'admin', '2025-11-11 21:28:41', '', null, null);
-INSERT INTO `class_forum_post` VALUES ('123', '1', '帖子内容', '/profile/202d0362-4b00-41c9-b9df-b26401fdfd33.png', '2', '1', '0', '0', 'admin', '2025-11-12 23:07:26', '', null, null);
-INSERT INTO `class_forum_post` VALUES ('124', '2', '为什么这个有权限？？？', null, '0', '0', '0', '0', 'ry', '2025-11-14 10:16:31', '', null, null);
+INSERT INTO `class_forum_post` VALUES ('100', '1', '计网好难啊！！！！！', '', '2', '0', '0', '0', 'admin', '2025-11-06 17:02:38', '', null, null);
+INSERT INTO `class_forum_post` VALUES ('107', '1', 'test', 'https://picsum.photos/400/300?random=13', '0', '0', '0', '2', 'admin', '2025-11-06 20:00:09', 'admin', '2025-11-16 07:40:01', null);
+INSERT INTO `class_forum_post` VALUES ('118', '1', '', '@/assets/xxsq_images/e8286666-285e-44fe-b353-fc100185fe27.png', '0', '0', '0', '2', 'admin', '2025-11-11 18:45:44', 'admin', '2025-11-14 08:44:08', null);
+INSERT INTO `class_forum_post` VALUES ('119', '1', '1111', '@/assets/xxsq_images/4d556801-572b-4320-99d3-0aaf287e92a8.png', '1', '1', '0', '2', 'admin', '2025-11-11 19:29:51', 'admin', '2025-11-14 08:44:12', null);
+INSERT INTO `class_forum_post` VALUES ('120', '1', '11', '@/assets/xxsq_images/e73ae82f-9424-4d96-9867-484eef3ddb28.png', '0', '0', '0', '2', 'admin', '2025-11-11 21:12:42', 'admin', '2025-11-14 08:43:58', null);
+INSERT INTO `class_forum_post` VALUES ('121', '1', '1', '@/assets/xxsq_images/4b717c8f-114b-48f1-b8e4-e2b2aa4c5307.png', '0', '0', '0', '2', 'admin', '2025-11-11 21:16:35', 'admin', '2025-11-14 08:44:02', null);
+INSERT INTO `class_forum_post` VALUES ('122', '1', '11', '@/assets/xxsq_images/5e197d17-f461-4aa4-af1e-07a947494141.png', '0', '0', '0', '2', 'admin', '2025-11-11 21:28:41', 'admin', '2025-11-14 08:43:54', null);
+INSERT INTO `class_forum_post` VALUES ('123', '1', '帖子内容', '/profile/202d0362-4b00-41c9-b9df-b26401fdfd33.png', '1', '1', '0', '0', 'admin', '2025-11-12 23:07:26', '', null, null);
+INSERT INTO `class_forum_post` VALUES ('124', '1', 'test', '/profile/forum_20251114_084434_45649792.png', '2', '0', '0', '0', 'admin', '2025-11-14 08:44:34', '', null, null);
+
+-- ----------------------------
+-- Table structure for class_group
+-- ----------------------------
+DROP TABLE IF EXISTS `class_group`;
+CREATE TABLE `class_group` (
+                               `group_id` bigint NOT NULL AUTO_INCREMENT COMMENT '小组ID',
+                               `group_name` varchar(100) NOT NULL COMMENT '小组名称',
+                               `owner_user_id` bigint NOT NULL COMMENT '创建者ID (FK sys_user)',
+                               `group_number` varchar(20) NOT NULL COMMENT '小组号 (唯一)',
+                               `avatar` varchar(255) DEFAULT '' COMMENT '小组头像URL',
+                               `qr_code` varchar(255) DEFAULT '' COMMENT '小组二维码URL (占位)',
+                               `latest_message_id` bigint DEFAULT NULL COMMENT '最新消息ID (FK class_group_message)',
+                               `del_flag` char(1) DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+                               `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+                               `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                               `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+                               `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                               PRIMARY KEY (`group_id`),
+                               UNIQUE KEY `idx_group_number` (`group_number`),
+                               KEY `idx_owner_user_id` (`owner_user_id`),
+                               CONSTRAINT `fk_group_owner` FOREIGN KEY (`owner_user_id`) REFERENCES `sys_user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='小组讨论-信息表';
+
+-- ----------------------------
+-- Records of class_group
+-- ----------------------------
+INSERT INTO `class_group` VALUES ('100', 'Java期末冲刺小组', '3', '10001', '/profile/group_20251115_221235_bb856ebc.png', '', '359', '0', 'admin', '2025-11-10 10:00:00', 'admin', '2025-11-16 05:15:05');
+INSERT INTO `class_group` VALUES ('101', 'Vue前端技术交流', '4', '10002', 'https://img.tukuppt.com/ad_preview/00/43/05/hvNg3z62ZN.jpg!/fw/260', '', '346', '0', 'teacher1', '2025-11-11 11:00:00', '', '2025-11-16 01:25:31');
+INSERT INTO `class_group` VALUES ('102', '吃饭！', '1', '447710', 'https://www.keaitupian.cn/cjpic/frombd/1/253/1078476678/1730821970.jpg', null, '320', '2', 'admin', '2025-11-14 09:19:31', 'admin', '2025-11-15 23:14:55');
+INSERT INTO `class_group` VALUES ('103', '计算机网络实验小组', '2', '095102', '/profile/group_20251116_024126_0f23ad5f.png', null, '361', '0', 'ry', '2025-11-16 02:40:51', 'ry', '2025-11-16 07:45:16');
+INSERT INTO `class_group` VALUES ('104', '金融大数据', '1', '061244', '/profile/group_20251116_074939_02333370.png', null, '362', '0', 'admin', '2025-11-16 07:49:15', 'admin', '2025-11-16 07:49:39');
+
+-- ----------------------------
+-- Table structure for class_group_member
+-- ----------------------------
+DROP TABLE IF EXISTS `class_group_member`;
+CREATE TABLE `class_group_member` (
+                                      `member_id` bigint NOT NULL AUTO_INCREMENT COMMENT '成员ID',
+                                      `group_id` bigint NOT NULL COMMENT '小组ID (FK)',
+                                      `user_id` bigint NOT NULL COMMENT '用户ID (FK)',
+                                      `status` char(1) DEFAULT '0' COMMENT '状态（0正常 2已移除）',
+                                      `last_read_message_id` bigint DEFAULT '0' COMMENT '最后已读消息ID (用于计算未读)',
+                                      `del_flag` char(1) DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+                                      `create_by` varchar(64) DEFAULT '' COMMENT '邀请者/加入者',
+                                      `create_time` datetime DEFAULT NULL COMMENT '加入时间',
+                                      `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+                                      `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                      PRIMARY KEY (`member_id`),
+                                      UNIQUE KEY `idx_group_user` (`group_id`,`user_id`),
+                                      KEY `fk_member_user` (`user_id`),
+                                      CONSTRAINT `fk_member_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`),
+                                      CONSTRAINT `fk_member_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=218 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='小组讨论-成员表';
+
+-- ----------------------------
+-- Records of class_group_member
+-- ----------------------------
+INSERT INTO `class_group_member` VALUES ('200', '100', '1', '0', '359', '0', 'admin', '2025-11-10 10:00:00', '', null);
+INSERT INTO `class_group_member` VALUES ('201', '100', '2', '0', '359', '0', 'admin', '2025-11-10 10:01:00', 'ry', '2025-11-16 01:50:30');
+INSERT INTO `class_group_member` VALUES ('202', '100', '3', '0', '322', '0', 'admin', '2025-11-10 10:02:00', '', null);
+INSERT INTO `class_group_member` VALUES ('203', '101', '4', '0', '0', '0', 'teacher1', '2025-11-11 11:00:00', '', null);
+INSERT INTO `class_group_member` VALUES ('204', '101', '1', '2', '346', '0', 'teacher1', '2025-11-11 11:01:00', '', null);
+INSERT INTO `class_group_member` VALUES ('205', '102', '1', '0', '312', '0', 'admin', '2025-11-14 09:19:31', '', null);
+INSERT INTO `class_group_member` VALUES ('206', '102', '2', '0', '312', '0', 'ry', '2025-11-14 09:32:40', '', null);
+INSERT INTO `class_group_member` VALUES ('207', '100', '101', '0', '359', '0', 'student_li', '2025-11-14 10:00:25', '', null);
+INSERT INTO `class_group_member` VALUES ('213', '101', '2', '0', '346', '0', 'ry', '2025-11-16 01:25:01', '', null);
+INSERT INTO `class_group_member` VALUES ('214', '103', '2', '0', '360', '0', 'ry', '2025-11-16 02:40:51', '', null);
+INSERT INTO `class_group_member` VALUES ('215', '103', '1', '0', '361', '0', 'admin', '2025-11-16 02:54:50', '', null);
+INSERT INTO `class_group_member` VALUES ('216', '103', '101', '0', '360', '0', 'student_li', '2025-11-16 05:15:33', '', null);
+INSERT INTO `class_group_member` VALUES ('217', '104', '1', '0', '362', '0', 'admin', '2025-11-16 07:49:15', '', null);
+
+-- ----------------------------
+-- Table structure for class_group_message
+-- ----------------------------
+DROP TABLE IF EXISTS `class_group_message`;
+CREATE TABLE `class_group_message` (
+                                       `message_id` bigint NOT NULL AUTO_INCREMENT COMMENT '消息ID',
+                                       `group_id` bigint NOT NULL COMMENT '小组ID (FK)',
+                                       `sender_user_id` bigint NOT NULL COMMENT '发送者ID (FK)',
+                                       `message_type` char(1) NOT NULL DEFAULT '0' COMMENT '消息类型（0文本 1图片 9系统）',
+                                       `content` text NOT NULL COMMENT '消息内容（文本/图片URL/系统提示）',
+                                       `del_flag` char(1) DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+                                       `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+                                       `create_time` datetime DEFAULT NULL COMMENT '发送时间',
+                                       PRIMARY KEY (`message_id`),
+                                       KEY `idx_group_time` (`group_id`,`create_time` DESC),
+                                       KEY `fk_message_sender` (`sender_user_id`),
+                                       CONSTRAINT `fk_message_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`),
+                                       CONSTRAINT `fk_message_sender` FOREIGN KEY (`sender_user_id`) REFERENCES `sys_user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=363 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='小组讨论-消息表';
+
+-- ----------------------------
+-- Records of class_group_message
+-- ----------------------------
+INSERT INTO `class_group_message` VALUES ('300', '100', '1', '0', '大家好，我是组长若依。期末复习开始了。', '0', 'admin', '2025-11-10 10:05:00');
+INSERT INTO `class_group_message` VALUES ('301', '100', '2', '0', '组长好！', '0', 'ry', '2025-11-10 10:06:00');
+INSERT INTO `class_group_message` VALUES ('302', '101', '4', '0', '欢迎大家加入Vue小组', '0', 'teacher1', '2025-11-11 11:05:00');
+INSERT INTO `class_group_message` VALUES ('303', '101', '1', '0', '老师好！', '0', 'admin', '2025-11-11 11:06:00');
+INSERT INTO `class_group_message` VALUES ('304', '101', '1', '0', '老师好！', '0', 'admin', '2025-11-14 02:55:40');
+INSERT INTO `class_group_message` VALUES ('305', '100', '1', '9', '\"张三\"已被组长移除', '0', 'admin', '2025-11-14 02:56:57');
+INSERT INTO `class_group_message` VALUES ('306', '101', '1', '0', '哈', '0', 'admin', '2025-11-14 02:59:05');
+INSERT INTO `class_group_message` VALUES ('307', '101', '1', '1', '/profile/group_20251114_082524_d6071e6b.png', '0', 'admin', '2025-11-14 08:25:25');
+INSERT INTO `class_group_message` VALUES ('308', '102', '1', '9', 'admin 创建了小组', '0', 'admin', '2025-11-14 09:19:31');
+INSERT INTO `class_group_message` VALUES ('309', '101', '1', '0', '哈哈哈哈哈', '0', 'admin', '2025-11-14 09:26:50');
+INSERT INTO `class_group_message` VALUES ('310', '101', '1', '0', '哈哈哈哈哈哈哈哈哈哈哈', '0', 'admin', '2025-11-14 09:26:52');
+INSERT INTO `class_group_message` VALUES ('311', '101', '1', '0', '红红火火恍恍惚惚', '0', 'admin', '2025-11-14 09:26:54');
+INSERT INTO `class_group_message` VALUES ('312', '102', '2', '9', '\"张三\" 加入了小组', '0', 'ry', '2025-11-14 09:32:40');
+INSERT INTO `class_group_message` VALUES ('313', '100', '101', '9', '\"李同学\" 加入了小组', '0', 'student_li', '2025-11-14 10:00:25');
+INSERT INTO `class_group_message` VALUES ('314', '100', '101', '0', '嗨嗨嗨', '0', 'student_li', '2025-11-14 10:00:40');
+INSERT INTO `class_group_message` VALUES ('315', '100', '1', '0', '欢迎大家！！！', '0', 'admin', '2025-11-14 10:18:34');
+INSERT INTO `class_group_message` VALUES ('316', '100', '1', '0', '一起复习吧！', '0', 'admin', '2025-11-14 10:18:42');
+INSERT INTO `class_group_message` VALUES ('317', '100', '1', '9', '成员 \"李同学\" 已被组长移除', '0', 'admin', '2025-11-14 10:19:11');
+INSERT INTO `class_group_message` VALUES ('318', '100', '1', '9', '成员 \"若依\" 退出了小组', '0', 'admin', '2025-11-15 23:14:14');
+INSERT INTO `class_group_message` VALUES ('319', '100', '1', '9', '\"李比\" 成为新的组长', '0', 'admin', '2025-11-15 23:14:14');
+INSERT INTO `class_group_message` VALUES ('320', '102', '1', '9', '组长已解散小组', '0', 'admin', '2025-11-15 23:14:55');
+INSERT INTO `class_group_message` VALUES ('321', '100', '3', '0', 'hahahaha', '0', 'student1', '2025-11-15 23:19:42');
+INSERT INTO `class_group_message` VALUES ('322', '100', '3', '9', '\"李比\" 撤回了一条消息', '0', 'student1', '2025-11-15 23:23:14');
+INSERT INTO `class_group_message` VALUES ('323', '101', '1', '0', 'xixi', '0', 'admin', '2025-11-16 00:08:42');
+INSERT INTO `class_group_message` VALUES ('324', '101', '1', '9', '成员 \"若依\" 退出了小组', '0', 'admin', '2025-11-16 00:09:07');
+INSERT INTO `class_group_message` VALUES ('325', '100', '1', '9', '\"若依\" 加入了小组', '0', 'admin', '2025-11-16 00:16:05');
+INSERT INTO `class_group_message` VALUES ('326', '101', '1', '9', '\"若依\" 加入了小组', '0', 'admin', '2025-11-16 00:16:41');
+INSERT INTO `class_group_message` VALUES ('327', '100', '1', '9', '成员 \"若依\" 退出了小组', '0', 'admin', '2025-11-16 00:29:48');
+INSERT INTO `class_group_message` VALUES ('328', '100', '1', '9', '\"若依\" 加入了小组', '0', 'admin', '2025-11-16 00:30:19');
+INSERT INTO `class_group_message` VALUES ('329', '101', '1', '9', '成员 \"若依\" 退出了小组', '0', 'admin', '2025-11-16 00:36:27');
+INSERT INTO `class_group_message` VALUES ('330', '101', '1', '9', '\"若依\" 加入了小组', '0', 'admin', '2025-11-16 00:37:16');
+INSERT INTO `class_group_message` VALUES ('331', '101', '1', '9', '成员 \"若依\" 退出了小组', '0', 'admin', '2025-11-16 00:37:34');
+INSERT INTO `class_group_message` VALUES ('332', '101', '1', '9', '\"若依\" 加入了小组', '0', 'admin', '2025-11-16 00:37:55');
+INSERT INTO `class_group_message` VALUES ('333', '101', '1', '9', '成员 \"若依\" 退出了小组', '0', 'admin', '2025-11-16 00:39:46');
+INSERT INTO `class_group_message` VALUES ('334', '101', '1', '9', '\"若依\" 加入了小组', '0', 'admin', '2025-11-16 00:40:19');
+INSERT INTO `class_group_message` VALUES ('335', '101', '1', '9', '成员 \"若依\" 退出了小组', '0', 'admin', '2025-11-16 00:46:51');
+INSERT INTO `class_group_message` VALUES ('336', '101', '1', '9', '\"若依\" 加入了小组', '0', 'admin', '2025-11-16 00:47:28');
+INSERT INTO `class_group_message` VALUES ('337', '101', '1', '9', '成员 \"若依\" 退出了小组', '0', 'admin', '2025-11-16 00:49:03');
+INSERT INTO `class_group_message` VALUES ('338', '101', '1', '9', '\"若依\" 加入了小组', '0', 'admin', '2025-11-16 00:49:37');
+INSERT INTO `class_group_message` VALUES ('339', '101', '1', '9', '成员 \"若依\" 退出了小组', '0', 'admin', '2025-11-16 00:53:34');
+INSERT INTO `class_group_message` VALUES ('340', '101', '1', '9', '\"若依\" 加入了小组', '0', 'admin', '2025-11-16 00:54:04');
+INSERT INTO `class_group_message` VALUES ('341', '101', '1', '9', '成员 \"若依\" 退出了小组', '0', 'admin', '2025-11-16 00:54:18');
+INSERT INTO `class_group_message` VALUES ('342', '101', '1', '9', '\"若依\" 加入了小组', '0', 'admin', '2025-11-16 00:54:38');
+INSERT INTO `class_group_message` VALUES ('343', '101', '1', '9', '成员 \"若依\" 退出了小组', '0', 'admin', '2025-11-16 00:58:11');
+INSERT INTO `class_group_message` VALUES ('344', '100', '1', '1', '/profile/group_20251116_012218_4e8e157e.png', '0', 'admin', '2025-11-16 01:22:18');
+INSERT INTO `class_group_message` VALUES ('345', '101', '2', '9', '\"张三\" 加入了小组', '0', 'ry', '2025-11-16 01:25:01');
+INSERT INTO `class_group_message` VALUES ('346', '101', '2', '1', '/profile/group_20251116_012531_d5d99594.png', '0', 'ry', '2025-11-16 01:25:31');
+INSERT INTO `class_group_message` VALUES ('347', '100', '1', '0', '111', '0', 'admin', '2025-11-16 01:47:56');
+INSERT INTO `class_group_message` VALUES ('348', '100', '2', '9', '\"张三\" 加入了小组', '0', 'ry', '2025-11-16 01:50:03');
+INSERT INTO `class_group_message` VALUES ('349', '100', '2', '9', '成员 \"张三\" 退出了小组', '0', 'ry', '2025-11-16 01:50:30');
+INSERT INTO `class_group_message` VALUES ('350', '100', '1', '0', '11', '0', 'admin', '2025-11-16 01:51:14');
+INSERT INTO `class_group_message` VALUES ('351', '100', '1', '0', '还在吗', '0', 'admin', '2025-11-16 01:58:37');
+INSERT INTO `class_group_message` VALUES ('352', '100', '2', '9', '\"张三\" 加入了小组', '0', 'ry', '2025-11-16 01:59:39');
+INSERT INTO `class_group_message` VALUES ('353', '100', '2', '0', '在', '0', 'ry', '2025-11-16 02:35:14');
+INSERT INTO `class_group_message` VALUES ('354', '103', '2', '9', '张三 创建了小组', '0', 'ry', '2025-11-16 02:40:51');
+INSERT INTO `class_group_message` VALUES ('355', '103', '2', '9', '\"张三\" 撤回了一条消息', '0', 'ry', '2025-11-16 02:52:49');
+INSERT INTO `class_group_message` VALUES ('356', '103', '1', '9', '\"若依\" 加入了小组', '0', 'admin', '2025-11-16 02:54:50');
+INSERT INTO `class_group_message` VALUES ('357', '103', '1', '9', '\"若依\" 分享了一篇文章', '0', 'admin', '2025-11-16 05:08:31');
+INSERT INTO `class_group_message` VALUES ('358', '103', '1', '2', '{\"id\":9, \"title\":\"1\", \"digest\":\"\", \"cover\":\"/profile/upload/2025/11/12/一．文件和文件系统_20251112231007A001.png\"}', '0', 'admin', '2025-11-16 05:08:31');
+INSERT INTO `class_group_message` VALUES ('359', '100', '101', '9', '\"李同学\" 加入了小组', '0', 'student_li', '2025-11-16 05:15:05');
+INSERT INTO `class_group_message` VALUES ('360', '103', '101', '9', '\"李同学\" 加入了小组', '0', 'student_li', '2025-11-16 05:15:33');
+INSERT INTO `class_group_message` VALUES ('361', '103', '1', '0', '1', '0', 'admin', '2025-11-16 07:45:16');
+INSERT INTO `class_group_message` VALUES ('362', '104', '1', '9', '若依 创建了小组', '0', 'admin', '2025-11-16 07:49:15');
 
 -- ----------------------------
 -- Table structure for class_homework
 -- ----------------------------
 DROP TABLE IF EXISTS `class_homework`;
 CREATE TABLE `class_homework` (
-  `homework_id` bigint NOT NULL AUTO_INCREMENT COMMENT '作业ID',
-  `course_id` bigint NOT NULL COMMENT '课程ID',
-  `session_id` bigint NOT NULL COMMENT '课堂ID',
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '作业标题',
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业内容',
-  `requirement` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业要求',
-  `total_score` decimal(5,2) DEFAULT NULL COMMENT '作业总分',
-  `deadline` datetime NOT NULL COMMENT '截止时间',
-  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件路径',
-  `attachment_names` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件原名',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  `message_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `message_read` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  PRIMARY KEY (`homework_id`) USING BTREE,
-  KEY `idx_course_id` (`course_id`) USING BTREE,
-  KEY `idx_session_id` (`session_id`) USING BTREE,
-  KEY `idx_deadline` (`deadline`) USING BTREE
+                                  `homework_id` bigint NOT NULL AUTO_INCREMENT COMMENT '作业ID',
+                                  `course_id` bigint NOT NULL COMMENT '课程ID',
+                                  `session_id` bigint NOT NULL COMMENT '课堂ID',
+                                  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '作业标题',
+                                  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业内容',
+                                  `requirement` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业要求',
+                                  `total_score` decimal(5,2) DEFAULT NULL COMMENT '作业总分',
+                                  `deadline` datetime NOT NULL COMMENT '截止时间',
+                                  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件路径',
+                                  `attachment_names` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件原名',
+                                  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
+                                  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                                  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                                  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+                                  `message_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+                                  `message_read` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+                                  PRIMARY KEY (`homework_id`) USING BTREE,
+                                  KEY `idx_course_id` (`course_id`) USING BTREE,
+                                  KEY `idx_session_id` (`session_id`) USING BTREE,
+                                  KEY `idx_deadline` (`deadline`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='作业主表';
 
 -- ----------------------------
@@ -753,16 +912,16 @@ INSERT INTO `class_homework` VALUES ('52', '1', '1', '1111111', '00000', null, '
 -- ----------------------------
 DROP TABLE IF EXISTS `class_login_log`;
 CREATE TABLE `class_login_log` (
-  `login_id` bigint NOT NULL AUTO_INCREMENT COMMENT '访问ID',
-  `user_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '用户账号',
-  `ipaddr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录IP地址',
-  `login_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录地点',
-  `browser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '浏览器类型',
-  `os` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作系统',
-  `status` int DEFAULT '0' COMMENT '登录状态（0成功 1失败）',
-  `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '提示消息',
-  `login_time` datetime DEFAULT NULL COMMENT '访问时间',
-  PRIMARY KEY (`login_id`) USING BTREE
+                                   `login_id` bigint NOT NULL AUTO_INCREMENT COMMENT '访问ID',
+                                   `user_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '用户账号',
+                                   `ipaddr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录IP地址',
+                                   `login_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录地点',
+                                   `browser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '浏览器类型',
+                                   `os` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作系统',
+                                   `status` int DEFAULT '0' COMMENT '登录状态（0成功 1失败）',
+                                   `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '提示消息',
+                                   `login_time` datetime DEFAULT NULL COMMENT '访问时间',
+                                   PRIMARY KEY (`login_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=108 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='系统登录日志';
 
 -- ----------------------------
@@ -875,137 +1034,28 @@ INSERT INTO `class_login_log` VALUES ('104', '未知用户', '127.0.0.1', '内�
 INSERT INTO `class_login_log` VALUES ('105', 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', '0', '登录成功', '2025-11-16 00:11:20');
 INSERT INTO `class_login_log` VALUES ('106', 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', '0', '登录成功', '2025-11-16 00:58:14');
 INSERT INTO `class_login_log` VALUES ('107', 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', '0', '登录成功', '2025-11-16 01:37:40');
-INSERT INTO `class_login_log` VALUES (1, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:01:46');
-INSERT INTO `class_login_log` VALUES (2, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:01:57');
-INSERT INTO `class_login_log` VALUES (3, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:17:58');
-INSERT INTO `class_login_log` VALUES (4, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '验证码错误', '2025-11-12 19:18:14');
-INSERT INTO `class_login_log` VALUES (5, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '验证码错误', '2025-11-12 19:18:19');
-INSERT INTO `class_login_log` VALUES (6, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:18:23');
-INSERT INTO `class_login_log` VALUES (7, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:18:46');
-INSERT INTO `class_login_log` VALUES (8, 'student_li', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:18:58');
-INSERT INTO `class_login_log` VALUES (9, NULL, '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:24:20');
-INSERT INTO `class_login_log` VALUES (10, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '验证码错误', '2025-11-12 19:24:36');
-INSERT INTO `class_login_log` VALUES (11, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:24:39');
-INSERT INTO `class_login_log` VALUES (12, NULL, '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:24:59');
-INSERT INTO `class_login_log` VALUES (13, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:25:10');
-INSERT INTO `class_login_log` VALUES (14, NULL, '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:28:19');
-INSERT INTO `class_login_log` VALUES (15, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:28:23');
-INSERT INTO `class_login_log` VALUES (16, NULL, '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:41:25');
-INSERT INTO `class_login_log` VALUES (17, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:41:25');
-INSERT INTO `class_login_log` VALUES (18, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:41:35');
-INSERT INTO `class_login_log` VALUES (19, NULL, '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:42:11');
-INSERT INTO `class_login_log` VALUES (20, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '验证码错误', '2025-11-12 19:42:14');
-INSERT INTO `class_login_log` VALUES (21, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:42:16');
-INSERT INTO `class_login_log` VALUES (22, NULL, '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:43:34');
-INSERT INTO `class_login_log` VALUES (23, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:43:34');
-INSERT INTO `class_login_log` VALUES (24, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '验证码错误', '2025-11-12 19:43:37');
-INSERT INTO `class_login_log` VALUES (25, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '验证码错误', '2025-11-12 19:43:40');
-INSERT INTO `class_login_log` VALUES (26, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:43:43');
-INSERT INTO `class_login_log` VALUES (27, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:52:41');
-INSERT INTO `class_login_log` VALUES (28, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:53:04');
-INSERT INTO `class_login_log` VALUES (29, NULL, '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:53:34');
-INSERT INTO `class_login_log` VALUES (30, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:53:44');
-INSERT INTO `class_login_log` VALUES (31, NULL, '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 19:57:15');
-INSERT INTO `class_login_log` VALUES (32, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '验证码错误', '2025-11-12 19:57:17');
-INSERT INTO `class_login_log` VALUES (33, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '验证码错误', '2025-11-12 19:57:21');
-INSERT INTO `class_login_log` VALUES (34, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 19:57:24');
-INSERT INTO `class_login_log` VALUES (35, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 20:03:32');
-INSERT INTO `class_login_log` VALUES (36, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '验证码错误', '2025-11-12 20:03:35');
-INSERT INTO `class_login_log` VALUES (37, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 20:03:38');
-INSERT INTO `class_login_log` VALUES (38, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 20:04:53');
-INSERT INTO `class_login_log` VALUES (39, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '验证码错误', '2025-11-12 20:04:57');
-INSERT INTO `class_login_log` VALUES (40, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 20:04:59');
-INSERT INTO `class_login_log` VALUES (41, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 20:09:32');
-INSERT INTO `class_login_log` VALUES (42, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 20:09:36');
-INSERT INTO `class_login_log` VALUES (43, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 20:09:53');
-INSERT INTO `class_login_log` VALUES (44, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 20:10:05');
-INSERT INTO `class_login_log` VALUES (45, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-12 20:10:14');
-INSERT INTO `class_login_log` VALUES (46, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 20:10:25');
-INSERT INTO `class_login_log` VALUES (47, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-12 23:02:33');
-INSERT INTO `class_login_log` VALUES (48, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-13 02:17:01');
-INSERT INTO `class_login_log` VALUES (49, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-13 16:35:35');
-INSERT INTO `class_login_log` VALUES (50, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-13 17:15:51');
-INSERT INTO `class_login_log` VALUES (51, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:10:10');
-INSERT INTO `class_login_log` VALUES (52, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:10:28');
-INSERT INTO `class_login_log` VALUES (53, 'ry', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:10:45');
-INSERT INTO `class_login_log` VALUES (54, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:10:55');
-INSERT INTO `class_login_log` VALUES (55, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:11:09');
-INSERT INTO `class_login_log` VALUES (56, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:14:04');
-INSERT INTO `class_login_log` VALUES (57, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:14:18');
-INSERT INTO `class_login_log` VALUES (58, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:15:25');
-INSERT INTO `class_login_log` VALUES (59, 'ry', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:15:32');
-INSERT INTO `class_login_log` VALUES (60, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:34:17');
-INSERT INTO `class_login_log` VALUES (61, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:34:24');
-INSERT INTO `class_login_log` VALUES (62, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:35:15');
-INSERT INTO `class_login_log` VALUES (63, 'ry', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:35:20');
-INSERT INTO `class_login_log` VALUES (64, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:35:39');
-INSERT INTO `class_login_log` VALUES (65, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:35:45');
-INSERT INTO `class_login_log` VALUES (66, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:36:27');
-INSERT INTO `class_login_log` VALUES (67, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:36:39');
-INSERT INTO `class_login_log` VALUES (68, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:42:19');
-INSERT INTO `class_login_log` VALUES (69, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:42:30');
-INSERT INTO `class_login_log` VALUES (70, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:46:10');
-INSERT INTO `class_login_log` VALUES (71, 'ry', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:46:18');
-INSERT INTO `class_login_log` VALUES (72, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:46:56');
-INSERT INTO `class_login_log` VALUES (73, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:47:02');
-INSERT INTO `class_login_log` VALUES (74, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:49:48');
-INSERT INTO `class_login_log` VALUES (75, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:50:00');
-INSERT INTO `class_login_log` VALUES (76, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:50:28');
-INSERT INTO `class_login_log` VALUES (77, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:50:49');
-INSERT INTO `class_login_log` VALUES (78, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:56:14');
-INSERT INTO `class_login_log` VALUES (79, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:56:24');
-INSERT INTO `class_login_log` VALUES (80, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 10:56:38');
-INSERT INTO `class_login_log` VALUES (81, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 10:56:57');
-INSERT INTO `class_login_log` VALUES (82, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 11:03:36');
-INSERT INTO `class_login_log` VALUES (83, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 11:03:53');
-INSERT INTO `class_login_log` VALUES (84, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 11:04:16');
-INSERT INTO `class_login_log` VALUES (85, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 11:04:25');
-INSERT INTO `class_login_log` VALUES (86, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 11:11:33');
-INSERT INTO `class_login_log` VALUES (87, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 11:11:46');
-INSERT INTO `class_login_log` VALUES (88, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 11:12:03');
-INSERT INTO `class_login_log` VALUES (89, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 11:12:13');
-INSERT INTO `class_login_log` VALUES (90, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 11:13:33');
-INSERT INTO `class_login_log` VALUES (91, 'ry', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 11:13:40');
-INSERT INTO `class_login_log` VALUES (92, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 11:14:54');
-INSERT INTO `class_login_log` VALUES (93, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 11:15:01');
-INSERT INTO `class_login_log` VALUES (94, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 15:20:09');
-INSERT INTO `class_login_log` VALUES (95, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 15:25:26');
-INSERT INTO `class_login_log` VALUES (96, 'ry', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 15:25:34');
-INSERT INTO `class_login_log` VALUES (97, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-11-14 15:26:21');
-INSERT INTO `class_login_log` VALUES (98, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-14 15:26:28');
-INSERT INTO `class_login_log` VALUES (99, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-14 20:13:10');
-INSERT INTO `class_login_log` VALUES (100, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-14 23:59:52');
-INSERT INTO `class_login_log` VALUES (101, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-15 16:23:24');
-INSERT INTO `class_login_log` VALUES (102, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-15 17:43:23');
-INSERT INTO `class_login_log` VALUES (103, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-15 23:52:58');
-INSERT INTO `class_login_log` VALUES (104, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-16 00:37:01');
-INSERT INTO `class_login_log` VALUES (105, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-16 03:08:04');
-INSERT INTO `class_login_log` VALUES (106, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-16 04:12:57');
-INSERT INTO `class_login_log` VALUES (107, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 1, '验证码错误', '2025-11-16 05:23:59');
-INSERT INTO `class_login_log` VALUES (108, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 1, '验证码错误', '2025-11-16 05:24:01');
-INSERT INTO `class_login_log` VALUES (109, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-16 05:24:04');
 
 -- ----------------------------
 -- Table structure for class_material
 -- ----------------------------
 DROP TABLE IF EXISTS `class_material`;
 CREATE TABLE `class_material` (
-  `material_id` bigint NOT NULL AUTO_INCREMENT COMMENT '资料ID',
-  `session_id` bigint NOT NULL COMMENT '课堂ID',
-  `material_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '资料名称',
-  `file_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '文件类型',
-  `file_size` bigint DEFAULT '0' COMMENT '文件大小(字节)',
-  `file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '文件路径',
-  `push_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '推送状态（0未推送 1已推送）',
-  `push_time` datetime DEFAULT NULL COMMENT '推送时间',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`material_id`) USING BTREE,
-  KEY `idx_session_id` (`session_id`) USING BTREE,
-  KEY `idx_push_status` (`push_status`) USING BTREE
+                                  `material_id` bigint NOT NULL AUTO_INCREMENT COMMENT '资料ID',
+                                  `session_id` bigint NOT NULL COMMENT '课堂ID',
+                                  `material_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '资料名称',
+                                  `file_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '文件类型',
+                                  `file_size` bigint DEFAULT '0' COMMENT '文件大小(字节)',
+                                  `file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '文件路径',
+                                  `push_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '推送状态（0未推送 1已推送）',
+                                  `push_time` datetime DEFAULT NULL COMMENT '推送时间',
+                                  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                                  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                                  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+                                  PRIMARY KEY (`material_id`) USING BTREE,
+                                  KEY `idx_session_id` (`session_id`) USING BTREE,
+                                  KEY `idx_push_status` (`push_status`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='资料表';
 
 -- ----------------------------
@@ -1021,47 +1071,46 @@ INSERT INTO `class_material` VALUES ('13', '9', 'PS1.docx', 'docx', '16522', '20
 -- ----------------------------
 DROP TABLE IF EXISTS `class_notice`;
 CREATE TABLE `class_notice` (
-  `notice_id` bigint NOT NULL AUTO_INCREMENT,
-  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `create_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
-  `update_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `del_flag` tinyint(1) DEFAULT '0' COMMENT '0=存在,1=已删除',
-  PRIMARY KEY (`notice_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='课堂模块：通告表';
+                                `notice_id` bigint NOT NULL AUTO_INCREMENT,
+                                `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                                `create_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                                `update_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+                                `del_flag` tinyint(1) DEFAULT '0' COMMENT '0=存在,1=已删除',
+                                PRIMARY KEY (`notice_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课堂模块：通告表';
 
 -- ----------------------------
 -- Records of class_notice
 -- ----------------------------
 INSERT INTO `class_notice` VALUES ('1', '11', '<p>1234566</p>', 'admin', '2025-11-13 17:22:06', 'admin', '2025-11-13 18:04:50', '1');
 INSERT INTO `class_notice` VALUES ('2', '你好', '<p>一点都不好！</p>', 'admin', '2025-11-13 18:04:27', 'admin', '2025-11-13 18:04:45', '0');
-INSERT INTO `class_notice` VALUES ('3', '1', '<p>AA</p>', 'admin', '2025-11-14 10:55:33', null, null, '0');
 
 -- ----------------------------
 -- Table structure for class_oper_log
 -- ----------------------------
 DROP TABLE IF EXISTS `class_oper_log`;
 CREATE TABLE `class_oper_log` (
-  `oper_id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志主键',
-  `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '模块标题',
-  `business_type` int DEFAULT '0' COMMENT '业务类型（0其它 1新增 2修改 3删除）',
-  `method` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '方法名称',
-  `request_method` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求方式',
-  `operator_type` int DEFAULT '0' COMMENT '操作类别（0其它 1后台用户 2手机端用户）',
-  `oper_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作人员',
-  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '部门名称',
-  `oper_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求URL',
-  `oper_ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '主机地址',
-  `oper_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作地点',
-  `oper_param` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求参数',
-  `json_result` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '返回参数',
-  `status` int DEFAULT '0' COMMENT '操作状态（0正常 1异常）',
-  `error_msg` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '错误消息',
-  `oper_time` datetime DEFAULT NULL COMMENT '操作时间',
-  PRIMARY KEY (`oper_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=184 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='操作日志记录';
+                                  `oper_id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志主键',
+                                  `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '模块标题',
+                                  `business_type` int DEFAULT '0' COMMENT '业务类型（0其它 1新增 2修改 3删除）',
+                                  `method` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '方法名称',
+                                  `request_method` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求方式',
+                                  `operator_type` int DEFAULT '0' COMMENT '操作类别（0其它 1后台用户 2手机端用户）',
+                                  `oper_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作人员',
+                                  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '部门名称',
+                                  `oper_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求URL',
+                                  `oper_ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '主机地址',
+                                  `oper_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作地点',
+                                  `oper_param` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求参数',
+                                  `json_result` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '返回参数',
+                                  `status` int DEFAULT '0' COMMENT '操作状态（0正常 1异常）',
+                                  `error_msg` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '错误消息',
+                                  `oper_time` datetime DEFAULT NULL COMMENT '操作时间',
+                                  PRIMARY KEY (`oper_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='操作日志记录';
 
 -- ----------------------------
 -- Records of class_oper_log
@@ -1233,64 +1282,24 @@ INSERT INTO `class_oper_log` VALUES ('165', '操作日志', '0', 'com.ruoyi.web.
 INSERT INTO `class_oper_log` VALUES ('166', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"businessType\\\":0,\\\"deptName\\\":\\\"系统部门\\\",\\\"jsonResult\\\":\\\"{\\\\\\\"code\\\\\\\":200,\\\\\\\"msg\\\\\\\":\\\\\\\"查询成功\\\\\\\",\\\\\\\"rows\\\\\\\":[{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":47,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-12 23:02:33\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"登录成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"admin\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":46,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-12 20:10:25\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"登录成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"admin\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome 14\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":45,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-12 20:10:14\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"退出成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"teacher_zhang\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":44,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-12 20:10:05\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"登录成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"teacher_zhang\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome 14\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":43,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-12 20:09:53\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"退出成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"admin\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":42,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-12 20:09:36\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"登录成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"admin\\\\\\\"},{\\\\\\\"browser\\\\\\\"', '0', null, '2025-11-12 23:08:25');
 INSERT INTO `class_oper_log` VALUES ('167', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":47,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 23:02:33\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":46,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:10:25\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":45,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:10:14\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":44,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:10:05\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":43,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:09:53\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":42,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:09:36\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":41,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:09:32\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":40,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:04:59\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":39,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:04:57\",\"msg\":\"验证码错误\",\"os\":\"Windows 10\",\"params\":{},\"status\":1,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":38,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:04:53\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"未知用户\"}],\"total\":47}', '0', null, '2025-11-12 23:08:26');
 INSERT INTO `class_oper_log` VALUES ('168', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":47,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 23:02:33\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":46,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:10:25\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":45,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:10:14\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":44,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:10:05\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":43,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:09:53\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":42,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:09:36\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":41,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:09:32\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":40,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:04:59\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":39,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:04:57\",\"msg\":\"验证码错误\",\"os\":\"Windows 10\",\"params\":{},\"status\":1,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":38,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:04:53\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"未知用户\"}],\"total\":47}', '0', null, '2025-11-12 23:08:28');
-INSERT INTO `class_oper_log` VALUES ('169', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":47,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 23:02:33\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":46,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 20:10:25\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":45,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 20:10:14\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"teacher_zhang\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":44,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 20:10:05\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"teacher_zhang\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":43,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 20:09:53\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":42,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 20:09:36\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":41,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 20:09:32\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":40,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 20:04:59\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":39,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginT', '0', null, '2025-11-14 10:10:21');
-INSERT INTO `class_oper_log` VALUES ('170', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":51,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:10:10\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":50,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-13 17:15:51\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":49,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-13 16:35:35\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":48,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-13 02:17:01\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":47,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 23:02:33\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":46,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:10:25\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":45,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:10:14\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":44,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:10:05\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":43,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:09:53\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":42,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:09:36\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"}],\"total\":51}', '0', null, '2025-11-14 10:10:22');
-INSERT INTO `class_oper_log` VALUES ('171', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":51,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:10:10\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Microsoft Edge\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":50,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-13 17:15:51\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Microsoft Edge\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":49,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-13 16:35:35\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Microsoft Edge\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":48,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-13 02:17:01\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":47,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 23:02:33\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":46,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 20:10:25\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":45,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 20:10:14\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"teacher_zhang\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":44,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-12 20:10:05\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"teacher_zhang\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":43,\\\"loginLocatio', '0', null, '2025-11-14 10:11:24');
-INSERT INTO `class_oper_log` VALUES ('172', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":55,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:11:09\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":54,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:10:55\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":53,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:10:45\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":52,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:10:28\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":51,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:10:10\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":50,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-13 17:15:51\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":49,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-13 16:35:35\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":48,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-13 02:17:01\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":47,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 23:02:33\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":46,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-12 20:10:25\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"}],\"total\":55}', '0', null, '2025-11-14 10:12:03');
-INSERT INTO `class_oper_log` VALUES ('173', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":65,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:35:45\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":64,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:35:39\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":63,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:35:20\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":62,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:35:15\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":61,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:34:24\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":60,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:34:17\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"未知用户\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":59,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:15:32\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":58,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:15:25\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":57,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:14:18\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":56,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:14:04\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"}],\"total\":65}', '0', null, '2025-11-14 10:36:19');
-INSERT INTO `class_oper_log` VALUES ('174', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":65,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:35:45\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":64,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:35:39\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"ry\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":63,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:35:20\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"ry\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":62,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:35:15\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":61,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:34:24\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":60,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:34:17\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"未知用户\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":59,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:15:32\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"ry\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":58,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:15:25\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":57,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:1', '0', null, '2025-11-14 10:50:14');
-INSERT INTO `class_oper_log` VALUES ('175', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":75,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:50:00\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":74,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:49:48\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":73,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:47:02\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":72,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:46:56\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":71,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:46:18\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":70,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:46:10\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":69,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:42:30\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":68,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:42:19\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":67,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:36:39\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":66,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:36:27\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"}],\"total\":75}', '0', null, '2025-11-14 10:50:16');
-INSERT INTO `class_oper_log` VALUES ('176', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":77,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:50:49\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":76,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:50:28\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":75,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:50:00\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":74,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:49:48\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":73,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:47:02\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":72,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:46:56\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":71,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:46:18\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":70,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:46:10\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":69,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:42:30\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":68,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 10:42:19\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"}],\"total\":77}', '0', null, '2025-11-14 10:51:43');
-INSERT INTO `class_oper_log` VALUES ('177', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":77,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:50:49\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":76,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:50:28\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"teacher_zhang\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":75,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:50:00\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"teacher_zhang\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":74,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:49:48\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":73,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:47:02\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":72,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:46:56\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"ry\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":71,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:46:18\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"ry\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":70,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 10:46:10\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":69,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime', '0', null, '2025-11-14 10:51:44');
-INSERT INTO `class_oper_log` VALUES ('178', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"businessType\\\":0,\\\"deptName\\\":\\\"系统部门\\\",\\\"jsonResult\\\":\\\"{\\\\\\\"code\\\\\\\":200,\\\\\\\"msg\\\\\\\":\\\\\\\"查询成功\\\\\\\",\\\\\\\"rows\\\\\\\":[{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":77,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 10:50:49\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"登录成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"admin\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome 14\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":76,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 10:50:28\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"退出成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"teacher_zhang\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":75,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 10:50:00\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"登录成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"teacher_zhang\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome 14\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":74,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 10:49:48\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"退出成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"admin\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":73,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 10:47:02\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"登录成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"admin\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome 14\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":72,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 10:46:56\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"退出成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"ry\\\\\\\"},{\\\\\\\"browser\\\\\\\"', '0', null, '2025-11-14 15:20:43');
-INSERT INTO `class_oper_log` VALUES ('179', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":94,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 15:20:09\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":93,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 11:15:01\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":92,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 11:14:54\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":91,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 11:13:40\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":90,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 11:13:33\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":89,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 11:12:13\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":88,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 11:12:03\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":87,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 11:11:46\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":86,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 11:11:33\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":85,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 11:04:25\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"}],\"total\":94}', '0', null, '2025-11-14 15:20:45');
-INSERT INTO `class_oper_log` VALUES ('180', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":94,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 15:20:09\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":93,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 11:15:01\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":92,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 11:14:54\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"ry\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":91,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 11:13:40\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"ry\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":90,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 11:13:33\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":89,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 11:12:13\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":88,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 11:12:03\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"teacher_zhang\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":87,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 11:11:46\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"teacher_zhang\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":86,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime', '0', null, '2025-11-14 15:25:44');
-INSERT INTO `class_oper_log` VALUES ('181', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"businessType\\\":0,\\\"deptName\\\":\\\"系统部门\\\",\\\"jsonResult\\\":\\\"{\\\\\\\"code\\\\\\\":200,\\\\\\\"msg\\\\\\\":\\\\\\\"查询成功\\\\\\\",\\\\\\\"rows\\\\\\\":[{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":94,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 15:20:09\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"登录成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"admin\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":93,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 11:15:01\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"登录成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"admin\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome 14\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":92,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 11:14:54\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"退出成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"ry\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":91,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 11:13:40\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"登录成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"ry\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome 14\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":90,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 11:13:33\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"退出成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"admin\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome\\\\\\\",\\\\\\\"ipaddr\\\\\\\":\\\\\\\"127.0.0.1\\\\\\\",\\\\\\\"loginId\\\\\\\":89,\\\\\\\"loginLocation\\\\\\\":\\\\\\\"内网IP\\\\\\\",\\\\\\\"loginTime\\\\\\\":\\\\\\\"2025-11-14 11:12:13\\\\\\\",\\\\\\\"msg\\\\\\\":\\\\\\\"登录成功\\\\\\\",\\\\\\\"os\\\\\\\":\\\\\\\"Windows 10\\\\\\\",\\\\\\\"params\\\\\\\":{},\\\\\\\"status\\\\\\\":0,\\\\\\\"userName\\\\\\\":\\\\\\\"admin\\\\\\\"},{\\\\\\\"browser\\\\\\\":\\\\\\\"Chrome 14\\\\\\\",\\\\\\', '0', null, '2025-11-16 00:10:43');
-INSERT INTO `class_oper_log` VALUES ('182', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":103,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-16 00:00:50\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":102,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-15 17:43:23\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":101,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-15 16:23:24\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":100,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 23:59:52\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":99,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 20:13:10\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":98,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 15:26:28\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":97,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 15:26:21\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":96,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 15:25:34\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"ry\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":95,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 15:25:26\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":94,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-14 15:20:09\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"}],\"total\":103}', '0', null, '2025-11-16 00:10:44');
-INSERT INTO `class_oper_log` VALUES ('183', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":103,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-16 00:00:50\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Microsoft Edge\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":102,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-15 17:43:23\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Microsoft Edge\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":101,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-15 16:23:24\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Microsoft Edge\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":100,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 23:59:52\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Microsoft Edge\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":99,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 20:13:10\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":98,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 15:26:28\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":97,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 15:26:21\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"ry\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":96,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-14 15:25:34\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"ry\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":95,\\\"loginLocation\\\":\\\"内网IP', '0', null, '2025-11-16 01:23:53');
-
--- ----------------------------
--- Table structure for class_password_reset
--- ----------------------------
-DROP TABLE IF EXISTS `class_password_reset`;
-CREATE TABLE `class_password_reset` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `user_id` bigint NOT NULL COMMENT '关联的sys_user用户ID',
-  `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '用户邮箱',
-  `token` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '重置令牌',
-  `expire_time` datetime NOT NULL COMMENT '过期时间',
-  `used_flag` tinyint(1) DEFAULT '0' COMMENT '是否已使用 (0=否, 1=是)',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_token` (`token`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='课堂模块：密码重置令牌表';
-
--- ----------------------------
--- Records of class_password_reset
--- ----------------------------
-INSERT INTO `class_password_reset` VALUES ('1', '100', 'chenrabbitcyq@163.com', '6200a043067e41a9a5690dd417293c5b', '2025-11-14 18:26:35', '0', '2025-11-14 17:56:35');
-INSERT INTO `class_password_reset` VALUES ('2', '100', 'chenrabbitcyq@163.com', 'fc30365dda7046fab8b5f57bd70e7b76', '2025-11-14 18:44:19', '0', '2025-11-14 18:14:19');
-INSERT INTO `class_password_reset` VALUES ('3', '100', 'chenrabbitcyq@163.com', '8d17888efd73400daa8bcfb61b3b909b', '2025-11-14 18:52:31', '0', '2025-11-14 18:22:30');
-INSERT INTO `class_password_reset` VALUES ('4', '100', 'chenrabbitcyq@163.com', '78894ce07bcf41139e9ed1e06d5f2976', '2025-11-14 18:56:50', '1', '2025-11-14 18:26:50');
-INSERT INTO `class_password_reset` VALUES ('5', '100', 'chenrabbitcyq@163.com', '8650b0f3e5b74cce94b116b2a3b15076', '2025-11-14 19:57:16', '1', '2025-11-14 19:27:16');
 
 -- ----------------------------
 -- Table structure for class_random_pick
 -- ----------------------------
 DROP TABLE IF EXISTS `class_random_pick`;
 CREATE TABLE `class_random_pick` (
-  `rpick_id` bigint NOT NULL AUTO_INCREMENT,
-  `session_id` bigint NOT NULL COMMENT '课堂ID',
-  `teacher_id` bigint NOT NULL COMMENT '教师ID',
-  `student_id` bigint NOT NULL COMMENT '被抽学生ID',
-  `pick_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '抽取时间',
-  `round_no` int DEFAULT '1' COMMENT '第几次抽人',
-  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  PRIMARY KEY (`rpick_id`) USING BTREE,
-  KEY `idx_session_picktime` (`session_id`,`pick_time`) USING BTREE,
-  KEY `class_rpick` (`student_id`) USING BTREE,
-  CONSTRAINT `class_rpick` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `class_rpick1` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
+                                     `rpick_id` bigint NOT NULL AUTO_INCREMENT,
+                                     `session_id` bigint NOT NULL COMMENT '课堂ID',
+                                     `teacher_id` bigint NOT NULL COMMENT '教师ID',
+                                     `student_id` bigint NOT NULL COMMENT '被抽学生ID',
+                                     `pick_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '抽取时间',
+                                     `round_no` int DEFAULT '1' COMMENT '第几次抽人',
+                                     `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+                                     PRIMARY KEY (`rpick_id`) USING BTREE,
+                                     KEY `idx_session_picktime` (`session_id`,`pick_time`) USING BTREE,
+                                     KEY `class_rpick` (`student_id`) USING BTREE,
+                                     CONSTRAINT `class_rpick` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+                                     CONSTRAINT `class_rpick1` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
@@ -1310,39 +1319,31 @@ INSERT INTO `class_random_pick` VALUES ('17', '1', '0', '26', '2025-11-04 22:58:
 INSERT INTO `class_random_pick` VALUES ('18', '1', '0', '9', '2025-11-04 22:58:09', null, null);
 INSERT INTO `class_random_pick` VALUES ('19', '1', '0', '20', '2025-11-07 09:58:44', null, null);
 INSERT INTO `class_random_pick` VALUES ('20', '1', '0', '13', '2025-11-12 23:07:45', null, null);
-INSERT INTO `class_random_pick` VALUES (5, 1, 0, 4, '2025-10-27 19:45:55', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (6, 1, 0, 27, '2025-10-27 19:46:04', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (9, 1, 0, 18, '2025-10-27 19:57:14', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (21, 1, 0, 24, '2025-11-16 02:39:10', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (22, 1, 0, 37, '2025-11-16 02:39:14', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (23, 1, 0, 23, '2025-11-16 02:39:17', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (24, 1, 0, 28, '2025-11-16 06:41:55', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (25, 1, 0, 7, '2025-11-16 06:42:08', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for class_session
 -- ----------------------------
 DROP TABLE IF EXISTS `class_session`;
 CREATE TABLE `class_session` (
-  `session_id` bigint NOT NULL AUTO_INCREMENT,
-  `class_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `teacher_id` bigint NOT NULL,
-  `status` tinyint DEFAULT '0' COMMENT '0未开始 1进行中 2已结束',
-  `total_students` int DEFAULT NULL COMMENT '总人数',
-  `teacher` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `class_number` int DEFAULT NULL,
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `course_id` bigint DEFAULT NULL,
-  `week_day` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '星期几（1-7）',
-  `class_duration` int DEFAULT '45' COMMENT '每堂课时长（分钟）',
-  `start_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '上课时间（HH:mm）',
-  `end_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '下课时间（HH:mm）',
-  PRIMARY KEY (`session_id`) USING BTREE,
-  KEY `fk_session_course` (`course_id`) USING BTREE,
-  CONSTRAINT `fk_session_course` FOREIGN KEY (`course_id`) REFERENCES `class_course` (`course_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+                                 `session_id` bigint NOT NULL AUTO_INCREMENT,
+                                 `class_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+                                 `teacher_id` bigint NOT NULL,
+                                 `status` tinyint DEFAULT '0' COMMENT '0未开始 1进行中 2已结束',
+                                 `total_students` int DEFAULT NULL COMMENT '总人数',
+                                 `teacher` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+                                 `class_number` int DEFAULT NULL,
+                                 `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                                 `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                 `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                                 `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                 `course_id` bigint DEFAULT NULL,
+                                 `week_day` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '星期几（1-7）',
+                                 `class_duration` int DEFAULT '45' COMMENT '每堂课时长（分钟）',
+                                 `start_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '上课时间（HH:mm）',
+                                 `end_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '下课时间（HH:mm）',
+                                 PRIMARY KEY (`session_id`) USING BTREE,
+                                 KEY `fk_session_course` (`course_id`) USING BTREE,
+                                 CONSTRAINT `fk_session_course` FOREIGN KEY (`course_id`) REFERENCES `class_course` (`course_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
@@ -1362,87 +1363,82 @@ INSERT INTO `class_session` VALUES ('11', '123123', '1', '0', '30', '111', null,
 -- ----------------------------
 DROP TABLE IF EXISTS `class_session_student`;
 CREATE TABLE `class_session_student` (
-  `session_id` bigint NOT NULL COMMENT '课堂 session_id',
-  `student_id` bigint NOT NULL COMMENT '学生 student_id',
-  `assigned_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '分配时间（从旧数据迁移时填入）',
-  PRIMARY KEY (`session_id`,`student_id`) USING BTREE,
-  KEY `idx_session` (`session_id`) USING BTREE,
-  KEY `idx_student` (`student_id`) USING BTREE,
-  CONSTRAINT `fk_session_student_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_session_student_student` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
+                                         `session_id` bigint NOT NULL COMMENT '课堂 session_id',
+                                         `student_id` bigint NOT NULL COMMENT '学生 student_id',
+                                         `assigned_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '分配时间（从旧数据迁移时填入）',
+                                         PRIMARY KEY (`session_id`,`student_id`) USING BTREE,
+                                         KEY `idx_session` (`session_id`) USING BTREE,
+                                         KEY `idx_student` (`student_id`) USING BTREE,
+                                         CONSTRAINT `fk_session_student_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+                                         CONSTRAINT `fk_session_student_student` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='课堂与学生关联表（显式映射 session <-> student）';
 
 -- ----------------------------
 -- Records of class_session_student
 -- ----------------------------
-INSERT INTO `class_session_student` VALUES (1, 1, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 2, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 3, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 4, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 5, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 6, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 7, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 8, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 9, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 10, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 11, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 12, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 13, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 14, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 15, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 16, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 17, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 18, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 19, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 20, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 21, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 22, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 23, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 24, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 25, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 26, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 27, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 28, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 29, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 30, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 31, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 32, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 33, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 34, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 35, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 36, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 37, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 38, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 39, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 40, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 41, '2025-11-16 06:02:59');
-INSERT INTO `class_session_student` VALUES (2, 1, '2025-11-16 00:40:12');
-INSERT INTO `class_session_student` VALUES (2, 2, '2025-11-16 00:40:18');
-INSERT INTO `class_session_student` VALUES (2, 4, '2025-11-16 00:40:31');
-INSERT INTO `class_session_student` VALUES (2, 5, '2025-11-16 00:40:26');
+INSERT INTO `class_session_student` VALUES ('1', '1', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '2', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '3', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '4', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '5', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '6', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '7', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '8', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '9', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '10', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '11', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '12', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '13', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '14', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '15', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '16', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '17', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '18', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '19', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '20', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '21', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '22', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '23', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '24', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '25', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '26', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '27', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '28', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '29', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '30', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '31', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '32', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '33', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '34', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '35', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '36', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '37', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '38', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '39', '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES ('1', '40', '2025-11-02 20:20:16');
 
 -- ----------------------------
 -- Table structure for class_student
 -- ----------------------------
 DROP TABLE IF EXISTS `class_student`;
 CREATE TABLE `class_student` (
-  `student_id` bigint NOT NULL AUTO_INCREMENT COMMENT '学生ID',
-  `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
-  `student_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学生姓名',
-  `gender` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '性别 M/F',
-  `class_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '所属班级',
-  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '联系方式',
-  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '邮箱',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
-  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `status` tinyint DEFAULT '1' COMMENT '1在读 0退学',
-  `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '关联课程编号',
-  `session_id` bigint DEFAULT NULL COMMENT '班级编号',
-  PRIMARY KEY (`student_id`) USING BTREE,
-  UNIQUE KEY `student_no` (`student_no`) USING BTREE,
-  KEY `idx_class_number` (`session_id`) USING BTREE,
-  KEY `idx_course_code` (`course_code`) USING BTREE,
-  CONSTRAINT `fk_student_course_code` FOREIGN KEY (`course_code`) REFERENCES `class_course` (`course_code`) ON DELETE SET NULL ON UPDATE CASCADE
+                                 `student_id` bigint NOT NULL AUTO_INCREMENT COMMENT '学生ID',
+                                 `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
+                                 `student_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学生姓名',
+                                 `gender` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '性别 M/F',
+                                 `class_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '所属班级',
+                                 `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '联系方式',
+                                 `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '邮箱',
+                                 `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+                                 `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                                 `status` tinyint DEFAULT '1' COMMENT '1在读 0退学',
+                                 `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '关联课程编号',
+                                 `session_id` bigint DEFAULT NULL COMMENT '班级编号',
+                                 PRIMARY KEY (`student_id`) USING BTREE,
+                                 UNIQUE KEY `student_no` (`student_no`) USING BTREE,
+                                 KEY `idx_class_number` (`session_id`) USING BTREE,
+                                 KEY `idx_course_code` (`course_code`) USING BTREE,
+                                 CONSTRAINT `fk_student_course_code` FOREIGN KEY (`course_code`) REFERENCES `class_course` (`course_code`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='学生信息表';
 
 -- ----------------------------
@@ -1497,132 +1493,129 @@ INSERT INTO `class_student` VALUES ('43', 'S003', '王五', 'M', '测试班级-�
 -- ----------------------------
 DROP TABLE IF EXISTS `class_student_homework`;
 CREATE TABLE `class_student_homework` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `homework_id` bigint NOT NULL COMMENT '作业ID',
-  `student_id` bigint NOT NULL COMMENT '学生ID',
-  `student_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '学生姓名',
-  `submit_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '提交内容',
-  `submission_files` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '提交文件路径',
-  `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '文件原名',
-  `file_size` bigint DEFAULT NULL COMMENT '文件大小',
-  `submit_time` datetime DEFAULT NULL COMMENT '提交时间',
-  `version` int DEFAULT '1' COMMENT '提交版本',
-  `grade` decimal(5,2) DEFAULT NULL COMMENT '得分',
-  `grade_comment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '评语',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0未提交 1已提交 2已批改 3逾期）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `is_graded` tinyint(1) DEFAULT '0' COMMENT '是否已批改：0-未批改 1-已批改',
-  `corrected_by` bigint DEFAULT NULL COMMENT '批改教师ID',
-  `corrected_time` datetime DEFAULT NULL COMMENT '批改时间',
-  `grade_attachment` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '批改附件',
-  `word_count` int DEFAULT '0' COMMENT '作业字数',
-  `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '学号',
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `idx_homework_id` (`homework_id`) USING BTREE,
-  KEY `idx_student_id` (`student_id`) USING BTREE,
-  KEY `idx_status` (`status`) USING BTREE,
-  KEY `idx_is_graded` (`is_graded`) USING BTREE,
-  KEY `idx_corrected_time` (`corrected_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='学生作业表';
+                                          `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+                                          `homework_id` bigint NOT NULL COMMENT '作业ID',
+                                          `student_id` bigint NOT NULL COMMENT '学生ID',
+                                          `student_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '学生姓名',
+                                          `submit_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '提交内容',
+                                          `submission_files` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '提交文件路径',
+                                          `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '文件原名',
+                                          `file_size` bigint DEFAULT NULL COMMENT '文件大小',
+                                          `submit_time` datetime DEFAULT NULL COMMENT '提交时间',
+                                          `version` int DEFAULT '1' COMMENT '提交版本',
+                                          `grade` decimal(5,2) DEFAULT NULL COMMENT '得分',
+                                          `grade_comment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '评语',
+                                          `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0未提交 1已提交 2已批改 3逾期）',
+                                          `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                                          `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                          `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                                          `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                          `is_graded` tinyint(1) DEFAULT '0' COMMENT '是否已批改：0-未批改 1-已批改',
+                                          `corrected_by` bigint DEFAULT NULL COMMENT '批改教师ID',
+                                          `corrected_time` datetime DEFAULT NULL COMMENT '批改时间',
+                                          `grade_attachment` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '批改附件',
+                                          `word_count` int DEFAULT '0' COMMENT '作业字数',
+                                          `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '学号',
+                                          PRIMARY KEY (`id`) USING BTREE,
+                                          KEY `idx_homework_id` (`homework_id`) USING BTREE,
+                                          KEY `idx_student_id` (`student_id`) USING BTREE,
+                                          KEY `idx_status` (`status`) USING BTREE,
+                                          KEY `idx_is_graded` (`is_graded`) USING BTREE,
+                                          KEY `idx_corrected_time` (`corrected_time`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='学生作业表';
 
 -- ----------------------------
 -- Records of class_student_homework
 -- ----------------------------
 INSERT INTO `class_student_homework` VALUES ('5', '8', '12121111', '', null, '改革开放史论文撰写模板.doc', null, null, '2025-11-01 15:13:53', '1', null, '', '1', 'admin', '2025-11-01 15:13:52', '', null, '0', null, null, null, '0', null);
 INSERT INTO `class_student_homework` VALUES ('15', '20', '38', '黎文靖', null, '测试作业.docx', null, null, '2025-11-09 16:28:57', '1', null, '', '1', 'admin', '2025-11-09 16:28:57', '', null, '0', null, null, null, '0', '2023141460368');
+INSERT INTO `class_student_homework` VALUES ('16', '22', '38', '黎文靖', null, '测试作业.docx', null, null, '2025-11-13 01:51:02', '1', null, '', '1', 'admin', '2025-11-13 01:51:02', '', null, '0', null, null, null, '0', '2023141460368');
+INSERT INTO `class_student_homework` VALUES ('17', '23', '38', '黎文靖', null, '测试作业.docx', null, null, '2025-11-13 01:58:06', '1', '90.00', 'q', '1', 'admin', '2025-11-13 01:58:06', 'admin', '2025-11-13 02:28:52', '1', '1', '2025-11-13 02:28:53', null, '0', '2023141460368');
 INSERT INTO `class_student_homework` VALUES ('18', '24', '38', '黎文靖', null, null, null, null, '2025-11-13 02:02:13', '1', '95.00', '', '2', 'admin', '2025-11-13 02:01:37', 'admin', '2025-11-13 02:02:12', '0', null, null, null, '0', '2023141460368');
 INSERT INTO `class_student_homework` VALUES ('19', '25', '38', '黎文靖', null, null, null, null, '2025-11-13 02:18:37', '1', '100.00', '', '2', 'admin', '2025-11-13 02:17:54', 'admin', '2025-11-13 02:18:37', '0', null, null, null, '0', '2023141460368');
 INSERT INTO `class_student_homework` VALUES ('20', '26', '38', '黎文靖', null, '测试作业.docx', null, null, '2025-11-13 02:29:57', '1', '99.00', '', '1', 'admin', '2025-11-13 02:29:56', 'admin', '2025-11-13 02:31:06', '1', '1', '2025-11-13 02:31:07', null, '0', '2023141460368');
-INSERT INTO `class_student_homework` VALUES ('21', '27', '38', '黎文靖', null, '/profile/upload/2025/11/14/测试作业_20251114224253A006.docx', null, null, '2025-11-14 22:42:55', '1', null, null, null, 'admin', '2025-11-13 17:00:08', 'admin', '2025-11-14 22:42:55', '0', null, null, null, '0', '2023141460368');
-INSERT INTO `class_student_homework` VALUES ('34', '52', '38', null, null, '/profile/upload/2025/11/15/考试管理_20251115171126A001.txt,/profile/upload/2025/11/15/考试相关数据表_20251115171152A002.txt', null, null, '2025-11-15 17:12:57', '1', '90.00', '111', '1', 'admin', '2025-11-15 17:05:30', 'admin', '2025-11-15 17:18:12', '1', '1', '2025-11-15 17:18:12', null, null, '2023141460368');
+INSERT INTO `class_student_homework` VALUES ('21', '27', '38', '黎文靖', null, '测试作业.docx', null, null, '2025-11-13 17:00:29', '1', null, '', null, 'admin', '2025-11-13 17:00:08', 'admin', '2025-11-13 17:00:28', '0', null, null, null, '0', '2023141460368');
 
 -- ----------------------------
 -- Table structure for class_todo
 -- ----------------------------
 DROP TABLE IF EXISTS `class_todo`;
 CREATE TABLE `class_todo` (
-  `todo_id` bigint NOT NULL AUTO_INCREMENT COMMENT '待办ID',
-  `user_id` bigint NOT NULL COMMENT '用户ID',
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '待办标题',
-  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '待办内容',
-  `todo_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '待办类型',
-  `priority` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '优先级（0低 1中 2高）',
-  `start_time` datetime DEFAULT NULL,
-  `end_time` datetime NOT NULL,
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0未完成 1完成 2过期）',
-  `remind_time` datetime DEFAULT NULL,
-  `is_reminded` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '是否已提醒',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL,
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL,
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  `message_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '消息状态（0正常 1消息已删除）',
-  `message_read` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '消息是否已读（0未读 1已读）',
-  `sequence_number` int DEFAULT NULL,
-  PRIMARY KEY (`todo_id`) USING BTREE,
-  UNIQUE KEY `sequence_number` (`sequence_number`) USING BTREE,
-  KEY `idx_user_id` (`user_id`) USING BTREE,
-  KEY `idx_end_time` (`end_time`) USING BTREE,
-  KEY `idx_status` (`status`) USING BTREE,
-  KEY `idx_todo_type` (`todo_type`) USING BTREE,
-  KEY `idx_priority` (`priority`) USING BTREE,
-  KEY `idx_create_time` (`create_time`) USING BTREE,
-  KEY `idx_message_status` (`message_status`) USING BTREE,
-  KEY `idx_message_read` (`message_read`) USING BTREE,
-  KEY `idx_sequence_number` (`sequence_number`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='待办事项表';
+                              `todo_id` bigint NOT NULL AUTO_INCREMENT COMMENT '待办ID',
+                              `user_id` bigint NOT NULL COMMENT '用户ID',
+                              `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '待办标题',
+                              `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '待办内容',
+                              `todo_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '待办类型',
+                              `priority` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '优先级（0低 1中 2高）',
+                              `start_time` datetime DEFAULT NULL,
+                              `end_time` datetime NOT NULL,
+                              `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0未完成 1完成 2过期）',
+                              `remind_time` datetime DEFAULT NULL,
+                              `is_reminded` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '是否已提醒',
+                              `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                              `create_time` datetime DEFAULT NULL,
+                              `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                              `update_time` datetime DEFAULT NULL,
+                              `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+                              `message_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '消息状态（0正常 1消息已删除）',
+                              `message_read` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '消息是否已读（0未读 1已读）',
+                              `sequence_number` int DEFAULT NULL,
+                              PRIMARY KEY (`todo_id`) USING BTREE,
+                              UNIQUE KEY `sequence_number` (`sequence_number`) USING BTREE,
+                              KEY `idx_user_id` (`user_id`) USING BTREE,
+                              KEY `idx_end_time` (`end_time`) USING BTREE,
+                              KEY `idx_status` (`status`) USING BTREE,
+                              KEY `idx_todo_type` (`todo_type`) USING BTREE,
+                              KEY `idx_priority` (`priority`) USING BTREE,
+                              KEY `idx_create_time` (`create_time`) USING BTREE,
+                              KEY `idx_message_status` (`message_status`) USING BTREE,
+                              KEY `idx_message_read` (`message_read`) USING BTREE,
+                              KEY `idx_sequence_number` (`sequence_number`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='待办事项表';
 
 -- ----------------------------
 -- Records of class_todo
 -- ----------------------------
 INSERT INTO `class_todo` VALUES ('1', '1', '完成Java作业', '完成Java程序设计第三章的编程作业', 'study', '2', '2024-01-15 09:00:00', '2024-01-20 23:59:59', '0', '2024-01-19 23:59:59', null, 'admin', '2025-11-01 23:55:43', 'admin', '2025-11-02 15:33:43', '重要作业，需要认真完成', null, '1', '1');
 INSERT INTO `class_todo` VALUES ('2', '1', '项目会议', '参加项目进度汇报会议', 'study', '1', '2024-01-16 14:00:00', '2024-01-16 16:00:00', '0', '2024-01-15 16:00:00', null, 'admin', '2025-11-01 23:55:43', 'admin', '2025-11-02 05:05:14', '需要准备项目进度PPT', '0', '1', '2');
-INSERT INTO `class_todo` VALUES ('3', '1', '购买生活用品', '去超市购买日常生活用品', 'life', '0', '2024-01-17 18:00:00', '2024-01-18 20:00:00', '0', '2024-01-17 20:00:00', '1', 'admin', '2025-11-01 23:55:43', 'admin', '2025-11-16 01:45:37', '记得带购物袋啊', '1', '1', '3');
+INSERT INTO `class_todo` VALUES ('3', '1', '购买生活用品', '去超市购买日常生活用品', 'life', '0', '2024-01-17 18:00:00', '2024-01-18 20:00:00', '0', '2024-01-17 20:00:00', '1', 'admin', '2025-11-01 23:55:43', 'admin', '2025-11-02 05:58:33', '记得带购物袋', '1', null, '3');
 INSERT INTO `class_todo` VALUES ('4', '1', '研究与开发', '111', 'other', '2', '2025-11-02 01:42:54', '2025-11-05 00:00:00', '1', '2025-11-04 00:00:00', '1', 'admin', '2025-11-02 01:43:03', 'admin', '2025-11-02 05:05:23', null, '0', '0', '4');
 INSERT INTO `class_todo` VALUES ('12', '1', '人工智能', '1', 'work', '0', '2025-11-01 00:00:00', '2025-11-02 05:17:23', '2', '2025-11-01 05:17:23', '0', 'admin', '2025-11-02 05:17:26', null, null, null, '0', '0', '5');
 INSERT INTO `class_todo` VALUES ('13', '1', '1', '1', 'study', '0', '2025-11-02 05:30:32', '2025-11-07 00:00:00', '0', '2025-11-06 00:00:00', '0', 'admin', '2025-11-02 05:30:38', 'admin', '2025-11-02 15:33:43', null, null, '1', '6');
-INSERT INTO `class_todo` VALUES ('14', '1', '做什么呢', '做做做', 'life', '2', '2025-11-04 22:52:08', '2025-11-04 22:52:11', '0', '2025-11-03 22:52:11', '0', 'admin', '2025-11-04 22:52:14', 'admin', '2025-11-16 01:20:10', null, '0', '1', '7');
+INSERT INTO `class_todo` VALUES ('14', '1', '做什么呢', '做做做', 'life', '2', '2025-11-04 22:52:08', '2025-11-04 22:52:11', '0', '2025-11-03 22:52:11', '0', 'admin', '2025-11-04 22:52:14', null, null, null, '0', '0', '7');
 INSERT INTO `class_todo` VALUES ('15', '1', '121112212121', 'AAAsss', 'study', '1', '2025-11-07 11:14:00', '2025-11-29 00:00:00', '0', '2025-11-28 00:00:00', '0', 'admin', '2025-11-07 11:14:07', 'admin', '2025-11-07 11:14:18', null, '1', null, '8');
 INSERT INTO `class_todo` VALUES ('20', '100', '1', '1', 'study', '0', '2025-11-12 11:33:30', '2025-11-29 00:00:00', '0', '2025-11-28 00:00:00', '0', 'teacher_zhang', '2025-11-12 11:33:35', 'teacher_zhang', '2025-11-12 15:28:46', null, null, '1', '9');
 INSERT INTO `class_todo` VALUES ('21', '100', '改作业', '批改作业', 'work', '1', '2025-11-12 11:50:23', '2025-11-13 00:00:00', '0', '2025-11-12 00:00:00', '0', 'teacher_zhang', '2025-11-12 11:50:28', 'teacher_zhang', '2025-11-12 15:28:46', null, null, '1', null);
 INSERT INTO `class_todo` VALUES ('22', '100', 'AA', 'AAA', 'study', '2', '2025-11-12 15:39:43', '2025-11-29 00:00:00', '0', '2025-11-28 00:00:00', '0', 'teacher_zhang', '2025-11-12 15:39:47', null, null, null, '0', '0', null);
 INSERT INTO `class_todo` VALUES ('23', '101', '做什么', '1', 'study', '1', '2025-11-12 15:52:41', '2025-11-29 00:00:00', '0', '2025-11-28 00:00:00', '0', 'student_li', '2025-11-12 15:52:45', null, null, null, '0', '0', null);
-INSERT INTO `class_todo` VALUES ('24', '100', '？', '1', 'other', '0', '2025-11-14 10:11:54', '2025-11-29 00:00:00', '0', '2025-11-28 00:00:00', '0', 'teacher_zhang', '2025-11-14 10:11:57', null, null, null, '0', '0', null);
-INSERT INTO `class_todo` VALUES ('25', '2', '1', '1', 'work', '0', '2025-11-27 00:00:00', '2025-11-14 00:00:00', '0', '2025-11-13 00:00:00', '0', 'ry', '2025-11-14 10:32:45', null, null, null, '0', '0', null);
-INSERT INTO `class_todo` VALUES ('26', '1', '1212', '12', 'work', '0', '2025-11-14 15:21:32', '2025-11-28 00:00:00', '0', '2025-11-27 00:00:00', '0', 'admin', '2025-11-14 15:21:37', 'admin', '2025-11-16 01:20:10', null, '0', '1', null);
-INSERT INTO `class_todo` VALUES ('33', '1', '1', '1', 'study', '0', '2025-11-16 01:52:25', '2025-11-17 01:53:00', '0', '2025-11-16 01:53:00', '0', 'admin', '2025-11-16 01:52:43', 'admin', '2025-11-16 01:53:15', null, '2', '1', null);
 
 -- ----------------------------
 -- Table structure for gen_table
 -- ----------------------------
 DROP TABLE IF EXISTS `gen_table`;
 CREATE TABLE `gen_table` (
-  `table_id` bigint NOT NULL AUTO_INCREMENT COMMENT '编号',
-  `table_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '表名称',
-  `table_comment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '表描述',
-  `sub_table_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '关联子表的表名',
-  `sub_table_fk_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '子表关联的外键名',
-  `class_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '实体类名称',
-  `tpl_category` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT 'crud' COMMENT '使用的模板（crud单表操作 tree树表操作）',
-  `tpl_web_type` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '前端模板类型（element-ui模版 element-plus模版）',
-  `package_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '生成包路径',
-  `module_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '生成模块名',
-  `business_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '生成业务名',
-  `function_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '生成功能名',
-  `function_author` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '生成功能作者',
-  `gen_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '生成代码方式（0zip压缩包 1自定义路径）',
-  `gen_path` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '/' COMMENT '生成路径（不填默认项目路径）',
-  `options` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '其它生成选项',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`table_id`) USING BTREE
+                             `table_id` bigint NOT NULL AUTO_INCREMENT COMMENT '编号',
+                             `table_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '表名称',
+                             `table_comment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '表描述',
+                             `sub_table_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '关联子表的表名',
+                             `sub_table_fk_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '子表关联的外键名',
+                             `class_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '实体类名称',
+                             `tpl_category` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT 'crud' COMMENT '使用的模板（crud单表操作 tree树表操作）',
+                             `tpl_web_type` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '前端模板类型（element-ui模版 element-plus模版）',
+                             `package_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '生成包路径',
+                             `module_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '生成模块名',
+                             `business_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '生成业务名',
+                             `function_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '生成功能名',
+                             `function_author` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '生成功能作者',
+                             `gen_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '生成代码方式（0zip压缩包 1自定义路径）',
+                             `gen_path` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '/' COMMENT '生成路径（不填默认项目路径）',
+                             `options` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '其它生成选项',
+                             `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                             `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                             `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                             `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                             `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+                             PRIMARY KEY (`table_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='代码生成业务表';
 
 -- ----------------------------
@@ -1634,29 +1627,29 @@ CREATE TABLE `gen_table` (
 -- ----------------------------
 DROP TABLE IF EXISTS `gen_table_column`;
 CREATE TABLE `gen_table_column` (
-  `column_id` bigint NOT NULL AUTO_INCREMENT COMMENT '编号',
-  `table_id` bigint DEFAULT NULL COMMENT '归属表编号',
-  `column_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '列名称',
-  `column_comment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '列描述',
-  `column_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '列类型',
-  `java_type` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'JAVA类型',
-  `java_field` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'JAVA字段名',
-  `is_pk` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否主键（1是）',
-  `is_increment` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否自增（1是）',
-  `is_required` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否必填（1是）',
-  `is_insert` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否为插入字段（1是）',
-  `is_edit` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否编辑字段（1是）',
-  `is_list` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否列表字段（1是）',
-  `is_query` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否查询字段（1是）',
-  `query_type` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT 'EQ' COMMENT '查询方式（等于、不等于、大于、小于、范围）',
-  `html_type` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '显示类型（文本框、文本域、下拉框、复选框、单选框、日期控件）',
-  `dict_type` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '字典类型',
-  `sort` int DEFAULT NULL COMMENT '排序',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`column_id`) USING BTREE
+                                    `column_id` bigint NOT NULL AUTO_INCREMENT COMMENT '编号',
+                                    `table_id` bigint DEFAULT NULL COMMENT '归属表编号',
+                                    `column_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '列名称',
+                                    `column_comment` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '列描述',
+                                    `column_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '列类型',
+                                    `java_type` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'JAVA类型',
+                                    `java_field` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'JAVA字段名',
+                                    `is_pk` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否主键（1是）',
+                                    `is_increment` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否自增（1是）',
+                                    `is_required` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否必填（1是）',
+                                    `is_insert` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否为插入字段（1是）',
+                                    `is_edit` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否编辑字段（1是）',
+                                    `is_list` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否列表字段（1是）',
+                                    `is_query` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '是否查询字段（1是）',
+                                    `query_type` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT 'EQ' COMMENT '查询方式（等于、不等于、大于、小于、范围）',
+                                    `html_type` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '显示类型（文本框、文本域、下拉框、复选框、单选框、日期控件）',
+                                    `dict_type` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '字典类型',
+                                    `sort` int DEFAULT NULL COMMENT '排序',
+                                    `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                                    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                    `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                                    `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                    PRIMARY KEY (`column_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='代码生成业务表字段';
 
 -- ----------------------------
@@ -1668,10 +1661,10 @@ CREATE TABLE `gen_table_column` (
 -- ----------------------------
 DROP TABLE IF EXISTS `qrtz_calendars`;
 CREATE TABLE `qrtz_calendars` (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
-  `calendar_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '日历名称',
-  `calendar` blob NOT NULL COMMENT '存放持久化calendar对象',
-  PRIMARY KEY (`sched_name`,`calendar_name`) USING BTREE
+                                  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
+                                  `calendar_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '日历名称',
+                                  `calendar` blob NOT NULL COMMENT '存放持久化calendar对象',
+                                  PRIMARY KEY (`sched_name`,`calendar_name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='日历信息表';
 
 -- ----------------------------
@@ -1683,13 +1676,13 @@ CREATE TABLE `qrtz_calendars` (
 -- ----------------------------
 DROP TABLE IF EXISTS `qrtz_cron_triggers`;
 CREATE TABLE `qrtz_cron_triggers` (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
-  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
-  `cron_expression` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'cron表达式',
-  `time_zone_id` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '时区',
-  PRIMARY KEY (`sched_name`,`trigger_name`,`trigger_group`) USING BTREE,
-  CONSTRAINT `qrtz_cron_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `qrtz_triggers` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
+                                      `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
+                                      `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
+                                      `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
+                                      `cron_expression` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'cron表达式',
+                                      `time_zone_id` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '时区',
+                                      PRIMARY KEY (`sched_name`,`trigger_name`,`trigger_group`) USING BTREE,
+                                      CONSTRAINT `qrtz_cron_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `qrtz_triggers` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='Cron类型的触发器表';
 
 -- ----------------------------
@@ -1701,20 +1694,20 @@ CREATE TABLE `qrtz_cron_triggers` (
 -- ----------------------------
 DROP TABLE IF EXISTS `qrtz_fired_triggers`;
 CREATE TABLE `qrtz_fired_triggers` (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
-  `entry_id` varchar(95) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度器实例id',
-  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
-  `instance_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度器实例名',
-  `fired_time` bigint NOT NULL COMMENT '触发的时间',
-  `sched_time` bigint NOT NULL COMMENT '定时器制定的时间',
-  `priority` int NOT NULL COMMENT '优先级',
-  `state` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '状态',
-  `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '任务名称',
-  `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '任务组名',
-  `is_nonconcurrent` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '是否并发',
-  `requests_recovery` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '是否接受恢复执行',
-  PRIMARY KEY (`sched_name`,`entry_id`) USING BTREE
+                                       `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
+                                       `entry_id` varchar(95) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度器实例id',
+                                       `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
+                                       `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
+                                       `instance_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度器实例名',
+                                       `fired_time` bigint NOT NULL COMMENT '触发的时间',
+                                       `sched_time` bigint NOT NULL COMMENT '定时器制定的时间',
+                                       `priority` int NOT NULL COMMENT '优先级',
+                                       `state` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '状态',
+                                       `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '任务名称',
+                                       `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '任务组名',
+                                       `is_nonconcurrent` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '是否并发',
+                                       `requests_recovery` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '是否接受恢复执行',
+                                       PRIMARY KEY (`sched_name`,`entry_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='已触发的触发器表';
 
 -- ----------------------------
@@ -1726,17 +1719,17 @@ CREATE TABLE `qrtz_fired_triggers` (
 -- ----------------------------
 DROP TABLE IF EXISTS `qrtz_job_details`;
 CREATE TABLE `qrtz_job_details` (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
-  `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务名称',
-  `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务组名',
-  `description` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '相关介绍',
-  `job_class_name` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '执行任务类名称',
-  `is_durable` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '是否持久化',
-  `is_nonconcurrent` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '是否并发',
-  `is_update_data` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '是否更新数据',
-  `requests_recovery` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '是否接受恢复执行',
-  `job_data` blob COMMENT '存放持久化job对象',
-  PRIMARY KEY (`sched_name`,`job_name`,`job_group`) USING BTREE
+                                    `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
+                                    `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务名称',
+                                    `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务组名',
+                                    `description` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '相关介绍',
+                                    `job_class_name` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '执行任务类名称',
+                                    `is_durable` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '是否持久化',
+                                    `is_nonconcurrent` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '是否并发',
+                                    `is_update_data` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '是否更新数据',
+                                    `requests_recovery` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '是否接受恢复执行',
+                                    `job_data` blob COMMENT '存放持久化job对象',
+                                    PRIMARY KEY (`sched_name`,`job_name`,`job_group`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='任务详细信息表';
 
 -- ----------------------------
@@ -1748,9 +1741,9 @@ CREATE TABLE `qrtz_job_details` (
 -- ----------------------------
 DROP TABLE IF EXISTS `qrtz_locks`;
 CREATE TABLE `qrtz_locks` (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
-  `lock_name` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '悲观锁名称',
-  PRIMARY KEY (`sched_name`,`lock_name`) USING BTREE
+                              `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
+                              `lock_name` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '悲观锁名称',
+                              PRIMARY KEY (`sched_name`,`lock_name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='存储的悲观锁信息表';
 
 -- ----------------------------
@@ -1762,9 +1755,9 @@ CREATE TABLE `qrtz_locks` (
 -- ----------------------------
 DROP TABLE IF EXISTS `qrtz_paused_trigger_grps`;
 CREATE TABLE `qrtz_paused_trigger_grps` (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
-  PRIMARY KEY (`sched_name`,`trigger_group`) USING BTREE
+                                            `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
+                                            `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
+                                            PRIMARY KEY (`sched_name`,`trigger_group`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='暂停的触发器表';
 
 -- ----------------------------
@@ -1776,11 +1769,11 @@ CREATE TABLE `qrtz_paused_trigger_grps` (
 -- ----------------------------
 DROP TABLE IF EXISTS `qrtz_scheduler_state`;
 CREATE TABLE `qrtz_scheduler_state` (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
-  `instance_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '实例名称',
-  `last_checkin_time` bigint NOT NULL COMMENT '上次检查时间',
-  `checkin_interval` bigint NOT NULL COMMENT '检查间隔时间',
-  PRIMARY KEY (`sched_name`,`instance_name`) USING BTREE
+                                        `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
+                                        `instance_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '实例名称',
+                                        `last_checkin_time` bigint NOT NULL COMMENT '上次检查时间',
+                                        `checkin_interval` bigint NOT NULL COMMENT '检查间隔时间',
+                                        PRIMARY KEY (`sched_name`,`instance_name`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='调度器状态表';
 
 -- ----------------------------
@@ -1792,14 +1785,14 @@ CREATE TABLE `qrtz_scheduler_state` (
 -- ----------------------------
 DROP TABLE IF EXISTS `qrtz_simple_triggers`;
 CREATE TABLE `qrtz_simple_triggers` (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
-  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
-  `repeat_count` bigint NOT NULL COMMENT '重复的次数统计',
-  `repeat_interval` bigint NOT NULL COMMENT '重复的间隔时间',
-  `times_triggered` bigint NOT NULL COMMENT '已经触发的次数',
-  PRIMARY KEY (`sched_name`,`trigger_name`,`trigger_group`) USING BTREE,
-  CONSTRAINT `qrtz_simple_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `qrtz_triggers` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
+                                        `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
+                                        `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
+                                        `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
+                                        `repeat_count` bigint NOT NULL COMMENT '重复的次数统计',
+                                        `repeat_interval` bigint NOT NULL COMMENT '重复的间隔时间',
+                                        `times_triggered` bigint NOT NULL COMMENT '已经触发的次数',
+                                        PRIMARY KEY (`sched_name`,`trigger_name`,`trigger_group`) USING BTREE,
+                                        CONSTRAINT `qrtz_simple_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `qrtz_triggers` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='简单触发器的信息表';
 
 -- ----------------------------
@@ -1811,22 +1804,22 @@ CREATE TABLE `qrtz_simple_triggers` (
 -- ----------------------------
 DROP TABLE IF EXISTS `qrtz_simprop_triggers`;
 CREATE TABLE `qrtz_simprop_triggers` (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
-  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
-  `str_prop_1` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'String类型的trigger的第一个参数',
-  `str_prop_2` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'String类型的trigger的第二个参数',
-  `str_prop_3` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'String类型的trigger的第三个参数',
-  `int_prop_1` int DEFAULT NULL COMMENT 'int类型的trigger的第一个参数',
-  `int_prop_2` int DEFAULT NULL COMMENT 'int类型的trigger的第二个参数',
-  `long_prop_1` bigint DEFAULT NULL COMMENT 'long类型的trigger的第一个参数',
-  `long_prop_2` bigint DEFAULT NULL COMMENT 'long类型的trigger的第二个参数',
-  `dec_prop_1` decimal(13,4) DEFAULT NULL COMMENT 'decimal类型的trigger的第一个参数',
-  `dec_prop_2` decimal(13,4) DEFAULT NULL COMMENT 'decimal类型的trigger的第二个参数',
-  `bool_prop_1` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Boolean类型的trigger的第一个参数',
-  `bool_prop_2` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Boolean类型的trigger的第二个参数',
-  PRIMARY KEY (`sched_name`,`trigger_name`,`trigger_group`) USING BTREE,
-  CONSTRAINT `qrtz_simprop_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `qrtz_triggers` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
+                                         `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
+                                         `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_name的外键',
+                                         `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_triggers表trigger_group的外键',
+                                         `str_prop_1` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'String类型的trigger的第一个参数',
+                                         `str_prop_2` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'String类型的trigger的第二个参数',
+                                         `str_prop_3` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'String类型的trigger的第三个参数',
+                                         `int_prop_1` int DEFAULT NULL COMMENT 'int类型的trigger的第一个参数',
+                                         `int_prop_2` int DEFAULT NULL COMMENT 'int类型的trigger的第二个参数',
+                                         `long_prop_1` bigint DEFAULT NULL COMMENT 'long类型的trigger的第一个参数',
+                                         `long_prop_2` bigint DEFAULT NULL COMMENT 'long类型的trigger的第二个参数',
+                                         `dec_prop_1` decimal(13,4) DEFAULT NULL COMMENT 'decimal类型的trigger的第一个参数',
+                                         `dec_prop_2` decimal(13,4) DEFAULT NULL COMMENT 'decimal类型的trigger的第二个参数',
+                                         `bool_prop_1` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Boolean类型的trigger的第一个参数',
+                                         `bool_prop_2` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Boolean类型的trigger的第二个参数',
+                                         PRIMARY KEY (`sched_name`,`trigger_name`,`trigger_group`) USING BTREE,
+                                         CONSTRAINT `qrtz_simprop_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `trigger_name`, `trigger_group`) REFERENCES `qrtz_triggers` (`sched_name`, `trigger_name`, `trigger_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='同步机制的行锁表';
 
 -- ----------------------------
@@ -1838,25 +1831,25 @@ CREATE TABLE `qrtz_simprop_triggers` (
 -- ----------------------------
 DROP TABLE IF EXISTS `qrtz_triggers`;
 CREATE TABLE `qrtz_triggers` (
-  `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
-  `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器的名字',
-  `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器所属组的名字',
-  `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_job_details表job_name的外键',
-  `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_job_details表job_group的外键',
-  `description` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '相关介绍',
-  `next_fire_time` bigint DEFAULT NULL COMMENT '上一次触发时间（毫秒）',
-  `prev_fire_time` bigint DEFAULT NULL COMMENT '下一次触发时间（默认为-1表示不触发）',
-  `priority` int DEFAULT NULL COMMENT '优先级',
-  `trigger_state` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器状态',
-  `trigger_type` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器的类型',
-  `start_time` bigint NOT NULL COMMENT '开始时间',
-  `end_time` bigint DEFAULT NULL COMMENT '结束时间',
-  `calendar_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '日程表名称',
-  `misfire_instr` smallint DEFAULT NULL COMMENT '补偿执行的策略',
-  `job_data` blob COMMENT '存放持久化job对象',
-  PRIMARY KEY (`sched_name`,`trigger_name`,`trigger_group`) USING BTREE,
-  KEY `sched_name` (`sched_name`,`job_name`,`job_group`) USING BTREE,
-  CONSTRAINT `qrtz_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `job_name`, `job_group`) REFERENCES `qrtz_job_details` (`sched_name`, `job_name`, `job_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
+                                 `sched_name` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调度名称',
+                                 `trigger_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器的名字',
+                                 `trigger_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器所属组的名字',
+                                 `job_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_job_details表job_name的外键',
+                                 `job_group` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'qrtz_job_details表job_group的外键',
+                                 `description` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '相关介绍',
+                                 `next_fire_time` bigint DEFAULT NULL COMMENT '上一次触发时间（毫秒）',
+                                 `prev_fire_time` bigint DEFAULT NULL COMMENT '下一次触发时间（默认为-1表示不触发）',
+                                 `priority` int DEFAULT NULL COMMENT '优先级',
+                                 `trigger_state` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器状态',
+                                 `trigger_type` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '触发器的类型',
+                                 `start_time` bigint NOT NULL COMMENT '开始时间',
+                                 `end_time` bigint DEFAULT NULL COMMENT '结束时间',
+                                 `calendar_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '日程表名称',
+                                 `misfire_instr` smallint DEFAULT NULL COMMENT '补偿执行的策略',
+                                 `job_data` blob COMMENT '存放持久化job对象',
+                                 PRIMARY KEY (`sched_name`,`trigger_name`,`trigger_group`) USING BTREE,
+                                 KEY `sched_name` (`sched_name`,`job_name`,`job_group`) USING BTREE,
+                                 CONSTRAINT `qrtz_triggers_ibfk_1` FOREIGN KEY (`sched_name`, `job_name`, `job_group`) REFERENCES `qrtz_job_details` (`sched_name`, `job_name`, `job_group`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='触发器详细信息表';
 
 -- ----------------------------
@@ -1868,20 +1861,20 @@ CREATE TABLE `qrtz_triggers` (
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_classroom`;
 CREATE TABLE `sys_classroom` (
-  `classroom_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课堂ID',
-  `classroom_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '课堂名称',
-  `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '未命名课程',
-  `start_time` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '上课时间',
-  `end_time` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '下课时间',
-  `total_students` int DEFAULT '0' COMMENT '课堂总人数',
-  `teacher` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '授课老师',
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '课堂描述',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '状态（0进行中 1停授）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`classroom_id`) USING BTREE
+                                 `classroom_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课堂ID',
+                                 `classroom_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '课堂名称',
+                                 `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '未命名课程',
+                                 `start_time` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '上课时间',
+                                 `end_time` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '下课时间',
+                                 `total_students` int DEFAULT '0' COMMENT '课堂总人数',
+                                 `teacher` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '授课老师',
+                                 `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '课堂描述',
+                                 `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '状态（0进行中 1停授）',
+                                 `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '创建者',
+                                 `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                 `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '更新者',
+                                 `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                 PRIMARY KEY (`classroom_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='课堂信息表';
 
 -- ----------------------------
@@ -1896,17 +1889,17 @@ INSERT INTO `sys_classroom` VALUES ('3', 'MSNU32546', '计算机金融应用', '
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_config`;
 CREATE TABLE `sys_config` (
-  `config_id` int NOT NULL AUTO_INCREMENT COMMENT '参数主键',
-  `config_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '参数名称',
-  `config_key` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '参数键名',
-  `config_value` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '参数键值',
-  `config_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'N' COMMENT '系统内置（Y是 N否）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`config_id`) USING BTREE
+                              `config_id` int NOT NULL AUTO_INCREMENT COMMENT '参数主键',
+                              `config_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '参数名称',
+                              `config_key` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '参数键名',
+                              `config_value` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '参数键值',
+                              `config_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'N' COMMENT '系统内置（Y是 N否）',
+                              `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                              `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                              `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                              `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                              `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+                              PRIMARY KEY (`config_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='参数配置表';
 
 -- ----------------------------
@@ -1926,21 +1919,21 @@ INSERT INTO `sys_config` VALUES ('8', '用户管理-账号密码更新周期', '
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_course`;
 CREATE TABLE `sys_course` (
-  `course_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课程ID',
-  `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程名称',
-  `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程编号',
-  `course_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '课程类型',
-  `college` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '所属学院',
-  `credit` decimal(3,1) DEFAULT NULL COMMENT '学分',
-  `introduction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '课程简介',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`course_id`) USING BTREE,
-  UNIQUE KEY `idx_course_code` (`course_code`) USING BTREE
+                              `course_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课程ID',
+                              `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程名称',
+                              `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程编号',
+                              `course_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '课程类型',
+                              `college` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '所属学院',
+                              `credit` decimal(3,1) DEFAULT NULL COMMENT '学分',
+                              `introduction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '课程简介',
+                              `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',
+                              `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+                              `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                              `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+                              `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                              `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+                              PRIMARY KEY (`course_id`) USING BTREE,
+                              UNIQUE KEY `idx_course_code` (`course_code`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='课程信息表';
 
 -- ----------------------------
@@ -1955,21 +1948,21 @@ INSERT INTO `sys_course` VALUES ('3', '计算机金融应用', 'MSNU32546', '选
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_dept`;
 CREATE TABLE `sys_dept` (
-  `dept_id` bigint NOT NULL AUTO_INCREMENT COMMENT '部门id',
-  `parent_id` bigint DEFAULT '0' COMMENT '父部门id',
-  `ancestors` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '祖级列表',
-  `dept_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '部门名称',
-  `order_num` int DEFAULT '0' COMMENT '显示顺序',
-  `leader` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '负责人',
-  `phone` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '联系电话',
-  `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '邮箱',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '部门状态（0正常 1停用）',
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`dept_id`) USING BTREE
+                            `dept_id` bigint NOT NULL AUTO_INCREMENT COMMENT '部门id',
+                            `parent_id` bigint DEFAULT '0' COMMENT '父部门id',
+                            `ancestors` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '祖级列表',
+                            `dept_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '部门名称',
+                            `order_num` int DEFAULT '0' COMMENT '显示顺序',
+                            `leader` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '负责人',
+                            `phone` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '联系电话',
+                            `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '邮箱',
+                            `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '部门状态（0正常 1停用）',
+                            `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+                            `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                            `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                            `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                            `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                            PRIMARY KEY (`dept_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=200 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='部门表';
 
 -- ----------------------------
@@ -1991,21 +1984,21 @@ INSERT INTO `sys_dept` VALUES ('109', '102', '0,100,102', '财务部门', '2', '
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_dict_data`;
 CREATE TABLE `sys_dict_data` (
-  `dict_code` bigint NOT NULL AUTO_INCREMENT COMMENT '字典编码',
-  `dict_sort` int DEFAULT '0' COMMENT '字典排序',
-  `dict_label` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '字典标签',
-  `dict_value` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '字典键值',
-  `dict_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '字典类型',
-  `css_class` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '样式属性（其他样式扩展）',
-  `list_class` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '表格回显样式',
-  `is_default` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'N' COMMENT '是否默认（Y是 N否）',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`dict_code`) USING BTREE
+                                 `dict_code` bigint NOT NULL AUTO_INCREMENT COMMENT '字典编码',
+                                 `dict_sort` int DEFAULT '0' COMMENT '字典排序',
+                                 `dict_label` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '字典标签',
+                                 `dict_value` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '字典键值',
+                                 `dict_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '字典类型',
+                                 `css_class` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '样式属性（其他样式扩展）',
+                                 `list_class` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '表格回显样式',
+                                 `is_default` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'N' COMMENT '是否默认（Y是 N否）',
+                                 `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',
+                                 `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                                 `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                 `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                                 `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                 `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+                                 PRIMARY KEY (`dict_code`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='字典数据表';
 
 -- ----------------------------
@@ -2046,17 +2039,17 @@ INSERT INTO `sys_dict_data` VALUES ('29', '2', '失败', '1', 'sys_common_status
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_dict_type`;
 CREATE TABLE `sys_dict_type` (
-  `dict_id` bigint NOT NULL AUTO_INCREMENT COMMENT '字典主键',
-  `dict_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '字典名称',
-  `dict_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '字典类型',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`dict_id`) USING BTREE,
-  UNIQUE KEY `dict_type` (`dict_type`) USING BTREE
+                                 `dict_id` bigint NOT NULL AUTO_INCREMENT COMMENT '字典主键',
+                                 `dict_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '字典名称',
+                                 `dict_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '字典类型',
+                                 `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',
+                                 `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                                 `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                 `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                                 `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                 `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+                                 PRIMARY KEY (`dict_id`) USING BTREE,
+                                 UNIQUE KEY `dict_type` (`dict_type`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='字典类型表';
 
 -- ----------------------------
@@ -2078,20 +2071,20 @@ INSERT INTO `sys_dict_type` VALUES ('10', '系统状态', 'sys_common_status', '
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_job`;
 CREATE TABLE `sys_job` (
-  `job_id` bigint NOT NULL AUTO_INCREMENT COMMENT '任务ID',
-  `job_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '任务名称',
-  `job_group` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'DEFAULT' COMMENT '任务组名',
-  `invoke_target` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调用目标字符串',
-  `cron_expression` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT 'cron执行表达式',
-  `misfire_policy` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '3' COMMENT '计划执行错误策略（1立即执行 2执行一次 3放弃执行）',
-  `concurrent` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '1' COMMENT '是否并发执行（0允许 1禁止）',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '状态（0正常 1暂停）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '备注信息',
-  PRIMARY KEY (`job_id`,`job_name`,`job_group`) USING BTREE
+                           `job_id` bigint NOT NULL AUTO_INCREMENT COMMENT '任务ID',
+                           `job_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '任务名称',
+                           `job_group` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'DEFAULT' COMMENT '任务组名',
+                           `invoke_target` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调用目标字符串',
+                           `cron_expression` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT 'cron执行表达式',
+                           `misfire_policy` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '3' COMMENT '计划执行错误策略（1立即执行 2执行一次 3放弃执行）',
+                           `concurrent` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '1' COMMENT '是否并发执行（0允许 1禁止）',
+                           `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '状态（0正常 1暂停）',
+                           `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                           `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                           `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                           `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                           `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '备注信息',
+                           PRIMARY KEY (`job_id`,`job_name`,`job_group`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='定时任务调度表';
 
 -- ----------------------------
@@ -2106,15 +2099,15 @@ INSERT INTO `sys_job` VALUES ('3', '系统默认（多参）', 'DEFAULT', 'ryTas
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_job_log`;
 CREATE TABLE `sys_job_log` (
-  `job_log_id` bigint NOT NULL AUTO_INCREMENT COMMENT '任务日志ID',
-  `job_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务名称',
-  `job_group` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务组名',
-  `invoke_target` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调用目标字符串',
-  `job_message` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '日志信息',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '执行状态（0正常 1失败）',
-  `exception_info` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '异常信息',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`job_log_id`) USING BTREE
+                               `job_log_id` bigint NOT NULL AUTO_INCREMENT COMMENT '任务日志ID',
+                               `job_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务名称',
+                               `job_group` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '任务组名',
+                               `invoke_target` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '调用目标字符串',
+                               `job_message` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '日志信息',
+                               `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '执行状态（0正常 1失败）',
+                               `exception_info` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '异常信息',
+                               `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                               PRIMARY KEY (`job_log_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='定时任务调度日志表';
 
 -- ----------------------------
@@ -2126,287 +2119,287 @@ CREATE TABLE `sys_job_log` (
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_logininfor`;
 CREATE TABLE `sys_logininfor` (
-  `info_id` bigint NOT NULL AUTO_INCREMENT COMMENT '访问ID',
-  `user_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '用户账号',
-  `ipaddr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '登录IP地址',
-  `login_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '登录地点',
-  `browser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '浏览器类型',
-  `os` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '操作系统',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '登录状态（0成功 1失败）',
-  `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '提示消息',
-  `login_time` datetime DEFAULT NULL COMMENT '访问时间',
-  PRIMARY KEY (`info_id`) USING BTREE,
-  INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
-  INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 337 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
+                                  `info_id` bigint NOT NULL AUTO_INCREMENT COMMENT '访问ID',
+                                  `user_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '用户账号',
+                                  `ipaddr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '登录IP地址',
+                                  `login_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '登录地点',
+                                  `browser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '浏览器类型',
+                                  `os` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '操作系统',
+                                  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '登录状态（0成功 1失败）',
+                                  `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '提示消息',
+                                  `login_time` datetime DEFAULT NULL COMMENT '访问时间',
+                                  PRIMARY KEY (`info_id`) USING BTREE,
+                                  KEY `idx_sys_logininfor_s` (`status`) USING BTREE,
+                                  KEY `idx_sys_logininfor_lt` (`login_time`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=337 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='系统访问记录';
 
 -- ----------------------------
 -- Records of sys_logininfor
 -- ----------------------------
-INSERT INTO `sys_logininfor` VALUES (100, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-30 18:05:38');
-INSERT INTO `sys_logininfor` VALUES (101, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-30 20:17:20');
-INSERT INTO `sys_logininfor` VALUES (102, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 19:10:48');
-INSERT INTO `sys_logininfor` VALUES (103, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 19:21:07');
-INSERT INTO `sys_logininfor` VALUES (104, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 21:36:17');
-INSERT INTO `sys_logininfor` VALUES (105, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-01 15:11:52');
-INSERT INTO `sys_logininfor` VALUES (106, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-01 17:25:16');
-INSERT INTO `sys_logininfor` VALUES (107, 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-01 23:25:50');
-INSERT INTO `sys_logininfor` VALUES (108, 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-02 00:20:23');
-INSERT INTO `sys_logininfor` VALUES (109, 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-02 00:56:37');
-INSERT INTO `sys_logininfor` VALUES (110, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 01:07:48');
-INSERT INTO `sys_logininfor` VALUES (111, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 16:25:50');
-INSERT INTO `sys_logininfor` VALUES (112, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 17:50:20');
-INSERT INTO `sys_logininfor` VALUES (113, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 18:22:02');
-INSERT INTO `sys_logininfor` VALUES (114, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-04 19:02:07');
-INSERT INTO `sys_logininfor` VALUES (115, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-04 19:09:27');
-INSERT INTO `sys_logininfor` VALUES (116, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-04 20:21:30');
-INSERT INTO `sys_logininfor` VALUES (117, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-04 21:34:08');
-INSERT INTO `sys_logininfor` VALUES (118, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-04 22:20:35');
-INSERT INTO `sys_logininfor` VALUES (119, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-06 17:57:40');
-INSERT INTO `sys_logininfor` VALUES (120, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-06 18:37:46');
-INSERT INTO `sys_logininfor` VALUES (121, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-06 20:02:41');
-INSERT INTO `sys_logininfor` VALUES (122, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-06 20:14:59');
-INSERT INTO `sys_logininfor` VALUES (123, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-06 20:15:05');
-INSERT INTO `sys_logininfor` VALUES (124, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-06 21:58:04');
-INSERT INTO `sys_logininfor` VALUES (125, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-07 09:52:48');
-INSERT INTO `sys_logininfor` VALUES (126, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-07 10:16:54');
-INSERT INTO `sys_logininfor` VALUES (127, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-07 11:12:26');
-INSERT INTO `sys_logininfor` VALUES (128, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-11 16:54:47');
-INSERT INTO `sys_logininfor` VALUES (129, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-11 19:38:32');
-INSERT INTO `sys_logininfor` VALUES (130, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-11 22:50:09');
-INSERT INTO `sys_logininfor` VALUES (131, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 00:33:47');
-INSERT INTO `sys_logininfor` VALUES (132, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 00:42:20');
-INSERT INTO `sys_logininfor` VALUES (133, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 00:56:30');
-INSERT INTO `sys_logininfor` VALUES (134, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 00:56:40');
-INSERT INTO `sys_logininfor` VALUES (135, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 00:58:27');
-INSERT INTO `sys_logininfor` VALUES (136, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 00:58:35');
-INSERT INTO `sys_logininfor` VALUES (137, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码已失效', '2025-11-12 01:05:56');
-INSERT INTO `sys_logininfor` VALUES (138, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:06:01');
-INSERT INTO `sys_logininfor` VALUES (139, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:21:05');
-INSERT INTO `sys_logininfor` VALUES (140, '张三', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 01:21:25');
-INSERT INTO `sys_logininfor` VALUES (141, '张三', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 01:22:16');
-INSERT INTO `sys_logininfor` VALUES (142, '张三', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 01:22:18');
-INSERT INTO `sys_logininfor` VALUES (143, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 01:22:53');
-INSERT INTO `sys_logininfor` VALUES (144, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 01:23:02');
-INSERT INTO `sys_logininfor` VALUES (145, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:23:29');
-INSERT INTO `sys_logininfor` VALUES (146, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:24:08');
-INSERT INTO `sys_logininfor` VALUES (147, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:24:17');
-INSERT INTO `sys_logininfor` VALUES (148, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:34:46');
-INSERT INTO `sys_logininfor` VALUES (149, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:35:27');
-INSERT INTO `sys_logininfor` VALUES (150, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:37:57');
-INSERT INTO `sys_logininfor` VALUES (151, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:38:13');
-INSERT INTO `sys_logininfor` VALUES (152, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:40:40');
-INSERT INTO `sys_logininfor` VALUES (153, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:41:23');
-INSERT INTO `sys_logininfor` VALUES (154, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:48:07');
-INSERT INTO `sys_logininfor` VALUES (155, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:48:20');
-INSERT INTO `sys_logininfor` VALUES (156, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:51:07');
-INSERT INTO `sys_logininfor` VALUES (157, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:51:23');
-INSERT INTO `sys_logininfor` VALUES (158, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:53:08');
-INSERT INTO `sys_logininfor` VALUES (159, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:53:22');
-INSERT INTO `sys_logininfor` VALUES (160, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:55:57');
-INSERT INTO `sys_logininfor` VALUES (161, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:56:14');
-INSERT INTO `sys_logininfor` VALUES (162, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 11:33:11');
-INSERT INTO `sys_logininfor` VALUES (163, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 11:50:39');
-INSERT INTO `sys_logininfor` VALUES (164, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 11:50:59');
-INSERT INTO `sys_logininfor` VALUES (165, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:07:35');
-INSERT INTO `sys_logininfor` VALUES (166, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:16:27');
-INSERT INTO `sys_logininfor` VALUES (167, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:16:45');
-INSERT INTO `sys_logininfor` VALUES (168, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:17:27');
-INSERT INTO `sys_logininfor` VALUES (169, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 15:17:39');
-INSERT INTO `sys_logininfor` VALUES (170, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:17:42');
-INSERT INTO `sys_logininfor` VALUES (171, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:18:32');
-INSERT INTO `sys_logininfor` VALUES (172, 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:18:45');
-INSERT INTO `sys_logininfor` VALUES (173, 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:21:45');
-INSERT INTO `sys_logininfor` VALUES (174, 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:22:19');
-INSERT INTO `sys_logininfor` VALUES (175, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:22:32');
-INSERT INTO `sys_logininfor` VALUES (176, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:26:45');
-INSERT INTO `sys_logininfor` VALUES (177, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:28:23');
-INSERT INTO `sys_logininfor` VALUES (178, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:48:31');
-INSERT INTO `sys_logininfor` VALUES (179, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:48:43');
-INSERT INTO `sys_logininfor` VALUES (180, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:50:47');
-INSERT INTO `sys_logininfor` VALUES (181, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:51:00');
-INSERT INTO `sys_logininfor` VALUES (182, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:52:11');
-INSERT INTO `sys_logininfor` VALUES (183, 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:52:21');
-INSERT INTO `sys_logininfor` VALUES (184, 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:53:04');
-INSERT INTO `sys_logininfor` VALUES (185, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:53:14');
-INSERT INTO `sys_logininfor` VALUES (186, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 16:24:22');
-INSERT INTO `sys_logininfor` VALUES (187, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 16:31:45');
-INSERT INTO `sys_logininfor` VALUES (188, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 16:32:02');
-INSERT INTO `sys_logininfor` VALUES (189, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 16:35:16');
-INSERT INTO `sys_logininfor` VALUES (190, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 16:35:26');
-INSERT INTO `sys_logininfor` VALUES (191, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 16:45:19');
-INSERT INTO `sys_logininfor` VALUES (192, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:02:05');
-INSERT INTO `sys_logininfor` VALUES (193, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 17:02:22');
-INSERT INTO `sys_logininfor` VALUES (194, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:02:25');
-INSERT INTO `sys_logininfor` VALUES (195, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:12:06');
-INSERT INTO `sys_logininfor` VALUES (196, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 17:12:17');
-INSERT INTO `sys_logininfor` VALUES (197, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:12:27');
-INSERT INTO `sys_logininfor` VALUES (198, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:17:11');
-INSERT INTO `sys_logininfor` VALUES (199, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:17:26');
-INSERT INTO `sys_logininfor` VALUES (200, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:17:53');
-INSERT INTO `sys_logininfor` VALUES (201, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:18:06');
-INSERT INTO `sys_logininfor` VALUES (202, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:36:21');
-INSERT INTO `sys_logininfor` VALUES (203, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:36:34');
-INSERT INTO `sys_logininfor` VALUES (204, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:37:18');
-INSERT INTO `sys_logininfor` VALUES (205, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 17:37:21');
-INSERT INTO `sys_logininfor` VALUES (206, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 17:37:24');
-INSERT INTO `sys_logininfor` VALUES (207, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:37:27');
-INSERT INTO `sys_logininfor` VALUES (208, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:37:43');
-INSERT INTO `sys_logininfor` VALUES (209, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 17:37:49');
-INSERT INTO `sys_logininfor` VALUES (210, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:37:55');
-INSERT INTO `sys_logininfor` VALUES (211, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:40:27');
-INSERT INTO `sys_logininfor` VALUES (212, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:40:31');
-INSERT INTO `sys_logininfor` VALUES (213, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:47:16');
-INSERT INTO `sys_logininfor` VALUES (214, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:47:18');
-INSERT INTO `sys_logininfor` VALUES (215, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:47:31');
-INSERT INTO `sys_logininfor` VALUES (216, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:47:41');
-INSERT INTO `sys_logininfor` VALUES (217, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:52:42');
-INSERT INTO `sys_logininfor` VALUES (218, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:52:45');
-INSERT INTO `sys_logininfor` VALUES (219, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 18:07:50');
-INSERT INTO `sys_logininfor` VALUES (220, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 18:08:11');
-INSERT INTO `sys_logininfor` VALUES (221, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 18:19:46');
-INSERT INTO `sys_logininfor` VALUES (222, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 18:19:57');
-INSERT INTO `sys_logininfor` VALUES (223, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 18:29:46');
-INSERT INTO `sys_logininfor` VALUES (224, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 18:29:58');
-INSERT INTO `sys_logininfor` VALUES (225, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 18:30:01');
-INSERT INTO `sys_logininfor` VALUES (226, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:01:23');
-INSERT INTO `sys_logininfor` VALUES (227, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:01:45');
-INSERT INTO `sys_logininfor` VALUES (228, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:01:57');
-INSERT INTO `sys_logininfor` VALUES (229, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:17:58');
-INSERT INTO `sys_logininfor` VALUES (230, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:18:14');
-INSERT INTO `sys_logininfor` VALUES (231, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:18:18');
-INSERT INTO `sys_logininfor` VALUES (232, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:18:23');
-INSERT INTO `sys_logininfor` VALUES (233, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:18:46');
-INSERT INTO `sys_logininfor` VALUES (234, 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:18:57');
-INSERT INTO `sys_logininfor` VALUES (235, 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:24:20');
-INSERT INTO `sys_logininfor` VALUES (236, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:24:36');
-INSERT INTO `sys_logininfor` VALUES (237, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:24:39');
-INSERT INTO `sys_logininfor` VALUES (238, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:24:58');
-INSERT INTO `sys_logininfor` VALUES (239, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:25:09');
-INSERT INTO `sys_logininfor` VALUES (240, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:28:18');
-INSERT INTO `sys_logininfor` VALUES (241, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:28:22');
-INSERT INTO `sys_logininfor` VALUES (242, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:41:25');
-INSERT INTO `sys_logininfor` VALUES (243, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:41:35');
-INSERT INTO `sys_logininfor` VALUES (244, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:42:10');
-INSERT INTO `sys_logininfor` VALUES (245, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:42:13');
-INSERT INTO `sys_logininfor` VALUES (246, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:42:15');
-INSERT INTO `sys_logininfor` VALUES (247, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:43:33');
-INSERT INTO `sys_logininfor` VALUES (248, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:43:36');
-INSERT INTO `sys_logininfor` VALUES (249, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:43:40');
-INSERT INTO `sys_logininfor` VALUES (250, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:43:42');
-INSERT INTO `sys_logininfor` VALUES (251, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:52:37');
-INSERT INTO `sys_logininfor` VALUES (252, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:52:41');
-INSERT INTO `sys_logininfor` VALUES (253, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:52:52');
-INSERT INTO `sys_logininfor` VALUES (254, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:53:04');
-INSERT INTO `sys_logininfor` VALUES (255, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:53:34');
-INSERT INTO `sys_logininfor` VALUES (256, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:53:43');
-INSERT INTO `sys_logininfor` VALUES (257, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:57:14');
-INSERT INTO `sys_logininfor` VALUES (258, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:57:17');
-INSERT INTO `sys_logininfor` VALUES (259, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:57:20');
-INSERT INTO `sys_logininfor` VALUES (260, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:57:24');
-INSERT INTO `sys_logininfor` VALUES (261, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 20:03:32');
-INSERT INTO `sys_logininfor` VALUES (262, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 20:03:35');
-INSERT INTO `sys_logininfor` VALUES (263, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 20:03:38');
-INSERT INTO `sys_logininfor` VALUES (264, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 20:04:52');
-INSERT INTO `sys_logininfor` VALUES (265, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 20:04:56');
-INSERT INTO `sys_logininfor` VALUES (266, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 20:04:59');
-INSERT INTO `sys_logininfor` VALUES (267, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 20:09:32');
-INSERT INTO `sys_logininfor` VALUES (268, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 20:09:36');
-INSERT INTO `sys_logininfor` VALUES (269, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 20:09:52');
-INSERT INTO `sys_logininfor` VALUES (270, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 20:10:05');
-INSERT INTO `sys_logininfor` VALUES (271, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 20:10:14');
-INSERT INTO `sys_logininfor` VALUES (272, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 20:10:25');
-INSERT INTO `sys_logininfor` VALUES (273, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 23:02:33');
-INSERT INTO `sys_logininfor` VALUES (274, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-13 02:17:01');
-INSERT INTO `sys_logininfor` VALUES (275, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-13 16:35:35');
-INSERT INTO `sys_logininfor` VALUES (276, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-13 17:15:50');
-INSERT INTO `sys_logininfor` VALUES (277, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:10:09');
-INSERT INTO `sys_logininfor` VALUES (278, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:10:27');
-INSERT INTO `sys_logininfor` VALUES (279, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:10:44');
-INSERT INTO `sys_logininfor` VALUES (280, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:10:54');
-INSERT INTO `sys_logininfor` VALUES (281, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:11:09');
-INSERT INTO `sys_logininfor` VALUES (282, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:14:04');
-INSERT INTO `sys_logininfor` VALUES (283, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:14:17');
-INSERT INTO `sys_logininfor` VALUES (284, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:15:25');
-INSERT INTO `sys_logininfor` VALUES (285, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:15:32');
-INSERT INTO `sys_logininfor` VALUES (286, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:34:16');
-INSERT INTO `sys_logininfor` VALUES (287, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:34:24');
-INSERT INTO `sys_logininfor` VALUES (288, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:35:14');
-INSERT INTO `sys_logininfor` VALUES (289, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:35:20');
-INSERT INTO `sys_logininfor` VALUES (290, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:35:39');
-INSERT INTO `sys_logininfor` VALUES (291, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:35:44');
-INSERT INTO `sys_logininfor` VALUES (292, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:36:26');
-INSERT INTO `sys_logininfor` VALUES (293, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:36:38');
-INSERT INTO `sys_logininfor` VALUES (294, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:42:18');
-INSERT INTO `sys_logininfor` VALUES (295, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:42:30');
-INSERT INTO `sys_logininfor` VALUES (296, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:46:09');
-INSERT INTO `sys_logininfor` VALUES (297, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:46:17');
-INSERT INTO `sys_logininfor` VALUES (298, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:46:55');
-INSERT INTO `sys_logininfor` VALUES (299, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:47:02');
-INSERT INTO `sys_logininfor` VALUES (300, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:49:48');
-INSERT INTO `sys_logininfor` VALUES (301, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:49:59');
-INSERT INTO `sys_logininfor` VALUES (302, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:50:27');
-INSERT INTO `sys_logininfor` VALUES (303, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:50:48');
-INSERT INTO `sys_logininfor` VALUES (304, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:56:14');
-INSERT INTO `sys_logininfor` VALUES (305, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:56:23');
-INSERT INTO `sys_logininfor` VALUES (306, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:56:37');
-INSERT INTO `sys_logininfor` VALUES (307, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:56:56');
-INSERT INTO `sys_logininfor` VALUES (308, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:03:36');
-INSERT INTO `sys_logininfor` VALUES (309, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:03:52');
-INSERT INTO `sys_logininfor` VALUES (310, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:04:16');
-INSERT INTO `sys_logininfor` VALUES (311, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:04:24');
-INSERT INTO `sys_logininfor` VALUES (312, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:11:33');
-INSERT INTO `sys_logininfor` VALUES (313, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:11:45');
-INSERT INTO `sys_logininfor` VALUES (314, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:12:03');
-INSERT INTO `sys_logininfor` VALUES (315, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:12:12');
-INSERT INTO `sys_logininfor` VALUES (316, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:13:33');
-INSERT INTO `sys_logininfor` VALUES (317, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:13:39');
-INSERT INTO `sys_logininfor` VALUES (318, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:14:54');
-INSERT INTO `sys_logininfor` VALUES (319, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:15:00');
-INSERT INTO `sys_logininfor` VALUES (320, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 15:20:09');
-INSERT INTO `sys_logininfor` VALUES (321, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 15:25:26');
-INSERT INTO `sys_logininfor` VALUES (322, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 15:25:33');
-INSERT INTO `sys_logininfor` VALUES (323, 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 15:26:21');
-INSERT INTO `sys_logininfor` VALUES (324, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 15:26:27');
-INSERT INTO `sys_logininfor` VALUES (325, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 20:13:10');
-INSERT INTO `sys_logininfor` VALUES (326, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 23:59:51');
-INSERT INTO `sys_logininfor` VALUES (327, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-15 16:23:24');
-INSERT INTO `sys_logininfor` VALUES (328, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-15 17:43:23');
-INSERT INTO `sys_logininfor` VALUES (329, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-15 23:52:58');
-INSERT INTO `sys_logininfor` VALUES (330, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 00:37:01');
-INSERT INTO `sys_logininfor` VALUES (331, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-16 03:07:16');
-INSERT INTO `sys_logininfor` VALUES (332, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 03:08:04');
-INSERT INTO `sys_logininfor` VALUES (333, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 04:12:56');
-INSERT INTO `sys_logininfor` VALUES (334, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-16 05:23:59');
-INSERT INTO `sys_logininfor` VALUES (335, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-16 05:24:00');
-INSERT INTO `sys_logininfor` VALUES (336, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 05:24:03');
+INSERT INTO `sys_logininfor` VALUES ('100', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-30 18:05:38');
+INSERT INTO `sys_logininfor` VALUES ('101', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-30 20:17:20');
+INSERT INTO `sys_logininfor` VALUES ('102', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 19:10:48');
+INSERT INTO `sys_logininfor` VALUES ('103', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 19:21:07');
+INSERT INTO `sys_logininfor` VALUES ('104', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-10-31 21:36:17');
+INSERT INTO `sys_logininfor` VALUES ('105', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-01 15:11:52');
+INSERT INTO `sys_logininfor` VALUES ('106', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-01 17:25:16');
+INSERT INTO `sys_logininfor` VALUES ('107', 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-01 23:25:50');
+INSERT INTO `sys_logininfor` VALUES ('108', 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-02 00:20:23');
+INSERT INTO `sys_logininfor` VALUES ('109', 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-02 00:56:37');
+INSERT INTO `sys_logininfor` VALUES ('110', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 01:07:48');
+INSERT INTO `sys_logininfor` VALUES ('111', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 16:25:50');
+INSERT INTO `sys_logininfor` VALUES ('112', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 17:50:20');
+INSERT INTO `sys_logininfor` VALUES ('113', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-02 18:22:02');
+INSERT INTO `sys_logininfor` VALUES ('114', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-04 19:02:07');
+INSERT INTO `sys_logininfor` VALUES ('115', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-04 19:09:27');
+INSERT INTO `sys_logininfor` VALUES ('116', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-04 20:21:30');
+INSERT INTO `sys_logininfor` VALUES ('117', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-04 21:34:08');
+INSERT INTO `sys_logininfor` VALUES ('118', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-04 22:20:35');
+INSERT INTO `sys_logininfor` VALUES ('119', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-06 17:57:40');
+INSERT INTO `sys_logininfor` VALUES ('120', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-06 18:37:46');
+INSERT INTO `sys_logininfor` VALUES ('121', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-06 20:02:41');
+INSERT INTO `sys_logininfor` VALUES ('122', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-06 20:14:59');
+INSERT INTO `sys_logininfor` VALUES ('123', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-06 20:15:05');
+INSERT INTO `sys_logininfor` VALUES ('124', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-06 21:58:04');
+INSERT INTO `sys_logininfor` VALUES ('125', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-07 09:52:48');
+INSERT INTO `sys_logininfor` VALUES ('126', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-07 10:16:54');
+INSERT INTO `sys_logininfor` VALUES ('127', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-07 11:12:26');
+INSERT INTO `sys_logininfor` VALUES ('128', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-11 16:54:47');
+INSERT INTO `sys_logininfor` VALUES ('129', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-11 19:38:32');
+INSERT INTO `sys_logininfor` VALUES ('130', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-11 22:50:09');
+INSERT INTO `sys_logininfor` VALUES ('131', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 00:33:47');
+INSERT INTO `sys_logininfor` VALUES ('132', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 00:42:20');
+INSERT INTO `sys_logininfor` VALUES ('133', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 00:56:30');
+INSERT INTO `sys_logininfor` VALUES ('134', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 00:56:40');
+INSERT INTO `sys_logininfor` VALUES ('135', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 00:58:27');
+INSERT INTO `sys_logininfor` VALUES ('136', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 00:58:35');
+INSERT INTO `sys_logininfor` VALUES ('137', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码已失效', '2025-11-12 01:05:56');
+INSERT INTO `sys_logininfor` VALUES ('138', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:06:01');
+INSERT INTO `sys_logininfor` VALUES ('139', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:21:05');
+INSERT INTO `sys_logininfor` VALUES ('140', '张三', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 01:21:25');
+INSERT INTO `sys_logininfor` VALUES ('141', '张三', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 01:22:16');
+INSERT INTO `sys_logininfor` VALUES ('142', '张三', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 01:22:18');
+INSERT INTO `sys_logininfor` VALUES ('143', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 01:22:53');
+INSERT INTO `sys_logininfor` VALUES ('144', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 01:23:02');
+INSERT INTO `sys_logininfor` VALUES ('145', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:23:29');
+INSERT INTO `sys_logininfor` VALUES ('146', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:24:08');
+INSERT INTO `sys_logininfor` VALUES ('147', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:24:17');
+INSERT INTO `sys_logininfor` VALUES ('148', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:34:46');
+INSERT INTO `sys_logininfor` VALUES ('149', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:35:27');
+INSERT INTO `sys_logininfor` VALUES ('150', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:37:57');
+INSERT INTO `sys_logininfor` VALUES ('151', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:38:13');
+INSERT INTO `sys_logininfor` VALUES ('152', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:40:40');
+INSERT INTO `sys_logininfor` VALUES ('153', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:41:23');
+INSERT INTO `sys_logininfor` VALUES ('154', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:48:07');
+INSERT INTO `sys_logininfor` VALUES ('155', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:48:20');
+INSERT INTO `sys_logininfor` VALUES ('156', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:51:07');
+INSERT INTO `sys_logininfor` VALUES ('157', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:51:23');
+INSERT INTO `sys_logininfor` VALUES ('158', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:53:08');
+INSERT INTO `sys_logininfor` VALUES ('159', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:53:22');
+INSERT INTO `sys_logininfor` VALUES ('160', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 01:55:57');
+INSERT INTO `sys_logininfor` VALUES ('161', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 01:56:14');
+INSERT INTO `sys_logininfor` VALUES ('162', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 11:33:11');
+INSERT INTO `sys_logininfor` VALUES ('163', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 11:50:39');
+INSERT INTO `sys_logininfor` VALUES ('164', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 11:50:59');
+INSERT INTO `sys_logininfor` VALUES ('165', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:07:35');
+INSERT INTO `sys_logininfor` VALUES ('166', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:16:27');
+INSERT INTO `sys_logininfor` VALUES ('167', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:16:45');
+INSERT INTO `sys_logininfor` VALUES ('168', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:17:27');
+INSERT INTO `sys_logininfor` VALUES ('169', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 15:17:39');
+INSERT INTO `sys_logininfor` VALUES ('170', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:17:42');
+INSERT INTO `sys_logininfor` VALUES ('171', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:18:32');
+INSERT INTO `sys_logininfor` VALUES ('172', 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:18:45');
+INSERT INTO `sys_logininfor` VALUES ('173', 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:21:45');
+INSERT INTO `sys_logininfor` VALUES ('174', 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:22:19');
+INSERT INTO `sys_logininfor` VALUES ('175', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:22:32');
+INSERT INTO `sys_logininfor` VALUES ('176', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:26:45');
+INSERT INTO `sys_logininfor` VALUES ('177', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:28:23');
+INSERT INTO `sys_logininfor` VALUES ('178', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:48:31');
+INSERT INTO `sys_logininfor` VALUES ('179', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:48:43');
+INSERT INTO `sys_logininfor` VALUES ('180', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:50:47');
+INSERT INTO `sys_logininfor` VALUES ('181', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:51:00');
+INSERT INTO `sys_logininfor` VALUES ('182', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:52:11');
+INSERT INTO `sys_logininfor` VALUES ('183', 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:52:21');
+INSERT INTO `sys_logininfor` VALUES ('184', 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 15:53:04');
+INSERT INTO `sys_logininfor` VALUES ('185', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 15:53:14');
+INSERT INTO `sys_logininfor` VALUES ('186', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 16:24:22');
+INSERT INTO `sys_logininfor` VALUES ('187', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 16:31:45');
+INSERT INTO `sys_logininfor` VALUES ('188', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 16:32:02');
+INSERT INTO `sys_logininfor` VALUES ('189', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 16:35:16');
+INSERT INTO `sys_logininfor` VALUES ('190', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 16:35:26');
+INSERT INTO `sys_logininfor` VALUES ('191', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 16:45:19');
+INSERT INTO `sys_logininfor` VALUES ('192', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:02:05');
+INSERT INTO `sys_logininfor` VALUES ('193', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 17:02:22');
+INSERT INTO `sys_logininfor` VALUES ('194', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:02:25');
+INSERT INTO `sys_logininfor` VALUES ('195', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:12:06');
+INSERT INTO `sys_logininfor` VALUES ('196', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 17:12:17');
+INSERT INTO `sys_logininfor` VALUES ('197', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:12:27');
+INSERT INTO `sys_logininfor` VALUES ('198', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:17:11');
+INSERT INTO `sys_logininfor` VALUES ('199', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:17:26');
+INSERT INTO `sys_logininfor` VALUES ('200', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:17:53');
+INSERT INTO `sys_logininfor` VALUES ('201', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:18:06');
+INSERT INTO `sys_logininfor` VALUES ('202', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:36:21');
+INSERT INTO `sys_logininfor` VALUES ('203', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:36:34');
+INSERT INTO `sys_logininfor` VALUES ('204', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:37:18');
+INSERT INTO `sys_logininfor` VALUES ('205', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 17:37:21');
+INSERT INTO `sys_logininfor` VALUES ('206', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 17:37:24');
+INSERT INTO `sys_logininfor` VALUES ('207', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:37:27');
+INSERT INTO `sys_logininfor` VALUES ('208', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:37:43');
+INSERT INTO `sys_logininfor` VALUES ('209', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-12 17:37:49');
+INSERT INTO `sys_logininfor` VALUES ('210', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:37:55');
+INSERT INTO `sys_logininfor` VALUES ('211', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:40:27');
+INSERT INTO `sys_logininfor` VALUES ('212', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:40:31');
+INSERT INTO `sys_logininfor` VALUES ('213', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:47:16');
+INSERT INTO `sys_logininfor` VALUES ('214', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:47:18');
+INSERT INTO `sys_logininfor` VALUES ('215', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:47:31');
+INSERT INTO `sys_logininfor` VALUES ('216', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:47:41');
+INSERT INTO `sys_logininfor` VALUES ('217', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 17:52:42');
+INSERT INTO `sys_logininfor` VALUES ('218', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 17:52:45');
+INSERT INTO `sys_logininfor` VALUES ('219', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 18:07:50');
+INSERT INTO `sys_logininfor` VALUES ('220', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 18:08:11');
+INSERT INTO `sys_logininfor` VALUES ('221', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 18:19:46');
+INSERT INTO `sys_logininfor` VALUES ('222', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 18:19:57');
+INSERT INTO `sys_logininfor` VALUES ('223', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 18:29:46');
+INSERT INTO `sys_logininfor` VALUES ('224', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 18:29:58');
+INSERT INTO `sys_logininfor` VALUES ('225', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 18:30:01');
+INSERT INTO `sys_logininfor` VALUES ('226', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:01:23');
+INSERT INTO `sys_logininfor` VALUES ('227', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:01:45');
+INSERT INTO `sys_logininfor` VALUES ('228', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:01:57');
+INSERT INTO `sys_logininfor` VALUES ('229', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:17:58');
+INSERT INTO `sys_logininfor` VALUES ('230', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:18:14');
+INSERT INTO `sys_logininfor` VALUES ('231', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:18:18');
+INSERT INTO `sys_logininfor` VALUES ('232', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:18:23');
+INSERT INTO `sys_logininfor` VALUES ('233', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:18:46');
+INSERT INTO `sys_logininfor` VALUES ('234', 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:18:57');
+INSERT INTO `sys_logininfor` VALUES ('235', 'student_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:24:20');
+INSERT INTO `sys_logininfor` VALUES ('236', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:24:36');
+INSERT INTO `sys_logininfor` VALUES ('237', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:24:39');
+INSERT INTO `sys_logininfor` VALUES ('238', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:24:58');
+INSERT INTO `sys_logininfor` VALUES ('239', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:25:09');
+INSERT INTO `sys_logininfor` VALUES ('240', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:28:18');
+INSERT INTO `sys_logininfor` VALUES ('241', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:28:22');
+INSERT INTO `sys_logininfor` VALUES ('242', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:41:25');
+INSERT INTO `sys_logininfor` VALUES ('243', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:41:35');
+INSERT INTO `sys_logininfor` VALUES ('244', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:42:10');
+INSERT INTO `sys_logininfor` VALUES ('245', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:42:13');
+INSERT INTO `sys_logininfor` VALUES ('246', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:42:15');
+INSERT INTO `sys_logininfor` VALUES ('247', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:43:33');
+INSERT INTO `sys_logininfor` VALUES ('248', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:43:36');
+INSERT INTO `sys_logininfor` VALUES ('249', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:43:40');
+INSERT INTO `sys_logininfor` VALUES ('250', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:43:42');
+INSERT INTO `sys_logininfor` VALUES ('251', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:52:37');
+INSERT INTO `sys_logininfor` VALUES ('252', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:52:41');
+INSERT INTO `sys_logininfor` VALUES ('253', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:52:52');
+INSERT INTO `sys_logininfor` VALUES ('254', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:53:04');
+INSERT INTO `sys_logininfor` VALUES ('255', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:53:34');
+INSERT INTO `sys_logininfor` VALUES ('256', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:53:43');
+INSERT INTO `sys_logininfor` VALUES ('257', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 19:57:14');
+INSERT INTO `sys_logininfor` VALUES ('258', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:57:17');
+INSERT INTO `sys_logininfor` VALUES ('259', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 19:57:20');
+INSERT INTO `sys_logininfor` VALUES ('260', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 19:57:24');
+INSERT INTO `sys_logininfor` VALUES ('261', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 20:03:32');
+INSERT INTO `sys_logininfor` VALUES ('262', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 20:03:35');
+INSERT INTO `sys_logininfor` VALUES ('263', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 20:03:38');
+INSERT INTO `sys_logininfor` VALUES ('264', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 20:04:52');
+INSERT INTO `sys_logininfor` VALUES ('265', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-12 20:04:56');
+INSERT INTO `sys_logininfor` VALUES ('266', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 20:04:59');
+INSERT INTO `sys_logininfor` VALUES ('267', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 20:09:32');
+INSERT INTO `sys_logininfor` VALUES ('268', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 20:09:36');
+INSERT INTO `sys_logininfor` VALUES ('269', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 20:09:52');
+INSERT INTO `sys_logininfor` VALUES ('270', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 20:10:05');
+INSERT INTO `sys_logininfor` VALUES ('271', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-12 20:10:14');
+INSERT INTO `sys_logininfor` VALUES ('272', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 20:10:25');
+INSERT INTO `sys_logininfor` VALUES ('273', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-12 23:02:33');
+INSERT INTO `sys_logininfor` VALUES ('274', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-13 02:17:01');
+INSERT INTO `sys_logininfor` VALUES ('275', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-13 16:35:35');
+INSERT INTO `sys_logininfor` VALUES ('276', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-13 17:15:50');
+INSERT INTO `sys_logininfor` VALUES ('277', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:10:09');
+INSERT INTO `sys_logininfor` VALUES ('278', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:10:27');
+INSERT INTO `sys_logininfor` VALUES ('279', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:10:44');
+INSERT INTO `sys_logininfor` VALUES ('280', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:10:54');
+INSERT INTO `sys_logininfor` VALUES ('281', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:11:09');
+INSERT INTO `sys_logininfor` VALUES ('282', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:14:04');
+INSERT INTO `sys_logininfor` VALUES ('283', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:14:17');
+INSERT INTO `sys_logininfor` VALUES ('284', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:15:25');
+INSERT INTO `sys_logininfor` VALUES ('285', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:15:32');
+INSERT INTO `sys_logininfor` VALUES ('286', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:34:16');
+INSERT INTO `sys_logininfor` VALUES ('287', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:34:24');
+INSERT INTO `sys_logininfor` VALUES ('288', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:35:14');
+INSERT INTO `sys_logininfor` VALUES ('289', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:35:20');
+INSERT INTO `sys_logininfor` VALUES ('290', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:35:39');
+INSERT INTO `sys_logininfor` VALUES ('291', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:35:44');
+INSERT INTO `sys_logininfor` VALUES ('292', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:36:26');
+INSERT INTO `sys_logininfor` VALUES ('293', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:36:38');
+INSERT INTO `sys_logininfor` VALUES ('294', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:42:18');
+INSERT INTO `sys_logininfor` VALUES ('295', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:42:30');
+INSERT INTO `sys_logininfor` VALUES ('296', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:46:09');
+INSERT INTO `sys_logininfor` VALUES ('297', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:46:17');
+INSERT INTO `sys_logininfor` VALUES ('298', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:46:55');
+INSERT INTO `sys_logininfor` VALUES ('299', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:47:02');
+INSERT INTO `sys_logininfor` VALUES ('300', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:49:48');
+INSERT INTO `sys_logininfor` VALUES ('301', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:49:59');
+INSERT INTO `sys_logininfor` VALUES ('302', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:50:27');
+INSERT INTO `sys_logininfor` VALUES ('303', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:50:48');
+INSERT INTO `sys_logininfor` VALUES ('304', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:56:14');
+INSERT INTO `sys_logininfor` VALUES ('305', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:56:23');
+INSERT INTO `sys_logininfor` VALUES ('306', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 10:56:37');
+INSERT INTO `sys_logininfor` VALUES ('307', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 10:56:56');
+INSERT INTO `sys_logininfor` VALUES ('308', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:03:36');
+INSERT INTO `sys_logininfor` VALUES ('309', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:03:52');
+INSERT INTO `sys_logininfor` VALUES ('310', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:04:16');
+INSERT INTO `sys_logininfor` VALUES ('311', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:04:24');
+INSERT INTO `sys_logininfor` VALUES ('312', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:11:33');
+INSERT INTO `sys_logininfor` VALUES ('313', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:11:45');
+INSERT INTO `sys_logininfor` VALUES ('314', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:12:03');
+INSERT INTO `sys_logininfor` VALUES ('315', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:12:12');
+INSERT INTO `sys_logininfor` VALUES ('316', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:13:33');
+INSERT INTO `sys_logininfor` VALUES ('317', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:13:39');
+INSERT INTO `sys_logininfor` VALUES ('318', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 11:14:54');
+INSERT INTO `sys_logininfor` VALUES ('319', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 11:15:00');
+INSERT INTO `sys_logininfor` VALUES ('320', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 15:20:09');
+INSERT INTO `sys_logininfor` VALUES ('321', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 15:25:26');
+INSERT INTO `sys_logininfor` VALUES ('322', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 15:25:33');
+INSERT INTO `sys_logininfor` VALUES ('323', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-14 15:26:21');
+INSERT INTO `sys_logininfor` VALUES ('324', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 15:26:27');
+INSERT INTO `sys_logininfor` VALUES ('325', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 20:13:10');
+INSERT INTO `sys_logininfor` VALUES ('326', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-14 23:59:51');
+INSERT INTO `sys_logininfor` VALUES ('327', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-15 16:23:24');
+INSERT INTO `sys_logininfor` VALUES ('328', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-15 17:43:23');
+INSERT INTO `sys_logininfor` VALUES ('329', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-15 23:52:58');
+INSERT INTO `sys_logininfor` VALUES ('330', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 00:37:01');
+INSERT INTO `sys_logininfor` VALUES ('331', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-16 03:07:16');
+INSERT INTO `sys_logininfor` VALUES ('332', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 03:08:04');
+INSERT INTO `sys_logininfor` VALUES ('333', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 04:12:56');
+INSERT INTO `sys_logininfor` VALUES ('334', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-16 05:23:59');
+INSERT INTO `sys_logininfor` VALUES ('335', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-16 05:24:00');
+INSERT INTO `sys_logininfor` VALUES ('336', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-16 05:24:03');
 
 -- ----------------------------
 -- Table structure for sys_menu
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_menu`;
 CREATE TABLE `sys_menu` (
-  `menu_id` bigint NOT NULL AUTO_INCREMENT COMMENT '菜单ID',
-  `menu_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '菜单名称',
-  `parent_id` bigint DEFAULT '0' COMMENT '父菜单ID',
-  `order_num` int DEFAULT '0' COMMENT '显示顺序',
-  `path` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '路由地址',
-  `component` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '组件路径',
-  `query` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '路由参数',
-  `route_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '路由名称',
-  `is_frame` int DEFAULT '1' COMMENT '是否为外链（0是 1否）',
-  `is_cache` int DEFAULT '0' COMMENT '是否缓存（0缓存 1不缓存）',
-  `menu_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '菜单类型（M目录 C菜单 F按钮）',
-  `visible` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '菜单状态（0显示 1隐藏）',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '菜单状态（0正常 1停用）',
-  `perms` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '权限标识',
-  `icon` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '#' COMMENT '菜单图标',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '备注',
-  PRIMARY KEY (`menu_id`) USING BTREE
+                            `menu_id` bigint NOT NULL AUTO_INCREMENT COMMENT '菜单ID',
+                            `menu_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '菜单名称',
+                            `parent_id` bigint DEFAULT '0' COMMENT '父菜单ID',
+                            `order_num` int DEFAULT '0' COMMENT '显示顺序',
+                            `path` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '路由地址',
+                            `component` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '组件路径',
+                            `query` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '路由参数',
+                            `route_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '路由名称',
+                            `is_frame` int DEFAULT '1' COMMENT '是否为外链（0是 1否）',
+                            `is_cache` int DEFAULT '0' COMMENT '是否缓存（0缓存 1不缓存）',
+                            `menu_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '菜单类型（M目录 C菜单 F按钮）',
+                            `visible` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '菜单状态（0显示 1隐藏）',
+                            `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '菜单状态（0正常 1停用）',
+                            `perms` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '权限标识',
+                            `icon` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '#' COMMENT '菜单图标',
+                            `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                            `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                            `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                            `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                            `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '备注',
+                            PRIMARY KEY (`menu_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=2042 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='菜单权限表';
 
 -- ----------------------------
@@ -2544,17 +2537,17 @@ INSERT INTO `sys_menu` VALUES ('2041', '考试入口', '2038', '2', 'exam_portal
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_notice`;
 CREATE TABLE `sys_notice` (
-  `notice_id` int NOT NULL AUTO_INCREMENT COMMENT '公告ID',
-  `notice_title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '公告标题',
-  `notice_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '公告类型（1通知 2公告）',
-  `notice_content` longblob COMMENT '公告内容',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '公告状态（0正常 1关闭）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`notice_id`) USING BTREE
+                              `notice_id` int NOT NULL AUTO_INCREMENT COMMENT '公告ID',
+                              `notice_title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '公告标题',
+                              `notice_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '公告类型（1通知 2公告）',
+                              `notice_content` longblob COMMENT '公告内容',
+                              `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '公告状态（0正常 1关闭）',
+                              `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                              `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                              `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                              `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                              `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+                              PRIMARY KEY (`notice_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='通知公告表';
 
 -- ----------------------------
@@ -2568,28 +2561,28 @@ INSERT INTO `sys_notice` VALUES ('2', '维护通知：2018-07-01 若依系统凌
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_oper_log`;
 CREATE TABLE `sys_oper_log` (
-  `oper_id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志主键',
-  `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '模块标题',
-  `business_type` int DEFAULT '0' COMMENT '业务类型（0其它 1新增 2修改 3删除）',
-  `method` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '方法名称',
-  `request_method` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '请求方式',
-  `operator_type` int DEFAULT '0' COMMENT '操作类别（0其它 1后台用户 2手机端用户）',
-  `oper_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '操作人员',
-  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '部门名称',
-  `oper_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '请求URL',
-  `oper_ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '主机地址',
-  `oper_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '操作地点',
-  `oper_param` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '请求参数',
-  `json_result` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '返回参数',
-  `status` int DEFAULT '0' COMMENT '操作状态（0正常 1异常）',
-  `error_msg` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '错误消息',
-  `oper_time` datetime DEFAULT NULL COMMENT '操作时间',
-  `cost_time` bigint DEFAULT '0' COMMENT '消耗时间',
-  PRIMARY KEY (`oper_id`) USING BTREE,
-  INDEX `idx_sys_oper_log_bt`(`business_type` ASC) USING BTREE,
-  INDEX `idx_sys_oper_log_s`(`status` ASC) USING BTREE,
-  INDEX `idx_sys_oper_log_ot`(`oper_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 511 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+                                `oper_id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志主键',
+                                `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '模块标题',
+                                `business_type` int DEFAULT '0' COMMENT '业务类型（0其它 1新增 2修改 3删除）',
+                                `method` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '方法名称',
+                                `request_method` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '请求方式',
+                                `operator_type` int DEFAULT '0' COMMENT '操作类别（0其它 1后台用户 2手机端用户）',
+                                `oper_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '操作人员',
+                                `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '部门名称',
+                                `oper_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '请求URL',
+                                `oper_ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '主机地址',
+                                `oper_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '操作地点',
+                                `oper_param` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '请求参数',
+                                `json_result` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '返回参数',
+                                `status` int DEFAULT '0' COMMENT '操作状态（0正常 1异常）',
+                                `error_msg` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '错误消息',
+                                `oper_time` datetime DEFAULT NULL COMMENT '操作时间',
+                                `cost_time` bigint DEFAULT '0' COMMENT '消耗时间',
+                                PRIMARY KEY (`oper_id`) USING BTREE,
+                                KEY `idx_sys_oper_log_bt` (`business_type`) USING BTREE,
+                                KEY `idx_sys_oper_log_s` (`status`) USING BTREE,
+                                KEY `idx_sys_oper_log_ot` (`oper_time`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=575 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='操作日志记录';
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -3075,17 +3068,17 @@ INSERT INTO `sys_oper_log` VALUES ('574', '删除消息', '3', 'com.ruoyi.web.co
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_post`;
 CREATE TABLE `sys_post` (
-  `post_id` bigint NOT NULL AUTO_INCREMENT COMMENT '岗位ID',
-  `post_code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '岗位编码',
-  `post_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '岗位名称',
-  `post_sort` int NOT NULL COMMENT '显示顺序',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '状态（0正常 1停用）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`post_id`) USING BTREE
+                            `post_id` bigint NOT NULL AUTO_INCREMENT COMMENT '岗位ID',
+                            `post_code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '岗位编码',
+                            `post_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '岗位名称',
+                            `post_sort` int NOT NULL COMMENT '显示顺序',
+                            `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '状态（0正常 1停用）',
+                            `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                            `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                            `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                            `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                            `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+                            PRIMARY KEY (`post_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='岗位信息表';
 
 -- ----------------------------
@@ -3101,21 +3094,21 @@ INSERT INTO `sys_post` VALUES ('4', 'user', '普通员工', '4', '0', 'admin', '
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_role`;
 CREATE TABLE `sys_role` (
-  `role_id` bigint NOT NULL AUTO_INCREMENT COMMENT '角色ID',
-  `role_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色名称',
-  `role_key` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色权限字符串',
-  `role_sort` int NOT NULL COMMENT '显示顺序',
-  `data_scope` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '1' COMMENT '数据范围（1：全部数据权限 2：自定数据权限 3：本部门数据权限 4：本部门及以下数据权限）',
-  `menu_check_strictly` tinyint(1) DEFAULT '1' COMMENT '菜单树选择项是否关联显示',
-  `dept_check_strictly` tinyint(1) DEFAULT '1' COMMENT '部门树选择项是否关联显示',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色状态（0正常 1停用）',
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`role_id`) USING BTREE
+                            `role_id` bigint NOT NULL AUTO_INCREMENT COMMENT '角色ID',
+                            `role_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色名称',
+                            `role_key` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色权限字符串',
+                            `role_sort` int NOT NULL COMMENT '显示顺序',
+                            `data_scope` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '1' COMMENT '数据范围（1：全部数据权限 2：自定数据权限 3：本部门数据权限 4：本部门及以下数据权限）',
+                            `menu_check_strictly` tinyint(1) DEFAULT '1' COMMENT '菜单树选择项是否关联显示',
+                            `dept_check_strictly` tinyint(1) DEFAULT '1' COMMENT '部门树选择项是否关联显示',
+                            `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色状态（0正常 1停用）',
+                            `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+                            `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                            `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                            `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                            `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                            `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+                            PRIMARY KEY (`role_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='角色信息表';
 
 -- ----------------------------
@@ -3131,9 +3124,9 @@ INSERT INTO `sys_role` VALUES ('101', 'student', 'student', '4', '1', '1', '1', 
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_role_dept`;
 CREATE TABLE `sys_role_dept` (
-  `role_id` bigint NOT NULL COMMENT '角色ID',
-  `dept_id` bigint NOT NULL COMMENT '部门ID',
-  PRIMARY KEY (`role_id`,`dept_id`) USING BTREE
+                                 `role_id` bigint NOT NULL COMMENT '角色ID',
+                                 `dept_id` bigint NOT NULL COMMENT '部门ID',
+                                 PRIMARY KEY (`role_id`,`dept_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='角色和部门关联表';
 
 -- ----------------------------
@@ -3148,9 +3141,9 @@ INSERT INTO `sys_role_dept` VALUES ('2', '105');
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_role_menu`;
 CREATE TABLE `sys_role_menu` (
-  `role_id` bigint NOT NULL COMMENT '角色ID',
-  `menu_id` bigint NOT NULL COMMENT '菜单ID',
-  PRIMARY KEY (`role_id`,`menu_id`) USING BTREE
+                                 `role_id` bigint NOT NULL COMMENT '角色ID',
+                                 `menu_id` bigint NOT NULL COMMENT '菜单ID',
+                                 PRIMARY KEY (`role_id`,`menu_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='角色和菜单关联表';
 
 -- ----------------------------
@@ -3494,11 +3487,11 @@ INSERT INTO `sys_role_menu` VALUES ('101', '2037');
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_todo`;
 CREATE TABLE `sys_todo` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `todo_item` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT '待办事项',
-  `create_by` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT '' COMMENT '创建人',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`) USING BTREE
+                            `id` bigint NOT NULL AUTO_INCREMENT,
+                            `todo_item` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT '待办事项',
+                            `create_by` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT '' COMMENT '创建人',
+                            `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                            PRIMARY KEY (`id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=DYNAMIC COMMENT='待办事项表';
 
 -- ----------------------------
@@ -3511,48 +3504,48 @@ INSERT INTO `sys_todo` VALUES ('8', 'todo1', '111', '2025-11-02 21:15:47');
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_user`;
 CREATE TABLE `sys_user` (
-  `user_id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户ID',
-  `dept_id` bigint DEFAULT NULL COMMENT '部门ID',
-  `user_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '用户账号',
-  `nick_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '用户昵称',
-  `user_type` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '00' COMMENT '用户类型（00系统用户）',
-  `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '用户邮箱',
-  `phonenumber` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '手机号码',
-  `sex` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '用户性别（0男 1女 2未知）',
-  `avatar` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '头像地址',
-  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '密码',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '账号状态（0正常 1停用）',
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-  `login_ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '最后登录IP',
-  `login_date` datetime DEFAULT NULL COMMENT '最后登录时间',
-  `pwd_update_date` datetime DEFAULT NULL COMMENT '密码最后更新时间',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`user_id`) USING BTREE
+                            `user_id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+                            `dept_id` bigint DEFAULT NULL COMMENT '部门ID',
+                            `user_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '用户账号',
+                            `nick_name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '用户昵称',
+                            `user_type` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '00' COMMENT '用户类型（00系统用户）',
+                            `email` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '用户邮箱',
+                            `phonenumber` varchar(11) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '手机号码',
+                            `sex` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '用户性别（0男 1女 2未知）',
+                            `avatar` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '头像地址',
+                            `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '密码',
+                            `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '账号状态（0正常 1停用）',
+                            `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+                            `login_ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '最后登录IP',
+                            `login_date` datetime DEFAULT NULL COMMENT '最后登录时间',
+                            `pwd_update_date` datetime DEFAULT NULL COMMENT '密码最后更新时间',
+                            `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                            `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                            `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                            `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                            `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+                            PRIMARY KEY (`user_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=102 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户信息表';
 
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES ('1', '103', 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-16 01:37:40', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', null, '管理员');
-INSERT INTO `sys_user` VALUES ('2', '105', 'ry', '张三', '00', 'ry@qq.com', '15666666666', '1', 'https://img0.baidu.com/it/u=3661017254,2148146033&fm=253&app=138&f=JPEG?w=500&h=500', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-14 15:25:34', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', null, '测试员');
-INSERT INTO `sys_user` VALUES ('3', '103', 'student1', '李比', '00', 'student1@school.com', '13800138001', '0', 'https://img0.baidu.com/it/u=2660145230,331641081&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=625', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 10:30:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', null, '学生');
+INSERT INTO `sys_user` VALUES ('1', '103', 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-16 07:30:36', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', null, '管理员');
+INSERT INTO `sys_user` VALUES ('2', '105', 'ry', '张三', '00', 'ry@qq.com', '15666666666', '1', 'https://img0.baidu.com/it/u=3661017254,2148146033&fm=253&app=138&f=JPEG?w=500&h=500', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-16 05:31:17', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', null, '测试员');
+INSERT INTO `sys_user` VALUES ('3', '103', 'student1', '李比', '00', 'student1@school.com', '13800138001', '0', 'https://img0.baidu.com/it/u=2660145230,331641081&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=625', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-15 23:16:27', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', null, '学生');
 INSERT INTO `sys_user` VALUES ('4', '105', 'teacher1', '王老师', '01', 'teacher1@school.com', '13900139001', '1', 'https://picsum.photos/200/200?random=2', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 11:20:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', null, '教师');
 INSERT INTO `sys_user` VALUES ('5', '103', 'student2', '赵六', '00', 'student2@school.com', '13700137001', '0', 'https://picsum.photos/200/200?random=3', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 09:15:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', null, '学生');
-INSERT INTO `sys_user` VALUES ('100', null, 'teacher_zhang', '张老师', '00', '', '13800000001', '0', '', '$2a$10$vpihLKD36.kAbG.T.IeM4.IeIhOzetQUEOOLCS5QA4v9Hx1JF.cSK', '0', '0', '127.0.0.1', '2025-11-14 11:11:46', null, 'admin', '2025-11-12 01:32:46', '', null, null);
-INSERT INTO `sys_user` VALUES ('101', null, 'student_li', '李同学', '00', '', '13800000002', '1', '', '$2a$10$76UxrSPYQSpNnfhy7PcKcukg9nPYHs9Q00ereE6msATSUELIOIybC', '0', '0', '127.0.0.1', '2025-11-12 19:18:58', null, 'admin', '2025-11-12 01:33:19', 'admin', '2025-11-12 01:34:13', null);
+INSERT INTO `sys_user` VALUES ('100', null, 'teacher_zhang', '张老师', '00', '', '13800000001', '0', '', '$2a$10$vpihLKD36.kAbG.T.IeM4.IeIhOzetQUEOOLCS5QA4v9Hx1JF.cSK', '0', '0', '127.0.0.1', '2025-11-14 09:51:08', null, 'admin', '2025-11-12 01:32:46', '', null, null);
+INSERT INTO `sys_user` VALUES ('101', null, 'student_li', '李同学', '00', '', '13800000002', '1', '', '$2a$10$76UxrSPYQSpNnfhy7PcKcukg9nPYHs9Q00ereE6msATSUELIOIybC', '0', '0', '127.0.0.1', '2025-11-16 05:14:45', null, 'admin', '2025-11-12 01:33:19', 'admin', '2025-11-12 01:34:13', null);
 
 -- ----------------------------
 -- Table structure for sys_user_post
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_user_post`;
 CREATE TABLE `sys_user_post` (
-  `user_id` bigint NOT NULL COMMENT '用户ID',
-  `post_id` bigint NOT NULL COMMENT '岗位ID',
-  PRIMARY KEY (`user_id`,`post_id`) USING BTREE
+                                 `user_id` bigint NOT NULL COMMENT '用户ID',
+                                 `post_id` bigint NOT NULL COMMENT '岗位ID',
+                                 PRIMARY KEY (`user_id`,`post_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户与岗位关联表';
 
 -- ----------------------------
@@ -3566,9 +3559,9 @@ INSERT INTO `sys_user_post` VALUES ('2', '2');
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_user_role`;
 CREATE TABLE `sys_user_role` (
-  `user_id` bigint NOT NULL COMMENT '用户ID',
-  `role_id` bigint NOT NULL COMMENT '角色ID',
-  PRIMARY KEY (`user_id`,`role_id`) USING BTREE
+                                 `user_id` bigint NOT NULL COMMENT '用户ID',
+                                 `role_id` bigint NOT NULL COMMENT '角色ID',
+                                 PRIMARY KEY (`user_id`,`role_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='用户和角色关联表';
 
 -- ----------------------------
@@ -3576,5 +3569,6 @@ CREATE TABLE `sys_user_role` (
 -- ----------------------------
 INSERT INTO `sys_user_role` VALUES ('1', '1');
 INSERT INTO `sys_user_role` VALUES ('2', '2');
+INSERT INTO `sys_user_role` VALUES ('3', '100');
 INSERT INTO `sys_user_role` VALUES ('100', '100');
 INSERT INTO `sys_user_role` VALUES ('101', '101');

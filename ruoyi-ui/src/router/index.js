@@ -310,6 +310,21 @@ export const constantRoutes = [
         component: () => import('@/views/proj_qhy/forum/index.vue'),
         name: 'Forum',
         meta: { title: '论坛', icon: 'message' }
+      },
+      // --- 新增 小组讨论 (主列表) ---
+      {
+        path: 'group',
+        component: () => import('@/views/proj_qhy/group/index.vue'),
+        name: 'Group',
+        meta: { title: '小组讨论', icon: 'chat-line-round' }
+      },
+      // --- 新增 聊天窗口 (隐藏) ---
+      {
+        path: 'group/chat/:groupId(\\d+)', // 确保groupId是数字
+        component: () => import('@/views/proj_qhy/group/chat.vue'),
+        name: 'GroupChat',
+        meta: { title: '聊天' },
+        hidden: true
       }
     ]
   },

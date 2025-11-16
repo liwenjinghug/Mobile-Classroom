@@ -85,3 +85,14 @@ export function hateArticle(id) {
     method: 'post'
   })
 }
+/**
+ * (新增) 批量导出文章为PDF
+ * @param {Array} ids 文章ID数组
+ */
+export function exportPdf(ids) {
+  return request({
+    url: '/proj_qhy/article/export-pdf',
+    method: 'post',
+    data: ids // 直接发送 ID 数组
+  })
+}

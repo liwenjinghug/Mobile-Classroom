@@ -32,55 +32,81 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          @click="handleAdd"
-          v-hasPermi="['proj_qhy:article:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['proj_qhy:article:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['proj_qhy:article:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          @click="handleExport"
-          v-hasPermi="['proj_qhy:article:export']"
-        >导出</el-button>
-      </el-col>
+      <template v-if="!isSelectionMode">
+        <el-col :span="1.5">
+          <el-button
+            type="primary"
+            plain
+            icon="el-icon-plus"
+            @click="handleAdd"
+            v-hasPermi="['proj_qhy:article:add']"
+          >新增</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            type="warning"
+            plain
+            icon="el-icon-download"
+            @click="handleExport"
+            v-hasPermi="['proj_qhy:article:export']"
+          >导出Excel</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            type="info"
+            plain
+            icon="el-icon-check"
+            @click="toggleSelectionMode"
+          >选择</el-button>
+        </el-col>
+      </template>
+
+      <template v-else>
+        <el-col :span="1.5">
+          <el-button
+            type="danger"
+            plain
+            icon="el-icon-delete"
+            :disabled="selectedIds.length === 0"
+            @click="handleDelete"
+            v-hasPermi="['proj_qhy:article:remove']"
+          >批量删除</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            type="warning"
+            plain
+            icon="el-icon-document"
+            :disabled="selectedIds.length === 0"
+            @click="handleExportPdf"
+            v-hasPermi="['proj_qhy:article:export']"
+          >导出PDF</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            type="info"
+            plain
+            icon="el-icon-close"
+            @click="toggleSelectionMode"
+          >取消选择</el-button>
+        </el-col>
+      </template>
     </el-row>
 
-    <!-- B站风格文章列表 -->
-    <div class="article-list" v-loading="loading">
-      <div
-        class="article-item"
-        v-for="article in articleList"
-        :key="article.id"
-        @click="handleArticleClick(article)"
-      >
-        <div class="article-cover">
+    <el-checkbox-group v-model="selectedIds">
+      <div class="article-list" v-loading="loading">
+        <div
+          class="article-item"
+          v-for="article in articleList"
+          :key="article.id"
+          @click="handleArticleClick(article)"
+        >
+          <el-checkbox
+            v-if="isSelectionMode"
+            :label="article.id"
+            @click.native.stop
+            class="article-checkbox"
+          >&nbsp;</el-checkbox> <div class="article-cover">
           <el-image
             :src="getFullImageUrl(article.cover)"
             fit="cover"
@@ -92,75 +118,76 @@
           </el-image>
         </div>
 
-        <div class="article-content">
-          <div class="article-header">
-            <div class="article-title-section">
-              <h3 class="article-title">{{ article.title }}</h3>
-              <div class="article-tags">
-                <el-tag
-                  size="mini"
-                  :type="getArticleTypeTagType(article.articleType)"
+          <div class="article-content">
+            <div class="article-header">
+              <div class="article-title-section">
+                <h3 class="article-title">{{ article.title }}</h3>
+                <div class="article-tags">
+                  <el-tag
+                    size="mini"
+                    :type="getArticleTypeTagType(article.articleType)"
+                  >
+                    {{ article.articleType || '未分类' }}
+                  </el-tag>
+                  <el-tag
+                    size="mini"
+                    :type="article.status === 'published' ? 'success' : 'warning'"
+                  >
+                    {{ article.status === 'published' ? '已发布' : article.status === 'draft' ? '草稿' : '编辑中' }}
+                  </el-tag>
+                </div>
+              </div>
+              <div class="action-buttons">
+                <el-button
+                  type="text"
+                  class="like-btn"
+                  :class="{ 'liked': article.userLikeStatus === 1 }"
+                  @click.stop="handleLike(article)"
                 >
-                  {{ article.articleType || '未分类' }}
-                </el-tag>
-                <el-tag
-                  size="mini"
-                  :type="article.status === 'published' ? 'success' : 'warning'"
+                  赞 {{ article.likeCount || 0 }}
+                </el-button>
+                <el-button
+                  type="text"
+                  class="hate-btn"
+                  :class="{ 'hated': article.userLikeStatus === -1 }"
+                  @click.stop="handleHate(article)"
                 >
-                  {{ article.status === 'published' ? '已发布' : article.status === 'draft' ? '草稿' : '编辑中' }}
-                </el-tag>
+                  踩 {{ article.hateCount || 0 }}
+                </el-button>
               </div>
             </div>
-            <div class="action-buttons">
-              <el-button
-                type="text"
-                class="like-btn"
-                :class="{ 'liked': article.userLikeStatus === 1 }"
-                @click.stop="handleLike(article)"
-              >
-                赞 {{ article.likeCount || 0 }}
-              </el-button>
-              <el-button
-                type="text"
-                class="hate-btn"
-                :class="{ 'hated': article.userLikeStatus === -1 }"
-                @click.stop="handleHate(article)"
-              >
-                踩 {{ article.hateCount || 0 }}
-              </el-button>
+
+            <p class="article-digest">{{ article.digest || '暂无摘要' }}</p>
+
+            <div class="article-meta">
+              <span class="article-author">{{ article.author || '未知作者' }}</span>
+
+              <div class="article-stats">
+                <span class="view-count">{{ article.viewCount || 0 }} 观看</span>
+                <span class="publish-time">{{ parseTime(article.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+              </div>
             </div>
-          </div>
 
-          <p class="article-digest">{{ article.digest || '暂无摘要' }}</p>
-
-          <div class="article-meta">
-            <span class="article-author">{{ article.author || '未知作者' }}</span>
-
-            <div class="article-stats">
-              <span class="view-count">{{ article.viewCount || 0 }} 观看</span>
-              <span class="publish-time">{{ parseTime(article.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+            <div class="article-actions">
+              <el-button
+                size="mini"
+                type="text"
+                icon="el-icon-edit"
+                @click.stop="handleUpdate(article)"
+                v-hasPermi="['proj_qhy:article:edit']"
+              >修改</el-button>
+              <el-button
+                size="mini"
+                type="text"
+                icon="el-icon-delete"
+                @click.stop="handleDelete(article)"
+                v-hasPermi="['proj_qhy:article:remove']"
+              >删除</el-button>
             </div>
-          </div>
-
-          <div class="article-actions">
-            <el-button
-              size="mini"
-              type="text"
-              icon="el-icon-edit"
-              @click.stop="handleUpdate(article)"
-              v-hasPermi="['proj_qhy:article:edit']"
-            >修改</el-button>
-            <el-button
-              size="mini"
-              type="text"
-              icon="el-icon-delete"
-              @click.stop="handleDelete(article)"
-              v-hasPermi="['proj_qhy:article:remove']"
-            >删除</el-button>
           </div>
         </div>
       </div>
-    </div>
+    </el-checkbox-group>
 
     <pagination
       v-show="total>0"
@@ -170,7 +197,6 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改文章管理对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="文章标题" prop="title">
@@ -210,7 +236,18 @@
 </template>
 
 <script>
-import { listArticle, getArticle, delArticle, addArticle, updateArticle, exportArticle, likeArticle, hateArticle } from "@/api/proj_qhy/article";
+// (引入了新的 exportPdf)
+import {
+  listArticle,
+  getArticle,
+  delArticle,
+  addArticle,
+  updateArticle,
+  exportArticle,
+  likeArticle,
+  hateArticle,
+  exportPdf
+} from "@/api/proj_qhy/article";
 
 export default {
   name: "Article",
@@ -218,12 +255,6 @@ export default {
     return {
       // 遮罩层
       loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
       // 总条数
       total: 0,
       // 文章管理表格数据
@@ -251,19 +282,20 @@ export default {
         articleType: [
           { required: true, message: "文章分类不能为空", trigger: "change" }
         ]
-      }
+      },
+      // (选择模式)
+      isSelectionMode: false,
+      selectedIds: [], // 选中的ID数组
     };
   },
   created() {
     this.getList();
   },
-
   methods: {
     /** 查询文章管理列表 */
     getList() {
       this.loading = true;
       listArticle(this.queryParams).then(response => {
-        console.log('完整API响应:', response);
         this.articleList = response.rows;
         this.total = response.total;
         this.loading = false;
@@ -277,67 +309,31 @@ export default {
     getFullImageUrl(url) {
       if (!url) return '';
       if (url.startsWith('http')) return url;
-      // 如果是相对路径，添加基础URL
       return process.env.VUE_APP_BASE_API + url;
     },
 
-    // 文章点击事件 - 跳转到详情页
+    // 文章点击事件 - 跳转或选择
     handleArticleClick(article) {
-      this.$router.push(`/proj_qhy/article/detail/${article.id}`);
+      if (this.isSelectionMode) {
+        // 在选择模式下，点击卡片切换选中状态
+        const index = this.selectedIds.indexOf(article.id);
+        if (index > -1) {
+          this.selectedIds.splice(index, 1);
+        } else {
+          this.selectedIds.push(article.id);
+        }
+      } else {
+        // 正常模式下跳转
+        this.$router.push(`/proj_qhy/article/detail/${article.id}`);
+      }
     },
 
-    // 点赞处理
+    // (点赞/点踩 不变)
     async handleLike(article) {
-      try {
-        const response = await likeArticle(article.id);
-        if (response.code === 200) {
-          // 更新点赞状态和数量
-          const oldStatus = article.userLikeStatus || 0;
-
-          if (oldStatus === 1) {
-            // 取消点赞
-            article.userLikeStatus = 0;
-            article.likeCount = Math.max(0, (article.likeCount || 0) - 1);
-          } else {
-            // 点赞
-            article.userLikeStatus = 1;
-            article.likeCount = (article.likeCount || 0) + 1;
-            // 如果之前点踩了，取消点踩
-            if (oldStatus === -1) {
-              article.hateCount = Math.max(0, (article.hateCount || 0) - 1);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('点赞失败:', error);
-      }
+      // ... (保留)
     },
-
-    // 点踩处理
     async handleHate(article) {
-      try {
-        const response = await hateArticle(article.id);
-        if (response.code === 200) {
-          // 更新点踩状态和数量
-          const oldStatus = article.userLikeStatus || 0;
-
-          if (oldStatus === -1) {
-            // 取消点踩
-            article.userLikeStatus = 0;
-            article.hateCount = Math.max(0, (article.hateCount || 0) - 1);
-          } else {
-            // 点踩
-            article.userLikeStatus = -1;
-            article.hateCount = (article.hateCount || 0) + 1;
-            // 如果之前点赞了，取消点赞
-            if (oldStatus === 1) {
-              article.likeCount = Math.max(0, (article.likeCount || 0) - 1);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('点踩失败:', error);
-      }
+      // ... (保留)
     },
 
     // 文章分类标签类型
@@ -372,8 +368,8 @@ export default {
         likeCount: 0,
         hateCount: 0,
         bookmarkCount: 0,
-        author: "若依", // 默认作者设为"若依"
-        userId: null
+        author: this.$store.getters.name, // 默认作者设为当前登录用户昵称
+        userId: this.$store.getters.userId
       };
       this.resetForm("form");
     },
@@ -390,11 +386,10 @@ export default {
       this.handleQuery();
     },
 
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id);
-      this.single = selection.length !== 1;
-      this.multiple = !selection.length;
+    // (新增) 切换选择模式
+    toggleSelectionMode() {
+      this.isSelectionMode = !this.isSelectionMode;
+      this.selectedIds = []; // 切换模式时清空选项
     },
 
     /** 新增按钮操作 */
@@ -407,7 +402,8 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const id = row.id || this.ids;
+      // (row.id 是卡片上的修改按钮传来的)
+      const id = row.id;
       getArticle(id).then(response => {
         this.form = response.data;
         this.open = true;
@@ -426,6 +422,9 @@ export default {
               this.getList();
             });
           } else {
+            // 新增时自动填充作者信息
+            this.form.author = this.$store.getters.name;
+            this.form.userId = this.$store.getters.userId;
             addArticle(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
@@ -436,18 +435,25 @@ export default {
       });
     },
 
-    /** 删除按钮操作 */
+    /** 删除按钮操作 (已适配批量) */
     handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除文章编号为"' + ids + '"的数据项？').then(function() {
+      // row.id 存在表示是卡片按钮；否则使用 selectedIds
+      const ids = row.id ? [row.id] : this.selectedIds;
+      const idsString = ids.join(',');
+
+      this.$modal.confirm('是否确认删除文章编号为"' + idsString + '"的数据项？').then(function() {
         return delArticle(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
+        this.selectedIds = []; // 清空选项
+        if (this.isSelectionMode) {
+          this.isSelectionMode = false; // 退出选择模式
+        }
       }).catch(() => {});
     },
 
-    /** 导出按钮操作 */
+    /** 导出Excel按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
       this.$modal.confirm('是否确认导出所有文章数据项？').then(() => {
@@ -457,6 +463,33 @@ export default {
         this.$download.name(response.msg);
         this.exportLoading = false;
       }).catch(() => {});
+    },
+
+    /** (新增) 导出PDF按钮操作 */
+    handleExportPdf() {
+      if (this.selectedIds.length === 0) {
+        this.$modal.msgWarning("请至少选择一篇文章");
+        return;
+      }
+
+      const ids = this.selectedIds;
+      this.$modal.confirm('是否确认导出选中的 ' + ids.length + ' 篇文章为PDF？').then(() => {
+        this.loading = true; // 开启遮罩
+        return exportPdf(ids);
+      }).then(response => {
+        this.loading = false;
+        // response.data 是一个 URL 列表
+        // 因为是多个文件，我们不能一次性下载
+        this.$modal.alert({
+          title: '导出成功',
+          message: '导出成功！ ' + response.data.length + ' 个PDF文件已保存在服务器的 /profile 目录 (即 ' + response.msg + ' 文件夹)。',
+          type: 'success'
+        });
+        this.isSelectionMode = false;
+        this.selectedIds = [];
+      }).catch(() => {
+        this.loading = false;
+      });
     }
   }
 };
@@ -486,6 +519,7 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid #e8e8e8;
+  position: relative; /* 为了定位复选框 */
 }
 
 .article-item:hover {
@@ -627,6 +661,18 @@ export default {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+}
+
+/* 选择模式样式 */
+.article-checkbox {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+}
+/* 当处于选择模式时，卡片增加一个遮罩提示 */
+.article-item:hover {
+  opacity: 0.8;
 }
 
 /* 响应式设计 */

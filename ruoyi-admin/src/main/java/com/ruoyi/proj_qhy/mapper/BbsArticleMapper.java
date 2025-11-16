@@ -147,4 +147,21 @@ public interface BbsArticleMapper {
             "</script>"
     })
     List<BbsArticle> selectHotArticleList(BbsArticle bbsArticle);
+
+    /**
+     * (新增) 批量查询文章管理
+     */
+    @Select({
+            "<script>",
+            "SELECT id, title, digest, content, cover, article_type as articleType, status, view_count as viewCount, " +
+                    "comment_count as commentCount, like_count as likeCount, hate_count as hateCount, bookmark_count as bookmarkCount, " +
+                    "author, user_id as userId, create_by as createBy, create_time as createTime, " +
+                    "update_by as updateBy, update_time as updateTime, remark ",
+            "FROM class_article WHERE id IN",
+            "<foreach collection='array' item='id' open='(' separator=',' close=')'>",
+            "#{id}",
+            "</foreach>",
+            "</script>"
+    })
+    List<BbsArticle> selectBbsArticleByIds(Long[] ids);
 }

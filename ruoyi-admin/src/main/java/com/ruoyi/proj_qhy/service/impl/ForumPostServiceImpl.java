@@ -1,25 +1,31 @@
 package com.ruoyi.proj_qhy.service.impl;
 
-import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.config.RuoYiConfig;
+import com.ruoyi.common.constant.Constants;
+import com.ruoyi.common.core.domain.model.LoginUser;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.proj_qhy.domain.ForumPost;
+import com.ruoyi.proj_qhy.mapper.ForumCommentMapper;
 import com.ruoyi.proj_qhy.mapper.ForumLikeMapper;
 import com.ruoyi.proj_qhy.mapper.ForumPostMapper;
 import com.ruoyi.proj_qhy.service.IForumPostService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
+/**
+ * 论坛帖子服务实现
+ */
 @Service
 public class ForumPostServiceImpl implements IForumPostService {
 
@@ -31,122 +37,174 @@ public class ForumPostServiceImpl implements IForumPostService {
     @Autowired
     private ForumLikeMapper likeMapper;
 
-    // 使用 ruoyi.profile 配置的上传目录（由 RuoYiConfig 注入），ResourcesConfig 已把 Constants.RESOURCE_PREFIX 映射到该目录
-    // 不再硬编码到 ruoyi-ui 源码目录
-    // 保存时会使用 RuoYiConfig.getProfile()；对外返回的路径使用 Constants.RESOURCE_PREFIX + "/<fileName>"
+    @Autowired
+    private ForumCommentMapper commentMapper; // 确保已创建 ForumCommentMapper
+
     @Override
     public List<ForumPost> selectPostList(Long userId) {
-        List<ForumPost> posts = postMapper.selectPostList();
-        // 补充当前用户点赞状态
-        for (ForumPost post : posts) {
-            Integer isLiked = likeMapper.selectIsLiked(post.getPostId(), userId);
-            post.setIsLiked(isLiked != null && isLiked > 0);
-        }
-        return posts;
-    }
-
-    @Override
-    public boolean publishPost(ForumPost post, MultipartFile[] files) {
-        try {
-            // 设置发布者信息
-            Long userId = SecurityUtils.getUserId();
-            String username = SecurityUtils.getUsername();
-            post.setUserId(userId);
-            post.setCreateBy(username);
-
-            // 处理图片上传
-            if (files != null && files.length > 0) {
-                List<String> imageUrls = new ArrayList<>();
-                for (MultipartFile file : files) {
-                    if (!file.isEmpty()) {
-                        // 生成唯一文件名
-                        String originalFilename = file.getOriginalFilename();
-                        if (!isValidFilename(originalFilename)) {
-                            continue;
-                        }
-                        int dotIdx = originalFilename.lastIndexOf('.');
-                        String ext = originalFilename.substring(dotIdx);
-                        String fileName = UUID.randomUUID().toString() + ext;
-
-                        // 保存图片到配置的目录（RuoYiConfig.getProfile()），如果配置为空则使用后台模块相对路径
-                        String profilePath = RuoYiConfig.getProfile();
-                        String saveDir = null;
-                        if (profilePath != null && !profilePath.trim().isEmpty()) {
-                            saveDir = resolveProfilePath(profilePath);
-                        }
-                        if (saveDir == null) {
-                            // fallback: put into ruoyi-ui assets folder relative to project root
-                            saveDir = "D:\\code\\java\\Mobile-Classroom\\ruoyi-ui\\src\\assets\\xxsq_images\\";
-                        }
-
-                        File saveFile = new File(saveDir + fileName);
-                        if (!saveFile.getParentFile().exists()) {
-                            boolean ok = saveFile.getParentFile().mkdirs();
-                            if (!ok) {
-                                logger.warn("创建图片保存目录失败: {}", saveFile.getParentFile().getAbsolutePath());
-                            }
-                        }
-                        file.transferTo(saveFile);
-
-                        // 记录可被前端通过后端访问的 URL（ResourcesConfig 把 Constants.RESOURCE_PREFIX/** 映射到 profile）
-                        imageUrls.add(Constants.RESOURCE_PREFIX + "/" + fileName);
-                    }
-                }
-                if (!imageUrls.isEmpty()) {
-                    post.setImageUrls(StringUtils.join(imageUrls, ","));
-                }
-            }
-
-            // 保存帖子
-            return postMapper.insertPost(post) > 0;
-        } catch (IOException e) {
-            logger.error("保存帖子图片失败", e);
-            return false;
-        }
+        // 假设 postMapper.selectPostList 已按要求修改，通过 JOIN 一次性查询
+        return postMapper.selectPostList(userId);
     }
 
     @Override
     public List<ForumPost> refreshPostList(Long userId) {
-        // 刷新逻辑同查询列表
-        return selectPostList(userId);
+        // 刷新和查询列表是同一逻辑
+        return postMapper.selectPostList(userId);
+    }
+
+    @Override
+    @Transactional
+    public boolean publishPost(ForumPost post, MultipartFile[] files) {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        Long userId = loginUser.getUserId();
+        String username = loginUser.getUsername();
+
+        // 1. 处理图片上传
+        String imageUrls = uploadFiles(files);
+
+        // 2. 设置帖子属性
+        post.setUserId(userId);
+        post.setCreateBy(username);
+        post.setImageUrls(imageUrls);
+
+        // 3. 插入数据库
+        int rows = postMapper.insertPost(post);
+        return rows > 0;
+    }
+
+    @Override
+    @Transactional
+    public boolean updatePost(ForumPost post, MultipartFile[] files) {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        Long currentUserId = loginUser.getUserId();
+        String username = loginUser.getUsername();
+
+        // 1. 鉴权：检查帖子是否存在且属于当前用户
+        ForumPost existingPost = postMapper.selectPostByIdSimple(post.getPostId());
+        if (existingPost == null) {
+            throw new ServiceException("帖子不存在");
+        }
+        if (!existingPost.getUserId().equals(currentUserId)) {
+            throw new ServiceException("无权修改此帖子");
+        }
+
+        // 2. 处理图片
+        // 2.1 上传新图片
+        String newImageUrls = uploadFiles(files);
+
+        // 2.2 合并新旧图片
+        // post.getImageUrls() 此时应包含前端传来的、需要保留的旧图片URL
+        List<String> finalImageUrls = new ArrayList<>();
+        if (StringUtils.isNotEmpty(post.getImageUrls())) {
+            finalImageUrls.addAll(Arrays.asList(post.getImageUrls().split(",")));
+        }
+        if (StringUtils.isNotEmpty(newImageUrls)) {
+            finalImageUrls.addAll(Arrays.asList(newImageUrls.split(",")));
+        }
+
+        // 3. 设置更新属性
+        post.setImageUrls(String.join(",", finalImageUrls));
+        post.setUpdateBy(username);
+
+        // 4. 更新数据库
+        int rows = postMapper.updatePost(post);
+        return rows > 0;
+    }
+
+    @Override
+    @Transactional
+    public boolean deletePost(Long postId) {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        Long currentUserId = loginUser.getUserId();
+        String username = loginUser.getUsername();
+
+        // 1. 鉴权
+        ForumPost existingPost = postMapper.selectPostByIdSimple(postId);
+        if (existingPost == null) {
+            // 帖子可能已被删除，也算成功
+            return true;
+        }
+        if (!existingPost.getUserId().equals(currentUserId)) {
+            throw new ServiceException("无权删除此帖子");
+        }
+
+        // 2. 准备更新信息
+        existingPost.setUpdateBy(username);
+
+        // 3. 逻辑删除帖子
+        int postRows = postMapper.deletePostById(existingPost);
+
+        // 4. 逻辑删除关联的点赞
+        likeMapper.deleteLikesByPostId(postId, username);
+
+        // 5. 逻辑删除关联的评论
+        commentMapper.deleteCommentsByPostId(postId, username);
+
+        return postRows > 0;
+    }
+
+
+    /**
+     * 统一文件上传逻辑
+     * (这个逻辑比您现有的更健壮，它依赖于若依的配置 ruoyi.profile)
+     */
+    private String uploadFiles(MultipartFile[] files) {
+        if (files == null || files.length == 0) {
+            return "";
+        }
+
+        List<String> successUrls = new ArrayList<>();
+        // 获取若依配置的全局上传路径
+        String configuredProfile = RuoYiConfig.getProfile();
+
+        for (MultipartFile file : files) {
+            if (file == null || file.isEmpty()) continue;
+
+            try {
+                // 1. 生成文件名
+                String originalFilename = file.getOriginalFilename();
+                String newFileName = generateFileName(originalFilename);
+
+                // 2. 确定保存路径
+                String savePath = configuredProfile;
+                if (StringUtils.isEmpty(savePath)) {
+                    // 备用方案（不推荐，但作为兜底）
+                    savePath = new File("").getAbsolutePath() + "/uploads/forum";
+                }
+
+                // 确保目录存在
+                File destDir = new File(savePath);
+                if (!destDir.exists()) {
+                    destDir.mkdirs();
+                }
+
+                // 3. 保存文件
+                File destFile = new File(savePath + File.separator + newFileName);
+                file.transferTo(destFile);
+
+                // 4. 构建返回的URL
+                // Constants.RESOURCE_PREFIX 是 /profile
+                String imageUrl = Constants.RESOURCE_PREFIX + "/" + newFileName;
+                successUrls.add(imageUrl);
+
+            } catch (Exception e) {
+                logger.error("文件上传失败: " + file.getOriginalFilename(), e);
+            }
+        }
+
+        return successUrls.stream().collect(Collectors.joining(","));
     }
 
     /**
-     * 简单校验文件名是否有效（非空且包含扩展名）
+     * 生成唯一文件名
      */
-    private boolean isValidFilename(String name) {
-        return name != null && name.indexOf('.') > 0;
-    }
-
-    private String resolveProfilePath(String configuredProfile) {
-        if (configuredProfile == null) return null;
-        configuredProfile = configuredProfile.trim();
-        File cfgFile = new File(configuredProfile);
-        if (cfgFile.isAbsolute()) {
-            String p = cfgFile.getAbsolutePath();
-            if (!p.endsWith(File.separator)) p = p + File.separator;
-            return p;
+    private String generateFileName(String originalFilename) {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String uuid = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
-        File dir = new File("").getAbsoluteFile();
-        while (dir != null) {
-            File candidate = new File(dir, configuredProfile);
-            if (candidate.exists()) {
-                String p = candidate.getAbsolutePath();
-                if (!p.endsWith(File.separator)) p = p + File.separator;
-                return p;
-            }
-            if ("Mobile-Classroom".equals(dir.getName())) {
-                File candidate2 = new File(dir, configuredProfile);
-                String p2 = candidate2.getAbsolutePath();
-                if (!p2.endsWith(File.separator)) p2 = p2 + File.separator;
-                return p2;
-            }
-            dir = dir.getParentFile();
-        }
-        String fallback = System.getProperty("user.home") + File.separator + "Mobile-Classroom" + File.separator + configuredProfile;
-        File f = new File(fallback);
-        String abs = f.getAbsolutePath();
-        if (!abs.endsWith(File.separator)) abs = abs + File.separator;
-        return abs;
+        return "forum_" + timeStamp + "_" + uuid + fileExtension;
     }
 }

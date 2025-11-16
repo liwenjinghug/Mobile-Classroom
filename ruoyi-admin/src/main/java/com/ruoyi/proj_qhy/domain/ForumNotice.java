@@ -1,6 +1,7 @@
 package com.ruoyi.proj_qhy.domain;
 
 import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * 论坛通知（非数据库表，用于前端展示）
@@ -13,6 +14,8 @@ public class ForumNotice {
     private String operatorAvatar; // 操作用户头像
     private Integer noticeType;    // 通知类型（1点赞 2评论）
     private String commentContent; // 评论内容（仅评论通知有值）
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") // <--- 添加这一行
     private Date createTime;       // 通知时间
 
     // 手动实现getter/setter
