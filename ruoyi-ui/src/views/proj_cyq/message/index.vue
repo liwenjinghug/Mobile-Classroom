@@ -3,11 +3,46 @@
     <div class="message-header">
       <h3>消息提示</h3>
       <div class="header-actions">
+        <el-button
+          @click="handleExport"
+          icon="el-icon-download"
+          :loading="exportLoading"
+        >导出</el-button>
+
         <el-button @click="handleRefresh" icon="el-icon-refresh">刷新</el-button>
         <el-button @click="handleMarkAllRead" type="primary" :loading="markingAllRead">全部标记已读</el-button>
         <el-button icon="el-icon-back" @click="handleBack">返回</el-button>
       </div>
     </div>
+
+    <h4 class="stats-title">统计概览</h4>
+
+    <el-row :gutter="20" class="stats-overview" v-if="stats.totalCount > 0">
+      <el-col :span="6">
+        <div class="stat-item">
+          <div class="stat-label">消息总数</div>
+          <div class="stat-value">{{ stats.totalCount }}</div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="stat-item unread">
+          <div class="stat-label">未读消息</div>
+          <div class="stat-value">{{ stats.unreadCount }}</div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="stat-item todo">
+          <div class="stat-label">待办事项</div>
+          <div class="stat-value">{{ getStatValue('typeStats', '待办事项') }}</div>
+        </div>
+      </el-col>
+      <el-col :span="6">
+        <div class="stat-item homework">
+          <div class="stat-label">作业消息</div>
+          <div class="stat-value">{{ getStatValue('typeStats', '作业消息') }}</div>
+        </div>
+      </el-col>
+    </el-row>
 
     <div class="message-list">
       <div
@@ -36,7 +71,6 @@
             <el-tag v-if="message.isRead === '0'" type="danger" size="mini">未读</el-tag>
           </div>
 
-          <!-- 作业消息内容 -->
           <div v-if="message.type === 'homework'" class="message-body">
             <div class="homework-info">
               <p><strong>作业名称：</strong>{{ message.homeworkName }}</p>
@@ -45,7 +79,6 @@
             </div>
           </div>
 
-          <!-- 待办消息内容 -->
           <div v-else-if="message.type === 'todo'" class="message-body">
             <div class="todo-info">
               <p><strong>待办内容：</strong>{{ message.content }}</p>
@@ -59,7 +92,6 @@
           </div>
         </div>
         <div class="message-actions">
-          <!-- 标记已读按钮 -->
           <el-button
             v-if="message.isRead === '0'"
             type="text"
@@ -68,7 +100,6 @@
           >{{ message.markingRead ? '标记中...' : '标记已读' }}</el-button>
           <span v-else class="read-text">已读</span>
 
-          <!-- 删除按钮 -->
           <el-button
             type="text"
             @click="handleDelete(message, index)"
@@ -78,7 +109,6 @@
         </div>
       </div>
 
-      <!-- 空状态 -->
       <div v-if="messageList.length === 0" class="empty-state">
         <el-empty description="暂无消息"></el-empty>
       </div>
@@ -87,7 +117,15 @@
 </template>
 
 <script>
-import { listMessage, markTodoAsRead, markHomeworkAsRead, markAllAsRead, deleteMessage } from "@/api/proj_cyq/message";
+// 【修改】引入 getMessageStats
+import {
+  listMessage,
+  markTodoAsRead,
+  markHomeworkAsRead,
+  markAllAsRead,
+  deleteMessage,
+  getMessageStats // <-- 引入
+} from "@/api/proj_cyq/message";
 
 export default {
   name: "Message",
@@ -96,11 +134,21 @@ export default {
       // 消息列表
       messageList: [],
       // 全部标记已读加载状态
-      markingAllRead: false
+      markingAllRead: false,
+
+      // 【新增】数据
+      exportLoading: false, // 导出加载状态
+      stats: { // 统计数据
+        totalCount: 0,
+        unreadCount: 0,
+        typeStats: [],
+        readStats: []
+      }
     };
   },
   created() {
     this.getList();
+    this.getStats(); // 【新增】页面加载时获取统计
   },
   methods: {
     // 获取消息列表
@@ -111,6 +159,38 @@ export default {
         console.log('消息列表:', this.messageList);
       });
     },
+
+    // 【新增】获取统计数据
+    getStats() {
+      getMessageStats().then(response => {
+        if (response.code === 200) {
+          this.stats = response.data;
+          console.log("统计数据已更新:", this.stats);
+        } else {
+          this.$modal.msgError("获取统计数据失败: " + response.msg);
+        }
+      }).catch(err => {
+        this.$modal.msgError("获取统计数据失败，请检查网络或联系管理员");
+        console.error("getStats 失败:", err);
+      });
+    },
+
+    // 【新增】处理导出
+    handleExport() {
+      this.exportLoading = true;
+      // this.download 是若依的全局混入(mixin)
+      // 它直接接收 URL、参数和文件名
+      this.download(
+        '/proj_cyq/message/export', // 后端 Controller 的 URL
+        {},                         // 没有参数，传空对象
+        '消息中心数据.xlsx'
+      ).then(() => {
+        this.exportLoading = false;
+      }).catch(() => {
+        this.exportLoading = false;
+      });
+    },
+
     // 处理消息列表，确保没有重复的key
     processMessageList(messages) {
       const seenKeys = new Set();
@@ -156,15 +236,16 @@ export default {
       // 如果messageId无效，使用索引和其他属性组合
       return `${message.type}_${index}_${Date.now()}`;
     },
-    // 刷新
+    // 【修改】刷新
     handleRefresh() {
       this.getList();
+      this.getStats(); // 刷新时也刷新统计
     },
     // 返回个人中心
     handleBack() {
       this.$router.push("/proj_cyq");
     },
-    // 标记单个消息已读
+    // 【修改】标记单个消息已读
     handleMarkRead(message) {
       this.$set(message, 'markingRead', true);
 
@@ -183,6 +264,7 @@ export default {
         if (response.code === 200) {
           this.$modal.msgSuccess("标记已读成功");
           message.isRead = '1';
+          this.getStats(); // <-- 刷新统计
           console.log('标记已读成功，消息ID:', message.messageId);
         } else {
           this.$modal.msgError(response.msg || "标记已读失败");
@@ -194,7 +276,7 @@ export default {
         this.$set(message, 'markingRead', false);
       });
     },
-    // 标记全部已读
+    // 【修改】标记全部已读
     handleMarkAllRead() {
       this.markingAllRead = true;
       markAllAsRead().then(response => {
@@ -204,6 +286,7 @@ export default {
           this.messageList.forEach(message => {
             message.isRead = '1';
           });
+          this.getStats(); // <-- 刷新统计
           console.log('全部标记已读成功');
         } else {
           this.$modal.msgError(response.msg || "全部标记已读失败");
@@ -215,7 +298,7 @@ export default {
         this.markingAllRead = false;
       });
     },
-    // 删除消息
+    // 【修改】删除消息
     handleDelete(message, index) {
       this.$modal.confirm('是否确认删除该消息？').then(() => {
         // 设置删除状态
@@ -227,6 +310,7 @@ export default {
           // 从列表中移除消息
           this.messageList.splice(index, 1);
           this.$modal.msgSuccess("删除成功");
+          this.getStats(); // <-- 刷新统计
         } else {
           this.$modal.msgError(response.msg || "删除失败");
         }
@@ -238,6 +322,14 @@ export default {
         this.$set(message, 'deleting', false);
       });
     },
+
+    // (辅助方法)
+    getStatValue(statType, name) {
+      if (!this.stats[statType]) return 0;
+      const item = this.stats[statType].find(s => s.name === name);
+      return item ? item.value : 0;
+    },
+
     // 获取消息类型标签样式
     getMessageType(type) {
       const typeMap = {
@@ -385,5 +477,42 @@ export default {
 
 .empty-state {
   padding: 40px 0;
+}
+
+/* 【新增】统计概览标题样式 */
+.stats-title {
+  font-size: 18px; /* 调整了字体大小 */
+  color: #303133;
+  margin-bottom: 15px; /* 增加了和下方卡片的间距 */
+  font-weight: 600; /* 加粗一点 */
+}
+
+/* 统计概览样式 */
+.stats-overview {
+  margin-bottom: 20px;
+}
+.stat-item {
+  padding: 20px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  text-align: center;
+}
+.stat-label {
+  font-size: 14px;
+  color: #909399;
+  margin-bottom: 10px;
+}
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+.stat-item.unread .stat-value {
+  color: #f56c6c;
+}
+.stat-item.todo .stat-value {
+  color: #e6a23c;
+}
+.stat-item.homework .stat-value {
+  color: #67c23a;
 }
 </style>

@@ -47,3 +47,22 @@ export function deleteMessage(messageId) {
     method: 'delete'
   })
 }
+
+// ========== 新增：导出消息 ==========
+// (参考 todo.js)
+export function exportMessage() {
+  return request({
+    url: '/proj_cyq/message/export',
+    method: 'post',
+    responseType: 'blob' // 导出功能需要 responseType: 'blob'
+  })
+}
+
+// ========== 新增：获取消息统计 ==========
+// (参考 todo.js)
+export function getMessageStats() {
+  return request({
+    url: '/proj_cyq/message/stats',
+    method: 'get'
+  })
+}

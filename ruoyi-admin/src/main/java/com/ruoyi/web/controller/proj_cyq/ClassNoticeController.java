@@ -1,7 +1,7 @@
-// src/main/java/com/ruoyi/web/controller/proj_cyq/ClassNoticeController.java
 package com.ruoyi.web.controller.proj_cyq;
 
-import com.ruoyi.common.annotation.Log;
+// 【修复】导入你自定义的 @Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -39,12 +39,13 @@ public class ClassNoticeController extends BaseController {
      * 导出公告列表 - 修改为GET请求，不接收参数
      */
     @PreAuthorize("@ss.hasPermi('proj_cyq:notice:export')")
-    @Log(title = "课堂公告", businessType = BusinessType.EXPORT)
+    // 此注解现在会正确指向 ClassLogAspect
+    @Log(title = "通告管理", businessType = BusinessType.EXPORT)
     @GetMapping("/export")  // 改为GET请求
     public void export(HttpServletResponse response) {
         List<ClassNotice> list = classNoticeService.selectClassNoticeList(new ClassNotice());
         ExcelUtil<ClassNotice> util = new ExcelUtil<>(ClassNotice.class);
-        util.exportExcel(response, list, "课堂公告数据");
+        util.exportExcel(response, list, "通告管理数据");
     }
 
     /**
@@ -60,7 +61,7 @@ public class ClassNoticeController extends BaseController {
      * 新增公告
      */
     @PreAuthorize("@ss.hasPermi('proj_cyq:notice:add')")
-    @Log(title = "课堂公告", businessType = BusinessType.INSERT)
+    @Log(title = "通告管理", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody ClassNotice notice) {
         return toAjax(classNoticeService.insertClassNotice(notice));
@@ -70,7 +71,7 @@ public class ClassNoticeController extends BaseController {
      * 修改公告
      */
     @PreAuthorize("@ss.hasPermi('proj_cyq:notice:edit')")
-    @Log(title = "课堂公告", businessType = BusinessType.UPDATE)
+    @Log(title = "通告管理", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody ClassNotice notice) {
         return toAjax(classNoticeService.updateClassNotice(notice));
@@ -80,7 +81,7 @@ public class ClassNoticeController extends BaseController {
      * 删除公告
      */
     @PreAuthorize("@ss.hasPermi('proj_cyq:notice:remove')")
-    @Log(title = "课堂公告", businessType = BusinessType.DELETE)
+    @Log(title = "通告管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{noticeIds}")
     public AjaxResult remove(@PathVariable Long[] noticeIds) {
         return toAjax(classNoticeService.deleteClassNoticeByIds(noticeIds));

@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.ruoyi.common.annotation.Log;
+
+// 【修复】导入你自定义的 @Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
@@ -31,6 +33,7 @@ public class TodoController extends BaseController {
     @Autowired
     private ITodoService todoService;
 
+    // (查询列表和GetInfo通常不记录操作日志，保持不变)
     @GetMapping("/list")
     public TableDataInfo list(Todo todo) {
         startPage();
@@ -38,6 +41,7 @@ public class TodoController extends BaseController {
         return getDataTable(list);
     }
 
+    // 此注解现在会正确指向 ClassLogAspect
     @Log(title = "待办事项", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, Todo todo) {
@@ -90,18 +94,14 @@ public class TodoController extends BaseController {
     public void exportStats(HttpServletResponse response, @RequestParam Map<String, Object> params) {
         List<Map<String, Object>> list = todoService.getTodoStatsDetail(params);
 
-        // 转换数据格式
+        // ... (省略转换逻辑)
         List<TodoStatsExport> exportList = new ArrayList<>();
         int total = 0;
-
-        // 先计算总数
         for (Map<String, Object> item : list) {
             if (item.get("value") != null) {
                 total += Integer.parseInt(item.get("value").toString());
             }
         }
-
-        // 转换数据并计算百分比
         for (Map<String, Object> item : list) {
             String category = item.get("category") != null ? item.get("category").toString() : "";
             String name = item.get("name") != null ? item.get("name").toString() : "";
@@ -116,8 +116,6 @@ public class TodoController extends BaseController {
             );
             exportList.add(exportItem);
         }
-
-        // 如果没有数据，添加一个空行
         if (exportList.isEmpty()) {
             TodoStatsExport emptyItem = new TodoStatsExport("无数据", "无数据", 0, "0%");
             exportList.add(emptyItem);

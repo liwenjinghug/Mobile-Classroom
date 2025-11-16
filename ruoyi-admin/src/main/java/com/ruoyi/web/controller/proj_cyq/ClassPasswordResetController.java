@@ -6,14 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.SimpleMailMessage;
-import com.ruoyi.proj_cyq.service.IClassPasswordResetService; // 引入 system 模块的服务
-import com.ruoyi.proj_cyq.domain.ClassPasswordReset; // 引入 system 模块的实体
-import com.ruoyi.system.service.ISysUserService; // 复用若依核心服务
+import com.ruoyi.proj_cyq.service.IClassPasswordResetService;
+import com.ruoyi.proj_cyq.domain.ClassPasswordReset;
+import com.ruoyi.system.service.ISysUserService;
 import com.ruoyi.common.core.domain.entity.SysUser;
-import com.ruoyi.common.utils.SecurityUtils; // 引入若依加密工具
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+
+// 【新增】导入你的注解
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
+
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -42,6 +47,8 @@ public class ClassPasswordResetController extends BaseController
     /**
      * 1. 请求重置密码（发送邮件）
      */
+    // 【新增】日志
+    @Log(title = "密码重置", businessType = BusinessType.OTHER)
     @PostMapping("/request-reset")
     public AjaxResult requestReset(@RequestBody Map<String, String> body)
     {
@@ -55,7 +62,6 @@ public class ClassPasswordResetController extends BaseController
 
         // 2. 检查用户和邮箱
         if (user == null) {
-            // 为了安全，不提示“用户不存在”
             return AjaxResult.success("如果账号存在且绑定了邮箱，重置邮件将很快发送。");
         }
         if (StringUtils.isEmpty(user.getEmail())) {
@@ -66,12 +72,11 @@ public class ClassPasswordResetController extends BaseController
         String token = resetService.createResetToken(user);
 
         // 4. 【修正】在异步块 *之前* 定义 message 变量
-        // 这样 message 变量对于 lambda 表达式才是可见的
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(mailFrom);
         message.setTo(user.getEmail());
         message.setSubject("【在线课堂】密码重置");
-        String url = frontendUrl + "/reset-password?token=" + token;
+        String url = frontendUrl + "/#/reset-password?token=" + token;
         message.setText("您好，" + user.getUserName() + "：\n\n您正在请求重置密码。\n请在30分钟内点击以下链接完成重置：\n" + url + "\n\n如果不是您本人操作，请忽略此邮件。");
 
         // (为了在 lambda 中安全使用，创建一个 'final' 副本)
@@ -80,11 +85,9 @@ public class ClassPasswordResetController extends BaseController
         // 5. 【异步】发送邮件
         CompletableFuture.runAsync(() -> {
             try {
-                mailSender.send(message); // <-- 现在可以正确找到 'message' 了
-                // 异步发送成功，在后端日志中记录
+                mailSender.send(message);
                 logger.info("密码重置邮件已异步发送至: {}", finalUser.getEmail());
             } catch (Exception e) {
-                // 异步发送失败，在后端日志中记录
                 logger.error("异步发送密码重置邮件失败: {}", e.getMessage());
             }
         });
@@ -96,6 +99,7 @@ public class ClassPasswordResetController extends BaseController
     /**
      * 2. 验证 Token 是否有效
      */
+    // (验证操作通常不记录日志)
     @GetMapping("/verify-token")
     public AjaxResult verify(@RequestParam String token)
     {
@@ -106,6 +110,8 @@ public class ClassPasswordResetController extends BaseController
     /**
      * 3. 提交新密码
      */
+    // 【新增】日志
+    @Log(title = "密码重置", businessType = BusinessType.UPDATE)
     @PostMapping("/reset-password")
     public AjaxResult resetPassword(@RequestBody Map<String, String> body)
     {

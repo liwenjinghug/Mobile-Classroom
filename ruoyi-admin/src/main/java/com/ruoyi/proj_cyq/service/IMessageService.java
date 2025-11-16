@@ -33,4 +33,10 @@ public interface IMessageService {
      * 批量标记消息为已读
      */
     int markAllAsRead(Long userId);
+
+    /**
+     * 【新增】获取消息统计
+     * (参考 ITodoService)
+     */
+    public Map<String, Object> getMessageStats(Long userId);
 }
