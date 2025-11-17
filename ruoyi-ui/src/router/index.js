@@ -107,32 +107,32 @@ export const constantRoutes = [
       {
         path: 'RandomPick',
         component: () => import('@/views/proj_myx/RandomPick.vue'),
-        name: 'RandomPick',
+        name: 'ProjMyx_RandomPick',
         meta: { title: '随机抽人', icon: 'education' }
       },
       {
         path: 'Attendance',
         component: () => import('@/views/proj_myx/Attendance.vue'),
-        name: 'Attendance',
+        name: 'ProjMyx_Attendance',
         meta: { title: '课堂签到', icon: 'peoples', roles: ['admin','common'] }
       },
       // Admin-only menu entries for detailed pages (they can also be accessed directly)
       {
         path: 'AttendanceCreate',
         component: () => import('@/views/proj_myx/CreateAttendance.vue'),
-        name: 'AttendanceCreate',
+        name: 'ProjMyx_AttendanceCreate',
         meta: { title: '创建签到', icon: 'edit', roles: ['admin'] }
       },
       {
         path: 'AttendanceStats',
         component: () => import('@/views/proj_myx/AttendanceStats.vue'),
-        name: 'AttendanceStats',
+        name: 'ProjMyx_AttendanceStats',
         meta: { title: '签到统计', icon: 'chart', roles: ['admin'] }
       },
       {
         path: 'Vote',
         component: () => import('@/views/proj_myx/Vote.vue'),
-        name: 'Vote',
+        name: 'ProjMyx_Vote',
         meta: { title: '课堂投票', icon: 'vote', roles: ['admin','common'] }
       }
     ]
@@ -148,19 +148,19 @@ export const constantRoutes = [
       {
         path: 'course',
         component: () => import('@/views/proj_lw/course/index.vue'),
-        name: 'course',
+        name: 'ProjLw_Course',
         meta: { title: '课程管理', icon: 'list' }
       },
       {
         path: 'material',
         component: () => import('@/views/proj_lw/material/index.vue'),
-        name: 'material',
+        name: 'ProjLw_Material',
         meta: { title: '资料管理', icon: 'document' },
       },
       {
         path: 'session',
         component: () => import('@/views/proj_lw/session/index.vue'),
-        name: 'Session',
+        name: 'ProjLw_Session',
         meta: { title: '课堂详情', icon: 'education' },
         hidden: true
       },
@@ -184,34 +184,34 @@ export const constantRoutes = [
       {
         path: 'homework_publish',
         component: () => import('@/views/proj_lwj/homework_publish/index.vue'),
-        name: 'HomeworkPublish',
+        name: 'ProjLwj_HomeworkPublish',
         meta: { title: '作业发布', icon: 'list' }
       },
       {
         path: 'homework_upload',
         alias: ['homework-upload','upload'],
         component: () => import('@/views/proj_lwj/homework-upload/index.vue'),
-        name: 'HomeworkUpload',
+        name: 'ProjLwj_HomeworkUpload',
         meta: { title: '作业上传', icon: 'upload' }
       },
       {
         path: 'homework_grading',
         component: () => import('@/views/proj_lwj/homework_grading/index.vue'),
-        name: 'HomeworkGrading',
+        name: 'ProjLwj_HomeworkGrading',
         meta: { title: '作业批改', icon: 'edit' }
       },
       // 新增：在作业批改下可见的“提交列表”菜单（展示某个作业的所有学生提交）
       {
         path: 'homework_grading/list/:homeworkId',
         component: () => import('@/views/proj_lwj/homework_grading/index.vue'),
-        name: 'HomeworkGradingList',
+        name: 'ProjLwj_HomeworkGradingList',
         meta: { title: '提交列表', icon: 'list' }
       },
       // 支持通过路由 params 直接打开某个作业的批改详情页面（不在侧边栏显示）
       {
         path: 'homework_grading/:homeworkId',
         component: () => import('@/views/proj_lwj/homework_grading/index.vue'),
-        name: 'HomeworkGradingDetail',
+        name: 'ProjLwj_HomeworkGradingDetail',
         meta: { title: '作业批改详情', icon: 'edit' },
         hidden: true
       }
@@ -228,7 +228,7 @@ export const constantRoutes = [
       {
         path: 'exam_publish',
         component: () => import('@/views/proj_lwj/exam_publish/index.vue'),
-        name: 'ExamPublish',
+        name: 'ProjLwj_ExamPublish',
         meta: { title: '考试发布', icon: 'list' }
       },
       {
@@ -240,7 +240,7 @@ export const constantRoutes = [
       {
         path: 'exam_questions/:examId',
         component: () => import('@/views/proj_lwj/exam_questions/index.vue'),
-        name: 'ExamQuestionsPage',
+        name: 'ProjLwj_ExamQuestionsPage',
         meta: { title: '题目配置', icon: 'edit' },
         props: true,
         hidden: true
@@ -295,20 +295,20 @@ export const constantRoutes = [
       {
         path: 'article',
         component: () => import('@/views/proj_qhy/article/index.vue'),
-        name: 'Article',
+        name: 'ProjQhy_Article',
         meta: { title: '文章管理', icon: 'documentation',permissions: ['proj_qhy:article:list'] }
       },
       {
         path: 'article/detail/:id',
         component: () => import('@/views/proj_qhy/article/ArticleDetail.vue'),
-        name: 'ArticleDetail',
+        name: 'ProjQhy_ArticleDetail',
         meta: { title: '文章详情' },
         hidden: true  // 确保这个路由在菜单中隐藏
       },
       {
         path: 'forum',
         component: () => import('@/views/proj_qhy/forum/index.vue'),
-        name: 'Forum',
+        name: 'ProjQhy_Forum',
         meta: { title: '论坛', icon: 'message' }
       },
       // --- 新增 小组讨论 (主列表) ---
@@ -339,19 +339,19 @@ export const constantRoutes = [
       {
         path: 'index',
         component: () => import('@/views/proj_cyq/personal/index'),
-        name: 'PersonalHome',
+        name: 'ProjCyq_PersonalHome',
         meta: { title: '个人主页', icon: 'dashboard',permissions: ['proj_cyq:personal:view'] }
       },
       {
         path: 'todo',
         component: () => import('@/views/proj_cyq/todo/index'),
-        name: 'Todo',
+        name: 'ProjCyq_Todo',
         meta: { title: '待办事项', icon: 'list',permissions: ['proj_cyq:todo:view'] }
       },
       {
         path: 'message',
         component: () => import('@/views/proj_cyq/message/index'),
-        name: 'Message',
+        name: 'ProjCyq_Message',
         meta: { title: '消息中心', icon: 'message',permissions: ['proj_cyq:message:view'] }
       },
       // ========== 新增：用户管理和角色管理 ==========
@@ -378,13 +378,13 @@ export const constantRoutes = [
       {
         path: 'operlog',
         component: () => import('@/views/proj_cyq/operlog/index'),
-        name: 'Operlog',
+        name: 'ProjCyq_Operlog',
         meta: { title: '操作日志', icon: 'log'}
       },
       {
         path: 'loginlog',
         component: () => import('@/views/proj_cyq/loginlog/index'),
-        name: 'Loginlog',
+        name: 'ProjCyq_Loginlog',
         meta: { title: '登录日志', icon: 'logininfor'}
       }
     ]
