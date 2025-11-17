@@ -93,13 +93,50 @@ public class AttendanceStatisticsServiceImpl implements IAttendanceStatisticsSer
     public Map<String, Object> getDashboardMetrics(Date startDate, Date endDate) {
         Map<String, Object> metrics = new HashMap<>();
 
-        // 全校平均签到率
-        Double schoolAvgRate = attendanceStatisticsMapper.selectSchoolAverageRate(startDate, endDate);
-        metrics.put("schoolAvgRate", schoolAvgRate != null ? schoolAvgRate : 0.0);
+        try {
+            // 全校平均签到率
+            Double schoolAvgRate = attendanceStatisticsMapper.selectSchoolAverageRate(startDate, endDate);
+            metrics.put("schoolAvgRate", schoolAvgRate != null ? schoolAvgRate : 0.0);
 
-        // 缺勤次数Top5课堂
-        List<AttendanceStatisticsDTO> topAbsenceSessions = attendanceStatisticsMapper.selectTopAbsenceSessions(startDate, endDate, 5);
-        metrics.put("topAbsenceSessions", topAbsenceSessions);
+            // 本周平均签到率
+            Double weekAvgRate = attendanceStatisticsMapper.selectWeekAverageRate(startDate, endDate);
+            metrics.put("weekAvgRate", weekAvgRate != null ? weekAvgRate : 0.0);
+
+            // 今日平均签到率
+            Double todayAvgRate = attendanceStatisticsMapper.selectTodayAverageRate(startDate, endDate);
+            metrics.put("todayAvgRate", todayAvgRate != null ? todayAvgRate : 0.0);
+
+            // 总课堂数
+            Integer totalSessions = attendanceStatisticsMapper.selectTotalSessions();
+            metrics.put("totalSessions", totalSessions != null ? totalSessions : 0);
+
+            // 活跃课堂数
+            Integer activeSessions = attendanceStatisticsMapper.selectActiveSessions();
+            metrics.put("activeSessions", activeSessions != null ? activeSessions : 0);
+
+            // 总学生数
+            Integer totalStudents = attendanceStatisticsMapper.selectTotalStudents();
+            metrics.put("totalStudents", totalStudents != null ? totalStudents : 0);
+
+            // 缺勤课堂数
+            Integer absenceSessions = attendanceStatisticsMapper.selectAbsenceSessions(startDate, endDate);
+            metrics.put("absenceSessions", absenceSessions != null ? absenceSessions : 0);
+
+            // 缺勤次数Top5课堂
+            List<AttendanceStatisticsDTO> topAbsenceSessions = attendanceStatisticsMapper.selectTopAbsenceSessions(startDate, endDate, 5);
+            metrics.put("topAbsenceSessions", topAbsenceSessions != null ? topAbsenceSessions : new ArrayList<>());
+
+        } catch (Exception e) {
+            // 如果查询失败，设置默认值
+            metrics.put("schoolAvgRate", 0.0);
+            metrics.put("weekAvgRate", 0.0);
+            metrics.put("todayAvgRate", 0.0);
+            metrics.put("totalSessions", 0);
+            metrics.put("activeSessions", 0);
+            metrics.put("totalStudents", 0);
+            metrics.put("absenceSessions", 0);
+            metrics.put("topAbsenceSessions", new ArrayList<>());
+        }
 
         return metrics;
     }

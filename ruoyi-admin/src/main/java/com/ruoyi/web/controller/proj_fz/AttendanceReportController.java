@@ -36,6 +36,7 @@ public class AttendanceReportController extends BaseController {
                                            @RequestParam(required = false) String endDate) {
         Date start = StringUtils.isNotEmpty(startDate) ? DateUtils.parseDate(startDate) : DateUtils.getNowDate();
         Date end = StringUtils.isNotEmpty(endDate) ? DateUtils.parseDate(endDate) : DateUtils.getNowDate();
+        startPage();
         List<AttendanceStatisticsDTO> list = attendanceStatisticsService.getSessionStatistics(sessionId, start, end);
         return getDataTable(list);
     }
@@ -66,6 +67,7 @@ public class AttendanceReportController extends BaseController {
                                            @RequestParam(required = false) Integer attendanceStatus) {
         Date start = StringUtils.isNotEmpty(startDate) ? DateUtils.parseDate(startDate) : DateUtils.getNowDate();
         Date end = StringUtils.isNotEmpty(endDate) ? DateUtils.parseDate(endDate) : DateUtils.getNowDate();
+        startPage();
         List<AttendanceStatisticsDTO> list = attendanceStatisticsService.getAttendanceDetails(sessionId, start, end, attendanceStatus);
         return getDataTable(list);
     }
@@ -118,9 +120,18 @@ public class AttendanceReportController extends BaseController {
         if ("details".equals(exportType)) {
             list = attendanceStatisticsService.getAttendanceDetails(sessionId, start, end, null);
             sheetName = "考勤明细";
+        } else if ("time".equals(exportType)) {
+            // 处理时间维度导出
+            Map<String, Object> result = attendanceStatisticsService.getTimeStatistics(sessionId, start, end, "day");
+            list = (List<AttendanceStatisticsDTO>) result.get("statistics");
+            sheetName = "时间趋势统计";
         } else {
             list = attendanceStatisticsService.getSessionStatistics(sessionId, start, end);
-            sheetName = "统计汇总";
+            sheetName = "课堂统计";
+        }
+
+        if (list == null || list.isEmpty()) {
+            throw new RuntimeException("没有数据可以导出");
         }
 
         ExcelUtil<AttendanceStatisticsDTO> util = new ExcelUtil<>(AttendanceStatisticsDTO.class);

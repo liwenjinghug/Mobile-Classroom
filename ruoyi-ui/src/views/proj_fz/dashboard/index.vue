@@ -14,8 +14,8 @@
           </span>
         </div>
         <el-icon class="weather-arrow">
-          <ArrowDown v-if="!showWeatherDetail" />
-          <ArrowUp v-else />
+          <i v-if="!showWeatherDetail" class="el-icon-arrow-down"></i>
+          <i v-else class="el-icon-arrow-up"></i>
         </el-icon>
       </div>
       <div v-if="showWeatherDetail" class="weather-detail">
@@ -209,6 +209,53 @@
 
       <!-- 右侧数据明细与公告区 -->
       <div class="right-panel">
+        <!-- 新增：考勤驾驶舱（与考勤报表联动） -->
+        <el-card shadow="hover" class="attendance-cockpit-card" style="margin-bottom: 16px;">
+          <template #header>
+            <div class="card-header">考勤驾驶舱（实时指标）</div>
+          </template>
+          <div class="attendance-cockpit">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <div class="metric-card metric-attendance">
+                  <div class="metric-title">本周全校平均签到率</div>
+                  <div ref="attendanceRingSchool" style="height:140px;"></div>
+                  <div class="metric-value-small">{{ (attendanceMetrics.schoolAvg||0).toFixed(1) }}%</div>
+                </div>
+              </el-col>
+              <el-col :span="12">
+                <div class="metric-card metric-attendance">
+                  <div class="metric-title">本周学院平均签到率</div>
+                  <div ref="attendanceRingCollege" style="height:140px;"></div>
+                  <div class="metric-value-small">{{ (attendanceMetrics.collegeAvg||0).toFixed(1) }}%</div>
+                </div>
+              </el-col>
+            </el-row>
+
+            <el-row :gutter="20" style="margin-top:8px;">
+              <el-col :span="24">
+                <div class="card-subsection">
+                  <div class="sub-title">本周缺勤次数 Top5 课堂</div>
+                  <div ref="absenceBar" style="height:200px;"></div>
+                  <div class="top5-table">
+                    <table>
+                      <thead><tr><th>排名</th><th>课堂名称</th><th>缺勤次数</th></tr></thead>
+                      <tbody>
+                      <tr v-for="(r, idx) in topAbsence" :key="r.className">
+                        <td>{{ idx+1 }}</td>
+                        <td style="text-align:left;padding-left:8px">{{ r.className }}</td>
+                        <td>{{ r.absenceCount }}</td>
+                      </tr>
+                      <tr v-if="!topAbsence || topAbsence.length===0"><td colspan="3">无数据</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </el-col>
+            </el-row>
+          </div>
+        </el-card>
+
         <!-- 作业明细表格 -->
         <div class="table-card">
           <div class="card-header">作业明细</div>
@@ -318,8 +365,9 @@
 
 <script>
 import * as echarts from 'echarts'
-import { getDashboardOverview, getHomeworkStatisticsListByFilter, exportHomeworkData } from '@/api/proj_fz/homeworkStatistics'
+import { getHomeworkStatisticsListByFilter } from '@/api/proj_fz/homeworkStatistics'
 import { listOperlog } from '@/api/proj_cyq/operlog'
+import { dashboardMetrics } from '@/api/proj_fz/attendanceReport'
 
 export default {
   name: 'ProjFzDashboardCockpit',
@@ -360,6 +408,19 @@ export default {
       },
       submissionRate: 0,
       averageScore: 0,
+
+      // 考勤驾驶舱数据
+      attendanceMetrics: {
+        schoolAvg: 0,
+        collegeAvg: 0
+      },
+      topAbsence: [],
+      attendanceCharts: {
+        ringSchool: null,
+        ringCollege: null,
+        absenceBar: null
+      },
+      attendanceLoading: false,
 
       // 筛选条件
       filters: {
@@ -443,6 +504,10 @@ export default {
     Object.values(this.charts).forEach(c => {
       try { c.dispose() } catch(e){}
     })
+    // 移除考勤筛选事件监听
+    if (Vue.prototype.$bus && this.onAttendanceFiltersChanged) {
+      Vue.prototype.$bus.$off('attendanceFiltersChanged', this.onAttendanceFiltersChanged)
+    }
   },
   methods: {
     async initDashboard() {
@@ -456,6 +521,12 @@ export default {
       this.$nextTick(() => {
         this.initCharts()
         this.renderAllCharts()
+        // 初始化考勤驾驶舱相关图表并加载数据（订阅考勤报表筛选变化）
+        this.initAttendanceCharts()
+        this.loadAttendanceMetrics()
+        if (!Vue.prototype.$bus) Vue.prototype.$bus = new Vue()
+        this.onAttendanceFiltersChanged = (payload) => { this.loadAttendanceMetrics(payload && payload.params ? payload.params : {}) }
+        Vue.prototype.$bus.$on('attendanceFiltersChanged', this.onAttendanceFiltersChanged)
       })
     },
 
@@ -463,6 +534,112 @@ export default {
       this.initChart('submissionTrend')
       this.initChart('statusPie')
       this.initChart('scoreDistribution')
+    },
+    // 初始化考勤驾驶舱图表实例
+    initAttendanceCharts() {
+      try {
+        const schoolDom = this.$refs.attendanceRingSchool
+        const collegeDom = this.$refs.attendanceRingCollege
+        const absenceDom = this.$refs.absenceBar
+        if (schoolDom) this.attendanceCharts.ringSchool = echarts.init(schoolDom)
+        if (collegeDom) this.attendanceCharts.ringCollege = echarts.init(collegeDom)
+        if (absenceDom) this.attendanceCharts.absenceBar = echarts.init(absenceDom)
+      } catch (e) {
+        console.warn('初始化考勤驾驶舱图表失败', e)
+      }
+      // resize on window
+      setTimeout(() => {
+        try { this.attendanceCharts.ringSchool && this.attendanceCharts.ringSchool.resize() } catch(e){}
+        try { this.attendanceCharts.ringCollege && this.attendanceCharts.ringCollege.resize() } catch(e){}
+        try { this.attendanceCharts.absenceBar && this.attendanceCharts.absenceBar.resize() } catch(e){}
+      }, 300)
+    },
+    // 加载考勤驾驶舱数据（接受可选 filters 参数）
+    async loadAttendanceMetrics(filters = {}) {
+      this.attendanceLoading = true
+      try {
+        const params = { ...filters }
+        const resp = await dashboardMetrics(params)
+        let payload = resp
+        if (resp && resp.data) payload = resp.data
+        // 支持后端返回不同结构：{ schoolAvg, collegeAvg, topAbsence: [] } 或 { data: {...} }
+        const schoolAvg = payload.schoolAvg !== undefined ? payload.schoolAvg : (payload.schoolAvgRate !== undefined ? payload.schoolAvgRate : (payload.school_avg || 0))
+        const collegeAvg = payload.collegeAvg !== undefined ? payload.collegeAvg : (payload.collegeAvgRate !== undefined ? payload.collegeAvgRate : (payload.college_avg || 0))
+        const top = payload.topAbsence || payload.top_absence || payload.topAbsenceClass || payload.top || []
+        // 规范化数值为 0-100
+        const norm = v => {
+          if (v === undefined || v === null) return 0
+          const n = Number(v)
+          if (Number.isNaN(n)) return 0
+          if (n > 0 && n <= 1) return +(n * 100)
+          return n
+        }
+        this.attendanceMetrics.schoolAvg = norm(schoolAvg)
+        this.attendanceMetrics.collegeAvg = norm(collegeAvg)
+        // 规范 topAbsence 为 [{ className, absenceCount }]
+        const tlist = Array.isArray(top) ? top : []
+        this.topAbsence = tlist.map(i => ({ className: i.className || i.name || i.class_title || i.title || '-', absenceCount: Number(i.absenceCount || i.absence_count || i.count || i.value || 0) }))
+        // 保证按缺勤次数排序并截断到 5 条
+        this.topAbsence.sort((a,b) => b.absenceCount - a.absenceCount)
+        if (this.topAbsence.length > 5) this.topAbsence = this.topAbsence.slice(0,5)
+        this.$nextTick(() => { this.updateAttendanceCharts() })
+      } catch (e) {
+        console.warn('加载驾驶舱考勤数据失败', e)
+      } finally {
+        this.attendanceLoading = false
+      }
+    },
+    // 更新考勤驾驶舱图表显示
+    updateAttendanceCharts() {
+      try {
+        // 学校环形
+        if (this.attendanceCharts.ringSchool) {
+          const val = Number(this.attendanceMetrics.schoolAvg || 0)
+          const opt = {
+            tooltip: { formatter: '{a} <br/>{b}: {c}%' },
+            series: [{
+              name: '本周全校平均签到率',
+              type: 'pie',
+              radius: ['60%', '80%'],
+              avoidLabelOverlap: false,
+              label: { show: true, position: 'center', formatter: val.toFixed(1) + '%', fontSize: 14 },
+              data: [ { value: val, name: '平均签到率' }, { value: Math.max(0, 100 - val), name: '剩余' } ],
+              color: ['#67C23A', '#f2f6f9']
+            }]
+          }
+          this.attendanceCharts.ringSchool.clear(); this.attendanceCharts.ringSchool.setOption(opt)
+        }
+        // 学院环形
+        if (this.attendanceCharts.ringCollege) {
+          const val = Number(this.attendanceMetrics.collegeAvg || 0)
+          const opt = {
+            tooltip: { formatter: '{a} <br/>{b}: {c}%' },
+            series: [{
+              name: '本周学院平均签到率',
+              type: 'pie',
+              radius: ['60%', '80%'],
+              avoidLabelOverlap: false,
+              label: { show: true, position: 'center', formatter: val.toFixed(1) + '%', fontSize: 14 },
+              data: [ { value: val, name: '学院平均' }, { value: Math.max(0, 100 - val), name: '剩余' } ],
+              color: ['#409EFF', '#f2f6f9']
+            }]
+          }
+          this.attendanceCharts.ringCollege.clear(); this.attendanceCharts.ringCollege.setOption(opt)
+        }
+        // 缺勤 Top5 横向柱状图
+        if (this.attendanceCharts.absenceBar) {
+          const names = this.topAbsence.map(i => i.className)
+          const vals = this.topAbsence.map(i => i.absenceCount)
+          const opt = {
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: params => `${params[0].name}<br/>缺勤次数: ${params[0].value}` },
+            grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+            xAxis: { type: 'value' },
+            yAxis: { type: 'category', data: names, inverse: true },
+            series: [{ type: 'bar', data: vals, barWidth: '50%', itemStyle: { color: '#ee6666' }, label: { show: true, position: 'right' } }]
+          }
+          this.attendanceCharts.absenceBar.clear(); this.attendanceCharts.absenceBar.setOption(opt)
+        }
+      } catch (e) { console.warn('更新驾驶舱图表失败', e) }
     },
 
     initChart(refKey) {
