@@ -17,13 +17,14 @@ public interface AttendanceStatisticsMapper {
             "    cs.session_id as sessionId, " +
             "    cs.class_name as className, " +
             "    COUNT(DISTINCT css.student_id) as totalStudents, " +
-            "    ROUND(AVG(signed_count), 0) as signedCount, " +
-            "    ROUND(AVG(absent_count), 0) as absentCount, " +
-            "    ROUND(AVG(late_count), 0) as lateCount, " +
-            "    ROUND(AVG(leave_count), 0) as leaveCount, " +
-            "    ROUND(AVG(early_leave_count), 0) as earlyLeaveCount, " +
-            "    ROUND(AVG(attendance_rate), 2) as attendanceRate " +
+            "    COALESCE(ROUND(AVG(signed_count), 0), 0) as signedCount, " +
+            "    COALESCE(ROUND(AVG(absent_count), 0), 0) as absentCount, " +
+            "    COALESCE(ROUND(AVG(late_count), 0), 0) as lateCount, " +
+            "    COALESCE(ROUND(AVG(leave_count), 0), 0) as leaveCount, " +
+            "    COALESCE(ROUND(AVG(early_leave_count), 0), 0) as earlyLeaveCount, " +
+            "    COALESCE(ROUND(AVG(attendance_rate), 2), 0) as attendanceRate " +
             "FROM class_session cs " +
+            "LEFT JOIN class_session_student css ON cs.session_id = css.session_id " +
             "LEFT JOIN (" +
             "    SELECT " +
             "        ca.session_id, " +
@@ -44,7 +45,6 @@ public interface AttendanceStatisticsMapper {
             "        </if>" +
             "    GROUP BY ca.session_id, ca.task_id" +
             ") as task_stats ON cs.session_id = task_stats.session_id " +
-            "LEFT JOIN class_session_student css ON cs.session_id = css.session_id " +
             "WHERE 1=1 " +
             "    <if test='sessionId != null'>" +
             "        AND cs.session_id = #{sessionId} " +
@@ -90,7 +90,7 @@ public interface AttendanceStatisticsMapper {
                                                        @Param("endDate") Date endDate,
                                                        @Param("groupBy") String groupBy);
 
-    // 签到明细查询
+    // 签到明细查询 - 修复学号和课堂名称
     @Select("<script>" +
             "SELECT " +
             "    cs.session_id as sessionId, " +
@@ -133,6 +133,129 @@ public interface AttendanceStatisticsMapper {
                                                           @Param("startDate") Date startDate,
                                                           @Param("endDate") Date endDate,
                                                           @Param("attendanceStatus") Integer attendanceStatus);
+
+    // 导出用的查询方法 - 课堂维度统计
+    @Select("<script>" +
+            "SELECT " +
+            "    cs.session_id as sessionId, " +
+            "    cs.class_name as className, " +
+            "    COUNT(DISTINCT css.student_id) as totalStudents, " +
+            "    COALESCE(ROUND(AVG(signed_count), 0), 0) as signedCount, " +
+            "    COALESCE(ROUND(AVG(absent_count), 0), 0) as absentCount, " +
+            "    COALESCE(ROUND(AVG(late_count), 0), 0) as lateCount, " +
+            "    COALESCE(ROUND(AVG(leave_count), 0), 0) as leaveCount, " +
+            "    COALESCE(ROUND(AVG(early_leave_count), 0), 0) as earlyLeaveCount, " +
+            "    COALESCE(ROUND(AVG(attendance_rate), 2), 0) as attendanceRate " +
+            "FROM class_session cs " +
+            "LEFT JOIN class_session_student css ON cs.session_id = css.session_id " +
+            "LEFT JOIN (" +
+            "    SELECT " +
+            "        ca.session_id, " +
+            "        ca.task_id, " +
+            "        COUNT(CASE WHEN ca.attendance_status = 1 THEN 1 END) as signed_count, " +
+            "        COUNT(CASE WHEN ca.attendance_status = 0 THEN 1 END) as absent_count, " +
+            "        COUNT(CASE WHEN ca.attendance_status = 2 THEN 1 END) as late_count, " +
+            "        COUNT(CASE WHEN ca.attendance_status = 3 THEN 1 END) as leave_count, " +
+            "        COUNT(CASE WHEN ca.attendance_status = 4 THEN 1 END) as early_leave_count, " +
+            "        ROUND(COUNT(CASE WHEN ca.attendance_status IN (1, 2) THEN 1 END) * 100.0 / GREATEST(COUNT(*), 1), 2) as attendance_rate " +
+            "    FROM class_attendance ca " +
+            "    WHERE 1=1 " +
+            "        <if test='startDate != null'>" +
+            "            AND DATE(ca.created_at) >= DATE(#{startDate}) " +
+            "        </if>" +
+            "        <if test='endDate != null'>" +
+            "            AND DATE(ca.created_at) &lt;= DATE(#{endDate}) " +
+            "        </if>" +
+            "    GROUP BY ca.session_id, ca.task_id" +
+            ") as task_stats ON cs.session_id = task_stats.session_id " +
+            "WHERE 1=1 " +
+            "    <if test='sessionId != null'>" +
+            "        AND cs.session_id = #{sessionId} " +
+            "    </if>" +
+            "GROUP BY cs.session_id, cs.class_name " +
+            "ORDER BY cs.session_id" +
+            "</script>")
+    List<AttendanceStatisticsDTO> selectExportSessionStatistics(@Param("sessionId") Long sessionId,
+                                                                @Param("startDate") Date startDate,
+                                                                @Param("endDate") Date endDate);
+
+    // 导出时间维度统计
+    @Select("<script>" +
+            "SELECT " +
+            "    cat.task_id as taskId, " +
+            "    cat.create_time as statDate, " +
+            "    cs.class_name as className, " +
+            "    COUNT(CASE WHEN ca.attendance_status = 1 THEN 1 END) as dailySigned, " +
+            "    COUNT(CASE WHEN ca.attendance_status = 0 THEN 1 END) as dailyAbsent, " +
+            "    COUNT(CASE WHEN ca.attendance_status = 2 THEN 1 END) as dailyLate, " +
+            "    COUNT(CASE WHEN ca.attendance_status = 3 THEN 1 END) as dailyLeave, " +
+            "    COUNT(CASE WHEN ca.attendance_status = 4 THEN 1 END) as dailyEarlyLeave, " +
+            "    COUNT(DISTINCT ca.student_id) as totalStudents, " +
+            "    ROUND(COUNT(CASE WHEN ca.attendance_status IN (1, 2) THEN 1 END) * 100.0 / GREATEST(COUNT(DISTINCT ca.student_id), 1), 2) as attendanceRate " +
+            "FROM class_attendance_task cat " +
+            "LEFT JOIN class_attendance ca ON cat.task_id = ca.task_id " +
+            "LEFT JOIN class_session cs ON cat.session_id = cs.session_id " +
+            "WHERE 1=1 " +
+            "    <if test='sessionId != null'>" +
+            "        AND cat.session_id = #{sessionId} " +
+            "    </if>" +
+            "    <if test='startDate != null'>" +
+            "        AND DATE(cat.create_time) >= DATE(#{startDate}) " +
+            "    </if>" +
+            "    <if test='endDate != null'>" +
+            "        AND DATE(cat.create_time) &lt;= DATE(#{endDate}) " +
+            "    </if>" +
+            "GROUP BY cat.task_id, cat.create_time, cs.class_name " +
+            "ORDER BY cat.create_time ASC" +
+            "</script>")
+    List<AttendanceStatisticsDTO> selectExportTimeStatistics(@Param("sessionId") Long sessionId,
+                                                             @Param("startDate") Date startDate,
+                                                             @Param("endDate") Date endDate);
+
+    // 导出明细查询
+    @Select("<script>" +
+            "SELECT " +
+            "    cs.session_id as sessionId, " +
+            "    cs.class_name as className, " +
+            "    s.student_name as studentName, " +
+            "    s.student_no as studentNo, " +
+            "    ca.attendance_time as attendanceTime, " +
+            "    ca.attendance_status as attendanceStatus, " +
+            "    CASE ca.attendance_status " +
+            "        WHEN 0 THEN '缺勤' " +
+            "        WHEN 1 THEN '已签到' " +
+            "        WHEN 2 THEN '迟到' " +
+            "        WHEN 3 THEN '请假' " +
+            "        WHEN 4 THEN '早退' " +
+            "        ELSE '未知' " +
+            "    END as statusText, " +
+            "    CASE " +
+            "        WHEN ca.device_type IS NOT NULL THEN ca.device_type " +
+            "        ELSE 'Web' " +
+            "    END as attendanceMethod " +
+            "FROM class_attendance ca " +
+            "JOIN class_student s ON ca.student_id = s.student_id " +
+            "JOIN class_session cs ON ca.session_id = cs.session_id " +
+            "WHERE 1=1 " +
+            "    <if test='sessionId != null'>" +
+            "        AND ca.session_id = #{sessionId} " +
+            "    </if>" +
+            "    <if test='startDate != null'>" +
+            "        AND DATE(ca.created_at) >= DATE(#{startDate}) " +
+            "    </if>" +
+            "    <if test='endDate != null'>" +
+            "        AND DATE(ca.created_at) &lt;= DATE(#{endDate}) " +
+            "    </if>" +
+            "    <if test='attendanceStatus != null'>" +
+            "        AND ca.attendance_status = #{attendanceStatus} " +
+            "    </if>" +
+            "ORDER BY ca.created_at DESC" +
+            "</script>")
+    List<AttendanceStatisticsDTO> selectExportAttendanceDetails(@Param("sessionId") Long sessionId,
+                                                                @Param("startDate") Date startDate,
+                                                                @Param("endDate") Date endDate,
+                                                                @Param("attendanceStatus") Integer attendanceStatus);
+
     // 周报表统计
     @Select("<script>" +
             "SELECT " +

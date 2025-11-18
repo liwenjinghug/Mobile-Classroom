@@ -101,7 +101,7 @@ public class AttendanceReportController extends BaseController {
     }
 
     /**
-     * 导出考勤报表
+     * 导出考勤报表 - 修复导出为空的问题
      */
     @Log(title = "考勤报表", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('proj_fz:attendanceReport:export')")
@@ -110,7 +110,8 @@ public class AttendanceReportController extends BaseController {
                        @RequestParam(required = false) Long sessionId,
                        @RequestParam(required = false) String startDate,
                        @RequestParam(required = false) String endDate,
-                       @RequestParam String exportType) {
+                       @RequestParam String exportType,
+                       @RequestParam(required = false) Integer attendanceStatus) {
         Date start = StringUtils.isNotEmpty(startDate) ? DateUtils.parseDate(startDate) : null;
         Date end = StringUtils.isNotEmpty(endDate) ? DateUtils.parseDate(endDate) : null;
 
@@ -118,15 +119,13 @@ public class AttendanceReportController extends BaseController {
         String sheetName;
 
         if ("details".equals(exportType)) {
-            list = attendanceStatisticsService.getAttendanceDetails(sessionId, start, end, null);
+            list = attendanceStatisticsService.getExportAttendanceDetails(sessionId, start, end, attendanceStatus);
             sheetName = "考勤明细";
         } else if ("trend".equals(exportType)) {
-            // 处理时间维度导出
-            Map<String, Object> result = attendanceStatisticsService.getTimeStatistics(sessionId, start, end, "day");
-            list = (List<AttendanceStatisticsDTO>) result.get("statistics");
+            list = attendanceStatisticsService.getExportTimeStatistics(sessionId, start, end);
             sheetName = "时间趋势统计";
         } else {
-            list = attendanceStatisticsService.getSessionStatistics(sessionId, start, end);
+            list = attendanceStatisticsService.getExportSessionStatistics(sessionId, start, end);
             sheetName = "课堂统计";
         }
 

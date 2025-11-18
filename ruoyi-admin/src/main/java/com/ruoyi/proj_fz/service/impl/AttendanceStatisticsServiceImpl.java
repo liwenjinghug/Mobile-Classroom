@@ -144,4 +144,37 @@ public class AttendanceStatisticsServiceImpl implements IAttendanceStatisticsSer
     public void exportAttendanceReport(List<AttendanceStatisticsDTO> list, String sheetName) {
         // Excel导出逻辑将在Controller中实现
     }
+
+    @Override
+    public List<AttendanceStatisticsDTO> getExportSessionStatistics(Long sessionId, Date startDate, Date endDate) {
+        if (startDate == null) {
+            startDate = DateUtils.addDays(new Date(), -30);
+        }
+        if (endDate == null) {
+            endDate = new Date();
+        }
+        return attendanceStatisticsMapper.selectExportSessionStatistics(sessionId, startDate, endDate);
+    }
+
+    @Override
+    public List<AttendanceStatisticsDTO> getExportTimeStatistics(Long sessionId, Date startDate, Date endDate) {
+        if (startDate == null) {
+            startDate = DateUtils.addDays(new Date(), -7);
+        }
+        if (endDate == null) {
+            endDate = new Date();
+        }
+        return attendanceStatisticsMapper.selectExportTimeStatistics(sessionId, startDate, endDate);
+    }
+
+    @Override
+    public List<AttendanceStatisticsDTO> getExportAttendanceDetails(Long sessionId, Date startDate, Date endDate, Integer attendanceStatus) {
+        if (startDate == null) {
+            startDate = DateUtils.addDays(new Date(), -30);
+        }
+        if (endDate == null) {
+            endDate = new Date();
+        }
+        return attendanceStatisticsMapper.selectExportAttendanceDetails(sessionId, startDate, endDate, attendanceStatus);
+    }
 }

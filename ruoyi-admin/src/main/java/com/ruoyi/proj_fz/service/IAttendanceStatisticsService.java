@@ -25,4 +25,9 @@ public interface IAttendanceStatisticsService {
 
     // 导出Excel
     void exportAttendanceReport(List<AttendanceStatisticsDTO> list, String sheetName);
+
+    // 新增导出方法
+    List<AttendanceStatisticsDTO> getExportSessionStatistics(Long sessionId, Date startDate, Date endDate);
+    List<AttendanceStatisticsDTO> getExportTimeStatistics(Long sessionId, Date startDate, Date endDate);
+    List<AttendanceStatisticsDTO> getExportAttendanceDetails(Long sessionId, Date startDate, Date endDate, Integer attendanceStatus);
 }

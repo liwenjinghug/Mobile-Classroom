@@ -95,6 +95,7 @@
       :row-key="rowKey"
       style="width: 100%"
       stripe
+      v-if="statDimension !== 'trend'"
     >
       <!-- 汇总统计维度列 -->
       <template v-if="statDimension === 'summary'">
@@ -155,32 +156,6 @@
         </el-table-column>
       </template>
 
-      <!-- 趋势分析维度列 -->
-      <template v-if="statDimension === 'trend'">
-        <el-table-column
-          label="签到时间"
-          align="center"
-          prop="statDate"
-          width="160"
-        >
-          <template slot-scope="scope">
-            {{ scope.row.statDate ? parseTime(scope.row.statDate, '{y}-{m}-{d} {h}:{i}') : '未知时间' }}
-          </template>
-        </el-table-column>
-        <el-table-column label="签到人数" align="center" width="100" prop="dailySigned" />
-        <el-table-column label="缺勤人数" align="center" width="100" prop="dailyAbsent" />
-        <el-table-column label="迟到人数" align="center" width="100" prop="dailyLate" />
-        <el-table-column label="请假人数" align="center" width="100" prop="dailyLeave" />
-        <el-table-column label="早退人数" align="center" width="100" prop="dailyEarlyLeave" />
-        <el-table-column label="签到率" align="center" width="100">
-          <template slot-scope="scope">
-            <el-tag :type="getRateType(scope.row.attendanceRate)" effect="dark">
-              {{ (scope.row.attendanceRate || 0).toFixed(1) }}%
-            </el-tag>
-          </template>
-        </el-table-column>
-      </template>
-
       <!-- 明细查询维度列 -->
       <template v-if="statDimension === 'details'">
         <el-table-column
@@ -232,6 +207,49 @@
         </el-table-column>
       </template>
     </el-table>
+
+    <!-- 趋势分析表格单独处理，平铺显示 -->
+    <div v-if="statDimension === 'trend'" class="trend-table-container">
+      <el-table
+        v-loading="loading"
+        :data="dataList"
+        :row-key="rowKey"
+        style="width: 100%"
+        stripe
+        :max-height="600"
+      >
+        <el-table-column
+          label="课堂名称"
+          align="center"
+          min-width="150"
+          show-overflow-tooltip
+          prop="className"
+        />
+        <el-table-column
+          label="签到时间"
+          align="center"
+          prop="statDate"
+          width="160"
+        >
+          <template slot-scope="scope">
+            {{ scope.row.statDate ? parseTime(scope.row.statDate, '{y}-{m}-{d} {h}:{i}') : '未知时间' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="签到人数" align="center" width="100" prop="dailySigned" />
+        <el-table-column label="缺勤人数" align="center" width="100" prop="dailyAbsent" />
+        <el-table-column label="迟到人数" align="center" width="100" prop="dailyLate" />
+        <el-table-column label="请假人数" align="center" width="100" prop="dailyLeave" />
+        <el-table-column label="早退人数" align="center" width="100" prop="dailyEarlyLeave" />
+        <el-table-column label="总人数" align="center" width="100" prop="totalStudents" />
+        <el-table-column label="签到率" align="center" width="100">
+          <template slot-scope="scope">
+            <el-tag :type="getRateType(scope.row.attendanceRate)" effect="dark">
+              {{ (scope.row.attendanceRate || 0).toFixed(1) }}%
+            </el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
     <pagination
       v-show="total>0"
@@ -334,18 +352,15 @@ export default {
       listSession().then(response => {
         console.log('课堂列表响应:', response);
 
-        // 修复：直接使用响应数据，不进行复杂的结构处理
         let rows = [];
         if (response && response.code === 200) {
-          // 直接使用 response.rows
           rows = response.rows || [];
         }
 
-        // 修复：简化映射逻辑
         this.sessionList = rows.map(r => ({
           sessionId: r.sessionId,
           className: r.className || '未知课堂'
-        })).filter(item => item.sessionId); // 过滤掉无效数据
+        })).filter(item => item.sessionId);
 
         console.log('处理后的课堂列表:', this.sessionList);
         this.loading = false;
@@ -387,17 +402,14 @@ export default {
       apiMethod(params).then(response => {
         console.log('API响应:', response);
 
-        // 修复：简化数据解析逻辑
         let data = [];
         let totalCount = 0;
 
         if (response && response.code === 200) {
           if (this.statDimension === 'trend') {
-            // 趋势分析的特殊结构
             data = response.data?.statistics || [];
             totalCount = data.length;
           } else {
-            // 汇总统计和明细查询的标准结构
             data = response.rows || [];
             totalCount = response.total || data.length;
           }
@@ -431,11 +443,9 @@ export default {
     /** 初始化图表 */
     initCharts() {
       try {
-        // 只在图表容器存在时初始化
         const initChart = (refName, chartVar) => {
           if (this.$refs[refName] && this.$refs[refName].offsetHeight > 0) {
             const dom = this.$refs[refName];
-            // 先销毁现有实例
             const inst = echarts.getInstanceByDom(dom);
             if (inst) {
               echarts.dispose(dom);
@@ -738,7 +748,7 @@ export default {
         this.trendChart.setOption(option, true);
       }
 
-      // 每次签到统计图 - 改为柱状图
+      // 每次签到统计图 - 柱状图
       if (this.dailyChart) {
         const option = {
           title: {
@@ -878,7 +888,6 @@ export default {
       this.queryParams.sessionId = undefined;
       this.queryParams.attendanceStatus = undefined;
       this.queryParams.pageNum = 1;
-      // 重置后重新设置默认时间范围
       const end = new Date();
       const start = new Date();
       start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
@@ -892,7 +901,7 @@ export default {
       this.getList();
     },
 
-    /** 导出按钮操作 */
+    /** 导出按钮操作 - 修复导出参数 */
     handleExport() {
       if (this.dataList.length === 0) {
         this.$message.warning('没有数据可以导出');
@@ -914,6 +923,7 @@ export default {
         `${params.startDate.replace(/-/g,'')}-${params.endDate.replace(/-/g,'')}` : this.getCurrentTime();
       const filename = `考勤报表_${this.getDimensionText()}_${className}_${dateRangeText}.xlsx`;
 
+      // 使用POST请求导出
       exportAttendanceReport(params, filename).then(() => {
         this.$message.success('导出成功');
         this.exportLoading = false;
@@ -931,7 +941,6 @@ export default {
         return;
       }
 
-      // 确保图表图片已生成
       this.generateChartImages();
 
       setTimeout(() => {
@@ -1089,7 +1098,7 @@ export default {
             </tr>
           </thead>
           <tbody>
-            ${this.dataList.map(item => `
+            ${this.dataList.map((item, index) => `
               <tr>
                 <td>${item.className || '未知'}</td>
                 <td>${item.totalStudents || 0}</td>
@@ -1116,24 +1125,28 @@ export default {
         <table>
           <thead>
             <tr>
+              <th>课堂名称</th>
               <th>签到时间</th>
               <th>签到人数</th>
               <th>缺勤人数</th>
               <th>迟到人数</th>
               <th>请假人数</th>
               <th>早退人数</th>
+              <th>总人数</th>
               <th>签到率</th>
             </tr>
           </thead>
           <tbody>
-            ${this.dataList.map(item => `
+            ${this.dataList.map((item, index) => `
               <tr>
+                <td>${item.className || '未知'}</td>
                 <td>${item.statDate ? this.parseTime(item.statDate, '{y}-{m}-{d} {h}:{i}') : '未知时间'}</td>
                 <td>${item.dailySigned || 0}</td>
                 <td>${item.dailyAbsent || 0}</td>
                 <td>${item.dailyLate || 0}</td>
                 <td>${item.dailyLeave || 0}</td>
                 <td>${item.dailyEarlyLeave || 0}</td>
+                <td>${item.totalStudents || 0}</td>
                 <td>${(item.attendanceRate || 0).toFixed(1)}%</td>
               </tr>
             `).join('')}
@@ -1161,7 +1174,7 @@ export default {
             </tr>
           </thead>
           <tbody>
-            ${this.dataList.map(item => `
+            ${this.dataList.map((item, index) => `
               <tr>
                 <td>${item.studentName || '未知'}</td>
                 <td>${item.studentNo || '未知'}</td>
@@ -1253,11 +1266,11 @@ export default {
     },
 
     rowKey(row) {
-      // 修复重复key问题
+      // 修复重复key问题，添加索引
       if (this.statDimension === 'summary') {
-        return `summary_${row.sessionId || Math.random()}`;
+        return `summary_${row.sessionId}_${Math.random()}`;
       } else if (this.statDimension === 'trend') {
-        return `trend_${row.taskId || row.statDate || Math.random()}`;
+        return `trend_${row.taskId || row.statDate}_${Math.random()}`;
       } else {
         return `details_${row.studentNo}_${row.attendanceTime || Math.random()}`;
       }
@@ -1286,6 +1299,11 @@ export default {
   color: #303133;
   padding-bottom: 10px;
   border-bottom: 1px solid #ebeef5;
+}
+
+.trend-table-container {
+  max-height: 600px;
+  overflow-y: auto;
 }
 
 .el-table th {
