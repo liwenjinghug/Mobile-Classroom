@@ -45,22 +45,27 @@ public class AttendanceStatisticsServiceImpl implements IAttendanceStatisticsSer
         List<Double> rateList = new ArrayList<>();
         List<Integer> signedList = new ArrayList<>();
         List<Integer> absentList = new ArrayList<>();
+        List<Integer> lateList = new ArrayList<>();
+        List<Integer> leaveList = new ArrayList<>();
+        List<Integer> earlyLeaveList = new ArrayList<>();
 
         for (AttendanceStatisticsDTO stat : statistics) {
-            if ("day".equals(groupBy)) {
-                dateList.add(DateUtils.parseDateToStr("MM-dd", stat.getStatDate()));
-            } else {
-                dateList.add(stat.getStatWeek());
-            }
+            dateList.add(DateUtils.parseDateToStr("MM-dd HH:mm", stat.getStatDate()));
             rateList.add(stat.getAttendanceRate() != null ? stat.getAttendanceRate() : 0.0);
             signedList.add(stat.getDailySigned() != null ? stat.getDailySigned() : 0);
             absentList.add(stat.getDailyAbsent() != null ? stat.getDailyAbsent() : 0);
+            lateList.add(stat.getDailyLate() != null ? stat.getDailyLate() : 0);
+            leaveList.add(stat.getDailyLeave() != null ? stat.getDailyLeave() : 0);
+            earlyLeaveList.add(stat.getDailyEarlyLeave() != null ? stat.getDailyEarlyLeave() : 0);
         }
 
         result.put("dateList", dateList);
         result.put("rateList", rateList);
         result.put("signedList", signedList);
         result.put("absentList", absentList);
+        result.put("lateList", lateList);
+        result.put("leaveList", leaveList);
+        result.put("earlyLeaveList", earlyLeaveList);
         result.put("statistics", statistics);
 
         return result;

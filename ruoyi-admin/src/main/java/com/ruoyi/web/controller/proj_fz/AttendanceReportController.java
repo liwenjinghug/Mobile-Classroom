@@ -120,7 +120,7 @@ public class AttendanceReportController extends BaseController {
         if ("details".equals(exportType)) {
             list = attendanceStatisticsService.getAttendanceDetails(sessionId, start, end, null);
             sheetName = "考勤明细";
-        } else if ("time".equals(exportType)) {
+        } else if ("trend".equals(exportType)) {
             // 处理时间维度导出
             Map<String, Object> result = attendanceStatisticsService.getTimeStatistics(sessionId, start, end, "day");
             list = (List<AttendanceStatisticsDTO>) result.get("statistics");

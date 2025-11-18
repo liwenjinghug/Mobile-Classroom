@@ -11,30 +11,43 @@ import java.util.List;
 @Mapper
 public interface AttendanceStatisticsMapper {
 
-    // 按课堂维度统计 - 修复查询
+    // 按课堂维度统计 - 修复查询，计算平均值
     @Select("<script>" +
             "SELECT " +
             "    cs.session_id as sessionId, " +
             "    cs.class_name as className, " +
             "    COUNT(DISTINCT css.student_id) as totalStudents, " +
-            "    COUNT(CASE WHEN ca.attendance_status = 1 THEN 1 END) as signedCount, " +
-            "    COUNT(CASE WHEN ca.attendance_status = 0 THEN 1 END) as absentCount, " +
-            "    COUNT(CASE WHEN ca.attendance_status = 2 THEN 1 END) as lateCount, " +
-            "    COUNT(CASE WHEN ca.attendance_status = 3 THEN 1 END) as leaveCount, " +
-            "    COUNT(CASE WHEN ca.attendance_status = 4 THEN 1 END) as earlyLeaveCount, " +
-            "    ROUND(COUNT(CASE WHEN ca.attendance_status IN (1, 2) THEN 1 END) * 100.0 / GREATEST(COUNT(DISTINCT css.student_id), 1), 2) as attendanceRate " +
+            "    ROUND(AVG(signed_count), 0) as signedCount, " +
+            "    ROUND(AVG(absent_count), 0) as absentCount, " +
+            "    ROUND(AVG(late_count), 0) as lateCount, " +
+            "    ROUND(AVG(leave_count), 0) as leaveCount, " +
+            "    ROUND(AVG(early_leave_count), 0) as earlyLeaveCount, " +
+            "    ROUND(AVG(attendance_rate), 2) as attendanceRate " +
             "FROM class_session cs " +
+            "LEFT JOIN (" +
+            "    SELECT " +
+            "        ca.session_id, " +
+            "        ca.task_id, " +
+            "        COUNT(CASE WHEN ca.attendance_status = 1 THEN 1 END) as signed_count, " +
+            "        COUNT(CASE WHEN ca.attendance_status = 0 THEN 1 END) as absent_count, " +
+            "        COUNT(CASE WHEN ca.attendance_status = 2 THEN 1 END) as late_count, " +
+            "        COUNT(CASE WHEN ca.attendance_status = 3 THEN 1 END) as leave_count, " +
+            "        COUNT(CASE WHEN ca.attendance_status = 4 THEN 1 END) as early_leave_count, " +
+            "        ROUND(COUNT(CASE WHEN ca.attendance_status IN (1, 2) THEN 1 END) * 100.0 / GREATEST(COUNT(*), 1), 2) as attendance_rate " +
+            "    FROM class_attendance ca " +
+            "    WHERE 1=1 " +
+            "        <if test='startDate != null'>" +
+            "            AND DATE(ca.created_at) >= DATE(#{startDate}) " +
+            "        </if>" +
+            "        <if test='endDate != null'>" +
+            "            AND DATE(ca.created_at) &lt;= DATE(#{endDate}) " +
+            "        </if>" +
+            "    GROUP BY ca.session_id, ca.task_id" +
+            ") as task_stats ON cs.session_id = task_stats.session_id " +
             "LEFT JOIN class_session_student css ON cs.session_id = css.session_id " +
-            "LEFT JOIN class_attendance ca ON cs.session_id = ca.session_id AND css.student_id = ca.student_id " +
             "WHERE 1=1 " +
             "    <if test='sessionId != null'>" +
             "        AND cs.session_id = #{sessionId} " +
-            "    </if>" +
-            "    <if test='startDate != null'>" +
-            "        AND DATE(ca.created_at) >= DATE(#{startDate}) " +
-            "    </if>" +
-            "    <if test='endDate != null'>" +
-            "        AND DATE(ca.created_at) &lt;= DATE(#{endDate}) " +
             "    </if>" +
             "GROUP BY cs.session_id, cs.class_name " +
             "ORDER BY cs.session_id" +
@@ -43,17 +56,12 @@ public interface AttendanceStatisticsMapper {
                                                           @Param("startDate") Date startDate,
                                                           @Param("endDate") Date endDate);
 
-    // 按时间维度统计
+    // 按时间维度统计 - 按签到任务分组
     @Select("<script>" +
             "SELECT " +
-            "    <choose>" +
-            "        <when test='groupBy == \"day\"'>" +
-            "            DATE(ca.created_at) as statDate, " +
-            "        </when>" +
-            "        <when test='groupBy == \"week\"'>" +
-            "            CONCAT(YEAR(ca.created_at), '-W', LPAD(WEEK(ca.created_at), 2, '0')) as statWeek, " +
-            "        </when>" +
-            "    </choose>" +
+            "    cat.task_id as taskId, " +
+            "    cat.create_time as statDate, " +
+            "    cs.class_name as className, " +
             "    COUNT(CASE WHEN ca.attendance_status = 1 THEN 1 END) as dailySigned, " +
             "    COUNT(CASE WHEN ca.attendance_status = 0 THEN 1 END) as dailyAbsent, " +
             "    COUNT(CASE WHEN ca.attendance_status = 2 THEN 1 END) as dailyLate, " +
@@ -61,35 +69,21 @@ public interface AttendanceStatisticsMapper {
             "    COUNT(CASE WHEN ca.attendance_status = 4 THEN 1 END) as dailyEarlyLeave, " +
             "    COUNT(DISTINCT ca.student_id) as totalStudents, " +
             "    ROUND(COUNT(CASE WHEN ca.attendance_status IN (1, 2) THEN 1 END) * 100.0 / GREATEST(COUNT(DISTINCT ca.student_id), 1), 2) as attendanceRate " +
-            "FROM class_attendance ca " +
+            "FROM class_attendance_task cat " +
+            "LEFT JOIN class_attendance ca ON cat.task_id = ca.task_id " +
+            "LEFT JOIN class_session cs ON cat.session_id = cs.session_id " +
             "WHERE 1=1 " +
             "    <if test='sessionId != null'>" +
-            "        AND ca.session_id = #{sessionId} " +
+            "        AND cat.session_id = #{sessionId} " +
             "    </if>" +
             "    <if test='startDate != null'>" +
-            "        AND DATE(ca.created_at) >= DATE(#{startDate}) " +
+            "        AND DATE(cat.create_time) >= DATE(#{startDate}) " +
             "    </if>" +
             "    <if test='endDate != null'>" +
-            "        AND DATE(ca.created_at) &lt;= DATE(#{endDate}) " +
+            "        AND DATE(cat.create_time) &lt;= DATE(#{endDate}) " +
             "    </if>" +
-            "GROUP BY " +
-            "    <choose>" +
-            "        <when test='groupBy == \"day\"'>" +
-            "            DATE(ca.created_at) " +
-            "        </when>" +
-            "        <when test='groupBy == \"week\"'>" +
-            "            CONCAT(YEAR(ca.created_at), '-W', LPAD(WEEK(ca.created_at), 2, '0')) " +
-            "        </when>" +
-            "    </choose>" +
-            "ORDER BY " +
-            "    <choose>" +
-            "        <when test='groupBy == \"day\"'>" +
-            "            statDate ASC " +
-            "        </when>" +
-            "        <when test='groupBy == \"week\"'>" +
-            "            statWeek ASC " +
-            "        </when>" +
-            "    </choose>" +
+            "GROUP BY cat.task_id, cat.create_time, cs.class_name " +
+            "ORDER BY cat.create_time ASC" +
             "</script>")
     List<AttendanceStatisticsDTO> selectTimeStatistics(@Param("sessionId") Long sessionId,
                                                        @Param("startDate") Date startDate,
@@ -139,7 +133,6 @@ public interface AttendanceStatisticsMapper {
                                                           @Param("startDate") Date startDate,
                                                           @Param("endDate") Date endDate,
                                                           @Param("attendanceStatus") Integer attendanceStatus);
-
     // 周报表统计
     @Select("<script>" +
             "SELECT " +

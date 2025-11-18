@@ -27,6 +27,9 @@ public class AttendanceStatisticsDTO implements Serializable {
     private Integer dailyLeave;
     private Integer dailyEarlyLeave;
 
+    // 新增字段：任务ID
+    private Long taskId;
+
     // 明细字段
     private String studentName;
     private String studentNo;
@@ -98,6 +101,9 @@ public class AttendanceStatisticsDTO implements Serializable {
 
     public Integer getDailyEarlyLeave() { return dailyEarlyLeave; }
     public void setDailyEarlyLeave(Integer dailyEarlyLeave) { this.dailyEarlyLeave = dailyEarlyLeave; }
+
+    public Long getTaskId() { return taskId; }
+    public void setTaskId(Long taskId) { this.taskId = taskId; }
 
     public String getStudentName() { return studentName; }
     public void setStudentName(String studentName) { this.studentName = studentName; }

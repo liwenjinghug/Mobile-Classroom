@@ -80,7 +80,7 @@
         <el-row :gutter="20" style="margin-bottom: 20px;">
           <el-col :span="24">
             <div class="chart-wrapper">
-              <div class="chart-title">每日考勤统计</div>
+              <div class="chart-title">每次签到统计</div>
               <div ref="dailyChart" style="height: 400px;"></div>
             </div>
           </el-col>
@@ -112,37 +112,37 @@
           prop="totalStudents"
         />
         <el-table-column
-          label="已签到"
+          label="平均已签到"
           align="center"
-          width="90"
+          width="100"
           prop="signedCount"
         />
         <el-table-column
-          label="缺勤"
+          label="平均缺勤"
           align="center"
-          width="90"
+          width="100"
           prop="absentCount"
         />
         <el-table-column
-          label="迟到"
+          label="平均迟到"
           align="center"
-          width="90"
+          width="100"
           prop="lateCount"
         />
         <el-table-column
-          label="请假"
+          label="平均请假"
           align="center"
-          width="90"
+          width="100"
           prop="leaveCount"
         />
         <el-table-column
-          label="早退"
+          label="平均早退"
           align="center"
-          width="90"
+          width="100"
           prop="earlyLeaveCount"
         />
         <el-table-column
-          label="签到率"
+          label="平均签到率"
           align="center"
           sortable
           width="120"
@@ -158,13 +158,13 @@
       <!-- 趋势分析维度列 -->
       <template v-if="statDimension === 'trend'">
         <el-table-column
-          label="日期"
+          label="签到时间"
           align="center"
           prop="statDate"
-          width="120"
+          width="160"
         >
           <template slot-scope="scope">
-            {{ scope.row.statDate ? parseTime(scope.row.statDate, '{y}-{m}-{d}') : (scope.row.statWeek || '未知') }}
+            {{ scope.row.statDate ? parseTime(scope.row.statDate, '{y}-{m}-{d} {h}:{i}') : '未知时间' }}
           </template>
         </el-table-column>
         <el-table-column label="签到人数" align="center" width="100" prop="dailySigned" />
@@ -522,9 +522,9 @@ export default {
               const session = dataList[data.dataIndex];
               return `
                 <div style="font-weight: bold; margin-bottom: 5px;">${data.name}</div>
-                <div>签到率: <span style="color: #5470c6; font-weight: bold">${data.value}%</span></div>
+                <div>平均签到率: <span style="color: #5470c6; font-weight: bold">${data.value}%</span></div>
                 <div>总人数: ${session.totalStudents || 0}</div>
-                <div>已签到: ${session.signedCount || 0}</div>
+                <div>平均已签到: ${session.signedCount || 0}</div>
               `;
             }
           },
@@ -595,7 +595,7 @@ export default {
 
         const option = {
           title: {
-            text: '考勤状态分布',
+            text: '平均考勤状态分布',
             left: 'center',
             textStyle: { fontSize: 16, fontWeight: 'bold', color: '#333' }
           },
@@ -647,7 +647,7 @@ export default {
       if (!dataList || dataList.length === 0) {
         console.log('趋势分析无数据，显示空图表');
         this.setEmptyChart(this.trendChart, '签到率趋势分析');
-        this.setEmptyChart(this.dailyChart, '每日考勤统计');
+        this.setEmptyChart(this.dailyChart, '每次签到统计');
         return;
       }
 
@@ -655,11 +655,9 @@ export default {
 
       const dateList = dataList.map(item => {
         if (item.statDate) {
-          return this.parseTime(item.statDate, '{m}-{d}');
-        } else if (item.statWeek) {
-          return item.statWeek;
+          return this.parseTime(item.statDate, '{m}-{d} {h}:{i}');
         }
-        return '未知日期';
+        return '未知时间';
       });
       const rateList = dataList.map(item => item.attendanceRate || 0);
       const signedList = dataList.map(item => item.dailySigned || 0);
@@ -740,11 +738,11 @@ export default {
         this.trendChart.setOption(option, true);
       }
 
-      // 每日考勤统计图
+      // 每次签到统计图 - 改为柱状图
       if (this.dailyChart) {
         const option = {
           title: {
-            text: '每日考勤统计',
+            text: '每次签到统计',
             left: 'center',
             textStyle: { fontSize: 16, fontWeight: 'bold', color: '#333' }
           },
@@ -782,7 +780,6 @@ export default {
             {
               name: '已签到',
               type: 'bar',
-              stack: 'total',
               data: signedList,
               itemStyle: {
                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -795,7 +792,6 @@ export default {
             {
               name: '迟到',
               type: 'bar',
-              stack: 'total',
               data: lateList,
               itemStyle: {
                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -808,7 +804,6 @@ export default {
             {
               name: '请假',
               type: 'bar',
-              stack: 'total',
               data: leaveList,
               itemStyle: {
                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -821,7 +816,6 @@ export default {
             {
               name: '早退',
               type: 'bar',
-              stack: 'total',
               data: earlyLeaveList,
               itemStyle: {
                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -834,7 +828,6 @@ export default {
             {
               name: '缺勤',
               type: 'bar',
-              stack: 'total',
               data: absentList,
               itemStyle: {
                 color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -1047,7 +1040,7 @@ export default {
             <img src="${this.chartImages.summary}" class="chart-image" alt="课堂签到率对比图" onerror="this.style.display='none'">
           </div>
           <div class="chart-container">
-            <div class="chart-title">考勤状态分布</div>
+            <div class="chart-title">平均考勤状态分布</div>
             <img src="${this.chartImages.distribution}" class="chart-image" alt="考勤状态分布图" onerror="this.style.display='none'">
           </div>
         </div>
@@ -1068,8 +1061,8 @@ export default {
             <img src="${this.chartImages.trend}" class="chart-image" alt="签到率趋势分析图" onerror="this.style.display='none'">
           </div>
           <div class="chart-container">
-            <div class="chart-title">每日考勤统计</div>
-            <img src="${this.chartImages.daily}" class="chart-image" alt="每日考勤统计图" onerror="this.style.display='none'">
+            <div class="chart-title">每次签到统计</div>
+            <img src="${this.chartImages.daily}" class="chart-image" alt="每次签到统计图" onerror="this.style.display='none'">
           </div>
         </div>
       `;
@@ -1087,12 +1080,12 @@ export default {
             <tr>
               <th>课堂名称</th>
               <th>总人数</th>
-              <th>已签到</th>
-              <th>缺勤</th>
-              <th>迟到</th>
-              <th>请假</th>
-              <th>早退</th>
-              <th>签到率</th>
+              <th>平均已签到</th>
+              <th>平均缺勤</th>
+              <th>平均迟到</th>
+              <th>平均请假</th>
+              <th>平均早退</th>
+              <th>平均签到率</th>
             </tr>
           </thead>
           <tbody>
@@ -1123,7 +1116,7 @@ export default {
         <table>
           <thead>
             <tr>
-              <th>日期</th>
+              <th>签到时间</th>
               <th>签到人数</th>
               <th>缺勤人数</th>
               <th>迟到人数</th>
@@ -1135,7 +1128,7 @@ export default {
           <tbody>
             ${this.dataList.map(item => `
               <tr>
-                <td>${item.statDate ? this.parseTime(item.statDate, '{y}-{m}-{d}') : (item.statWeek || '未知')}</td>
+                <td>${item.statDate ? this.parseTime(item.statDate, '{y}-{m}-{d} {h}:{i}') : '未知时间'}</td>
                 <td>${item.dailySigned || 0}</td>
                 <td>${item.dailyAbsent || 0}</td>
                 <td>${item.dailyLate || 0}</td>
@@ -1195,7 +1188,7 @@ export default {
 
     /** 格式化签到率显示 */
     formatRate(row) {
-      return `${(row.attendanceRate || 0).toFixed(1)}% (${row.signedCount || 0}/${row.totalStudents || 0})`;
+      return `${(row.attendanceRate || 0).toFixed(1)}%`;
     },
 
     /** 获取签到率类型 */
@@ -1260,7 +1253,14 @@ export default {
     },
 
     rowKey(row) {
-      return row.sessionId || row.studentNo || row.id || Math.random();
+      // 修复重复key问题
+      if (this.statDimension === 'summary') {
+        return `summary_${row.sessionId || Math.random()}`;
+      } else if (this.statDimension === 'trend') {
+        return `trend_${row.taskId || row.statDate || Math.random()}`;
+      } else {
+        return `details_${row.studentNo}_${row.attendanceTime || Math.random()}`;
+      }
     }
   }
 };
