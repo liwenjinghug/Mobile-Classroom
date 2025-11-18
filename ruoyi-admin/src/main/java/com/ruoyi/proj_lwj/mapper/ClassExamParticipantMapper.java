@@ -7,11 +7,13 @@ import java.util.List;
 @Mapper
 public interface ClassExamParticipantMapper {
 
-    @Select("<script>SELECT * FROM class_exam_participant <where>" +
-            "<if test='examId != null'> AND exam_id = #{examId}</if>" +
-            "<if test='studentId != null'> AND student_id = #{studentId}</if>" +
-            "<if test='participantStatus != null'> AND participant_status = #{participantStatus}</if>" +
-            "</where> ORDER BY id DESC</script>")
+    @Select("<script>SELECT p.* FROM class_exam_participant p <where>"
+            + "<if test='examId != null'> AND p.exam_id = #{examId}</if>"
+            + "<if test='studentId != null'> AND p.student_id = #{studentId}</if>"
+            + "<if test='studentNo != null and studentNo != \"\"'> AND p.student_no = #{studentNo}</if>"
+            + "<if test='participantStatus != null'> AND p.participant_status = #{participantStatus}</if>"
+            + " AND EXISTS(SELECT 1 FROM class_exam e WHERE e.id = p.exam_id)"
+            + "</where> ORDER BY p.id DESC</script>")
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "examId", column = "exam_id"),
@@ -88,5 +90,7 @@ public interface ClassExamParticipantMapper {
 
     @Delete("<script>DELETE FROM class_exam_participant WHERE id IN <foreach item='i' collection='array' open='(' separator=',' close=')'>#{i}</foreach></script>")
     int deleteByIds(Long[] ids);
-}
 
+    @Delete("DELETE FROM class_exam_participant WHERE exam_id=#{examId}")
+    int deleteByExamId(Long examId);
+}

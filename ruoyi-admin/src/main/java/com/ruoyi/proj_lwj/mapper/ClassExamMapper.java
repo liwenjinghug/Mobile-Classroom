@@ -88,7 +88,7 @@ public interface ClassExamMapper {
             "JOIN class_student s ON s.student_id = ss.student_id " +
             "LEFT JOIN class_course cc ON e.course_id = cc.course_id " +
             "LEFT JOIN class_session cs ON e.session_id = cs.session_id " +
-            "WHERE s.student_no = #{studentNo} AND e.status IN (1,2) ORDER BY e.start_time DESC")
+            "WHERE s.student_no = #{studentNo} AND e.status IN (1,2,3) ORDER BY e.start_time DESC")
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "examName", column = "exam_name"),
@@ -114,4 +114,8 @@ public interface ClassExamMapper {
             @Result(property = "className", column = "class_name")
     })
     List<ClassExam> selectAvailableByStudentNo(String studentNo);
+
+    // New: count exams with same name within same session (optionally excluding an id)
+    @Select("<script>SELECT COUNT(1) FROM class_exam WHERE session_id=#{sessionId} AND exam_name=#{examName} <if test='excludeId != null'>AND id != #{excludeId}</if></script>")
+    int countBySessionAndName(@Param("sessionId") Long sessionId, @Param("examName") String examName, @Param("excludeId") Long excludeId);
 }

@@ -42,7 +42,10 @@ public class ClassExamController extends BaseController {
     @GetMapping("/{id}")
     public AjaxResult info(@PathVariable Long id) {
         ClassExam ex = examService.selectExamById(id);
-        if (ex == null) return AjaxResult.error(HttpStatus.NOT_FOUND, "考试不存在");
+        if (ex == null) {
+            // 返回 200，避免前端弹出“访问资源不存在”
+            return AjaxResult.success("考试不存在或已删除", null).put("missing", true).put("id", id);
+        }
         return AjaxResult.success(ex);
     }
 
@@ -69,6 +72,11 @@ public class ClassExamController extends BaseController {
     @Log(title = "考试管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
+        // 级联删除：先删答案与参与记录，再删考试
+        for (Long examId : ids) {
+            try { answerService.deleteByExamId(examId); } catch (Exception ignore) {}
+            try { participantService.deleteByExamId(examId); } catch (Exception ignore) {}
+        }
         int r = examService.deleteExamByIds(ids);
         return toAjax(r);
     }
@@ -84,6 +92,22 @@ public class ClassExamController extends BaseController {
         ex.setUpdateBy(getUsername());
         examService.updateExam(ex);
         return AjaxResult.success();
+    }
+
+    // 兼容前端误用：支持以 JSON 传 id/status
+    @PreAuthorize("@ss.hasPermi('projlwj:exam:status')")
+    @Log(title = "考试状态更新", businessType = BusinessType.UPDATE)
+    @PutMapping("/status")
+    public AjaxResult changeStatusBody(@RequestBody Map<String, Object> body) {
+        if (body == null) return AjaxResult.error("请求体为空");
+        Long id = null; Integer status = null;
+        Object oid = body.get("id"); Object ostatus = body.get("status");
+        if (oid instanceof Number) id = ((Number) oid).longValue();
+        else if (oid instanceof String) { try { id = Long.valueOf(((String) oid).trim()); } catch (Exception ignore) {} }
+        if (ostatus instanceof Number) status = ((Number) ostatus).intValue();
+        else if (ostatus instanceof String) { try { status = Integer.valueOf(((String) ostatus).trim()); } catch (Exception ignore) {} }
+        if (id == null || status == null) return AjaxResult.error("id/status 不能为空");
+        return changeStatus(id, status);
     }
 
     // ===== 多课堂发布支持 =====
@@ -137,11 +161,62 @@ public class ClassExamController extends BaseController {
     }
 
     // ===== 考试参与 =====
-    @PreAuthorize("@ss.hasPermi('projlwj:examParticipant:list')")
     @GetMapping("/participant/list")
     public AjaxResult participantList(ClassExamParticipant p) {
-        List<ClassExamParticipant> list = participantService.selectList(p);
-        return AjaxResult.success(list);
+        try {
+            // 当未传学号时，不返回任何记录，保持前端页面空列表但接口成功
+            if (p == null || p.getStudentNo() == null || p.getStudentNo().trim().isEmpty()) {
+                return AjaxResult.success(java.util.Collections.emptyList());
+            }
+            List<ClassExamParticipant> list = participantService.selectList(p);
+            List<java.util.Map<String, Object>> result = new java.util.ArrayList<>();
+            for (ClassExamParticipant participant : list) {
+                // 过滤已被删除考试的记录（额外兜底，SQL 已做 EXISTS 过滤）
+                ClassExam examRef = participant.getExamId() != null ? examService.selectById(participant.getExamId()) : null;
+                if (examRef == null) continue;
+
+                java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+                map.put("id", participant.getId());
+                map.put("examId", participant.getExamId());
+                map.put("studentId", participant.getStudentId());
+                map.put("studentNo", participant.getStudentNo());
+                map.put("studentName", participant.getStudentName());
+                map.put("participantStatus", participant.getParticipantStatus());
+                map.put("startTime", participant.getStartTime());
+                map.put("submitTime", participant.getSubmitTime());
+                map.put("ipAddress", participant.getIpAddress());
+                map.put("deviceInfo", participant.getDeviceInfo());
+                map.put("totalScore", participant.getTotalScore());
+                map.put("timeUsed", participant.getTimeUsed());
+                map.put("objectiveScore", participant.getObjectiveScore());
+                map.put("subjectiveScore", participant.getSubjectiveScore());
+                map.put("correctStatus", participant.getCorrectStatus());
+                map.put("passStatus", participant.getPassStatus());
+                // 计算 及格 文字描述
+                String passLabel = "—";
+                Integer ps = participant.getPassStatus();
+                if (ps != null) passLabel = ps == 1 ? "及格" : "不及格";
+                map.put("passStatusLabel", passLabel);
+                map.put("createTime", participant.getCreateTime());
+                map.put("updateTime", participant.getUpdateTime());
+
+                // 补充考试信息
+                if (examRef != null) {
+                    map.put("examName", examRef.getExamName());
+                    map.put("courseName", examRef.getCourseName());
+                    // 根据需求：我的考试记录里不需要有课堂，但 participant/list 表格保留 className 以便区分
+                    map.put("className", examRef.getClassName());
+                    map.put("examType", examRef.getExamType());
+                    map.put("examTotalScore", examRef.getTotalScore());
+                    map.put("passScore", examRef.getPassScore());
+                }
+                result.add(map);
+            }
+            return AjaxResult.success(result);
+        } catch (Exception ex) {
+            // 任何异常均返回空列表，避免 500 影响前端
+            return AjaxResult.success(java.util.Collections.emptyList()).put("error", ex.getMessage());
+        }
     }
 
     @Log(title = "考试参与", businessType = BusinessType.INSERT)
@@ -153,7 +228,10 @@ public class ClassExamController extends BaseController {
             ClassStudent s = classStudentMapper.selectByStudentNo(payload.getStudentNo());
             if (s != null) { studentId = s.getStudentId(); if (payload.getStudentName() == null) payload.setStudentName(s.getStudentName()); }
         }
-        if (studentId == null) studentId = getUserId();
+        if (studentId == null) {
+            // 未能解析出学生身份 -> 明确提示
+            return AjaxResult.error("学号未找到，无法开始考试");
+        }
         // 反查补齐 studentNo/studentName，避免 DB 约束失败
         if (payload.getStudentNo() == null) {
             ClassStudent s2 = classStudentMapper.selectByStudentId(studentId);
@@ -195,20 +273,97 @@ public class ClassExamController extends BaseController {
         ClassExamParticipant existing = participantService.selectByExamStudent(payload.getExamId(), studentId);
         if (existing == null) return AjaxResult.error(HttpStatus.NOT_FOUND, "未开始考试或记录不存在");
         if (existing.getParticipantStatus() == 2) return AjaxResult.error("已提交，不能重复提交");
+
         existing.setParticipantStatus(2);
         existing.setSubmitTime(new Date());
         if (existing.getStartTime() != null) {
             existing.setTimeUsed((int) ((existing.getSubmitTime().getTime() - existing.getStartTime().getTime()) / 1000));
         }
+
+        // 计算得分：汇总该考生本次考试的所有答题记录
+        ClassExamAnswer queryAnswer = new ClassExamAnswer();
+        queryAnswer.setExamId(payload.getExamId());
+        queryAnswer.setStudentId(studentId);
+        List<ClassExamAnswer> answers = answerService.selectList(queryAnswer);
+
+        // 获取考试题目列表以判断题型
+        ClassExamQuestion queryQuestion = new ClassExamQuestion();
+        queryQuestion.setExamId(payload.getExamId());
+        List<ClassExamQuestion> questions = questionService.selectQuestionList(queryQuestion);
+        java.util.Map<Long, ClassExamQuestion> qMap = new java.util.HashMap<>();
+        boolean hasObjectiveQuestions = false;  // 是否包含客观题
+        boolean hasSubjectiveQuestions = false; // 是否包含主观题
+        for (ClassExamQuestion q : questions) {
+            qMap.put(q.getId(), q);
+            Integer t = q.getQuestionType();
+            if (t != null && (t == 1 || t == 2 || t == 3)) hasObjectiveQuestions = true;
+            if (t != null && (t == 5 || t == 6)) hasSubjectiveQuestions = true;
+        }
+
+        BigDecimal objectiveScore = BigDecimal.ZERO;  // 客观题得分
+        BigDecimal subjectiveScore = BigDecimal.ZERO; // 主观题得分
+        boolean hasUnscoredSubjective = false; // 是否有未批改的主观题
+
+        for (ClassExamAnswer ans : answers) {
+            ClassExamQuestion q = qMap.get(ans.getQuestionId());
+            if (q == null) continue;
+
+            Integer qType = q.getQuestionType();
+            BigDecimal ansScore = ans.getScore();
+            if (ansScore == null) ansScore = BigDecimal.ZERO;
+
+            // 判断题型：1单选 2多选 3判断 -> 客观题；5简答 6文件 -> 主观题
+            if (qType != null && (qType == 1 || qType == 2 || qType == 3)) {
+                objectiveScore = objectiveScore.add(ansScore);
+            } else if (qType != null && (qType == 5 || qType == 6)) {
+                // 主观题：如果未批改(score为null或0且无批改人)，标记为待批改
+                if (ans.getScore() == null || (ans.getScore().compareTo(BigDecimal.ZERO) == 0 && ans.getCorrectorId() == null)) {
+                    hasUnscoredSubjective = true;
+                } else {
+                    subjectiveScore = subjectiveScore.add(ansScore);
+                }
+            }
+        }
+
+        // 当考试没有主观题时：主观题得分=客观题得分，用于前端列表展示，但总分=客观题得分（避免重复累计）
+        if (!hasSubjectiveQuestions) {
+            subjectiveScore = objectiveScore;
+        }
+
+        BigDecimal totalScore = hasSubjectiveQuestions ? objectiveScore.add(subjectiveScore) : objectiveScore;
+        existing.setObjectiveScore(objectiveScore);
+        existing.setSubjectiveScore(subjectiveScore);
+        existing.setTotalScore(totalScore);
+
+        // 判断批改状态：如果有未批改的主观题，状态为0；否则为1（无主观题也视为已批改）
+        existing.setCorrectStatus(hasUnscoredSubjective ? 0 : 1);
+
+        // 判断及格状态：仅在所有题目已批改完成或没有主观题时才判断
+        ClassExam exam = examService.selectById(payload.getExamId());
+        if (exam != null && exam.getPassScore() != null && !hasUnscoredSubjective) {
+            existing.setPassStatus(totalScore.compareTo(exam.getPassScore()) >= 0 ? 1 : 0);
+        } else {
+            existing.setPassStatus(0); // 未完成批改或无及格线，暂不及格
+        }
+
         participantService.update(existing);
         return AjaxResult.success(existing);
     }
 
     // 学生考试入口：按学号列出可参加考试
     @GetMapping("/available")
-    public AjaxResult available(@RequestParam String studentNo) {
-        if (studentNo == null || studentNo.trim().isEmpty()) return AjaxResult.error("缺少学号");
-        return AjaxResult.success(examService.selectAvailableByStudentNo(studentNo.trim()));
+    public AjaxResult available(@RequestParam(value = "studentNo", required = false) String studentNo) {
+        try {
+            // 学号缺失 -> 返回空列表且 200
+            if (studentNo == null || studentNo.trim().isEmpty()) {
+                return AjaxResult.success(java.util.Collections.emptyList());
+            }
+            // 包含已结束考试（状态3），前端自行分组显示
+            List<ClassExam> exams = examService.selectAvailableByStudentNo(studentNo.trim());
+            return AjaxResult.success(exams);
+        } catch (Exception ex) {
+            return AjaxResult.success(java.util.Collections.emptyList()).put("error", ex.getMessage());
+        }
     }
 
     // 兼容前端 API：开始考试/提交试卷（路径无需 /participant 前缀）
@@ -272,19 +427,28 @@ public class ClassExamController extends BaseController {
     @PreAuthorize("@ss.hasPermi('projlwj:examAnswer:list')")
     @GetMapping("/answer/list")
     public AjaxResult answerList(ClassExamAnswer a) {
+        // 支持以 studentNo 过滤：解析为 studentId
+        if (a != null && a.getStudentId() == null && a.getStudentNo() != null) {
+            ClassStudent s = classStudentMapper.selectByStudentNo(a.getStudentNo());
+            if (s != null) { a.setStudentId(s.getStudentId()); }
+        }
         List<ClassExamAnswer> list = answerService.selectList(a);
         return AjaxResult.success(list);
     }
 
-    // 自动判分简易逻辑
+    // 自动判分简易逻辑（基于传入答案与快照答案对比；正确则取题目分值）
     private void autoJudgeObjective(ClassExamAnswer a) {
         if (a.getCorrectAnswer() != null && a.getStudentAnswer() != null) {
             String std = a.getCorrectAnswer().trim();
             String stu = a.getStudentAnswer().trim();
             if (std.equalsIgnoreCase(stu)) {
                 a.setIsCorrect(1);
+                // 若未设置分数，则按题目分值给分（回填在上层获取的 questionContent 逻辑之后生效）
                 if (a.getScore() == null) {
-                    a.setScore(new BigDecimal("1"));
+                    try {
+                        // 从题目快照内容无法直接取分值，这里保持为空，交由保存时根据题库题目补齐
+                        // 留空 -> 在 saveAnswer 中使用实际题目分值回填
+                    } catch (Exception ignore) {}
                 }
             } else {
                 a.setIsCorrect(0);
@@ -302,14 +466,35 @@ public class ClassExamController extends BaseController {
         filter.setStudentId(studentId);
         List<ClassExamAnswer> answers = answerService.selectList(filter);
         if (answers == null || answers.isEmpty()) return;
+
+        // 需要判断考试是否包含主观题/客观题
+        ClassExamQuestion qFilter = new ClassExamQuestion();
+        qFilter.setExamId(examId);
+        List<ClassExamQuestion> qList = questionService.selectQuestionList(qFilter);
+        boolean hasSubjectiveQuestions = false;
+        java.util.Map<Long, ClassExamQuestion> qMap = new java.util.HashMap<>();
+        for (ClassExamQuestion q : qList) {
+            qMap.put(q.getId(), q);
+            Integer t = q.getQuestionType();
+            if (t != null && (t == 5 || t == 6)) { hasSubjectiveQuestions = true; }
+        }
+
         BigDecimal obj = BigDecimal.ZERO; BigDecimal subj = BigDecimal.ZERO;
         for (ClassExamAnswer ans : answers) {
+            ClassExamQuestion q = qMap.get(ans.getQuestionId());
             BigDecimal s = ans.getScore() == null ? BigDecimal.ZERO : ans.getScore();
-            if (ans.getIsCorrect() != null) obj = obj.add(s); else subj = subj.add(s);
+            if (q != null) {
+                Integer t = q.getQuestionType();
+                if (t != null && (t == 1 || t == 2 || t == 3)) obj = obj.add(s); else subj = subj.add(s);
+            }
+        }
+        // 无主观题：主观题得分=客观题得分；总分=客观题得分
+        if (!hasSubjectiveQuestions) {
+            subj = obj;
         }
         part.setObjectiveScore(obj);
         part.setSubjectiveScore(subj);
-        part.setTotalScore(obj.add(subj));
+        part.setTotalScore(hasSubjectiveQuestions ? obj.add(subj) : obj);
         ClassExam ex = examService.selectExamById(examId);
         if (ex != null && ex.getPassScore() != null) {
             part.setPassStatus(part.getTotalScore().compareTo(ex.getPassScore()) >= 0 ? 1 : 0);
@@ -322,20 +507,40 @@ public class ClassExamController extends BaseController {
     @PostMapping("/answer/save")
     public AjaxResult saveAnswer(@RequestBody ClassExamAnswer payload) {
         if (payload.getExamId() == null || payload.getQuestionId() == null) return AjaxResult.error("examId/questionId不能为空");
-        Long studentId = payload.getStudentId() != null ? payload.getStudentId() : getUserId();
+        // 优先用学号反查 studentId，保证与参与记录一致
+        Long studentId = payload.getStudentId();
+        if ((studentId == null || studentId <= 0) && payload.getStudentNo() != null) {
+            ClassStudent s = classStudentMapper.selectByStudentNo(payload.getStudentNo());
+            if (s != null) { studentId = s.getStudentId(); }
+        }
+        // 若仍为空，明确报错，避免 DB 违反非空约束
+        if (studentId == null) {
+            return AjaxResult.error("学号未找到，无法保存答案");
+        }
+        // 关键：将解析出的 studentId 回写到 payload，避免插入时为 NULL
+        if (payload.getStudentId() == null || !studentId.equals(payload.getStudentId())) {
+            payload.setStudentId(studentId);
+        }
         // 补齐 studentNo
         if (payload.getStudentNo() == null) {
             ClassStudent stu = classStudentMapper.selectByStudentId(studentId);
-            if (stu != null) payload.setStudentNo(stu.getStudentNo());
+            if (stu != null) { payload.setStudentNo(stu.getStudentNo()); }
         }
-        payload.setStudentId(studentId);
         // 快照字段填充（仅在不存在时）
-        if (payload.getQuestionContent() == null || payload.getQuestionOptions() == null || payload.getCorrectAnswer() == null) {
+        if (payload.getQuestionContent() == null || payload.getQuestionOptions() == null || payload.getCorrectAnswer() == null || payload.getScore() == null) {
             ClassExamQuestion q = questionService.selectById(payload.getQuestionId());
             if (q != null) {
                 if (payload.getQuestionContent() == null) payload.setQuestionContent(q.getQuestionContent());
                 if (payload.getQuestionOptions() == null) payload.setQuestionOptions(q.getQuestionOptions());
                 if (payload.getCorrectAnswer() == null) payload.setCorrectAnswer(q.getCorrectAnswer());
+                // 如果是客观题且未设置分数，按题目分值赋分（正确时）
+                if (payload.getScore() == null && payload.getStudentAnswer() != null && payload.getCorrectAnswer() != null) {
+                    Integer t = q.getQuestionType();
+                    if (t != null && (t == 1 || t == 2 || t == 3) && payload.getStudentAnswer().trim().equalsIgnoreCase(payload.getCorrectAnswer().trim())) {
+                        if (q.getScore() != null) payload.setScore(q.getScore()); else payload.setScore(java.math.BigDecimal.ONE);
+                        payload.setIsCorrect(1);
+                    }
+                }
             }
         }
         ClassExamAnswer existing = answerService.selectByExamStudentQuestion(payload.getExamId(), studentId, payload.getQuestionId());
@@ -456,5 +661,62 @@ public class ClassExamController extends BaseController {
             participantService.update(existing);
         }
         return AjaxResult.success(existing);
+    }
+
+    // 学生综合考试列表：包含可参加考试 + 已参与记录(成绩/状态)
+    @GetMapping("/my")
+    public AjaxResult myExams(@RequestParam(value = "studentNo", required = false) String studentNo) {
+        try {
+            // 学号缺失 -> 返回空列表且 200
+            if (studentNo == null || studentNo.trim().isEmpty()) {
+                return AjaxResult.success(java.util.Collections.emptyList());
+            }
+            studentNo = studentNo.trim();
+            // 查询该学号的学生ID
+            ClassStudent stu = classStudentMapper.selectByStudentNo(studentNo);
+            Long studentId = stu != null ? stu.getStudentId() : null;
+            // 可参加考试列表（已发布/进行中）
+            List<ClassExam> exams = examService.selectAvailableByStudentNo(studentNo);
+            List<Map<String,Object>> data = new ArrayList<>();
+            for (ClassExam ex : exams) {
+                Map<String,Object> row = new LinkedHashMap<>();
+                row.put("examId", ex.getId());
+                row.put("examName", ex.getExamName());
+                row.put("examType", ex.getExamType());
+                row.put("courseId", ex.getCourseId());
+                // 根据需求：我的考试记录里不需要有课堂 -> 不再返回 sessionId / className
+                row.put("courseName", ex.getCourseName());
+                row.put("startTime", ex.getStartTime());
+                row.put("endTime", ex.getEndTime());
+                row.put("status", ex.getStatus());
+                row.put("totalScoreSetting", ex.getTotalScore());
+                row.put("passScore", ex.getPassScore());
+                // 参与记录
+                ClassExamParticipant part = null;
+                if (studentId != null) part = participantService.selectByExamStudent(ex.getId(), studentId);
+                if (part != null) {
+                    row.put("participantId", part.getId());
+                    row.put("participantStatus", part.getParticipantStatus());
+                    row.put("objectiveScore", part.getObjectiveScore());
+                    row.put("subjectiveScore", part.getSubjectiveScore());
+                    row.put("totalScore", part.getTotalScore());
+                    row.put("passStatus", part.getPassStatus());
+                    // 计算 及格 文字描述
+                    Integer ps = part.getPassStatus();
+                    row.put("passStatusLabel", ps==null?"—":(ps==1?"及格":"不及格"));
+                    row.put("correctStatus", part.getCorrectStatus());
+                    row.put("startTimeActual", part.getStartTime());
+                    row.put("submitTime", part.getSubmitTime());
+                    row.put("timeUsed", part.getTimeUsed());
+                    row.put("entered", true);
+                } else {
+                    row.put("entered", false);
+                }
+                data.add(row);
+            }
+            return AjaxResult.success(data);
+        } catch (Exception ex) {
+            return AjaxResult.success(java.util.Collections.emptyList()).put("error", ex.getMessage());
+        }
     }
 }

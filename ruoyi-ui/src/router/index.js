@@ -287,7 +287,7 @@ export const constantRoutes = [
   {
     path: '/proj_qhy',
     component: Layout,
-    redirect: '/forum/article',
+    redirect: '/proj_qhy/article', // 修正 redirect，指向本模块下的文章列表
     name: 'proj_qhy',
     meta: { title: '学习社区', icon: 'peoples' },
     alwaysShow: true,
@@ -303,7 +303,7 @@ export const constantRoutes = [
         component: () => import('@/views/proj_qhy/article/ArticleDetail.vue'),
         name: 'ProjQhy_ArticleDetail',
         meta: { title: '文章详情' },
-        hidden: true  // 确保这个路由在菜单中隐藏
+        hidden: true
       },
       {
         path: 'forum',
@@ -311,18 +311,18 @@ export const constantRoutes = [
         name: 'ProjQhy_Forum',
         meta: { title: '论坛', icon: 'message' }
       },
-      // --- 新增 小组讨论 (主列表) ---
+      // --- 小组讨论 ---
       {
         path: 'group',
         component: () => import('@/views/proj_qhy/group/index.vue'),
-        name: 'Group',
+        name: 'ProjQhy_Group', // 避免与其他模块的 Group 名称冲突
         meta: { title: '小组讨论', icon: 'chat-line-round' }
       },
-      // --- 新增 聊天窗口 (隐藏) ---
+      // --- 聊天窗口 (隐藏) ---
       {
-        path: 'group/chat/:groupId(\\d+)', // 确保groupId是数字
+        path: 'group/chat/:groupId(\\d+)',
         component: () => import('@/views/proj_qhy/group/chat.vue'),
-        name: 'GroupChat',
+        name: 'ProjQhy_GroupChat', // 同样加前缀以保证唯一
         meta: { title: '聊天' },
         hidden: true
       }

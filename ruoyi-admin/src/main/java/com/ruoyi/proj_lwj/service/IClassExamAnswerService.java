@@ -11,5 +11,5 @@ public interface IClassExamAnswerService {
     int update(ClassExamAnswer a);
     int deleteById(Long id);
     int deleteByIds(Long[] ids);
+    int deleteByExamId(Long examId);
 }
-
