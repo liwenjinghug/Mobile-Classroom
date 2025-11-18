@@ -24,8 +24,8 @@
       </el-form-item>
       <el-form-item label="统计维度" prop="statDimension">
         <el-radio-group v-model="statDimension" @change="handleDimensionChange">
-          <el-radio-button label="session">课堂统计</el-radio-button>
-          <el-radio-button label="time">时间趋势</el-radio-button>
+          <el-radio-button label="summary">汇总统计</el-radio-button>
+          <el-radio-button label="trend">趋势分析</el-radio-button>
           <el-radio-button label="details">明细查询</el-radio-button>
         </el-radio-group>
       </el-form-item>
@@ -42,37 +42,37 @@
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" @click="handleQuery" :loading="loading">搜索</el-button>
         <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
-        <el-button type="warning" icon="el-icon-download" @click="handleExport">导出</el-button>
+        <el-button type="warning" icon="el-icon-download" @click="handleExport" :loading="exportLoading">导出</el-button>
         <el-button type="info" icon="el-icon-printer" @click="handlePrint">打印</el-button>
       </el-form-item>
     </el-form>
 
     <!-- 图表展示区域 -->
     <div v-if="showCharts" class="chart-container">
-      <!-- 课堂统计维度图表 -->
-      <div v-if="statDimension === 'session'">
+      <!-- 汇总统计维度图表 -->
+      <div v-if="statDimension === 'summary'">
         <el-row :gutter="20" style="margin-bottom: 20px;">
           <el-col :span="12">
             <div class="chart-wrapper">
-              <div class="chart-title">课堂签到分布</div>
-              <div ref="distributionChart" style="height: 400px;"></div>
+              <div class="chart-title">课堂签到率对比</div>
+              <div ref="summaryChart" style="height: 400px;"></div>
             </div>
           </el-col>
           <el-col :span="12">
             <div class="chart-wrapper">
-              <div class="chart-title">课堂签到率排名</div>
-              <div ref="sessionRankChart" style="height: 400px;"></div>
+              <div class="chart-title">考勤状态分布</div>
+              <div ref="distributionChart" style="height: 400px;"></div>
             </div>
           </el-col>
         </el-row>
       </div>
 
-      <!-- 时间趋势维度图表 -->
-      <div v-if="statDimension === 'time'">
+      <!-- 趋势分析维度图表 -->
+      <div v-if="statDimension === 'trend'">
         <el-row :gutter="20" style="margin-bottom: 20px;">
           <el-col :span="24">
             <div class="chart-wrapper">
-              <div class="chart-title">签到率趋势图</div>
+              <div class="chart-title">签到率趋势分析</div>
               <div ref="trendChart" style="height: 400px;"></div>
             </div>
           </el-col>
@@ -80,8 +80,8 @@
         <el-row :gutter="20" style="margin-bottom: 20px;">
           <el-col :span="24">
             <div class="chart-wrapper">
-              <div class="chart-title">每日签到统计</div>
-              <div ref="timeStackChart" style="height: 320px;"></div>
+              <div class="chart-title">每日考勤统计</div>
+              <div ref="dailyChart" style="height: 400px;"></div>
             </div>
           </el-col>
         </el-row>
@@ -93,148 +93,144 @@
       v-loading="loading"
       :data="dataList"
       :row-key="rowKey"
-      :row-class-name="rowClassName"
-      @selection-change="handleSelectionChange"
-      :default-sort="{prop: 'attendanceRate', order: 'descending'}"
       style="width: 100%"
+      stripe
     >
-      <el-table-column type="selection" width="55" align="center" />
+      <!-- 汇总统计维度列 -->
+      <template v-if="statDimension === 'summary'">
+        <el-table-column
+          label="课堂名称"
+          align="center"
+          min-width="150"
+          show-overflow-tooltip
+          prop="className"
+        />
+        <el-table-column
+          label="总人数"
+          align="center"
+          width="90"
+          prop="totalStudents"
+        />
+        <el-table-column
+          label="已签到"
+          align="center"
+          width="90"
+          prop="signedCount"
+        />
+        <el-table-column
+          label="缺勤"
+          align="center"
+          width="90"
+          prop="absentCount"
+        />
+        <el-table-column
+          label="迟到"
+          align="center"
+          width="90"
+          prop="lateCount"
+        />
+        <el-table-column
+          label="请假"
+          align="center"
+          width="90"
+          prop="leaveCount"
+        />
+        <el-table-column
+          label="早退"
+          align="center"
+          width="90"
+          prop="earlyLeaveCount"
+        />
+        <el-table-column
+          label="签到率"
+          align="center"
+          sortable
+          width="120"
+        >
+          <template slot-scope="scope">
+            <el-tag :type="getRateType(scope.row.attendanceRate)" effect="dark">
+              {{ formatRate(scope.row) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </template>
 
-      <!-- 课堂统计维度列 -->
-      <el-table-column
-        v-if="statDimension === 'session'"
-        label="课堂名称"
-        align="center"
-        min-width="120"
-        show-overflow-tooltip
-        prop="className"
-      />
-      <el-table-column
-        v-if="statDimension === 'session'"
-        label="总人数"
-        align="center"
-        width="90"
-        prop="totalStudents"
-      />
-      <el-table-column
-        v-if="statDimension === 'session'"
-        label="已签到"
-        align="center"
-        width="90"
-        prop="signedCount"
-      />
-      <el-table-column
-        v-if="statDimension === 'session'"
-        label="缺勤人数"
-        align="center"
-        width="90"
-        prop="absentCount"
-      />
-      <el-table-column
-        v-if="statDimension === 'session'"
-        label="迟到人数"
-        align="center"
-        width="90"
-        prop="lateCount"
-      />
-      <el-table-column
-        v-if="statDimension === 'session'"
-        label="请假人数"
-        align="center"
-        width="90"
-        prop="leaveCount"
-      />
-      <el-table-column
-        v-if="statDimension === 'session'"
-        label="签到率"
-        align="center"
-        sortable
-        width="100"
-      >
-        <template slot-scope="scope">
-          <el-tag :type="getRateType(scope.row.attendanceRate)" effect="dark">
-            {{ formatRate(scope.row) }}
-          </el-tag>
-        </template>
-      </el-table-column>
-
-      <!-- 时间趋势维度列 -->
-      <el-table-column
-        v-if="statDimension === 'time'"
-        label="统计日期"
-        align="center"
-        prop="statDate"
-        width="120"
-      >
-        <template slot-scope="scope">
-          {{ scope.row.statDate ? parseTime(scope.row.statDate, '{y}-{m}-{d}') : scope.row.statWeek }}
-        </template>
-      </el-table-column>
-      <el-table-column v-if="statDimension === 'time'" label="当日签到" align="center" width="100" prop="dailySigned" />
-      <el-table-column v-if="statDimension === 'time'" label="当日缺勤" align="center" width="100" prop="dailyAbsent" />
-      <el-table-column v-if="statDimension === 'time'" label="当日迟到" align="center" width="100" prop="dailyLate" />
-      <el-table-column v-if="statDimension === 'time'" label="签到率" align="center" width="100">
-        <template slot-scope="scope">
-          <el-tag :type="getRateType(scope.row.attendanceRate)" effect="dark">
-            {{ scope.row.attendanceRate.toFixed(1) }}%
-          </el-tag>
-        </template>
-      </el-table-column>
+      <!-- 趋势分析维度列 -->
+      <template v-if="statDimension === 'trend'">
+        <el-table-column
+          label="日期"
+          align="center"
+          prop="statDate"
+          width="120"
+        >
+          <template slot-scope="scope">
+            {{ scope.row.statDate ? parseTime(scope.row.statDate, '{y}-{m}-{d}') : (scope.row.statWeek || '未知') }}
+          </template>
+        </el-table-column>
+        <el-table-column label="签到人数" align="center" width="100" prop="dailySigned" />
+        <el-table-column label="缺勤人数" align="center" width="100" prop="dailyAbsent" />
+        <el-table-column label="迟到人数" align="center" width="100" prop="dailyLate" />
+        <el-table-column label="请假人数" align="center" width="100" prop="dailyLeave" />
+        <el-table-column label="早退人数" align="center" width="100" prop="dailyEarlyLeave" />
+        <el-table-column label="签到率" align="center" width="100">
+          <template slot-scope="scope">
+            <el-tag :type="getRateType(scope.row.attendanceRate)" effect="dark">
+              {{ (scope.row.attendanceRate || 0).toFixed(1) }}%
+            </el-tag>
+          </template>
+        </el-table-column>
+      </template>
 
       <!-- 明细查询维度列 -->
-      <el-table-column
-        v-if="statDimension === 'details'"
-        label="学生姓名"
-        align="center"
-        width="140"
-        prop="studentName"
-      />
-      <el-table-column
-        v-if="statDimension === 'details'"
-        label="学号"
-        align="center"
-        prop="studentNo"
-        width="120"
-      />
-      <el-table-column
-        v-if="statDimension === 'details'"
-        label="课堂名称"
-        align="center"
-        min-width="120"
-        show-overflow-tooltip
-        prop="className"
-      />
-      <el-table-column
-        v-if="statDimension === 'details'"
-        label="签到时间"
-        align="center"
-        prop="attendanceTime"
-        width="160"
-      >
-        <template slot-scope="scope">
-          {{ scope.row.attendanceTime ? parseTime(scope.row.attendanceTime) : '-' }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        v-if="statDimension === 'details'"
-        label="签到方式"
-        align="center"
-        prop="attendanceMethod"
-        width="100"
-      />
-      <el-table-column
-        v-if="statDimension === 'details'"
-        label="状态"
-        align="center"
-        prop="statusText"
-        width="100"
-      >
-        <template slot-scope="scope">
-          <el-tag :type="getStatusType(scope.row.attendanceStatus)" effect="light">
-            {{ scope.row.statusText }}
-          </el-tag>
-        </template>
-      </el-table-column>
+      <template v-if="statDimension === 'details'">
+        <el-table-column
+          label="学生姓名"
+          align="center"
+          width="120"
+          prop="studentName"
+        />
+        <el-table-column
+          label="学号"
+          align="center"
+          prop="studentNo"
+          width="120"
+        />
+        <el-table-column
+          label="课堂名称"
+          align="center"
+          min-width="150"
+          show-overflow-tooltip
+          prop="className"
+        />
+        <el-table-column
+          label="签到时间"
+          align="center"
+          prop="attendanceTime"
+          width="160"
+        >
+          <template slot-scope="scope">
+            {{ scope.row.attendanceTime ? parseTime(scope.row.attendanceTime) : '未签到' }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="签到方式"
+          align="center"
+          prop="attendanceMethod"
+          width="100"
+        />
+        <el-table-column
+          label="状态"
+          align="center"
+          prop="statusText"
+          width="100"
+        >
+          <template slot-scope="scope">
+            <el-tag :type="getStatusType(scope.row.attendanceStatus)" effect="light">
+              {{ scope.row.statusText }}
+            </el-tag>
+          </template>
+        </el-table-column>
+      </template>
     </el-table>
 
     <pagination
@@ -248,9 +244,7 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import * as echarts from 'echarts'
-import { saveAs } from 'file-saver'
 import { listSession } from "@/api/proj_lw/session";
 import {
   sessionStatistics,
@@ -263,8 +257,8 @@ export default {
   name: "AttendanceReport",
   data() {
     return {
-      loading: true,
-      ids: [],
+      loading: false,
+      exportLoading: false,
       total: 0,
       dataList: [],
       sessionList: [],
@@ -276,12 +270,13 @@ export default {
         groupBy: 'day'
       },
       dateRange: [],
-      statDimension: 'session',
-      trendChart: null,
+      statDimension: 'summary',
+      summaryChart: null,
       distributionChart: null,
-      sessionRankChart: null,
-      timeStackChart: null,
+      trendChart: null,
+      dailyChart: null,
       showCharts: true,
+      chartImages: {},
       pickerOptions: {
         shortcuts: [{
           text: '最近一周',
@@ -308,31 +303,25 @@ export default {
             picker.$emit('pick', [start, end]);
           }
         }]
-      },
-      chartImages: {
-        distribution: '',
-        sessionRank: '',
-        trend: '',
-        timeStack: ''
       }
     };
   },
   created() {
-    if (!Vue.prototype.$bus) Vue.prototype.$bus = new Vue()
     this.getSessionList();
+    // 设置默认时间范围为最近一周
     const end = new Date();
     const start = new Date();
     start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
     this.dateRange = [this.parseTime(start, '{y}-{m}-{d}'), this.parseTime(end, '{y}-{m}-{d}')];
-    this.getList();
   },
   mounted() {
-    this.$nextTick(() => {
-      this.initCharts();
-    });
+    // 延迟加载数据，确保图表容器已渲染
+    setTimeout(() => {
+      this.getList();
+    }, 300);
   },
   beforeDestroy() {
-    [this.trendChart, this.distributionChart, this.sessionRankChart, this.timeStackChart].forEach(chart => {
+    [this.summaryChart, this.distributionChart, this.trendChart, this.dailyChart].forEach(chart => {
       if (chart) {
         try { chart.dispose() } catch(e){}
       }
@@ -341,17 +330,30 @@ export default {
   methods: {
     /** 查询课堂列表 */
     getSessionList() {
+      this.loading = true;
       listSession().then(response => {
-        let payload = response;
-        if (response && response.data) payload = response.data;
-        let rows = payload && payload.rows ? payload.rows : (Array.isArray(payload) ? payload : []);
-        this.sessionList = (rows || []).map(r => ({
-          sessionId: r.sessionId || r.id || r.classId,
-          className: r.className || r.name || r.title || r.class_name
-        }));
+        console.log('课堂列表响应:', response);
+
+        // 修复：直接使用响应数据，不进行复杂的结构处理
+        let rows = [];
+        if (response && response.code === 200) {
+          // 直接使用 response.rows
+          rows = response.rows || [];
+        }
+
+        // 修复：简化映射逻辑
+        this.sessionList = rows.map(r => ({
+          sessionId: r.sessionId,
+          className: r.className || '未知课堂'
+        })).filter(item => item.sessionId); // 过滤掉无效数据
+
+        console.log('处理后的课堂列表:', this.sessionList);
+        this.loading = false;
       }).catch(err => {
-        console.warn('加载课堂列表失败', err);
+        console.error('加载课堂列表失败', err);
         this.sessionList = [];
+        this.loading = false;
+        this.$message.error('加载课堂列表失败: ' + (err.message || '请检查网络连接'));
       });
     },
 
@@ -364,12 +366,14 @@ export default {
         endDate: this.dateRange && this.dateRange.length ? this.dateRange[1] : undefined
       };
 
+      console.log('查询参数:', params);
+
       let apiMethod;
       switch (this.statDimension) {
-        case 'session':
+        case 'summary':
           apiMethod = sessionStatistics;
           break;
-        case 'time':
+        case 'trend':
           params.groupBy = 'day';
           apiMethod = timeStatistics;
           break;
@@ -381,113 +385,55 @@ export default {
       }
 
       apiMethod(params).then(response => {
-        let payload = response;
-        if (response && response.data) payload = response.data;
+        console.log('API响应:', response);
 
-        // 处理不同的响应结构
-        if (payload && payload.data) {
-          payload = payload.data;
-        } else if (payload && payload.rows) {
-          payload = payload;
+        // 修复：简化数据解析逻辑
+        let data = [];
+        let totalCount = 0;
+
+        if (response && response.code === 200) {
+          if (this.statDimension === 'trend') {
+            // 趋势分析的特殊结构
+            data = response.data?.statistics || [];
+            totalCount = data.length;
+          } else {
+            // 汇总统计和明细查询的标准结构
+            data = response.rows || [];
+            totalCount = response.total || data.length;
+          }
         }
 
-        const normalized = this.normalizePayload(payload);
-        this.total = normalized.total || (Array.isArray(normalized.list) ? normalized.list.length : 0);
-        this.dataList = normalized.list || [];
+        this.total = totalCount;
+        this.dataList = data;
 
-        // 更新图表
+        console.log('处理后的数据:', this.dataList);
+
+        // 更新图表 - 确保在数据加载完成后
         this.$nextTick(() => {
-          this.initCharts();
-          if (this.statDimension === 'time') {
-            this.updateTimeCharts(normalized.list);
-          } else if (this.statDimension === 'session') {
-            this.updateSessionCharts(normalized.list);
-          }
-
-          // 生成图表图片用于打印
-          this.generateChartImages();
+          setTimeout(() => {
+            this.initCharts();
+            if (this.statDimension === 'summary') {
+              this.updateSummaryCharts(this.dataList);
+            } else if (this.statDimension === 'trend') {
+              this.updateTrendCharts(this.dataList);
+            }
+          }, 100);
         });
 
-        // 广播筛选条件到驾驶舱
-        if (Vue.prototype.$bus) {
-          Vue.prototype.$bus.$emit('attendanceFiltersChanged', {
-            params: params,
-            statDimension: this.statDimension
-          })
-        }
         this.loading = false;
       }).catch(err => {
         console.error('查询失败', err);
         this.loading = false;
+        this.$message.error('数据加载失败: ' + (err.message || '请检查网络连接'));
       });
-    },
-
-    /** 规范化后端数据 */
-    normalizePayload(payload) {
-      if (!payload) return { list: [], total: 0 };
-
-      // 处理不同的响应结构
-      let dataArray = [];
-      if (Array.isArray(payload)) {
-        dataArray = payload;
-      } else if (payload.rows && Array.isArray(payload.rows)) {
-        dataArray = payload.rows;
-      } else if (payload.data && Array.isArray(payload.data)) {
-        dataArray = payload.data;
-      } else if (payload.statistics && Array.isArray(payload.statistics)) {
-        dataArray = payload.statistics;
-      }
-
-      if (this.statDimension === 'details') {
-        const list = dataArray.map(item => ({
-          sessionId: item.sessionId || item.classId || '',
-          className: item.className || item.class_name || '',
-          studentName: item.studentName || item.student_name || item.name || '',
-          studentNo: item.studentNo || item.student_no || '',
-          attendanceMethod: item.attendanceMethod || item.method || (item.device_type || '未知'),
-          attendanceTime: item.attendanceTime || item.signTime || '',
-          attendanceStatus: item.attendanceStatus !== undefined ? item.attendanceStatus : (item.status !== undefined ? item.status : null),
-          statusText: item.statusText || item.status_name ||
-            (item.attendanceStatus === 0 ? '缺勤' :
-              item.attendanceStatus === 1 ? '已签到' :
-                item.attendanceStatus === 2 ? '迟到' :
-                  item.attendanceStatus === 3 ? '请假' :
-                    item.attendanceStatus === 4 ? '早退' : '未知')
-        }));
-        return { list, total: payload.total || list.length };
-      }
-
-      if (this.statDimension === 'time') {
-        const list = dataArray.map(item => ({
-          statDate: item.statDate || item.date || item.day || '',
-          statWeek: item.statWeek || item.week || '',
-          dailySigned: item.dailySigned || item.signed || item.attended || 0,
-          dailyAbsent: item.dailyAbsent || item.absent || item.missing || 0,
-          dailyLate: item.dailyLate || item.late || 0,
-          attendanceRate: Number(item.attendanceRate || item.rate || 0)
-        }));
-        return { list, total: list.length };
-      }
-
-      // 课堂维度
-      const list = dataArray.map(item => ({
-        sessionId: item.sessionId || item.id || item.classId || '',
-        className: item.className || item.class_name || item.name || item.title || '',
-        totalStudents: item.totalStudents || item.total || item.studentCount || 0,
-        signedCount: item.signedCount || item.signed || item.attended || 0,
-        absentCount: item.absentCount || item.absent || item.missing || 0,
-        lateCount: item.lateCount || item.late || item.tardy || 0,
-        leaveCount: item.leaveCount || item.leave || 0,
-        attendanceRate: Number(item.attendanceRate || item.rate || 0)
-      }));
-      return { list, total: payload.total || list.length };
     },
 
     /** 初始化图表 */
     initCharts() {
       try {
+        // 只在图表容器存在时初始化
         const initChart = (refName, chartVar) => {
-          if (this.$refs[refName]) {
+          if (this.$refs[refName] && this.$refs[refName].offsetHeight > 0) {
             const dom = this.$refs[refName];
             // 先销毁现有实例
             const inst = echarts.getInstanceByDom(dom);
@@ -495,17 +441,17 @@ export default {
               echarts.dispose(dom);
             }
             this[chartVar] = echarts.init(dom);
-            // 添加窗口大小变化监听
-            window.addEventListener('resize', () => {
-              try { this[chartVar].resize(); } catch (e) {}
-            });
+            console.log(`初始化图表: ${chartVar}`);
           }
         };
 
-        initChart('trendChart', 'trendChart');
-        initChart('distributionChart', 'distributionChart');
-        initChart('sessionRankChart', 'sessionRankChart');
-        initChart('timeStackChart', 'timeStackChart');
+        if (this.statDimension === 'summary') {
+          initChart('summaryChart', 'summaryChart');
+          initChart('distributionChart', 'distributionChart');
+        } else if (this.statDimension === 'trend') {
+          initChart('trendChart', 'trendChart');
+          initChart('dailyChart', 'dailyChart');
+        }
       } catch (e) {
         console.warn('初始化图表失败', e);
       }
@@ -513,214 +459,166 @@ export default {
 
     /** 生成图表图片用于打印 */
     generateChartImages() {
-      this.$nextTick(() => {
-        setTimeout(() => {
-          try {
-            if (this.distributionChart) {
-              this.chartImages.distribution = this.distributionChart.getDataURL({
-                pixelRatio: 2,
-                backgroundColor: '#fff'
-              });
-            }
-            if (this.sessionRankChart) {
-              this.chartImages.sessionRank = this.sessionRankChart.getDataURL({
-                pixelRatio: 2,
-                backgroundColor: '#fff'
-              });
-            }
-            if (this.trendChart) {
-              this.chartImages.trend = this.trendChart.getDataURL({
-                pixelRatio: 2,
-                backgroundColor: '#fff'
-              });
-            }
-            if (this.timeStackChart) {
-              this.chartImages.timeStack = this.timeStackChart.getDataURL({
-                pixelRatio: 2,
-                backgroundColor: '#fff'
-              });
-            }
-          } catch (e) {
-            console.warn('生成图表图片失败', e);
-          }
-        }, 1000);
-      });
+      try {
+        if (this.summaryChart) {
+          this.chartImages.summary = this.summaryChart.getDataURL({
+            pixelRatio: 2,
+            backgroundColor: '#fff'
+          });
+        }
+        if (this.distributionChart) {
+          this.chartImages.distribution = this.distributionChart.getDataURL({
+            pixelRatio: 2,
+            backgroundColor: '#fff'
+          });
+        }
+        if (this.trendChart) {
+          this.chartImages.trend = this.trendChart.getDataURL({
+            pixelRatio: 2,
+            backgroundColor: '#fff'
+          });
+        }
+        if (this.dailyChart) {
+          this.chartImages.daily = this.dailyChart.getDataURL({
+            pixelRatio: 2,
+            backgroundColor: '#fff'
+          });
+        }
+      } catch (e) {
+        console.warn('生成图表图片失败', e);
+      }
     },
 
-    /** 更新时间趋势维度图表 */
-    updateTimeCharts(dataList) {
+    /** 更新汇总统计图表 */
+    updateSummaryCharts(dataList) {
       if (!dataList || dataList.length === 0) {
-        this.setEmptyChart(this.trendChart, '签到率趋势图');
-        this.setEmptyChart(this.timeStackChart, '每日签到统计');
+        console.log('汇总统计无数据，显示空图表');
+        this.setEmptyChart(this.summaryChart, '课堂签到率对比');
+        this.setEmptyChart(this.distributionChart, '考勤状态分布');
         return;
       }
 
-      const dateList = dataList.map(item => item.statDate || item.statWeek);
-      const rateList = dataList.map(item => item.attendanceRate || 0);
-      const signedList = dataList.map(item => item.dailySigned || 0);
-      const absentList = dataList.map(item => item.dailyAbsent || 0);
-      const lateList = dataList.map(item => item.dailyLate || 0);
+      console.log('更新汇总统计图表，数据:', dataList);
 
-      // 更新趋势图
-      if (this.trendChart) {
+      // 课堂签到率对比图
+      if (this.summaryChart) {
+        const classNames = dataList.map(item => item.className || '未知课堂');
+        const rates = dataList.map(item => item.attendanceRate || 0);
+
         const option = {
           title: {
-            text: '签到率趋势图',
+            text: '课堂签到率对比',
             left: 'center',
-            textStyle: {
-              fontSize: 16,
-              fontWeight: 'bold'
-            }
+            textStyle: { fontSize: 16, fontWeight: 'bold', color: '#333' }
           },
           tooltip: {
             trigger: 'axis',
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            borderColor: '#ddd',
+            borderWidth: 1,
+            textStyle: { color: '#333' },
             formatter: (params) => {
               const data = params[0];
-              const index = data.dataIndex;
-              return `${data.name}<br/>签到率: ${data.value}%<br/>签到人数: ${signedList[index]}/${signedList[index] + absentList[index] + lateList[index]}`;
+              const session = dataList[data.dataIndex];
+              return `
+                <div style="font-weight: bold; margin-bottom: 5px;">${data.name}</div>
+                <div>签到率: <span style="color: #5470c6; font-weight: bold">${data.value}%</span></div>
+                <div>总人数: ${session.totalStudents || 0}</div>
+                <div>已签到: ${session.signedCount || 0}</div>
+              `;
             }
           },
-          grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            top: '15%',
-            containLabel: true
-          },
+          grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
           xAxis: {
             type: 'category',
-            data: dateList,
+            data: classNames,
             axisLabel: {
+              interval: 0,
               rotate: 45,
-              interval: 0
-            }
+              color: '#666'
+            },
+            axisLine: { lineStyle: { color: '#ddd' } }
           },
           yAxis: {
             type: 'value',
-            axisLabel: { formatter: '{value}%' },
+            axisLabel: {
+              formatter: '{value}%',
+              color: '#666'
+            },
+            axisLine: { show: false },
+            splitLine: { lineStyle: { color: '#f0f0f0' } },
             min: 0,
             max: 100
           },
           series: [{
-            data: rateList,
-            type: 'line',
-            smooth: true,
-            itemStyle: { color: '#5470c6' },
-            lineStyle: { width: 3 },
-            areaStyle: {
+            data: rates,
+            type: 'bar',
+            itemStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: 'rgba(84, 112, 198, 0.3)' },
-                { offset: 1, color: 'rgba(84, 112, 198, 0.1)' }
-              ])
+                { offset: 0, color: '#83bff6' },
+                { offset: 0.5, color: '#188df0' },
+                { offset: 1, color: '#188df0' }
+              ]),
+              borderRadius: [4, 4, 0, 0]
+            },
+            emphasis: {
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#2378f7' },
+                  { offset: 0.7, color: '#2378f7' },
+                  { offset: 1, color: '#83bff6' }
+                ])
+              }
+            },
+            label: {
+              show: true,
+              position: 'top',
+              formatter: '{c}%',
+              color: '#333',
+              fontWeight: 'bold'
             }
           }]
         };
-        this.trendChart.setOption(option, true);
+        this.summaryChart.setOption(option, true);
       }
 
-      // 更新时间堆叠图
-      if (this.timeStackChart) {
+      // 考勤状态分布图（使用第一个课堂的数据）
+      if (this.distributionChart && dataList[0]) {
+        const sessionData = dataList[0];
+        const pieData = [
+          { value: sessionData.signedCount || 0, name: '已签到' },
+          { value: sessionData.lateCount || 0, name: '迟到' },
+          { value: sessionData.leaveCount || 0, name: '请假' },
+          { value: sessionData.earlyLeaveCount || 0, name: '早退' },
+          { value: sessionData.absentCount || 0, name: '缺勤' }
+        ].filter(item => item.value > 0);
+
         const option = {
           title: {
-            text: '每日签到统计',
+            text: '考勤状态分布',
             left: 'center',
-            textStyle: {
-              fontSize: 16,
-              fontWeight: 'bold'
-            }
-          },
-          tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'shadow' }
-          },
-          legend: {
-            data: ['已签到', '迟到', '缺勤'],
-            bottom: 0
-          },
-          grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '10%',
-            top: '15%',
-            containLabel: true
-          },
-          xAxis: {
-            type: 'category',
-            data: dateList,
-            axisLabel: {
-              rotate: 45,
-              interval: 0
-            }
-          },
-          yAxis: { type: 'value' },
-          series: [
-            {
-              name: '已签到',
-              type: 'bar',
-              stack: 'total',
-              data: signedList,
-              itemStyle: { color: '#67C23A' }
-            },
-            {
-              name: '迟到',
-              type: 'bar',
-              stack: 'total',
-              data: lateList,
-              itemStyle: { color: '#E6A23C' }
-            },
-            {
-              name: '缺勤',
-              type: 'bar',
-              stack: 'total',
-              data: absentList,
-              itemStyle: { color: '#F56C6C' }
-            }
-          ]
-        };
-        this.timeStackChart.setOption(option, true);
-      }
-    },
-
-    /** 更新课堂统计维度图表 */
-    updateSessionCharts(dataList) {
-      if (!dataList || dataList.length === 0) {
-        this.setEmptyChart(this.distributionChart, '课堂签到分布');
-        this.setEmptyChart(this.sessionRankChart, '课堂签到率排名');
-        return;
-      }
-
-      // 更新分布图（使用第一个课堂的数据）
-      const sessionData = dataList[0];
-      if (this.distributionChart && sessionData) {
-        const option = {
-          title: {
-            text: '课堂签到分布',
-            left: 'center',
-            textStyle: {
-              fontSize: 16,
-              fontWeight: 'bold'
-            }
+            textStyle: { fontSize: 16, fontWeight: 'bold', color: '#333' }
           },
           tooltip: {
             trigger: 'item',
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            borderColor: '#ddd',
+            borderWidth: 1,
+            textStyle: { color: '#333' },
             formatter: '{a} <br/>{b}: {c} ({d}%)'
           },
           legend: {
             orient: 'vertical',
             left: 'left',
-            top: 'middle'
+            top: 'middle',
+            textStyle: { color: '#666' }
           },
           series: [{
-            name: '签到状态',
+            name: '考勤状态',
             type: 'pie',
             radius: ['40%', '70%'],
             center: ['60%', '50%'],
-            data: [
-              { value: sessionData.signedCount || 0, name: '已签到' },
-              { value: sessionData.lateCount || 0, name: '迟到' },
-              { value: sessionData.leaveCount || 0, name: '请假' },
-              { value: sessionData.absentCount || 0, name: '缺勤' }
-            ],
+            data: pieData,
             emphasis: {
               itemStyle: {
                 shadowBlur: 10,
@@ -729,77 +627,226 @@ export default {
               }
             },
             itemStyle: {
-              borderRadius: 10,
+              borderRadius: 8,
               borderColor: '#fff',
               borderWidth: 2
+            },
+            label: {
+              formatter: '{b}: {d}%',
+              color: '#333'
             }
           }],
-          color: ['#67C23A', '#E6A23C', '#409EFF', '#F56C6C']
+          color: ['#67C23A', '#E6A23C', '#409EFF', '#F56C6C', '#909399']
         };
         this.distributionChart.setOption(option, true);
       }
+    },
 
-      // 更新排名图
-      if (this.sessionRankChart) {
-        const classNames = dataList.map(item => item.className);
-        const rates = dataList.map(item => item.attendanceRate || 0);
+    /** 更新趋势分析图表 */
+    updateTrendCharts(dataList) {
+      if (!dataList || dataList.length === 0) {
+        console.log('趋势分析无数据，显示空图表');
+        this.setEmptyChart(this.trendChart, '签到率趋势分析');
+        this.setEmptyChart(this.dailyChart, '每日考勤统计');
+        return;
+      }
 
+      console.log('更新趋势分析图表，数据:', dataList);
+
+      const dateList = dataList.map(item => {
+        if (item.statDate) {
+          return this.parseTime(item.statDate, '{m}-{d}');
+        } else if (item.statWeek) {
+          return item.statWeek;
+        }
+        return '未知日期';
+      });
+      const rateList = dataList.map(item => item.attendanceRate || 0);
+      const signedList = dataList.map(item => item.dailySigned || 0);
+      const absentList = dataList.map(item => item.dailyAbsent || 0);
+      const lateList = dataList.map(item => item.dailyLate || 0);
+      const leaveList = dataList.map(item => item.dailyLeave || 0);
+      const earlyLeaveList = dataList.map(item => item.dailyEarlyLeave || 0);
+
+      // 签到率趋势图
+      if (this.trendChart) {
         const option = {
           title: {
-            text: '课堂签到率排名',
+            text: '签到率趋势分析',
             left: 'center',
-            textStyle: {
-              fontSize: 16,
-              fontWeight: 'bold'
-            }
+            textStyle: { fontSize: 16, fontWeight: 'bold', color: '#333' }
           },
           tooltip: {
             trigger: 'axis',
-            axisPointer: { type: 'shadow' },
-            formatter: (params) => {
-              const data = params[0];
-              const session = dataList[data.dataIndex];
-              return `${data.name}<br/>签到率: ${data.value}%<br/>总人数: ${session.totalStudents}<br/>已签到: ${session.signedCount}`;
-            }
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            borderColor: '#ddd',
+            borderWidth: 1,
+            textStyle: { color: '#333' }
           },
-          grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            top: '15%',
-            containLabel: true
-          },
+          grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
           xAxis: {
             type: 'category',
-            data: classNames,
+            data: dateList,
             axisLabel: {
+              rotate: 45,
               interval: 0,
-              rotate: 45
-            }
+              color: '#666'
+            },
+            axisLine: { lineStyle: { color: '#ddd' } }
           },
           yAxis: {
             type: 'value',
-            axisLabel: { formatter: '{value}%' },
+            axisLabel: {
+              formatter: '{value}%',
+              color: '#666'
+            },
+            axisLine: { show: false },
+            splitLine: { lineStyle: { color: '#f0f0f0' } },
             min: 0,
             max: 100
           },
           series: [{
-            data: rates,
-            type: 'bar',
+            data: rateList,
+            type: 'line',
+            smooth: true,
+            symbol: 'circle',
+            symbolSize: 8,
             itemStyle: {
-              color: (params) => {
-                const colorList = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de'];
-                return colorList[params.dataIndex % colorList.length];
-              }
+              color: '#5470c6',
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            lineStyle: {
+              width: 4,
+              shadowColor: 'rgba(84, 112, 198, 0.3)',
+              shadowBlur: 10,
+              shadowOffsetY: 5
+            },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(84, 112, 198, 0.6)' },
+                { offset: 1, color: 'rgba(84, 112, 198, 0.1)' }
+              ])
             },
             label: {
               show: true,
               position: 'top',
-              formatter: '{c}%'
+              formatter: '{c}%',
+              color: '#5470c6',
+              fontWeight: 'bold'
             }
           }]
         };
-        this.sessionRankChart.setOption(option, true);
+        this.trendChart.setOption(option, true);
+      }
+
+      // 每日考勤统计图
+      if (this.dailyChart) {
+        const option = {
+          title: {
+            text: '每日考勤统计',
+            left: 'center',
+            textStyle: { fontSize: 16, fontWeight: 'bold', color: '#333' }
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            borderColor: '#ddd',
+            borderWidth: 1,
+            textStyle: { color: '#333' }
+          },
+          legend: {
+            data: ['已签到', '迟到', '请假', '早退', '缺勤'],
+            bottom: 0,
+            textStyle: { color: '#666' }
+          },
+          grid: { left: '3%', right: '4%', bottom: '12%', top: '15%', containLabel: true },
+          xAxis: {
+            type: 'category',
+            data: dateList,
+            axisLabel: {
+              rotate: 45,
+              interval: 0,
+              color: '#666'
+            },
+            axisLine: { lineStyle: { color: '#ddd' } }
+          },
+          yAxis: {
+            type: 'value',
+            axisLabel: { color: '#666' },
+            axisLine: { show: false },
+            splitLine: { lineStyle: { color: '#f0f0f0' } }
+          },
+          series: [
+            {
+              name: '已签到',
+              type: 'bar',
+              stack: 'total',
+              data: signedList,
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#9EE6A1' },
+                  { offset: 1, color: '#67C23A' }
+                ]),
+                borderRadius: [2, 2, 0, 0]
+              }
+            },
+            {
+              name: '迟到',
+              type: 'bar',
+              stack: 'total',
+              data: lateList,
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#F8D9A0' },
+                  { offset: 1, color: '#E6A23C' }
+                ]),
+                borderRadius: [2, 2, 0, 0]
+              }
+            },
+            {
+              name: '请假',
+              type: 'bar',
+              stack: 'total',
+              data: leaveList,
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#A0C8FF' },
+                  { offset: 1, color: '#409EFF' }
+                ]),
+                borderRadius: [2, 2, 0, 0]
+              }
+            },
+            {
+              name: '早退',
+              type: 'bar',
+              stack: 'total',
+              data: earlyLeaveList,
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#F9A7A7' },
+                  { offset: 1, color: '#F56C6C' }
+                ]),
+                borderRadius: [2, 2, 0, 0]
+              }
+            },
+            {
+              name: '缺勤',
+              type: 'bar',
+              stack: 'total',
+              data: absentList,
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#C0C4CC' },
+                  { offset: 1, color: '#909399' }
+                ]),
+                borderRadius: [2, 2, 0, 0]
+              }
+            }
+          ]
+        };
+        this.dailyChart.setOption(option, true);
       }
     },
 
@@ -811,21 +858,13 @@ export default {
             text: title,
             left: 'center',
             top: 'center',
-            textStyle: {
-              color: '#999',
-              fontSize: 16,
-              fontWeight: 'normal'
-            }
+            textStyle: { color: '#999', fontSize: 16, fontWeight: 'normal' }
           },
           graphic: {
             type: 'text',
             left: 'center',
             top: '45%',
-            style: {
-              text: '暂无数据',
-              fontSize: 14,
-              fill: '#999'
-            }
+            style: { text: '暂无数据', fontSize: 14, fill: '#999' }
           },
           xAxis: { show: false },
           yAxis: { show: false }
@@ -843,8 +882,15 @@ export default {
     /** 重置按钮操作 */
     resetQuery() {
       this.dateRange = [];
-      this.resetForm("queryForm");
-      this.handleQuery();
+      this.queryParams.sessionId = undefined;
+      this.queryParams.attendanceStatus = undefined;
+      this.queryParams.pageNum = 1;
+      // 重置后重新设置默认时间范围
+      const end = new Date();
+      const start = new Date();
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+      this.dateRange = [this.parseTime(start, '{y}-{m}-{d}'), this.parseTime(end, '{y}-{m}-{d}')];
+      this.getList();
     },
 
     /** 维度变更 */
@@ -853,13 +899,14 @@ export default {
       this.getList();
     },
 
-    /** 多选框选中数据 */
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.sessionId || item.id);
-    },
-
     /** 导出按钮操作 */
     handleExport() {
+      if (this.dataList.length === 0) {
+        this.$message.warning('没有数据可以导出');
+        return;
+      }
+
+      this.exportLoading = true;
       const params = {
         sessionId: this.queryParams.sessionId,
         startDate: this.dateRange && this.dateRange.length ? this.dateRange[0] : undefined,
@@ -872,28 +919,39 @@ export default {
         (this.sessionList.find(s => s.sessionId === this.queryParams.sessionId) || {}).className : '全部课堂';
       const dateRangeText = params.startDate && params.endDate ?
         `${params.startDate.replace(/-/g,'')}-${params.endDate.replace(/-/g,'')}` : this.getCurrentTime();
-      const filename = `考勤报表_${className}_${dateRangeText}.xlsx`;
+      const filename = `考勤报表_${this.getDimensionText()}_${className}_${dateRangeText}.xlsx`;
 
       exportAttendanceReport(params, filename).then(() => {
-        this.$message.success('导出任务已开始');
+        this.$message.success('导出成功');
+        this.exportLoading = false;
       }).catch(err => {
         console.error('导出失败', err);
         this.$message.error('导出失败: ' + (err.message || '请检查数据'));
+        this.exportLoading = false;
       });
     },
 
     /** 打印功能 */
     handlePrint() {
-      // 重新生成图表图片确保最新
+      if (this.dataList.length === 0) {
+        this.$message.warning('没有数据可以打印');
+        return;
+      }
+
+      // 确保图表图片已生成
       this.generateChartImages();
 
       setTimeout(() => {
         const printContent = this.generatePrintContent();
         const printWindow = window.open('', '_blank');
-        printWindow.document.write(printContent);
-        printWindow.document.close();
-        printWindow.print();
-      }, 500);
+        if (printWindow) {
+          printWindow.document.write(printContent);
+          printWindow.document.close();
+          printWindow.onload = () => {
+            printWindow.print();
+          };
+        }
+      }, 1000);
     },
 
     /** 生成打印内容 */
@@ -905,12 +963,12 @@ export default {
       let tableContent = '';
       let chartContent = '';
 
-      if (this.statDimension === 'session') {
-        tableContent = this.generateSessionTable();
-        chartContent = this.generateSessionChartsForPrint();
-      } else if (this.statDimension === 'time') {
-        tableContent = this.generateTimeTable();
-        chartContent = this.generateTimeChartsForPrint();
+      if (this.statDimension === 'summary') {
+        tableContent = this.generateSummaryTable();
+        chartContent = this.generateSummaryChartsForPrint();
+      } else if (this.statDimension === 'trend') {
+        tableContent = this.generateTrendTable();
+        chartContent = this.generateTrendChartsForPrint();
       } else {
         tableContent = this.generateDetailsTable();
       }
@@ -920,41 +978,54 @@ export default {
         <html>
         <head>
           <title>${title}</title>
+          <meta charset="UTF-8">
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
+            body { font-family: "Microsoft YaHei", Arial, sans-serif; margin: 20px; line-height: 1.6; }
             .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-            .meta { margin-bottom: 15px; color: #666; }
-            .chart-section { margin: 20px 0; }
-            .chart-container { text-align: center; margin: 15px 0; }
-            .chart-title { font-weight: bold; margin-bottom: 10px; font-size: 16px; }
-            .chart-image { max-width: 100%; height: auto; border: 1px solid #ddd; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            .meta { margin-bottom: 20px; color: #666; background: #f9f9f9; padding: 10px; border-radius: 4px; }
+            .chart-section { margin: 25px 0; }
+            .chart-container { text-align: center; margin: 20px 0; page-break-inside: avoid; }
+            .chart-title { font-weight: bold; margin-bottom: 15px; font-size: 16px; color: #333; }
+            .chart-image { max-width: 90%; height: auto; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            .table-section { margin-top: 25px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
             table, th, td { border: 1px solid #ddd; }
-            th, td { padding: 8px; text-align: center; }
-            th { background-color: #f5f7fa; font-weight: bold; }
-            .no-data { text-align: center; color: #999; padding: 20px; }
+            th, td { padding: 8px 12px; text-align: center; }
+            th { background-color: #f5f7fa; font-weight: bold; color: #333; }
+            .no-data { text-align: center; color: #999; padding: 40px; font-size: 14px; }
+            .print-info { background: #e8f4ff; padding: 10px; margin: 10px 0; border-radius: 4px; font-size: 12px; }
             @media print {
-              body { margin: 0; }
+              body { margin: 0.5cm; font-size: 12pt; }
               .no-print { display: none; }
-              .chart-image { max-width: 90% !important; }
+              .chart-image { max-width: 95% !important; }
+              .chart-container { page-break-inside: avoid; }
+              table { page-break-inside: auto; }
+              tr { page-break-inside: avoid; page-break-after: auto; }
             }
           </style>
         </head>
         <body>
           <div class="header">
-            <h2>${title}</h2>
+            <h1 style="margin: 0; color: #333;">${title}</h1>
           </div>
+
           <div class="meta">
-            <div><strong>统计时间:</strong> ${this.dateRange && this.dateRange.length ? this.dateRange[0] + ' 至 ' + this.dateRange[1] : '全部'}</div>
-            <div><strong>生成人:</strong> ${userName} | <strong>生成时间:</strong> ${now}</div>
-            <div><strong>统计维度:</strong> ${this.getDimensionText()}</div>
-            ${this.queryParams.sessionId ? `<div><strong>课堂:</strong> ${(this.sessionList.find(s => s.sessionId === this.queryParams.sessionId) || {}).className || '未知'}</div>` : ''}
+            <div class="print-info">
+              <strong>统计时间:</strong> ${this.dateRange && this.dateRange.length ? this.dateRange[0] + ' 至 ' + this.dateRange[1] : '全部时间'} |
+              <strong>统计维度:</strong> ${this.getDimensionText()} |
+              <strong>课堂:</strong> ${this.queryParams.sessionId ? ((this.sessionList.find(s => s.sessionId === this.queryParams.sessionId) || {}).className || '未知') : '全部课堂'}
+            </div>
+            <div class="print-info">
+              <strong>生成人:</strong> ${userName} |
+              <strong>生成时间:</strong> ${now} |
+              <strong>数据条数:</strong> ${this.dataList.length} 条
+            </div>
           </div>
 
           ${chartContent}
 
           <div class="table-section">
-            <h3>数据表格</h3>
+            <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 8px;">数据明细</h2>
             ${tableContent}
           </div>
         </body>
@@ -962,50 +1033,50 @@ export default {
       `;
     },
 
-    /** 生成课堂统计图表打印内容 */
-    generateSessionChartsForPrint() {
-      if (!this.dataList || this.dataList.length === 0) {
+    /** 生成汇总统计图表打印内容 */
+    generateSummaryChartsForPrint() {
+      if (!this.dataList || this.dataList.length === 0 || !this.chartImages.summary) {
         return '<div class="no-data">暂无图表数据</div>';
       }
 
       return `
         <div class="chart-section">
-          <h3>统计图表</h3>
+          <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 8px;">统计图表</h2>
           <div class="chart-container">
-            <div class="chart-title">课堂签到分布</div>
-            <img src="${this.chartImages.distribution}" class="chart-image" alt="课堂签到分布图">
+            <div class="chart-title">课堂签到率对比</div>
+            <img src="${this.chartImages.summary}" class="chart-image" alt="课堂签到率对比图" onerror="this.style.display='none'">
           </div>
           <div class="chart-container">
-            <div class="chart-title">课堂签到率排名</div>
-            <img src="${this.chartImages.sessionRank}" class="chart-image" alt="课堂签到率排名图">
+            <div class="chart-title">考勤状态分布</div>
+            <img src="${this.chartImages.distribution}" class="chart-image" alt="考勤状态分布图" onerror="this.style.display='none'">
           </div>
         </div>
       `;
     },
 
-    /** 生成时间趋势图表打印内容 */
-    generateTimeChartsForPrint() {
-      if (!this.dataList || this.dataList.length === 0) {
+    /** 生成趋势分析图表打印内容 */
+    generateTrendChartsForPrint() {
+      if (!this.dataList || this.dataList.length === 0 || !this.chartImages.trend) {
         return '<div class="no-data">暂无图表数据</div>';
       }
 
       return `
         <div class="chart-section">
-          <h3>统计图表</h3>
+          <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 8px;">统计图表</h2>
           <div class="chart-container">
-            <div class="chart-title">签到率趋势图</div>
-            <img src="${this.chartImages.trend}" class="chart-image" alt="签到率趋势图">
+            <div class="chart-title">签到率趋势分析</div>
+            <img src="${this.chartImages.trend}" class="chart-image" alt="签到率趋势分析图" onerror="this.style.display='none'">
           </div>
           <div class="chart-container">
-            <div class="chart-title">每日签到统计</div>
-            <img src="${this.chartImages.timeStack}" class="chart-image" alt="每日签到统计图">
+            <div class="chart-title">每日考勤统计</div>
+            <img src="${this.chartImages.daily}" class="chart-image" alt="每日考勤统计图" onerror="this.style.display='none'">
           </div>
         </div>
       `;
     },
 
-    /** 生成课堂统计表格 */
-    generateSessionTable() {
+    /** 生成汇总统计表格 */
+    generateSummaryTable() {
       if (!this.dataList || this.dataList.length === 0) {
         return '<div class="no-data">暂无数据</div>';
       }
@@ -1020,19 +1091,21 @@ export default {
               <th>缺勤</th>
               <th>迟到</th>
               <th>请假</th>
+              <th>早退</th>
               <th>签到率</th>
             </tr>
           </thead>
           <tbody>
             ${this.dataList.map(item => `
               <tr>
-                <td>${item.className}</td>
-                <td>${item.totalStudents}</td>
-                <td>${item.signedCount}</td>
-                <td>${item.absentCount}</td>
-                <td>${item.lateCount}</td>
-                <td>${item.leaveCount}</td>
-                <td>${item.attendanceRate.toFixed(1)}%</td>
+                <td>${item.className || '未知'}</td>
+                <td>${item.totalStudents || 0}</td>
+                <td>${item.signedCount || 0}</td>
+                <td>${item.absentCount || 0}</td>
+                <td>${item.lateCount || 0}</td>
+                <td>${item.leaveCount || 0}</td>
+                <td>${item.earlyLeaveCount || 0}</td>
+                <td>${(item.attendanceRate || 0).toFixed(1)}%</td>
               </tr>
             `).join('')}
           </tbody>
@@ -1040,8 +1113,8 @@ export default {
       `;
     },
 
-    /** 生成时间统计表格 */
-    generateTimeTable() {
+    /** 生成趋势分析表格 */
+    generateTrendTable() {
       if (!this.dataList || this.dataList.length === 0) {
         return '<div class="no-data">暂无数据</div>';
       }
@@ -1050,21 +1123,25 @@ export default {
         <table>
           <thead>
             <tr>
-              <th>统计日期</th>
-              <th>当日签到</th>
-              <th>当日缺勤</th>
-              <th>当日迟到</th>
+              <th>日期</th>
+              <th>签到人数</th>
+              <th>缺勤人数</th>
+              <th>迟到人数</th>
+              <th>请假人数</th>
+              <th>早退人数</th>
               <th>签到率</th>
             </tr>
           </thead>
           <tbody>
             ${this.dataList.map(item => `
               <tr>
-                <td>${item.statDate || item.statWeek}</td>
-                <td>${item.dailySigned}</td>
-                <td>${item.dailyAbsent}</td>
-                <td>${item.dailyLate}</td>
-                <td>${item.attendanceRate.toFixed(1)}%</td>
+                <td>${item.statDate ? this.parseTime(item.statDate, '{y}-{m}-{d}') : (item.statWeek || '未知')}</td>
+                <td>${item.dailySigned || 0}</td>
+                <td>${item.dailyAbsent || 0}</td>
+                <td>${item.dailyLate || 0}</td>
+                <td>${item.dailyLeave || 0}</td>
+                <td>${item.dailyEarlyLeave || 0}</td>
+                <td>${(item.attendanceRate || 0).toFixed(1)}%</td>
               </tr>
             `).join('')}
           </tbody>
@@ -1093,12 +1170,12 @@ export default {
           <tbody>
             ${this.dataList.map(item => `
               <tr>
-                <td>${item.studentName}</td>
-                <td>${item.studentNo}</td>
-                <td>${item.className}</td>
-                <td>${item.attendanceTime ? this.parseTime(item.attendanceTime) : '-'}</td>
-                <td>${item.attendanceMethod}</td>
-                <td>${item.statusText}</td>
+                <td>${item.studentName || '未知'}</td>
+                <td>${item.studentNo || '未知'}</td>
+                <td>${item.className || '未知'}</td>
+                <td>${item.attendanceTime ? this.parseTime(item.attendanceTime) : '未签到'}</td>
+                <td>${item.attendanceMethod || '未知'}</td>
+                <td>${item.statusText || '未知'}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -1109,22 +1186,23 @@ export default {
     /** 获取维度文本 */
     getDimensionText() {
       const dimensionMap = {
-        'session': '课堂统计',
-        'time': '时间趋势',
+        'summary': '汇总统计',
+        'trend': '趋势分析',
         'details': '明细查询'
       };
-      return dimensionMap[this.statDimension] || '课堂统计';
+      return dimensionMap[this.statDimension] || '汇总统计';
     },
 
     /** 格式化签到率显示 */
     formatRate(row) {
-      return `${row.attendanceRate.toFixed(1)}% (${row.signedCount}/${row.totalStudents})`;
+      return `${(row.attendanceRate || 0).toFixed(1)}% (${row.signedCount || 0}/${row.totalStudents || 0})`;
     },
 
     /** 获取签到率类型 */
     getRateType(rate) {
-      if (rate >= 90) return 'success';
-      if (rate >= 70) return 'warning';
+      const value = rate || 0;
+      if (value >= 90) return 'success';
+      if (value >= 70) return 'warning';
       return 'danger';
     },
 
@@ -1135,7 +1213,7 @@ export default {
         1: 'success',  // 已签到
         2: 'warning',  // 迟到
         3: 'info',     // 请假
-        4: 'info'      // 早退
+        4: 'warning'   // 早退
       };
       return statusMap[status] || 'info';
     },
@@ -1182,12 +1260,8 @@ export default {
     },
 
     rowKey(row) {
-      return row.sessionId || row.studentNo || row.id || JSON.stringify(row);
-    },
-
-    rowClassName({ rowIndex }) {
-      return rowIndex % 2 === 1 ? 'striped-row' : '';
-    },
+      return row.sessionId || row.studentNo || row.id || Math.random();
+    }
   }
 };
 </script>
@@ -1200,24 +1274,24 @@ export default {
   background: #fff;
   padding: 16px 16px 0;
   margin-bottom: 20px;
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #ebeef5;
 }
 .chart-title {
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 16px;
   text-align: center;
-  color: #333;
+  color: #303133;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ebeef5;
 }
 
 .el-table th {
   background: #f7f9fb !important;
   color: #333;
   font-weight: 600;
-}
-.striped-row {
-  background: #fafafa;
 }
 
 @media print {

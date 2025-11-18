@@ -45,13 +45,9 @@ export function dashboardMetrics(params) {
   })
 }
 
-// 导出考勤报表（使用 download helper 确保 form-urlencoded 兼容）
+// 导出考勤报表
 export function exportAttendanceReport(params, filename) {
-  // download helper 会 POST 表单并保存 blob
-  return download('/proj_fz/attendanceReport/export', params, filename, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-}
-
-// 导出（表单方式，回退用）
-export function exportAttendanceReportForm(params, filename) {
-  return download('/proj_fz/attendanceReport/export', params, filename, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+  return download('/proj_fz/attendanceReport/export', params, filename, {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+  })
 }

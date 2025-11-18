@@ -14,6 +14,8 @@ public class AttendanceStatisticsDTO implements Serializable {
     private Integer signedCount;
     private Integer absentCount;
     private Integer lateCount;
+    private Integer leaveCount;
+    private Integer earlyLeaveCount;
     private Double attendanceRate;
 
     // 时间维度统计
@@ -21,6 +23,9 @@ public class AttendanceStatisticsDTO implements Serializable {
     private String statWeek;
     private Integer dailySigned;
     private Integer dailyAbsent;
+    private Integer dailyLate;
+    private Integer dailyLeave;
+    private Integer dailyEarlyLeave;
 
     // 明细字段
     private String studentName;
@@ -64,6 +69,12 @@ public class AttendanceStatisticsDTO implements Serializable {
     public Integer getLateCount() { return lateCount; }
     public void setLateCount(Integer lateCount) { this.lateCount = lateCount; }
 
+    public Integer getLeaveCount() { return leaveCount; }
+    public void setLeaveCount(Integer leaveCount) { this.leaveCount = leaveCount; }
+
+    public Integer getEarlyLeaveCount() { return earlyLeaveCount; }
+    public void setEarlyLeaveCount(Integer earlyLeaveCount) { this.earlyLeaveCount = earlyLeaveCount; }
+
     public Double getAttendanceRate() { return attendanceRate; }
     public void setAttendanceRate(Double attendanceRate) { this.attendanceRate = attendanceRate; }
 
@@ -78,6 +89,15 @@ public class AttendanceStatisticsDTO implements Serializable {
 
     public Integer getDailyAbsent() { return dailyAbsent; }
     public void setDailyAbsent(Integer dailyAbsent) { this.dailyAbsent = dailyAbsent; }
+
+    public Integer getDailyLate() { return dailyLate; }
+    public void setDailyLate(Integer dailyLate) { this.dailyLate = dailyLate; }
+
+    public Integer getDailyLeave() { return dailyLeave; }
+    public void setDailyLeave(Integer dailyLeave) { this.dailyLeave = dailyLeave; }
+
+    public Integer getDailyEarlyLeave() { return dailyEarlyLeave; }
+    public void setDailyEarlyLeave(Integer dailyEarlyLeave) { this.dailyEarlyLeave = dailyEarlyLeave; }
 
     public String getStudentName() { return studentName; }
     public void setStudentName(String studentName) { this.studentName = studentName; }

@@ -34,8 +34,8 @@ public class AttendanceReportController extends BaseController {
     public TableDataInfo sessionStatistics(@RequestParam(required = false) Long sessionId,
                                            @RequestParam(required = false) String startDate,
                                            @RequestParam(required = false) String endDate) {
-        Date start = StringUtils.isNotEmpty(startDate) ? DateUtils.parseDate(startDate) : DateUtils.getNowDate();
-        Date end = StringUtils.isNotEmpty(endDate) ? DateUtils.parseDate(endDate) : DateUtils.getNowDate();
+        Date start = StringUtils.isNotEmpty(startDate) ? DateUtils.parseDate(startDate) : null;
+        Date end = StringUtils.isNotEmpty(endDate) ? DateUtils.parseDate(endDate) : null;
         startPage();
         List<AttendanceStatisticsDTO> list = attendanceStatisticsService.getSessionStatistics(sessionId, start, end);
         return getDataTable(list);
@@ -50,8 +50,8 @@ public class AttendanceReportController extends BaseController {
                                      @RequestParam(required = false) String startDate,
                                      @RequestParam(required = false) String endDate,
                                      @RequestParam(defaultValue = "day") String groupBy) {
-        Date start = StringUtils.isNotEmpty(startDate) ? DateUtils.parseDate(startDate) : DateUtils.getNowDate();
-        Date end = StringUtils.isNotEmpty(endDate) ? DateUtils.parseDate(endDate) : DateUtils.getNowDate();
+        Date start = StringUtils.isNotEmpty(startDate) ? DateUtils.parseDate(startDate) : null;
+        Date end = StringUtils.isNotEmpty(endDate) ? DateUtils.parseDate(endDate) : null;
         Map<String, Object> result = attendanceStatisticsService.getTimeStatistics(sessionId, start, end, groupBy);
         return AjaxResult.success(result);
     }
@@ -65,8 +65,8 @@ public class AttendanceReportController extends BaseController {
                                            @RequestParam(required = false) String startDate,
                                            @RequestParam(required = false) String endDate,
                                            @RequestParam(required = false) Integer attendanceStatus) {
-        Date start = StringUtils.isNotEmpty(startDate) ? DateUtils.parseDate(startDate) : DateUtils.getNowDate();
-        Date end = StringUtils.isNotEmpty(endDate) ? DateUtils.parseDate(endDate) : DateUtils.getNowDate();
+        Date start = StringUtils.isNotEmpty(startDate) ? DateUtils.parseDate(startDate) : null;
+        Date end = StringUtils.isNotEmpty(endDate) ? DateUtils.parseDate(endDate) : null;
         startPage();
         List<AttendanceStatisticsDTO> list = attendanceStatisticsService.getAttendanceDetails(sessionId, start, end, attendanceStatus);
         return getDataTable(list);
@@ -111,8 +111,8 @@ public class AttendanceReportController extends BaseController {
                        @RequestParam(required = false) String startDate,
                        @RequestParam(required = false) String endDate,
                        @RequestParam String exportType) {
-        Date start = StringUtils.isNotEmpty(startDate) ? DateUtils.parseDate(startDate) : DateUtils.getNowDate();
-        Date end = StringUtils.isNotEmpty(endDate) ? DateUtils.parseDate(endDate) : DateUtils.getNowDate();
+        Date start = StringUtils.isNotEmpty(startDate) ? DateUtils.parseDate(startDate) : null;
+        Date end = StringUtils.isNotEmpty(endDate) ? DateUtils.parseDate(endDate) : null;
 
         List<AttendanceStatisticsDTO> list;
         String sheetName;

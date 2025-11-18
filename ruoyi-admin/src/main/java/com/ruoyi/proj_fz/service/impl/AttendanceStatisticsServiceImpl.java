@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class AttendanceStatisticsServiceImpl implements IAttendanceStatisticsService {
@@ -19,11 +18,26 @@ public class AttendanceStatisticsServiceImpl implements IAttendanceStatisticsSer
 
     @Override
     public List<AttendanceStatisticsDTO> getSessionStatistics(Long sessionId, Date startDate, Date endDate) {
+        // 如果没有日期范围，设置默认范围
+        if (startDate == null) {
+            startDate = DateUtils.addDays(new Date(), -30);
+        }
+        if (endDate == null) {
+            endDate = new Date();
+        }
         return attendanceStatisticsMapper.selectSessionStatistics(sessionId, startDate, endDate);
     }
 
     @Override
     public Map<String, Object> getTimeStatistics(Long sessionId, Date startDate, Date endDate, String groupBy) {
+        // 如果没有日期范围，设置默认范围
+        if (startDate == null) {
+            startDate = DateUtils.addDays(new Date(), -7);
+        }
+        if (endDate == null) {
+            endDate = new Date();
+        }
+
         List<AttendanceStatisticsDTO> statistics = attendanceStatisticsMapper.selectTimeStatistics(sessionId, startDate, endDate, groupBy);
 
         Map<String, Object> result = new HashMap<>();
@@ -54,57 +68,49 @@ public class AttendanceStatisticsServiceImpl implements IAttendanceStatisticsSer
 
     @Override
     public List<AttendanceStatisticsDTO> getAttendanceDetails(Long sessionId, Date startDate, Date endDate, Integer attendanceStatus) {
+        // 如果没有日期范围，设置默认范围
+        if (startDate == null) {
+            startDate = DateUtils.addDays(new Date(), -30);
+        }
+        if (endDate == null) {
+            endDate = new Date();
+        }
         return attendanceStatisticsMapper.selectAttendanceDetails(sessionId, startDate, endDate, attendanceStatus);
     }
 
     @Override
     public Map<String, Object> getWeeklyReport(Date startDate, Date endDate) {
+        if (startDate == null) {
+            startDate = DateUtils.addDays(new Date(), -7);
+        }
+        if (endDate == null) {
+            endDate = new Date();
+        }
+
         List<AttendanceStatisticsDTO> weeklyData = attendanceStatisticsMapper.selectWeeklyReport(startDate, endDate);
-        List<AttendanceStatisticsDTO> topAbsenceStudents = attendanceStatisticsMapper.selectTopAbsenceStudents(startDate, endDate, 10);
-
-        // 计算平均签到率
-        Double avgRate = weeklyData.stream()
-                .mapToDouble(stat -> stat.getAvgAttendanceRate() != null ? stat.getAvgAttendanceRate() : 0.0)
-                .average()
-                .orElse(0.0);
-
-        // 获取Top3和Bottom3课堂
-        List<AttendanceStatisticsDTO> top3Sessions = weeklyData.stream()
-                .limit(3)
-                .collect(Collectors.toList());
-
-        List<AttendanceStatisticsDTO> bottom3Sessions = weeklyData.stream()
-                .sorted((a, b) -> Double.compare(a.getAvgAttendanceRate() != null ? a.getAvgAttendanceRate() : 0.0,
-                        b.getAvgAttendanceRate() != null ? b.getAvgAttendanceRate() : 0.0))
-                .limit(3)
-                .collect(Collectors.toList());
-
         Map<String, Object> result = new HashMap<>();
-        result.put("weeklyData", weeklyData);
-        result.put("topAbsenceStudents", topAbsenceStudents);
-        result.put("avgAttendanceRate", avgRate);
-        result.put("top3Sessions", top3Sessions);
-        result.put("bottom3Sessions", bottom3Sessions);
+        result.put("weeklyData", weeklyData != null ? weeklyData : new ArrayList<>());
+        result.put("avgAttendanceRate", 0.0);
+        result.put("top3Sessions", new ArrayList<>());
+        result.put("bottom3Sessions", new ArrayList<>());
 
         return result;
     }
 
     @Override
     public Map<String, Object> getDashboardMetrics(Date startDate, Date endDate) {
-        Map<String, Object> metrics = new HashMap<>();
+        if (startDate == null) {
+            startDate = DateUtils.addDays(new Date(), -7);
+        }
+        if (endDate == null) {
+            endDate = new Date();
+        }
 
+        Map<String, Object> metrics = new HashMap<>();
         try {
             // 全校平均签到率
             Double schoolAvgRate = attendanceStatisticsMapper.selectSchoolAverageRate(startDate, endDate);
             metrics.put("schoolAvgRate", schoolAvgRate != null ? schoolAvgRate : 0.0);
-
-            // 本周平均签到率
-            Double weekAvgRate = attendanceStatisticsMapper.selectWeekAverageRate(startDate, endDate);
-            metrics.put("weekAvgRate", weekAvgRate != null ? weekAvgRate : 0.0);
-
-            // 今日平均签到率
-            Double todayAvgRate = attendanceStatisticsMapper.selectTodayAverageRate(startDate, endDate);
-            metrics.put("todayAvgRate", todayAvgRate != null ? todayAvgRate : 0.0);
 
             // 总课堂数
             Integer totalSessions = attendanceStatisticsMapper.selectTotalSessions();
@@ -118,24 +124,12 @@ public class AttendanceStatisticsServiceImpl implements IAttendanceStatisticsSer
             Integer totalStudents = attendanceStatisticsMapper.selectTotalStudents();
             metrics.put("totalStudents", totalStudents != null ? totalStudents : 0);
 
-            // 缺勤课堂数
-            Integer absenceSessions = attendanceStatisticsMapper.selectAbsenceSessions(startDate, endDate);
-            metrics.put("absenceSessions", absenceSessions != null ? absenceSessions : 0);
-
-            // 缺勤次数Top5课堂
-            List<AttendanceStatisticsDTO> topAbsenceSessions = attendanceStatisticsMapper.selectTopAbsenceSessions(startDate, endDate, 5);
-            metrics.put("topAbsenceSessions", topAbsenceSessions != null ? topAbsenceSessions : new ArrayList<>());
-
         } catch (Exception e) {
             // 如果查询失败，设置默认值
             metrics.put("schoolAvgRate", 0.0);
-            metrics.put("weekAvgRate", 0.0);
-            metrics.put("todayAvgRate", 0.0);
             metrics.put("totalSessions", 0);
             metrics.put("activeSessions", 0);
             metrics.put("totalStudents", 0);
-            metrics.put("absenceSessions", 0);
-            metrics.put("topAbsenceSessions", new ArrayList<>());
         }
 
         return metrics;
