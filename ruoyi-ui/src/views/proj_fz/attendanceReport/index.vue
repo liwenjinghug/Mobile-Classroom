@@ -223,8 +223,11 @@
           align="center"
           min-width="150"
           show-overflow-tooltip
-          prop="className"
-        />
+        >
+          <template slot-scope="scope">
+            {{ scope.row.className || '未知课堂' }}
+          </template>
+        </el-table-column>
         <el-table-column
           label="签到时间"
           align="center"

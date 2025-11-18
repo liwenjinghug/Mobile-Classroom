@@ -56,12 +56,13 @@ public interface AttendanceStatisticsMapper {
                                                           @Param("startDate") Date startDate,
                                                           @Param("endDate") Date endDate);
 
-    // 按时间维度统计 - 按签到任务分组
+    // 按时间维度统计 - 修复课堂名称关联问题
     @Select("<script>" +
             "SELECT " +
             "    cat.task_id as taskId, " +
             "    cat.create_time as statDate, " +
             "    cs.class_name as className, " +
+            "    cs.session_id as sessionId, " +
             "    COUNT(CASE WHEN ca.attendance_status = 1 THEN 1 END) as dailySigned, " +
             "    COUNT(CASE WHEN ca.attendance_status = 0 THEN 1 END) as dailyAbsent, " +
             "    COUNT(CASE WHEN ca.attendance_status = 2 THEN 1 END) as dailyLate, " +
@@ -82,7 +83,7 @@ public interface AttendanceStatisticsMapper {
             "    <if test='endDate != null'>" +
             "        AND DATE(cat.create_time) &lt;= DATE(#{endDate}) " +
             "    </if>" +
-            "GROUP BY cat.task_id, cat.create_time, cs.class_name " +
+            "GROUP BY cat.task_id, cat.create_time, cs.class_name, cs.session_id " +
             "ORDER BY cat.create_time ASC" +
             "</script>")
     List<AttendanceStatisticsDTO> selectTimeStatistics(@Param("sessionId") Long sessionId,
@@ -90,7 +91,7 @@ public interface AttendanceStatisticsMapper {
                                                        @Param("endDate") Date endDate,
                                                        @Param("groupBy") String groupBy);
 
-    // 签到明细查询 - 修复学号和课堂名称
+    // 签到明细查询
     @Select("<script>" +
             "SELECT " +
             "    cs.session_id as sessionId, " +
@@ -179,12 +180,13 @@ public interface AttendanceStatisticsMapper {
                                                                 @Param("startDate") Date startDate,
                                                                 @Param("endDate") Date endDate);
 
-    // 导出时间维度统计
+    // 导出时间维度统计 - 修复课堂名称问题
     @Select("<script>" +
             "SELECT " +
             "    cat.task_id as taskId, " +
             "    cat.create_time as statDate, " +
             "    cs.class_name as className, " +
+            "    cs.session_id as sessionId, " +
             "    COUNT(CASE WHEN ca.attendance_status = 1 THEN 1 END) as dailySigned, " +
             "    COUNT(CASE WHEN ca.attendance_status = 0 THEN 1 END) as dailyAbsent, " +
             "    COUNT(CASE WHEN ca.attendance_status = 2 THEN 1 END) as dailyLate, " +
@@ -205,7 +207,7 @@ public interface AttendanceStatisticsMapper {
             "    <if test='endDate != null'>" +
             "        AND DATE(cat.create_time) &lt;= DATE(#{endDate}) " +
             "    </if>" +
-            "GROUP BY cat.task_id, cat.create_time, cs.class_name " +
+            "GROUP BY cat.task_id, cat.create_time, cs.class_name, cs.session_id " +
             "ORDER BY cat.create_time ASC" +
             "</script>")
     List<AttendanceStatisticsDTO> selectExportTimeStatistics(@Param("sessionId") Long sessionId,
@@ -321,7 +323,6 @@ public interface AttendanceStatisticsMapper {
     Double selectSchoolAverageRate(@Param("startDate") Date startDate,
                                    @Param("endDate") Date endDate);
 
-    // 本周平均签到率
     @Select("<script>" +
             "SELECT " +
             "    ROUND(COUNT(CASE WHEN ca.attendance_status IN (1, 2) THEN 1 END) * 100.0 / GREATEST(COUNT(*), 1), 2) as weekAvgRate " +
@@ -337,7 +338,6 @@ public interface AttendanceStatisticsMapper {
     Double selectWeekAverageRate(@Param("startDate") Date startDate,
                                  @Param("endDate") Date endDate);
 
-    // 今日平均签到率
     @Select("<script>" +
             "SELECT " +
             "    ROUND(COUNT(CASE WHEN ca.attendance_status IN (1, 2) THEN 1 END) * 100.0 / GREATEST(COUNT(*), 1), 2) as todayAvgRate " +
@@ -353,7 +353,6 @@ public interface AttendanceStatisticsMapper {
     Double selectTodayAverageRate(@Param("startDate") Date startDate,
                                   @Param("endDate") Date endDate);
 
-    // 缺勤次数Top5课堂
     @Select("<script>" +
             "SELECT " +
             "    cs.session_id as sessionId, " +
@@ -378,19 +377,15 @@ public interface AttendanceStatisticsMapper {
                                                            @Param("endDate") Date endDate,
                                                            @Param("limit") Integer limit);
 
-    // 总课堂数
     @Select("SELECT COUNT(*) as totalSessions FROM class_session WHERE status = 1")
     Integer selectTotalSessions();
 
-    // 活跃课堂数（今天有签到记录的课堂）
     @Select("SELECT COUNT(DISTINCT session_id) as activeSessions FROM class_attendance WHERE DATE(created_at) = CURDATE()")
     Integer selectActiveSessions();
 
-    // 总学生数
     @Select("SELECT COUNT(*) as totalStudents FROM class_student WHERE status = 0")
     Integer selectTotalStudents();
 
-    // 缺勤课堂数（签到率低于60%的课堂）
     @Select("<script>" +
             "SELECT COUNT(*) as absenceSessions FROM (" +
             "SELECT cs.session_id, " +
