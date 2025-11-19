@@ -281,6 +281,13 @@ export const constantRoutes = [
         component: () => import('@/views/proj_fz/dashboard/index'),
         name: 'ProjFz_Dashboard',
         meta: { title: '驾驶舱', icon: 'dashboard' }
+      },
+      // 在 proj_fz 路由配置中添加
+      {
+        path: 'participationHeat',
+        component: () => import('@/views/proj_fz/participationHeat/index'),
+        name: 'ProjFz_ParticipationHeat',
+        meta: { title: '参与热力', icon: 'heatmap' }
       }
     ]
   },
