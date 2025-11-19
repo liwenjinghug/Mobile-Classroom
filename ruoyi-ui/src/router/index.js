@@ -302,20 +302,20 @@ export const constantRoutes = [
       {
         path: 'article',
         component: () => import('@/views/proj_qhy/article/index.vue'),
-        name: 'ProjQhy_Article',
+        name: 'Article',
         meta: { title: '文章管理', icon: 'documentation',permissions: ['proj_qhy:article:list'] }
       },
       {
         path: 'article/detail/:id',
         component: () => import('@/views/proj_qhy/article/ArticleDetail.vue'),
-        name: 'ProjQhy_ArticleDetail',
+        name: 'ArticleDetail',
         meta: { title: '文章详情' },
         hidden: true  // 确保这个路由在菜单中隐藏
       },
       {
         path: 'forum',
         component: () => import('@/views/proj_qhy/forum/index.vue'),
-        name: 'ProjQhy_Forum',
+        name: 'Forum',
         meta: { title: '论坛', icon: 'message' }
       },
       // --- 新增 小组讨论 (主列表) ---

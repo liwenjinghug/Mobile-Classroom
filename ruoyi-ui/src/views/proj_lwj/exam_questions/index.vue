@@ -11,6 +11,9 @@
       <el-button type="primary" @click="openEditor()">新增题目</el-button>
       <el-button type="danger" @click="removeSelected" :disabled="!selection.length">批量删除</el-button>
       <el-button @click="reload">刷新</el-button>
+      <el-button type="success" @click="saveDraft" :disabled="!realExamId || savingMeta">保存草稿</el-button>
+      <el-button type="warning" @click="doPublish" :disabled="!canPublish" :loading="publishing">发布考试</el-button>
+      <span style="color:#909399" v-if="!canPublish">（需至少1题且考试ID有效才能发布）</span>
       <span style="color:#909399" v-if="filter.type">（已按题型筛选，已临时禁用拖拽排序）</span>
     </div>
 
@@ -108,7 +111,7 @@
 
 <script>
 import { listExamQuestion, addExamQuestion, updateExamQuestion, delExamQuestion, delExamQuestionBatch, reorderExamQuestions } from '@/api/proj_lwj/examQuestion'
-import { getExam } from '@/api/proj_lwj/exam'
+import { updateExam, publishExam, getExam } from '@/api/proj_lwj/exam'
 import { getCourse } from '@/api/proj_lw/course'
 import Sortable from 'sortablejs'
 
@@ -126,6 +129,8 @@ export default {
       dialogVisible: false,
       editMode: false,
       saving: false,
+      savingMeta: false,
+      publishing: false,
       form: { id: null, examId: null, questionType: 1, questionContent: '', score: 1, difficulty: 1, sortOrder: 1, analysis: '' },
       optionList: [ { text: '' }, { text: '' } ],
       singleCorrect: 0,
@@ -179,6 +184,9 @@ export default {
         }
       }
       return NaN
+    },
+    canPublish() {
+      return this.realExamId > 0 && Array.isArray(this.list) && this.list.length > 0
     }
   },
   mounted() {
@@ -355,6 +363,81 @@ export default {
       if (!this.selection.length) return
       const ids = this.selection.map(x=>x.id)
       delExamQuestionBatch(ids).then(()=>{ this.$message.success('已删除'); this.reload() })
+    },
+    async saveDraft() {
+      if (!(this.realExamId > 0)) { this.$message.error('无效考试ID'); return }
+      this.savingMeta = true
+      try {
+        // 获取考试详情，补充题目数量
+        const ex = await getExam(this.realExamId)
+        const examData = (ex && (ex.data || ex))
+        const examObj = examData && (examData.data || examData)
+        if (!examObj) throw new Error('未获取到考试详情')
+        const payload = {
+          id: examObj.id || examObj.examId,
+          examName: examObj.examName,
+          courseId: examObj.courseId,
+          sessionId: examObj.sessionId,
+          examType: examObj.examType,
+          startTime: examObj.startTime,
+          endTime: examObj.endTime,
+          examDuration: examObj.examDuration,
+          totalScore: examObj.totalScore,
+          passScore: examObj.passScore,
+          examMode: examObj.examMode,
+          questionOrder: examObj.questionOrder,
+          showAnswer: examObj.showAnswer,
+          lateTime: examObj.lateTime,
+          antiCheat: examObj.antiCheat,
+          autoSubmit: examObj.autoSubmit,
+          lateSubmit: examObj.lateSubmit,
+          status: 0, // 强制草稿
+          questionCount: this.list.length
+        }
+        await updateExam(payload)
+        this.$message.success('草稿已保存')
+      } catch (e) {
+        console.error('saveDraft error', e)
+        this.$message.error('保存草稿失败')
+      } finally { this.savingMeta = false }
+    },
+    async doPublish() {
+      if (!this.canPublish) { this.$message.error('至少添加1个题目后才能发布'); return }
+      this.publishing = true
+      try {
+        // 先更新题目数量再发布
+        const ex = await getExam(this.realExamId)
+        const examData = (ex && (ex.data || ex))
+        const examObj = examData && (examData.data || examData)
+        if (!examObj) throw new Error('未获取到考试详情')
+        const payload = {
+          id: examObj.id || examObj.examId,
+          examName: examObj.examName,
+          courseId: examObj.courseId,
+          sessionId: examObj.sessionId,
+          examType: examObj.examType,
+          startTime: examObj.startTime,
+          endTime: examObj.endTime,
+          examDuration: examObj.examDuration,
+          totalScore: examObj.totalScore,
+          passScore: examObj.passScore,
+          examMode: examObj.examMode,
+          questionOrder: examObj.questionOrder,
+          showAnswer: examObj.showAnswer,
+          lateTime: examObj.lateTime,
+          antiCheat: examObj.antiCheat,
+          autoSubmit: examObj.autoSubmit,
+          lateSubmit: examObj.lateSubmit,
+          status: 1, // 准备发布
+          questionCount: this.list.length
+        }
+        await updateExam(payload)
+        await publishExam(this.realExamId)
+        this.$message.success('考试已发布')
+      } catch (e) {
+        console.error('publish error', e)
+        this.$message.error('发布失败')
+      } finally { this.publishing = false }
     }
   }
 }

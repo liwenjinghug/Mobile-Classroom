@@ -70,5 +70,7 @@ public interface ClassExamAnswerMapper {
 
     @Delete("<script>DELETE FROM class_exam_answer WHERE id IN <foreach item='i' collection='array' open='(' separator=',' close=')'>#{i}</foreach></script>")
     int deleteByIds(Long[] ids);
-}
 
+    @Delete("DELETE FROM class_exam_answer WHERE exam_id=#{examId}")
+    int deleteByExamId(Long examId);
+}

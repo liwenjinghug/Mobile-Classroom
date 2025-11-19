@@ -48,5 +48,7 @@ public class ClassExamAnswerServiceImpl implements IClassExamAnswerService {
     public int deleteByIds(Long[] ids) {
         return mapper.deleteByIds(ids);
     }
-}
 
+    @Override
+    public int deleteByExamId(Long examId) { return mapper.deleteByExamId(examId); }
+}

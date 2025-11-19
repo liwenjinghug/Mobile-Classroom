@@ -1,59 +1,159 @@
 import request from '@/utils/request'
 
-// 考试列表（分页，支持 examName/courseId/sessionId/status 等查询）
-export function listExam(params) {
-  return request({ url: '/proj_lwj/exam/list', method: 'get', params })
+// 查询考试列表
+export function listExam(query) {
+  return request({
+    url: '/proj_lwj/exam/list',
+    method: 'get',
+    params: query
+  })
 }
 
+// 新增考试
 export function addExam(data) {
-  return request({ url: '/proj_lwj/exam', method: 'post', data })
+  return request({
+    url: '/proj_lwj/exam',
+    method: 'post',
+    data: data
+  })
 }
 
+// 修改考试
 export function updateExam(data) {
-  return request({ url: '/proj_lwj/exam', method: 'put', data })
+  return request({
+    url: '/proj_lwj/exam',
+    method: 'put',
+    data: data
+  })
 }
 
-export function changeExamStatus(id, status) {
-  return request({ url: `/proj_lwj/exam/status/${id}/${status}`, method: 'put' })
+// 删除考试（支持批量，ids 可以是单个 id 或 id 数组）
+export function delExam(ids) {
+  if (Array.isArray(ids)) {
+    return request({
+      url: '/proj_lwj/exam/' + ids.join(','),
+      method: 'delete'
+    })
+  }
+  return request({
+    url: '/proj_lwj/exam/' + ids,
+    method: 'delete'
+  })
 }
 
-// 考试详情
+// 发布考试（状态流转）
+export function publishExam(id) {
+  return request({
+    url: `/proj_lwj/exam/status/${id}/1`,
+    method: 'put'
+  })
+}
+
+// 开始考试
+export function startExam(id) {
+  return request({
+    url: `/proj_lwj/exam/status/${id}/2`,
+    method: 'put'
+  })
+}
+
+// 结束考试
+export function endExam(id) {
+  return request({
+    url: `/proj_lwj/exam/status/${id}/3`,
+    method: 'put'
+  })
+}
+
+// 批量创建考试到多个课堂
+export function batchAddExam(payload) {
+  // 这里假设你已有后端批量接口，如需调整路径可在此修改
+  return request({
+    url: '/proj_lwj/exam/batch',
+    method: 'post',
+    data: payload
+  })
+}
+
+// 查询指定学生可参加的考试列表（原函数）
+export function listAvailableExam(studentNo) {
+  return request({
+    url: '/proj_lwj/exam/available',
+    method: 'get',
+    params: { studentNo }
+  })
+}
+// 兼容前端调用的复数命名与对象参数形式
+export function listAvailableExams(arg) {
+  if (typeof arg === 'string') return listAvailableExam(arg)
+  if (arg && typeof arg === 'object') {
+    const studentNo = arg.studentNo || arg.student_no || arg.sn
+    return listAvailableExam(studentNo)
+  }
+  return listAvailableExam(arg)
+}
+
+// 学生开始考试（生成参与记录），与状态流转 startExam 区分
+export function startExamParticipant(data) {
+  // 后端 /proj_lwj/exam/start 支持 JSON body 解析 examId 和 studentNo
+  return request({
+    url: '/proj_lwj/exam/start',
+    method: 'post',
+    data
+  })
+}
+
+// 查询指定考试详情
 export function getExam(id) {
-  return request({ url: `/proj_lwj/exam/${id}`, method: 'get' })
+  return request({
+    url: '/proj_lwj/exam/' + id,
+    method: 'get'
+  })
 }
 
-// 查询考试题目列表（后端在 /proj_lwj/exam/question/list）
-export function listQuestions(params) {
-  return request({ url: '/proj_lwj/exam/question/list', method: 'get', params })
+// 获取考试题目列表
+export function listQuestions(query) {
+  return request({
+    url: '/proj_lwj/exam/question/list',
+    method: 'get',
+    params: query
+  })
 }
-
-// 学生可参加的考试（按学号）
-export function listAvailableExams(params) {
-  return request({ url: '/proj_lwj/exam/available', method: 'get', params })
-}
-
-// 开始考试（后端兼容 /participant/start 与 /start）
-export function startExam(data) {
-  return request({ url: '/proj_lwj/exam/start', method: 'post', data })
-}
-
-// 保存答案
+// 保存答题
 export function saveAnswer(data) {
-  return request({ url: '/proj_lwj/exam/answer/save', method: 'post', data })
+  return request({
+    url: '/proj_lwj/exam/answer/save',
+    method: 'post',
+    data
+  })
 }
-
-// 提交试卷（后端兼容 /participant/submit 与 /submit）
+// 提交试卷（参与记录提交）
 export function submitExam(data) {
-  return request({ url: '/proj_lwj/exam/submit', method: 'post', data })
+  return request({
+    url: '/proj_lwj/exam/participant/submit',
+    method: 'post',
+    data
+  })
 }
 
-// 其它统计/监控相关（预留）
-export function examProgress(params) {
-  return request({ url: `/proj_lwj/exam/${params.examId}/progress`, method: 'get' })
+// 获取答案列表
+export function listAnswers(query) {
+  return request({
+    url: '/proj_lwj/exam/answer/list',
+    method: 'get',
+    params: query
+  })
 }
-export function monitorEvents(params) {
-  return request({ url: '/proj_lwj/exam/monitor/list', method: 'get', params })
-}
-export function pushMonitorEvent(data) {
-  return request({ url: '/proj_lwj/exam/monitor/event', method: 'post', data })
+
+// 新增：按学号查询"我的考试参与记录"
+export function listMyParticipants(arg) {
+  const params = {}
+  if (typeof arg === 'string') params.studentNo = arg
+  else if (arg && typeof arg === 'object') params.studentNo = arg.studentNo || arg.student_no || arg.sn
+  else params.studentNo = arg
+  return request({
+    url: '/proj_lwj/exam/participant/list',
+    method: 'get',
+    params
+  })
 }

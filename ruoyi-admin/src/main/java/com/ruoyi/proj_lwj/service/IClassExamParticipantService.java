@@ -11,5 +11,5 @@ public interface IClassExamParticipantService {
     int update(ClassExamParticipant p);
     int deleteById(Long id);
     int deleteByIds(Long[] ids);
+    int deleteByExamId(Long examId);
 }
-

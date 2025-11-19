@@ -11,6 +11,7 @@ public interface IClassExamQuestionService {
     int deleteQuestionById(Long id);
     int deleteQuestionByIds(Long[] ids);
     int countByExamId(Long examId);
+    default List<ClassExamQuestion> selectList(ClassExamQuestion q){ return selectQuestionList(q); }
     default List<ClassExamQuestion> list(ClassExamQuestion q){ return selectQuestionList(q); }
     default ClassExamQuestion get(Long id){ return selectById(id); }
     default int insert(ClassExamQuestion q){ return insertQuestion(q); }

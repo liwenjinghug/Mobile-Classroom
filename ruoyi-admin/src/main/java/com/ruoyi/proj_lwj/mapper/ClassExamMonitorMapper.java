@@ -35,5 +35,7 @@ public interface ClassExamMonitorMapper {
 
     @Delete("DELETE FROM class_exam_monitor WHERE id=#{id}")
     int deleteById(Long id);
-}
 
+    @Delete("DELETE FROM class_exam_monitor WHERE exam_id=#{examId}")
+    int deleteByExamId(Long examId);
+}

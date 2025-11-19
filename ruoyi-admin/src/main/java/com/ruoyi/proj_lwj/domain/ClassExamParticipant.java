@@ -28,6 +28,8 @@ public class ClassExamParticipant extends BaseEntity {
     private BigDecimal subjectiveScore; // 主观题得分
     private Integer correctStatus; // 批改状态(0未批改 1已批改)
     private Integer passStatus; // 及格状态(0不及格 1及格)
+    // 新增: 文字描述（不持久化）
+    private transient String passStatusLabel;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -61,5 +63,14 @@ public class ClassExamParticipant extends BaseEntity {
     public void setCorrectStatus(Integer correctStatus) { this.correctStatus = correctStatus; }
     public Integer getPassStatus() { return passStatus; }
     public void setPassStatus(Integer passStatus) { this.passStatus = passStatus; }
-}
 
+    /** 及格状态文字描述 */
+    public String getPassStatusLabel() {
+        if (passStatus == null) return "未知";
+        switch (passStatus) {
+            case 0: return "不及格";
+            case 1: return "及格";
+            default: return "未知";
+        }
+    }
+}

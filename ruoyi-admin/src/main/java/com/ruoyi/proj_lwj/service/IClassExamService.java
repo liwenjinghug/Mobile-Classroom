@@ -6,6 +6,7 @@ import java.util.List;
 public interface IClassExamService {
     List<ClassExam> selectExamList(ClassExam exam);
     ClassExam selectExamById(Long id);
+    default ClassExam selectById(Long id) { return selectExamById(id); }
     int insertExam(ClassExam exam);
     int updateExam(ClassExam exam);
     int deleteExamById(Long id);

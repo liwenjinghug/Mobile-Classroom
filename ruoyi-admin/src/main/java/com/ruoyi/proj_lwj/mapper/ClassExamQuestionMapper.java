@@ -66,4 +66,11 @@ public interface ClassExamQuestionMapper {
 
     @Update("<script><foreach collection='list' item='item' separator=';'>UPDATE class_exam_question SET sort_order=#{item.sortOrder}, update_by=#{item.updateBy}, update_time=NOW() WHERE id=#{item.id}</foreach></script>")
     int batchUpdateSortOrder(@Param("list") List<ClassExamQuestion> list);
+
+    @Delete("DELETE FROM class_exam_question WHERE exam_id=#{examId}")
+    int deleteByExamId(Long examId);
+
+    // New: count duplicate question content within an exam (optionally excluding a question id)
+    @Select("<script>SELECT COUNT(1) FROM class_exam_question WHERE exam_id=#{examId} AND question_content=#{questionContent} <if test='excludeId != null'>AND id != #{excludeId}</if></script>")
+    int countByExamAndContent(@Param("examId") Long examId, @Param("questionContent") String questionContent, @Param("excludeId") Long excludeId);
 }
