@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : ry-vue
+ Source Server         : 01tech
  Source Server Type    : MySQL
  Source Server Version : 80042 (8.0.42)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 18/11/2025 17:08:39
+ Date: 21/11/2025 06:27:51
 */
 
 SET NAMES utf8mb4;
@@ -71,7 +71,7 @@ CREATE TABLE `class_article_like`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_article_user`(`article_id` ASC, `user_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_article_like
@@ -103,7 +103,7 @@ CREATE TABLE `class_attendance`  (
   CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_attendance_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 82 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '学生课堂签到记录表（含 session_id + task_id）' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 92 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '学生课堂签到记录表（含 session_id + task_id）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_attendance
@@ -175,7 +175,7 @@ INSERT INTO `class_attendance` VALUES (67, 1, 19, 37, '2025-11-16 06:04:20', 1, 
 INSERT INTO `class_attendance` VALUES (68, 1, 19, 26, NULL, 4, '2025-11-16 06:05:18', '2025-11-16 06:05:21', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (69, 1, 19, 25, '2025-11-16 06:05:22', 1, '2025-11-16 06:05:22', '2025-11-16 06:05:22', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (70, 1, 19, 9, '2025-11-16 06:24:13', 2, '2025-11-16 06:05:23', '2025-11-16 06:24:13', NULL, NULL, NULL);
-INSERT INTO `class_attendance` VALUES (71, 1, 19, 1, NULL, 3, '2025-11-16 06:05:24', '2025-11-16 06:23:41', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (71, 1, 19, 1, '2025-11-20 20:12:42', 1, '2025-11-16 06:05:24', '2025-11-20 20:12:42', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (72, 1, 19, 10, '2025-11-16 06:05:24', 1, '2025-11-16 06:05:24', '2025-11-16 06:05:24', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (73, 1, 19, 30, '2025-11-16 06:05:25', 1, '2025-11-16 06:05:25', '2025-11-16 06:05:25', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (74, 1, 19, 16, '2025-11-16 06:05:25', 1, '2025-11-16 06:05:25', '2025-11-16 06:05:25', NULL, NULL, NULL);
@@ -185,6 +185,16 @@ INSERT INTO `class_attendance` VALUES (77, 1, 19, 14, NULL, 3, '2025-11-16 06:05
 INSERT INTO `class_attendance` VALUES (78, 1, 19, 2, NULL, 3, '2025-11-16 06:05:34', '2025-11-16 06:05:35', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (79, 1, 19, 40, '2025-11-16 06:28:33', 2, '2025-11-16 06:28:11', '2025-11-16 06:28:33', NULL, NULL, NULL);
 INSERT INTO `class_attendance` VALUES (80, 1, 19, 15, '2025-11-16 06:28:39', 1, '2025-11-16 06:28:39', '2025-11-16 06:28:39', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (82, 1, 19, 24, '2025-11-20 20:12:45', 1, '2025-11-20 20:12:45', '2025-11-20 20:12:45', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (83, 1, 19, 12, '2025-11-20 20:12:45', 1, '2025-11-20 20:12:45', '2025-11-20 20:12:45', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (84, 1, 19, 5, '2025-11-20 20:12:46', 1, '2025-11-20 20:12:46', '2025-11-20 20:12:46', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (85, 1, 8, 38, '2025-11-20 21:13:24', 1, '2025-11-20 21:13:24', '2025-11-20 21:13:24', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (86, 3, 5, 3, '2025-11-20 21:38:18', 1, '2025-11-20 21:38:18', '2025-11-20 21:38:18', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (87, 3, 5, 1, '2025-11-20 21:38:19', 1, '2025-11-20 21:38:19', '2025-11-20 21:38:19', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (88, 3, 5, 2, '2025-11-20 21:38:20', 1, '2025-11-20 21:38:20', '2025-11-20 21:38:20', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (89, 1, 19, 20, '2025-11-20 22:40:50', 1, '2025-11-20 22:40:50', '2025-11-20 22:40:50', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (90, 1, 19, 36, NULL, 0, '2025-11-20 23:54:39', '2025-11-20 23:54:45', NULL, NULL, NULL);
+INSERT INTO `class_attendance` VALUES (91, 1, 19, 17, NULL, 0, '2025-11-20 23:54:56', '2025-11-20 23:54:59', NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for class_attendance_bak
@@ -264,7 +274,7 @@ CREATE TABLE `class_attendance_qr`  (
   UNIQUE INDEX `uq_token`(`token` ASC) USING BTREE,
   INDEX `idx_task_qr`(`task_id` ASC) USING BTREE,
   CONSTRAINT `fk_qr_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 59 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到二维码/token 表（用于动态二维码与失效控制）' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 71 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到二维码/token 表（用于动态二维码与失效控制）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_attendance_qr
@@ -282,6 +292,16 @@ INSERT INTO `class_attendance_qr` VALUES (39, 9, '26f3d5bd088b47e697d538f9a34e81
 INSERT INTO `class_attendance_qr` VALUES (42, 11, '9c1663e14a4c44ff830043f9d708c173', 600, '2025-11-16 01:40:03', 0, 'admin', '2025-11-16 01:30:03');
 INSERT INTO `class_attendance_qr` VALUES (43, 9, '4124218177ca4212a316c7ce1fa622c6', 600, '2025-11-16 01:40:07', 0, 'admin', '2025-11-16 01:30:06');
 INSERT INTO `class_attendance_qr` VALUES (44, 11, '655ec6d01a9e467c8b1870c8c28a6f90', 600, '2025-11-16 03:23:28', 0, 'admin', '2025-11-16 03:13:28');
+INSERT INTO `class_attendance_qr` VALUES (59, 22, 'f7889331ce9d4a278d86ed933030036e', 600, '2025-11-20 22:55:29', 0, 'admin', '2025-11-20 22:45:29');
+INSERT INTO `class_attendance_qr` VALUES (62, 25, 'a9dc33c36479448f95d5ae09766f9f5e', 600, '2025-11-20 23:16:03', 0, 'admin', '2025-11-20 23:06:02');
+INSERT INTO `class_attendance_qr` VALUES (63, 25, '45cc60c5d6284f8f98d1b1a0bd454247', 600, '2025-11-20 23:30:35', 0, 'admin', '2025-11-20 23:20:34');
+INSERT INTO `class_attendance_qr` VALUES (64, 28, '440356c1bf3d4aefb7123435b5cd5aeb', 600, '2025-11-21 06:22:35', 0, 'admin', '2025-11-21 06:12:34');
+INSERT INTO `class_attendance_qr` VALUES (65, 28, '0449d0f865304aeabf4c527c186f51e7', 600, '2025-11-21 06:22:57', 0, 'admin', '2025-11-21 06:12:57');
+INSERT INTO `class_attendance_qr` VALUES (66, 29, '807d3908894e436fb3abe528c6e78129', 600, '2025-11-21 06:25:41', 0, 'admin', '2025-11-21 06:15:41');
+INSERT INTO `class_attendance_qr` VALUES (67, 28, '189c0e39e87f471781887c1bf79e30f9', 600, '2025-11-21 06:27:46', 0, 'admin', '2025-11-21 06:17:46');
+INSERT INTO `class_attendance_qr` VALUES (68, 29, '207b322c552f446ca88d78d206830988', 600, '2025-11-21 06:27:47', 0, 'admin', '2025-11-21 06:17:47');
+INSERT INTO `class_attendance_qr` VALUES (69, 28, '2ee1a41c82894fbdb4f1d5c9909f7408', 600, '2025-11-21 06:28:01', 0, 'admin', '2025-11-21 06:18:01');
+INSERT INTO `class_attendance_qr` VALUES (70, 28, 'ca3d86609ba646688c370e521a85a727', 600, '2025-11-21 06:36:30', 0, 'admin', '2025-11-21 06:26:30');
 
 -- ----------------------------
 -- Table structure for class_attendance_task
@@ -304,24 +324,29 @@ CREATE TABLE `class_attendance_task`  (
   INDEX `idx_task_session`(`session_id` ASC) USING BTREE,
   INDEX `idx_task_status`(`status` ASC) USING BTREE,
   CONSTRAINT `fk_task_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 22 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到任务表（记录签到活动：位置/二维码等）' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到任务表（记录签到活动：位置/二维码等）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_attendance_task
 -- ----------------------------
-INSERT INTO `class_attendance_task` VALUES (1, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-02 19:19:34', '2025-11-02 19:19:37', 1, 'admin', '2025-11-02 19:19:38');
-INSERT INTO `class_attendance_task` VALUES (2, 3, 'location', 1, 1, 500, NULL, '2025-11-02 19:20:59', '2025-11-03 00:00:00', 1, 'admin', '2025-11-02 19:21:03');
-INSERT INTO `class_attendance_task` VALUES (3, 3, 'qr', NULL, NULL, NULL, NULL, '2025-11-02 19:42:04', '2025-11-02 20:12:04', 1, 'admin', '2025-11-02 19:42:04');
-INSERT INTO `class_attendance_task` VALUES (4, 3, 'location', 1, 1, 500, NULL, NULL, NULL, 1, 'admin', '2025-11-02 19:42:59');
-INSERT INTO `class_attendance_task` VALUES (5, 3, 'location', 1, 1, 500, NULL, '2025-11-02 20:06:30', '2025-11-02 20:06:31', 1, 'admin', '2025-11-02 20:06:32');
-INSERT INTO `class_attendance_task` VALUES (6, 1, 'location', 1, 1, 500, NULL, '2025-11-02 20:20:54', '2025-11-04 20:20:55', 1, 'admin', '2025-11-02 20:20:59');
-INSERT INTO `class_attendance_task` VALUES (7, 1, 'qr', 123, NULL, 500, NULL, '2025-11-07 00:00:00', '2025-11-13 00:00:00', 1, 'admin', '2025-11-15 23:54:47');
-INSERT INTO `class_attendance_task` VALUES (8, 1, 'location', 1, 1, 500, NULL, '2025-11-16 00:04:01', '2025-11-16 02:04:06', 1, 'admin', '2025-11-16 00:04:15');
-INSERT INTO `class_attendance_task` VALUES (9, 1, 'qr', 1, 1, 500, NULL, '2025-11-16 00:04:01', '2025-11-16 02:04:06', 1, 'admin', '2025-11-16 00:09:31');
-INSERT INTO `class_attendance_task` VALUES (10, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:37:24', '2025-11-16 03:40:27', 1, 'admin', '2025-11-16 00:37:32');
-INSERT INTO `class_attendance_task` VALUES (11, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:37:24', '2025-11-16 03:40:27', 1, 'admin', '2025-11-16 00:38:10');
-INSERT INTO `class_attendance_task` VALUES (17, 1, 'location', 2, 1, 500, NULL, '2025-11-16 04:15:06', '2025-11-16 07:15:08', 1, 'admin', '2025-11-16 04:15:14');
-INSERT INTO `class_attendance_task` VALUES (19, 1, 'location', 1, 1, 500, NULL, '2025-11-16 04:37:20', '2025-11-16 10:37:21', 1, 'admin', '2025-11-16 04:37:25');
+INSERT INTO `class_attendance_task` VALUES (1, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-02 19:19:34', '2025-11-20 23:05:08', 2, 'admin', '2025-11-02 19:19:38');
+INSERT INTO `class_attendance_task` VALUES (2, 3, 'location', 1, 1, 500, NULL, '2025-11-02 19:20:59', '2025-11-03 00:00:00', 2, 'admin', '2025-11-02 19:21:03');
+INSERT INTO `class_attendance_task` VALUES (3, 3, 'qr', NULL, NULL, NULL, NULL, '2025-11-02 19:42:04', '2025-11-02 20:12:04', 2, 'admin', '2025-11-02 19:42:04');
+INSERT INTO `class_attendance_task` VALUES (5, 3, 'location', 1, 1, 500, NULL, '2025-11-02 20:06:30', '2025-11-02 20:06:31', 2, 'admin', '2025-11-02 20:06:32');
+INSERT INTO `class_attendance_task` VALUES (6, 1, 'location', 1, 1, 500, NULL, '2025-11-02 20:20:54', '2025-11-04 20:20:55', 2, 'admin', '2025-11-02 20:20:59');
+INSERT INTO `class_attendance_task` VALUES (7, 1, 'qr', 123, NULL, 500, NULL, '2025-11-07 00:00:00', '2025-11-13 00:00:00', 2, 'admin', '2025-11-15 23:54:47');
+INSERT INTO `class_attendance_task` VALUES (8, 1, 'location', 1, 1, 500, NULL, '2025-11-16 00:04:01', '2025-11-16 02:04:06', 2, 'admin', '2025-11-16 00:04:15');
+INSERT INTO `class_attendance_task` VALUES (9, 1, 'qr', 1, 1, 500, NULL, '2025-11-16 00:04:01', '2025-11-16 02:04:06', 2, 'admin', '2025-11-16 00:09:31');
+INSERT INTO `class_attendance_task` VALUES (10, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:37:24', '2025-11-16 03:40:27', 2, 'admin', '2025-11-16 00:37:32');
+INSERT INTO `class_attendance_task` VALUES (11, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-16 00:37:24', '2025-11-16 03:40:27', 2, 'admin', '2025-11-16 00:38:10');
+INSERT INTO `class_attendance_task` VALUES (17, 1, 'location', 2, 1, 500, NULL, '2025-11-16 04:15:06', '2025-11-16 07:15:08', 2, 'admin', '2025-11-16 04:15:14');
+INSERT INTO `class_attendance_task` VALUES (19, 1, 'location', 1, 1, 500, NULL, '2025-11-16 04:37:20', '2025-11-16 10:37:21', 2, 'admin', '2025-11-16 04:37:25');
+INSERT INTO `class_attendance_task` VALUES (22, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-20 23:19:50', '2025-11-20 23:20:12', 2, 'admin', '2025-11-20 22:45:29');
+INSERT INTO `class_attendance_task` VALUES (25, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-20 23:20:32', '2025-11-20 23:20:41', 2, 'admin', '2025-11-20 23:06:02');
+INSERT INTO `class_attendance_task` VALUES (26, 1, 'location', 1, 1, 500, NULL, '2025-11-21 06:11:18', '2025-11-30 00:00:00', 1, 'admin', '2025-11-21 06:11:22');
+INSERT INTO `class_attendance_task` VALUES (27, 1, 'location', 1, 1, 500, NULL, '2025-11-25 06:11:18', '2025-11-30 00:00:00', 0, 'admin', '2025-11-21 06:11:37');
+INSERT INTO `class_attendance_task` VALUES (28, 1, 'qr', 1, 1, 500, NULL, '2025-11-21 06:12:32', '2025-11-30 00:00:00', 1, 'admin', '2025-11-21 06:12:34');
+INSERT INTO `class_attendance_task` VALUES (29, 1, 'qr', NULL, NULL, 500, NULL, '2025-11-21 06:15:38', '2025-11-28 00:00:00', 1, 'admin', '2025-11-21 06:15:41');
 
 -- ----------------------------
 -- Table structure for class_course
@@ -491,7 +516,7 @@ CREATE TABLE `class_exam_monitor`  (
   INDEX `idx_exam_student`(`exam_id` ASC, `student_id` ASC) USING BTREE,
   INDEX `idx_event_type`(`event_type` ASC) USING BTREE,
   INDEX `idx_event_time`(`event_time` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试监控记录表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试监控记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_exam_monitor
@@ -630,7 +655,7 @@ CREATE TABLE `class_exam_session`  (
   UNIQUE INDEX `uk_exam_session`(`exam_id` ASC, `session_id` ASC) USING BTREE,
   INDEX `idx_exam_id`(`exam_id` ASC) USING BTREE,
   INDEX `idx_session_id`(`session_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试与课堂关联表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试与课堂关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_exam_session
@@ -784,7 +809,7 @@ CREATE TABLE `class_group`  (
   UNIQUE INDEX `idx_group_number`(`group_number` ASC) USING BTREE,
   INDEX `idx_owner_user_id`(`owner_user_id` ASC) USING BTREE,
   CONSTRAINT `fk_group_owner` FOREIGN KEY (`owner_user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 105 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '小组讨论-信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 105 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '小组讨论-信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_group
@@ -815,7 +840,7 @@ CREATE TABLE `class_group_member`  (
   INDEX `fk_member_user`(`user_id` ASC) USING BTREE,
   CONSTRAINT `fk_member_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `fk_member_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 218 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '小组讨论-成员表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 218 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '小组讨论-成员表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_group_member
@@ -852,7 +877,7 @@ CREATE TABLE `class_group_message`  (
   INDEX `fk_message_sender`(`sender_user_id` ASC) USING BTREE,
   CONSTRAINT `fk_message_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   CONSTRAINT `fk_message_sender` FOREIGN KEY (`sender_user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 363 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '小组讨论-消息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 363 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '小组讨论-消息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_group_message
@@ -984,7 +1009,7 @@ CREATE TABLE `class_login_log`  (
   `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '提示消息',
   `login_time` datetime NULL DEFAULT NULL COMMENT '访问时间',
   PRIMARY KEY (`login_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 117 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 120 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_login_log
@@ -1105,6 +1130,9 @@ INSERT INTO `class_login_log` VALUES (113, 'admin', '127.0.0.1', '内网IP', 'Ch
 INSERT INTO `class_login_log` VALUES (114, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-18 13:29:46');
 INSERT INTO `class_login_log` VALUES (115, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-18 16:13:21');
 INSERT INTO `class_login_log` VALUES (116, 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-11-18 16:52:43');
+INSERT INTO `class_login_log` VALUES (117, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-20 20:03:45');
+INSERT INTO `class_login_log` VALUES (118, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-20 23:52:47');
+INSERT INTO `class_login_log` VALUES (119, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-11-21 06:09:27');
 
 -- ----------------------------
 -- Table structure for class_material
@@ -1151,7 +1179,7 @@ CREATE TABLE `class_notice`  (
   `update_time` datetime NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `del_flag` tinyint(1) NULL DEFAULT 0 COMMENT '0=存在,1=已删除',
   PRIMARY KEY (`notice_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '课堂模块：通告表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '课堂模块：通告表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_notice
@@ -1389,25 +1417,20 @@ CREATE TABLE `class_random_pick`  (
   INDEX `class_rpick`(`student_id` ASC) USING BTREE,
   CONSTRAINT `class_rpick` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `class_rpick1` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 44 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_random_pick
 -- ----------------------------
-INSERT INTO `class_random_pick` VALUES (5, 1, 0, 4, '2025-10-27 19:45:55', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (6, 1, 0, 27, '2025-10-27 19:46:04', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (9, 1, 0, 18, '2025-10-27 19:57:14', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (10, 1, 0, 21, '2025-10-27 19:57:23', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (11, 1, 0, 23, '2025-10-27 19:59:42', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (12, 1, 0, 36, '2025-10-27 19:59:46', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (13, 1, 0, 24, '2025-10-27 19:59:48', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (14, 1, 0, 6, '2025-10-27 19:59:49', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (15, 1, 0, 37, '2025-10-31 21:58:52', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (16, 1, 0, 16, '2025-11-01 00:42:03', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (17, 1, 0, 26, '2025-11-04 22:58:06', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (18, 1, 0, 9, '2025-11-04 22:58:09', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (19, 1, 0, 20, '2025-11-07 09:58:44', NULL, NULL);
-INSERT INTO `class_random_pick` VALUES (20, 1, 0, 13, '2025-11-12 23:07:45', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (32, 1, 0, 24, '2025-11-20 21:39:44', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (33, 1, 0, 30, '2025-11-20 21:43:52', NULL, '汇报很棒 +3分');
+INSERT INTO `class_random_pick` VALUES (34, 1, 0, 12, '2025-11-20 21:44:00', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (35, 1, 0, 31, '2025-11-20 21:44:07', NULL, '主动回答 +2分');
+INSERT INTO `class_random_pick` VALUES (39, 1, 0, 28, '2025-11-20 22:27:07', NULL, '上课睡觉没答出来 -1分');
+INSERT INTO `class_random_pick` VALUES (40, 1, 0, 19, '2025-11-20 22:28:38', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (41, 3, 0, 1, '2025-11-20 22:30:25', NULL, NULL);
+INSERT INTO `class_random_pick` VALUES (42, 1, 0, 37, '2025-11-20 22:43:47', NULL, '被动回答 不加分');
+INSERT INTO `class_random_pick` VALUES (43, 1, 0, 23, '2025-11-20 22:56:27', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for class_session
@@ -1505,6 +1528,9 @@ INSERT INTO `class_session_student` VALUES (1, 37, '2025-11-02 20:20:16');
 INSERT INTO `class_session_student` VALUES (1, 38, '2025-11-02 20:20:16');
 INSERT INTO `class_session_student` VALUES (1, 39, '2025-11-02 20:20:16');
 INSERT INTO `class_session_student` VALUES (1, 40, '2025-11-02 20:20:16');
+INSERT INTO `class_session_student` VALUES (3, 1, '2025-11-20 21:37:41');
+INSERT INTO `class_session_student` VALUES (3, 2, '2025-11-20 21:37:45');
+INSERT INTO `class_session_student` VALUES (3, 3, '2025-11-20 21:37:48');
 
 -- ----------------------------
 -- Table structure for class_student
@@ -1521,61 +1547,56 @@ CREATE TABLE `class_student`  (
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` tinyint NULL DEFAULT 1 COMMENT '1在读 0退学',
-  `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '关联课程编号',
-  `session_id` bigint NULL DEFAULT NULL COMMENT '班级编号',
   PRIMARY KEY (`student_id`) USING BTREE,
-  UNIQUE INDEX `student_no`(`student_no` ASC) USING BTREE,
-  INDEX `idx_class_number`(`session_id` ASC) USING BTREE,
-  INDEX `idx_course_code`(`course_code` ASC) USING BTREE,
-  CONSTRAINT `fk_student_course_code` FOREIGN KEY (`course_code`) REFERENCES `class_course` (`course_code`) ON DELETE SET NULL ON UPDATE CASCADE
+  UNIQUE INDEX `student_no`(`student_no` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 50 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '学生信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_student
 -- ----------------------------
-INSERT INTO `class_student` VALUES (1, '2022141460087', '贺英洲', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (2, '2022141460092', '刘成伟', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (3, '2022141460189', '陈禹岐', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (4, '2022141460306', '王际华', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (5, '2023141460332', '邹易言', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (6, '2023141460333', '白桂源', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (7, '2023141460334', '李卓航', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (8, '2023141460335', '肖翰宇', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (9, '2023141460336', '谢东廷', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (10, '2023141460337', '黄正国', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (11, '2023141460339', '孙清正', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (12, '2023141460341', '毛国屹', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (13, '2023141460342', '徐雷博', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (14, '2023141460343', '温芃磊', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (15, '2023141460344', '卜天一', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (16, '2023141460345', '王慧卓', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (17, '2023141460346', '卢昊', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:14', 1, '1', NULL);
-INSERT INTO `class_student` VALUES (18, '2023141460347', '朱藩林', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (19, '2023141460348', '李为', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 16:01:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (20, '2023141460349', '岂皓月', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (21, '2023141460350', '陈殷琦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (22, '2023141460352', '程晨', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (23, '2023141460353', '邹雨航', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (24, '2023141460354', '周雨龙', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (25, '2023141460355', '陈昱都', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (26, '2023141460356', '罗允绩', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (27, '2023141460357', '张越', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (28, '2023141460358', '吴昱稼', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (29, '2023141460359', '王远贵', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (30, '2023141460360', '范彭融', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (31, '2023141460361', '朱传龙', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (32, '2023141460362', '张瑾伦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (33, '2023141460363', '孙家鹤', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (34, '2023141460364', '孙宏森', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (35, '2023141460365', '官前锦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (36, '2023141460366', '方锦阳', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (37, '2023141460367', '熊眭杨', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (38, '2023141460368', '黎文靖', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (39, '2023141460369', '符桢', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (40, '2023141460370', '刘伊鸣', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1, '1', 1);
-INSERT INTO `class_student` VALUES (41, 'S001', '张三', 'M', '测试班级-在线课堂', '13800000001', 's001@example.com', '2025-11-02 19:40:01', '2025-11-02 19:40:01', 1, NULL, NULL);
-INSERT INTO `class_student` VALUES (42, 'S002', '李四', 'F', '测试班级-在线课堂', '13800000002', 's002@example.com', '2025-11-02 19:40:01', '2025-11-02 19:40:01', 1, NULL, NULL);
-INSERT INTO `class_student` VALUES (43, 'S003', '王五', 'M', '测试班级-在线课堂', '13800000003', 's003@example.com', '2025-11-02 19:40:01', '2025-11-02 19:40:01', 1, NULL, NULL);
+INSERT INTO `class_student` VALUES (1, '2022141460087', '贺英洲', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (2, '2022141460092', '刘成伟', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (3, '2022141460189', '陈禹岐', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (4, '2022141460306', '王际华', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (5, '2023141460332', '邹易言', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (6, '2023141460333', '白桂源', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (7, '2023141460334', '李卓航', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (8, '2023141460335', '肖翰宇', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (9, '2023141460336', '谢东廷', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (10, '2023141460337', '黄正国', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (11, '2023141460339', '孙清正', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (12, '2023141460341', '毛国屹', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (13, '2023141460342', '徐雷博', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (14, '2023141460343', '温芃磊', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (15, '2023141460344', '卜天一', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (16, '2023141460345', '王慧卓', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (17, '2023141460346', '卢昊', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:14', 1);
+INSERT INTO `class_student` VALUES (18, '2023141460347', '朱藩林', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (19, '2023141460348', '李为', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 16:01:02', 1);
+INSERT INTO `class_student` VALUES (20, '2023141460349', '岂皓月', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (21, '2023141460350', '陈殷琦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (22, '2023141460352', '程晨', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (23, '2023141460353', '邹雨航', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (24, '2023141460354', '周雨龙', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (25, '2023141460355', '陈昱都', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (26, '2023141460356', '罗允绩', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (27, '2023141460357', '张越', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (28, '2023141460358', '吴昱稼', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (29, '2023141460359', '王远贵', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (30, '2023141460360', '范彭融', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (31, '2023141460361', '朱传龙', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (32, '2023141460362', '张瑾伦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (33, '2023141460363', '孙家鹤', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (34, '2023141460364', '孙宏森', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (35, '2023141460365', '官前锦', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (36, '2023141460366', '方锦阳', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (37, '2023141460367', '熊眭杨', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (38, '2023141460368', '黎文靖', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (39, '2023141460369', '符桢', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (40, '2023141460370', '刘伊鸣', NULL, NULL, NULL, NULL, '2025-10-26 14:15:37', '2025-11-01 15:57:02', 1);
+INSERT INTO `class_student` VALUES (41, 'S001', '张三', 'M', '测试班级-在线课堂', '13800000001', 's001@example.com', '2025-11-02 19:40:01', '2025-11-02 19:40:01', 1);
+INSERT INTO `class_student` VALUES (42, 'S002', '李四', 'F', '测试班级-在线课堂', '13800000002', 's002@example.com', '2025-11-02 19:40:01', '2025-11-02 19:40:01', 1);
+INSERT INTO `class_student` VALUES (43, 'S003', '王五', 'M', '测试班级-在线课堂', '13800000003', 's003@example.com', '2025-11-02 19:40:01', '2025-11-02 19:40:01', 1);
 
 -- ----------------------------
 -- Table structure for class_student_homework
@@ -2220,7 +2241,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 346 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 349 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -2471,6 +2492,9 @@ INSERT INTO `sys_logininfor` VALUES (342, 'admin', '127.0.0.1', '内网IP', 'Chr
 INSERT INTO `sys_logininfor` VALUES (343, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-18 13:29:46');
 INSERT INTO `sys_logininfor` VALUES (344, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-18 16:13:21');
 INSERT INTO `sys_logininfor` VALUES (345, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-18 16:52:42');
+INSERT INTO `sys_logininfor` VALUES (346, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-20 20:03:45');
+INSERT INTO `sys_logininfor` VALUES (347, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-20 23:52:47');
+INSERT INTO `sys_logininfor` VALUES (348, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-21 06:09:27');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -2684,7 +2708,7 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 625 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 658 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -3214,6 +3238,39 @@ INSERT INTO `sys_oper_log` VALUES (621, '考试管理', 3, 'com.ruoyi.web.contro
 INSERT INTO `sys_oper_log` VALUES (622, '考试管理', 3, 'com.ruoyi.web.controller.proj_lwj.ClassExamController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_lwj/exam/20', '127.0.0.1', '内网IP', '[20]', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_exam_monitor\' doesn\'t exist\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassExamMonitorMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassExamMonitorMapper.deleteByExamId-Inline\r\n### The error occurred while setting parameters\r\n### SQL: DELETE FROM class_exam_monitor WHERE exam_id=?\r\n### Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_exam_monitor\' doesn\'t exist\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_exam_monitor\' doesn\'t exist', '2025-11-18 16:57:05', 39);
 INSERT INTO `sys_oper_log` VALUES (623, '考试管理', 3, 'com.ruoyi.web.controller.proj_lwj.ClassExamController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_lwj/exam/20', '127.0.0.1', '内网IP', '[20]', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_exam_session\' doesn\'t exist\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassExamSessionMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassExamSessionMapper.deleteByExamId-Inline\r\n### The error occurred while setting parameters\r\n### SQL: DELETE FROM class_exam_session WHERE exam_id=?\r\n### Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_exam_session\' doesn\'t exist\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_exam_session\' doesn\'t exist', '2025-11-18 17:02:53', 1161);
 INSERT INTO `sys_oper_log` VALUES (624, '考试管理', 3, 'com.ruoyi.web.controller.proj_lwj.ClassExamController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_lwj/exam/14', '127.0.0.1', '内网IP', '[14]', NULL, 1, '\r\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_exam_session\' doesn\'t exist\r\n### The error may exist in com/ruoyi/proj_lwj/mapper/ClassExamSessionMapper.java (best guess)\r\n### The error may involve com.ruoyi.proj_lwj.mapper.ClassExamSessionMapper.deleteByExamId-Inline\r\n### The error occurred while setting parameters\r\n### SQL: DELETE FROM class_exam_session WHERE exam_id=?\r\n### Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_exam_session\' doesn\'t exist\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_exam_session\' doesn\'t exist', '2025-11-18 17:06:05', 1832);
+INSERT INTO `sys_oper_log` VALUES (625, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:15:12.145\",\"sessionId\":1,\"studentId\":8,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:15:12', 7);
+INSERT INTO `sys_oper_log` VALUES (626, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:15:16.028\",\"sessionId\":1,\"studentId\":1,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:15:16', 3);
+INSERT INTO `sys_oper_log` VALUES (627, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:22:33.984\",\"sessionId\":1,\"studentId\":28,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:22:33', 3);
+INSERT INTO `sys_oper_log` VALUES (628, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:22:59.062\",\"sessionId\":1,\"studentId\":31,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:22:59', 3);
+INSERT INTO `sys_oper_log` VALUES (629, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:26:58.177\",\"sessionId\":1,\"studentId\":30,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:26:58', 2);
+INSERT INTO `sys_oper_log` VALUES (630, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:27:06.109\",\"sessionId\":1,\"studentId\":33,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:27:06', 3);
+INSERT INTO `sys_oper_log` VALUES (631, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:27:13.6\",\"sessionId\":1,\"studentId\":10,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:27:13', 3);
+INSERT INTO `sys_oper_log` VALUES (632, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:27:20.54\",\"sessionId\":1,\"studentId\":35,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:27:20', 3);
+INSERT INTO `sys_oper_log` VALUES (633, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:27:31.068\",\"sessionId\":1,\"studentId\":15,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:27:31', 2);
+INSERT INTO `sys_oper_log` VALUES (634, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:38:41.036\",\"sessionId\":3,\"studentId\":3,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:38:41', 3);
+INSERT INTO `sys_oper_log` VALUES (635, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:38:52.147\",\"sessionId\":3,\"studentId\":2,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:38:52', 2);
+INSERT INTO `sys_oper_log` VALUES (636, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:39:44.201\",\"sessionId\":1,\"studentId\":24,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:39:44', 3);
+INSERT INTO `sys_oper_log` VALUES (637, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:43:52.178\",\"sessionId\":1,\"studentId\":30,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:43:52', 3);
+INSERT INTO `sys_oper_log` VALUES (638, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:44:00.152\",\"sessionId\":1,\"studentId\":12,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:44:00', 2);
+INSERT INTO `sys_oper_log` VALUES (639, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:44:06.844\",\"sessionId\":1,\"studentId\":31,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:44:06', 2);
+INSERT INTO `sys_oper_log` VALUES (640, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:44:21.147\",\"sessionId\":3,\"studentId\":2,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:44:21', 2);
+INSERT INTO `sys_oper_log` VALUES (641, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:44:29.831\",\"sessionId\":3,\"studentId\":1,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:44:29', 2);
+INSERT INTO `sys_oper_log` VALUES (642, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 21:44:36.132\",\"sessionId\":3,\"studentId\":3,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 21:44:36', 2);
+INSERT INTO `sys_oper_log` VALUES (643, '修改抽取记录', 2, 'com.ruoyi.web.controller.proj_myx.RandomPickController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_myx/random/pick', '127.0.0.1', '内网IP', '{\"remark\":\"1\",\"rpickId\":35}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:26:34', 10);
+INSERT INTO `sys_oper_log` VALUES (644, '修改抽取记录', 2, 'com.ruoyi.web.controller.proj_myx.RandomPickController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_myx/random/pick', '127.0.0.1', '内网IP', '{\"remark\":\"主动回答 +2分\",\"rpickId\":35}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:26:51', 3);
+INSERT INTO `sys_oper_log` VALUES (645, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 22:27:07.25\",\"sessionId\":1,\"studentId\":28,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:27:07', 5);
+INSERT INTO `sys_oper_log` VALUES (646, '修改抽取记录', 2, 'com.ruoyi.web.controller.proj_myx.RandomPickController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_myx/random/pick', '127.0.0.1', '内网IP', '{\"remark\":\"汇报很棒 +3分\",\"rpickId\":33}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:27:31', 3);
+INSERT INTO `sys_oper_log` VALUES (647, '导出抽取记录', 5, 'com.ruoyi.web.controller.proj_myx.RandomPickController.export()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/export', '127.0.0.1', '内网IP', '{\"sessionId\":\"1\"}', NULL, 0, NULL, '2025-11-20 22:27:41', 515);
+INSERT INTO `sys_oper_log` VALUES (648, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 22:28:38.077\",\"sessionId\":1,\"studentId\":19,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:28:38', 3);
+INSERT INTO `sys_oper_log` VALUES (649, '修改抽取记录', 2, 'com.ruoyi.web.controller.proj_myx.RandomPickController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_myx/random/pick', '127.0.0.1', '内网IP', '{\"remark\":\"上课睡觉没答出来 -1分\",\"rpickId\":39}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:29:22', 2);
+INSERT INTO `sys_oper_log` VALUES (650, '删除抽取记录', 3, 'com.ruoyi.web.controller.proj_myx.RandomPickController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_myx/random/pick/37', '127.0.0.1', '内网IP', '37', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:30:10', 4);
+INSERT INTO `sys_oper_log` VALUES (651, '删除抽取记录', 3, 'com.ruoyi.web.controller.proj_myx.RandomPickController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_myx/random/pick/38', '127.0.0.1', '内网IP', '38', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:30:15', 2);
+INSERT INTO `sys_oper_log` VALUES (652, '删除抽取记录', 3, 'com.ruoyi.web.controller.proj_myx.RandomPickController.remove()', 'DELETE', 1, 'admin', '研发部门', '/proj_myx/random/pick/36', '127.0.0.1', '内网IP', '36', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:30:19', 2);
+INSERT INTO `sys_oper_log` VALUES (653, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 22:30:24.571\",\"sessionId\":3,\"studentId\":1,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:30:24', 2);
+INSERT INTO `sys_oper_log` VALUES (654, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 22:43:47.088\",\"sessionId\":1,\"studentId\":37,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:43:47', 8);
+INSERT INTO `sys_oper_log` VALUES (655, '修改抽取记录', 2, 'com.ruoyi.web.controller.proj_myx.RandomPickController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_myx/random/pick', '127.0.0.1', '内网IP', '{\"remark\":\"被动回答 不加分\",\"rpickId\":42}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:43:57', 4);
+INSERT INTO `sys_oper_log` VALUES (656, '保存抽取记录', 1, 'com.ruoyi.web.controller.proj_myx.RandomPickController.savePick()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/pick/save', '127.0.0.1', '内网IP', '{\"pickTime\":\"2025-11-20 22:56:27.47\",\"sessionId\":1,\"studentId\":23,\"teacherId\":0}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-11-20 22:56:27', 2);
+INSERT INTO `sys_oper_log` VALUES (657, '导出抽取记录', 5, 'com.ruoyi.web.controller.proj_myx.RandomPickController.export()', 'POST', 1, 'admin', '研发部门', '/proj_myx/random/export', '127.0.0.1', '内网IP', '{\"sessionId\":\"1\"}', NULL, 0, NULL, '2025-11-20 22:59:26', 409);
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -3682,7 +3739,7 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-18 16:52:43', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
+INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-21 06:09:27', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '管理员');
 INSERT INTO `sys_user` VALUES (2, 105, 'ry', '张三', '00', 'ry@qq.com', '15666666666', '1', 'https://img0.baidu.com/it/u=3661017254,2148146033&fm=253&app=138&f=JPEG?w=500&h=500', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-16 05:31:17', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '测试员');
 INSERT INTO `sys_user` VALUES (3, 103, 'student1', '李比', '00', 'student1@school.com', '13800138001', '0', 'https://img0.baidu.com/it/u=2660145230,331641081&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=625', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-15 23:16:27', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '学生');
 INSERT INTO `sys_user` VALUES (4, 105, 'teacher1', '王老师', '01', 'teacher1@school.com', '13900139001', '1', 'https://picsum.photos/200/200?random=2', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 11:20:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '教师');
