@@ -31,3 +31,27 @@ export function fetchHistory(sessionId) {
     params: { sessionId }
   })
 }
+
+export function delPick(rpickId) {
+  return request({
+    url: '/proj_myx/random/pick/' + rpickId,
+    method: 'delete'
+  })
+}
+
+export function updatePick(data) {
+  return request({
+    url: '/proj_myx/random/pick',
+    method: 'put',
+    data: data
+  })
+}
+
+export function exportPick(sessionId) {
+  return request({
+    url: '/proj_myx/random/export',
+    method: 'post',
+    params: { sessionId },
+    responseType: 'blob'
+  })
+}

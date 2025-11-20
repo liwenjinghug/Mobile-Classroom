@@ -1,8 +1,49 @@
 // cover some element-ui styles
 
+// Global Flat Design Overrides
+.el-button {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.el-button--primary {
+  background-color: #10a37f; // ChatGPT Green (or similar brand color)
+  border-color: #10a37f;
+  
+  &:hover, &:focus {
+    background-color: #1a7f64;
+    border-color: #1a7f64;
+  }
+}
+
+.el-input__inner {
+  border-radius: 6px;
+  border-color: #e5e5e5;
+  
+  &:focus {
+    border-color: #10a37f;
+  }
+}
+
+.el-card {
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  box-shadow: none !important; // Remove shadow for flat look
+  
+  &.is-hover-shadow:hover {
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,.05) !important;
+  }
+}
+
+.el-dialog {
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+}
+
 .el-breadcrumb__inner,
 .el-breadcrumb__inner a {
   font-weight: 400 !important;
+  color: #666;
 }
 
 .el-upload {

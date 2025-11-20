@@ -1,9 +1,32 @@
 <template>
   <div class="wheel-container">
-    <div class="circle" @click="start">
-      <div class="name">{{ displayName }}</div>
+    <div class="wheel-wrapper">
+      <div 
+        class="wheel" 
+        ref="wheel"
+        :style="wheelStyle"
+      >
+        <div 
+          v-for="(item, index) in students" 
+          :key="item.studentId || index"
+          class="label-container"
+          :style="getLabelStyle(index)"
+        >
+          <span class="label-text">{{ item.studentName }}</span>
+        </div>
+      </div>
+      <div class="pointer"></div>
     </div>
-    <button class="stop-btn" @click="stop" :disabled="!running">停止</button>
+    
+    <div class="controls">
+      <button 
+        class="spin-btn" 
+        @click="handleSpinClick" 
+        :disabled="isSpinning || students.length === 0"
+      >
+        {{ isSpinning ? '抽取中...' : '开始抽取' }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -13,53 +36,186 @@ export default {
   props: {
     students: {
       type: Array,
-      default: function() { return [] }
+      default: () => []
     }
   },
   data() {
     return {
-      running: false,
-      idx: 0,
-      timer: null,
-      displayName: '开始'
+      rotation: 0,
+      isSpinning: false,
+      duration: 4, // seconds
+      colors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5', '#9B59B6', '#3498DB']
+    }
+  },
+  computed: {
+    sectorAngle() {
+      return 360 / Math.max(this.students.length, 1)
+    },
+    wheelStyle() {
+      // Create conic-gradient for sectors
+      const len = this.students.length
+      if (len === 0) return {}
+      
+      let gradient = 'conic-gradient('
+      const angle = 360 / len
+      
+      for (let i = 0; i < len; i++) {
+        const color = this.colors[i % this.colors.length]
+        const start = i * angle
+        const end = (i + 1) * angle
+        gradient += `${color} ${start}deg ${end}deg`
+        if (i < len - 1) gradient += ', '
+      }
+      gradient += ')'
+      
+      return {
+        background: gradient,
+        transform: `rotate(${this.rotation}deg)`,
+        transition: this.isSpinning ? `transform ${this.duration}s cubic-bezier(0.25, 0.1, 0.25, 1)` : 'none'
+      }
     }
   },
   methods: {
-    start() {
-      if (this.running) return
-      const list = this.students || []
-      if (!list.length) return
-      this.running = true
-      this.timer = setInterval(() => {
-        this.idx = (this.idx + 1) % list.length
-        const s = list[this.idx]
-        this.displayName = s.studentName || s.name || '匿名'
-      }, 80)
+    getLabelStyle(index) {
+      const angle = 360 / this.students.length
+      // Position the label in the middle of the sector
+      const rotate = index * angle + angle / 2
+      
+      return {
+        transform: `rotate(${rotate}deg) translateY(-240px)`, // Move text out from center
+      }
     },
-    stop() {
-      if (!this.running) return
-      clearInterval(this.timer)
-      this.running = false
-      const list = this.students || []
-      const chosen = list[this.idx]
-      this.displayName = chosen ? (chosen.studentName || chosen.name || '匿名') : '无'
-      this.$emit('picked', chosen)
+    
+    handleSpinClick() {
+      this.$emit('start-spin')
+    },
+
+    spin() {
+      if (this.isSpinning || this.students.length === 0) return
+      
+      this.isSpinning = true
+      
+      // Calculate a random landing spot
+      const minSpins = 5
+      const extraSpins = Math.floor(Math.random() * 5)
+      const randomDegree = Math.floor(Math.random() * 360)
+      
+      const totalDegrees = (minSpins + extraSpins) * 360 + randomDegree
+      
+      this.rotation += totalDegrees
+      
+      setTimeout(() => {
+        this.isSpinning = false
+        this.announceWinner()
+      }, this.duration * 1000)
+    },
+    
+    announceWinner() {
+      const len = this.students.length
+      if (len === 0) return
+
+      const actualRotation = this.rotation % 360
+      const angle = 360 / len
+      const target = (360 - (actualRotation % 360)) % 360
+      const index = Math.floor(target / angle)
+      
+      const winnerIndex = Math.min(Math.max(index, 0), len - 1)
+      const winner = this.students[winnerIndex]
+      
+      if (winner) {
+        this.$emit('picked', winner)
+      }
     }
-  },
-  beforeDestroy() {
-    if (this.timer) clearInterval(this.timer)
   }
 }
 </script>
 
-<style scoped>
-.wheel-container { text-align:center; margin-top:20px; }
-.circle {
-  width: 220px; height: 220px; border-radius: 50%; background:#409EFF; color:#fff;
-  display:flex; align-items:center; justify-content:center; margin:0 auto; cursor:pointer;
-  box-shadow: 0 6px 18px rgba(64,158,255,0.35);
+<style lang="scss" scoped>
+.wheel-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
 }
-.name { font-size:20px; font-weight:700 }
-.stop-btn { margin-top:12px; padding:6px 12px; border-radius:4px; border:1px solid #dcdfe6; cursor:pointer }
-.stop-btn:disabled { opacity:0.5; cursor:not-allowed }
+
+.wheel-wrapper {
+  position: relative;
+  width: 600px;
+  height: 600px;
+  margin-bottom: 30px;
+}
+
+.wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  border: 8px solid #fff;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.label-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+.label-text {
+  display: block;
+  width: 160px;
+  margin-left: -80px;
+  text-align: center;
+  transform: rotate(-90deg); 
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pointer {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 30px solid #ff4757;
+  z-index: 10;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+}
+
+.spin-btn {
+  padding: 12px 40px;
+  font-size: 18px;
+  background: linear-gradient(135deg, #0071e3, #00c7be);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-weight: 600;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,113,227,0.3);
+  }
+  
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #ccc;
+  }
+}
 </style>

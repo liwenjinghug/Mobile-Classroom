@@ -10,6 +10,8 @@ public interface IAttendanceService {
     List<AttendanceTask> getTasksBySession(Long sessionId);
     AttendanceTask getTask(Long taskId);
     int closeTask(Long taskId);
+    int startTask(Long taskId);
+    int deleteTask(Long taskId);
 
     // statistics
     List<Attendance> getAllByTask(Long taskId);

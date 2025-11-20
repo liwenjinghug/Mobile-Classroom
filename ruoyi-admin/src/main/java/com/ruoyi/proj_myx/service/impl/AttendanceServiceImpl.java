@@ -37,7 +37,32 @@ public class AttendanceServiceImpl implements IAttendanceService {
 
     @Override
     public List<AttendanceTask> getTasksBySession(Long sessionId) {
-        return taskMapper.selectBySession(sessionId);
+        List<AttendanceTask> tasks = taskMapper.selectBySession(sessionId);
+        if (tasks == null || tasks.isEmpty()) return tasks;
+
+        Date now = new Date();
+        for (AttendanceTask task : tasks) {
+            Integer currentStatus = task.getStatus();
+            Integer newStatus = currentStatus;
+
+            Date start = task.getStartTime();
+            Date end = task.getEndTime();
+
+            // Auto-correct status based on time
+            if (end != null && now.after(end)) {
+                newStatus = 2; // Ended
+            } else if (start != null && now.before(start)) {
+                newStatus = 0; // Not Started
+            } else {
+                newStatus = 1; // In Progress
+            }
+
+            if (newStatus != null && !newStatus.equals(currentStatus)) {
+                task.setStatus(newStatus);
+                taskMapper.updateStatusOnly(task);
+            }
+        }
+        return tasks;
     }
 
     @Override
@@ -50,7 +75,22 @@ public class AttendanceServiceImpl implements IAttendanceService {
         AttendanceTask t = new AttendanceTask();
         t.setTaskId(taskId);
         t.setStatus(2);
+        t.setEndTime(new Date());
         return taskMapper.updateStatus(t);
+    }
+
+    @Override
+    public int startTask(Long taskId) {
+        AttendanceTask t = new AttendanceTask();
+        t.setTaskId(taskId);
+        t.setStatus(1);
+        t.setStartTime(new Date());
+        return taskMapper.updateStatusAndStartTime(t);
+    }
+
+    @Override
+    public int deleteTask(Long taskId) {
+        return taskMapper.deleteById(taskId);
     }
 
     @Override

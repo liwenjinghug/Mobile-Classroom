@@ -2,9 +2,9 @@
   <div class="vote-page">
     <h2>课堂投票</h2>
 
-    <div style="margin-bottom:12px">
+    <div class="actions-bar">
       <el-button type="primary" @click="loadPolls">加载投票列表</el-button>
-      <el-button v-if="isAdmin" type="success" style="margin-left:8px" @click="openCreate">创建投票</el-button>
+      <el-button v-if="isAdmin" type="success" @click="openCreate">创建投票</el-button>
     </div>
 
     <el-table :data="polls" style="width:100%">
@@ -85,9 +85,9 @@
     <!-- 结果弹窗 -->
     <el-dialog title="投票结果（前端模拟）" :visible.sync="showResultsDialog" width="520px">
       <div v-if="currentPoll">
-        <div v-for="opt in currentPoll.options" :key="opt.id" style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee">
-          <div>{{ opt.text }}</div>
-          <div style="min-width:120px;text-align:right">{{ opt.votes }} 票</div>
+        <div v-for="opt in currentPoll.options" :key="opt.id" class="vote-result-item">
+          <div class="vote-option-text">{{ opt.text }}</div>
+          <div class="vote-count">{{ opt.votes }} 票</div>
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
@@ -216,6 +216,158 @@ export default {
 </script>
 
 <style scoped>
-.vote-page { padding: 16px }
+.vote-page {
+  padding: 40px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
+}
+
+h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.actions-bar {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.actions-bar >>> .el-button {
+  border-radius: 980px;
+  padding: 10px 24px;
+  font-weight: 500;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.actions-bar >>> .el-button--primary {
+  background-color: #0071e3;
+}
+
+.actions-bar >>> .el-button--success {
+  background-color: #34c759;
+}
+
+/* Table Styling */
+.vote-page >>> .el-table {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+}
+
+.vote-page >>> .el-table th {
+  background-color: #ffffff;
+  color: #86868b;
+  font-weight: 600;
+  border-bottom: 1px solid #f5f5f7;
+  padding: 16px 0;
+}
+
+.vote-page >>> .el-table td {
+  padding: 16px 0;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.vote-page >>> .el-tag {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+}
+
+.vote-page >>> .el-tag--success {
+  background-color: rgba(52, 199, 89, 0.1);
+  color: #34c759;
+}
+
+.vote-page >>> .el-tag--warning {
+  background-color: rgba(255, 149, 0, 0.1);
+  color: #ff9500;
+}
+
+.vote-page >>> .el-tag--info {
+  background-color: rgba(142, 142, 147, 0.1);
+  color: #8e8e93;
+}
+
+/* Dialog Styling */
+.vote-page >>> .el-dialog {
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.vote-page >>> .el-dialog__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.vote-page >>> .el-dialog__title {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.vote-page >>> .el-dialog__body {
+  padding: 24px;
+}
+
+.vote-page >>> .el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f5f5f7;
+}
+
+/* Form Items */
+.vote-page >>> .el-input__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  transition: all 0.2s;
+}
+
+.vote-page >>> .el-input__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+/* Option List in Dialog */
+.vote-option-item {
+  background: #fbfbfd;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.vote-option-item:hover {
+  background: #f5f5f7;
+}
+
+.vote-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.vote-result-item:last-child {
+  border-bottom: none;
+}
+
+.vote-count {
+  font-weight: 600;
+  color: #0071e3;
+  background: rgba(0, 113, 227, 0.1);
+  padding: 4px 10px;
+  border-radius: 980px;
+  font-size: 13px;
+}
 </style>
 

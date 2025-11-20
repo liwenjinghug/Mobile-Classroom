@@ -10,4 +10,6 @@ public interface IRandomPickService {
     RandomPickRecord pickRandomAndSave(Long sessionId, Long teacherId);
     int savePick(RandomPickRecord record);
     List<RandomPickRecord> getHistory(Long sessionId);
+    int deletePick(Long rpickId);
+    int updatePick(RandomPickRecord record);
 }

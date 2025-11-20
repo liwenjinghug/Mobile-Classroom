@@ -59,4 +59,14 @@ public class RandomPickServiceImpl implements IRandomPickService {
     public List<RandomPickRecord> getHistory(Long sessionId) {
         return randomPickMapper.selectHistoryBySession(sessionId);
     }
+
+    @Override
+    public int deletePick(Long rpickId) {
+        return randomPickMapper.deleteRandomPickById(rpickId);
+    }
+
+    @Override
+    public int updatePick(RandomPickRecord record) {
+        return randomPickMapper.updateRandomPick(record);
+    }
 }

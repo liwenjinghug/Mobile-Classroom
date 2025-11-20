@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Date;
 import java.net.URLEncoder;
 
 @RestController
@@ -40,8 +41,17 @@ public class AttendanceController extends BaseController {
     public AjaxResult createTask(@RequestBody AttendanceTask task) {
         if (task == null || task.getSessionId() == null) return AjaxResult.error("参数不完整");
         try {
-            // set defaults
-            if (task.getStatus() == null) task.setStatus(1);
+            // Determine initial status based on time
+            Date now = new Date();
+            if (task.getEndTime() != null && now.after(task.getEndTime())) {
+                task.setStatus(2);
+            } else if (task.getStartTime() != null && now.before(task.getStartTime())) {
+                task.setStatus(0);
+            } else {
+                // Default to 1 (In Progress) if within time or times are null
+                if (task.getStatus() == null) task.setStatus(1);
+            }
+            
             task.setCreateBy(getUsername());
             AttendanceTask created = attendanceService.createTask(task);
             return created != null ? AjaxResult.success(created) : AjaxResult.error("签到创建失败!");
@@ -62,6 +72,20 @@ public class AttendanceController extends BaseController {
     @PostMapping("/task/{taskId}/close")
     public AjaxResult closeTask(@PathVariable Long taskId) {
         int rows = attendanceService.closeTask(taskId);
+        return rows > 0 ? AjaxResult.success() : AjaxResult.error();
+    }
+
+    @PreAuthorize("@ss.hasPermi('proj_myx:attendance:edit')")
+    @PostMapping("/task/{taskId}/start")
+    public AjaxResult startTask(@PathVariable Long taskId) {
+        int rows = attendanceService.startTask(taskId);
+        return rows > 0 ? AjaxResult.success() : AjaxResult.error();
+    }
+
+    @PreAuthorize("@ss.hasPermi('proj_myx:attendance:remove')")
+    @DeleteMapping("/task/{taskId}")
+    public AjaxResult deleteTask(@PathVariable Long taskId) {
+        int rows = attendanceService.deleteTask(taskId);
         return rows > 0 ? AjaxResult.success() : AjaxResult.error();
     }
 

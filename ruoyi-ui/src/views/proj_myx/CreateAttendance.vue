@@ -1,51 +1,57 @@
 <template>
-  <div>
-    <el-form :model="form" label-width="120px">
+  <div class="create-form-container">
+    <el-form :model="form" label-position="top" class="apple-form">
       <el-form-item label="签到方式">
-        <el-radio-group v-model="form.type">
-          <el-radio label="location">位置签到</el-radio>
-          <el-radio label="qr">二维码签到</el-radio>
+        <el-radio-group v-model="form.type" class="apple-radio-group">
+          <el-radio label="location" border>位置签到</el-radio>
+          <el-radio label="qr" border>二维码签到</el-radio>
         </el-radio-group>
       </el-form-item>
 
-      <div v-if="form.type === 'location'">
-        <el-form-item label="中心纬度">
-          <el-input v-model.number="form.centerLat" />
-        </el-form-item>
-        <el-form-item label="中心经度">
-          <el-input v-model.number="form.centerLng" />
-        </el-form-item>
+      <div v-if="form.type === 'location'" class="form-section">
+        <div class="form-row">
+          <el-form-item label="中心纬度" class="half-width">
+            <el-input v-model.number="form.centerLat" placeholder="例如：39.9042" />
+          </el-form-item>
+          <el-form-item label="中心经度" class="half-width">
+            <el-input v-model.number="form.centerLng" placeholder="例如：116.4074" />
+          </el-form-item>
+        </div>
         <el-form-item label="半径（米）">
-          <el-input v-model.number="form.radius" />
+          <el-input v-model.number="form.radius" placeholder="例如：500" />
         </el-form-item>
       </div>
 
-      <div v-else>
+      <div v-else class="form-section">
         <el-form-item label="二维码有效时长(分钟)">
-          <el-input v-model.number="form.qrTtl" />
+          <el-input v-model.number="form.qrTtl" placeholder="例如：10" />
         </el-form-item>
       </div>
 
-      <el-form-item label="开始时间">
-        <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择开始时间" />
-      </el-form-item>
-      <el-form-item label="结束时间">
-        <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择结束时间" />
-      </el-form-item>
+      <div class="form-row">
+        <el-form-item label="开始时间" class="half-width">
+          <el-date-picker v-model="form.startTime" type="datetime" placeholder="选择开始时间" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="结束时间" class="half-width">
+          <el-date-picker v-model="form.endTime" type="datetime" placeholder="选择结束时间" style="width: 100%" />
+        </el-form-item>
+      </div>
 
-      <el-form-item>
-        <el-button type="primary" @click="create">创建</el-button>
+      <el-form-item class="form-actions">
+        <el-button type="primary" @click="create" class="submit-btn">创建签到</el-button>
       </el-form-item>
     </el-form>
 
-    <el-dialog title="二维码" :visible.sync="showQr" width="360px" @close="onQrClose">
-      <div v-if="qrData">
-        <img :src="qrData.qrUrl" alt="qr" style="width:300px;height:300px;display:block;margin:0 auto" />
-        <p style="word-break:break-all;">Token: {{ qrData.token }}</p>
-        <p>过期时间: {{ qrData.expireTime }}</p>
+    <el-dialog title="二维码" :visible.sync="showQr" width="360px" @close="onQrClose" custom-class="qr-dialog" append-to-body>
+      <div v-if="qrData" class="qr-content">
+        <img :src="qrData.qrUrl" alt="qr" class="qr-image" />
+        <div class="qr-info">
+          <p class="qr-token">Token: {{ qrData.token }}</p>
+          <p class="qr-expire">过期时间: {{ qrData.expireTime }}</p>
+        </div>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="onQrClose">查看签到详情</el-button>
+        <el-button type="primary" round @click="showQr = false">查看签到详情</el-button>
       </span>
     </el-dialog>
   </div>
@@ -122,3 +128,131 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.create-form-container {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  padding: 10px;
+}
+
+.apple-form >>> .el-form-item__label {
+  font-weight: 500;
+  color: #1d1d1f;
+  padding-bottom: 8px;
+}
+
+.apple-form >>> .el-input__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  height: 40px;
+  transition: all 0.2s ease;
+}
+
+.apple-form >>> .el-input__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+.apple-radio-group {
+  display: flex;
+  gap: 12px;
+}
+
+.apple-radio-group >>> .el-radio {
+  margin-right: 0;
+}
+
+.apple-radio-group >>> .el-radio.is-bordered {
+  border-radius: 10px;
+  border-color: #d2d2d7;
+  padding: 10px 20px;
+  height: auto;
+}
+
+.apple-radio-group >>> .el-radio.is-bordered.is-checked {
+  border-color: #0071e3;
+  background-color: rgba(0, 113, 227, 0.05);
+}
+
+.apple-radio-group >>> .el-radio__label {
+  font-weight: 500;
+}
+
+.form-section {
+  background-color: #fbfbfd;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.half-width {
+  flex: 1;
+}
+
+.form-actions {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.submit-btn {
+  width: 100%;
+  max-width: 200px;
+  height: 44px;
+  border-radius: 22px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: #0071e3;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+  transition: all 0.2s ease;
+}
+
+.submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 113, 227, 0.4);
+}
+
+.submit-btn:active {
+  transform: scale(0.98);
+}
+
+/* QR Dialog Styles */
+.qr-content {
+  text-align: center;
+  padding: 10px;
+}
+
+.qr-image {
+  width: 260px;
+  height: 260px;
+  display: block;
+  margin: 0 auto 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.qr-info {
+  background-color: #f5f5f7;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.qr-token {
+  font-family: monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+  word-break: break-all;
+}
+
+.qr-expire {
+  font-size: 13px;
+  color: #86868b;
+}
+</style>

@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.proj_myx;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.proj_myx.domain.Attendance;
 import com.ruoyi.proj_myx.domain.RandomPickRecord;
 import com.ruoyi.proj_myx.service.IRandomPickService;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
@@ -62,5 +64,28 @@ public class RandomPickController extends BaseController {
         }
         List<RandomPickRecord> list = randomPickService.getHistory(sessionId);
         return AjaxResult.success(list);
+    }
+
+    @PreAuthorize("@ss.hasPermi('proj_myx:random:remove')")
+    @Log(title = "删除抽取记录", businessType = com.ruoyi.common.enums.BusinessType.DELETE)
+    @DeleteMapping("/pick/{rpickId}")
+    public AjaxResult remove(@PathVariable Long rpickId) {
+        return toAjax(randomPickService.deletePick(rpickId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('proj_myx:random:edit')")
+    @Log(title = "修改抽取记录", businessType = com.ruoyi.common.enums.BusinessType.UPDATE)
+    @PutMapping("/pick")
+    public AjaxResult edit(@RequestBody RandomPickRecord record) {
+        return toAjax(randomPickService.updatePick(record));
+    }
+
+    @PreAuthorize("@ss.hasPermi('proj_myx:random:export')")
+    @Log(title = "导出抽取记录", businessType = com.ruoyi.common.enums.BusinessType.EXPORT)
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, @RequestParam Long sessionId) {
+        List<RandomPickRecord> list = randomPickService.getHistory(sessionId);
+        ExcelUtil<RandomPickRecord> util = new ExcelUtil<>(RandomPickRecord.class);
+        util.exportExcel(response, list, "随机抽人记录");
     }
 }

@@ -1,21 +1,36 @@
 package com.ruoyi.proj_myx.domain;
 
+import com.ruoyi.common.annotation.Excel;
 import java.io.Serializable;
 import java.util.Date;
 
 public class RandomPickRecord implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Excel(name = "记录ID")
     private Long rpickId;
+    
+    @Excel(name = "课堂ID")
     private Long sessionId;
+    
     private Long teacherId;
+    
     private Long studentId;
+    
+    @Excel(name = "抽取时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date pickTime;
+    
+    @Excel(name = "轮次")
     private Integer roundNo;
+    
+    @Excel(name = "备注")
     private String remark;
 
     // 联表字段
+    @Excel(name = "学生姓名")
     private String studentName;
+    
+    @Excel(name = "学号")
     private String studentNo;
 
     public Long getRpickId() {

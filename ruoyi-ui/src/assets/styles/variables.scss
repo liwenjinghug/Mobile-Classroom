@@ -8,35 +8,20 @@ $tiffany: #4AB7BD;
 $yellow:#FEC171;
 $panGreen: #30B08F;
 
-// 默认菜单主题风格
-$base-menu-color:#bfcbd9;
-$base-menu-color-active:#f4f4f5;
-$base-menu-background:#304156;
-$base-logo-title-color: #ffffff;
+// ChatGPT-like Light Theme Variables
+$base-menu-color: #343541; // Dark gray text
+$base-menu-color-active: #000000; // Black active text
+$base-menu-background: #f9f9f9; // Light gray sidebar
+$base-logo-title-color: #000000;
 
-$base-menu-light-color:rgba(0,0,0,.70);
-$base-menu-light-background:#ffffff;
-$base-logo-light-title-color: #001529;
+$base-menu-light-color: #343541;
+$base-menu-light-background: #f9f9f9;
+$base-logo-light-title-color: #000000;
 
-$base-sub-menu-background:#1f2d3d;
-$base-sub-menu-hover:#001528;
+$base-sub-menu-background: #f9f9f9; // Same as sidebar for flat look
+$base-sub-menu-hover: #ececec; // Slightly darker hover
 
-// 自定义暗色菜单风格
-/**
-$base-menu-color:hsla(0,0%,100%,.65);
-$base-menu-color-active:#fff;
-$base-menu-background:#001529;
-$base-logo-title-color: #ffffff;
-
-$base-menu-light-color:rgba(0,0,0,.70);
-$base-menu-light-background:#ffffff;
-$base-logo-light-title-color: #001529;
-
-$base-sub-menu-background:#000c17;
-$base-sub-menu-hover:#001528;
-*/
-
-$base-sidebar-width: 200px;
+$base-sidebar-width: 260px; // Wider sidebar like ChatGPT
 
 // the :export directive is the magic sauce for webpack
 // https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass

@@ -28,6 +28,14 @@ export function closeTask(taskId) {
   return request({ url: '/proj_myx/attendance/task/' + taskId + '/close', method: 'post' })
 }
 
+export function startTask(taskId) {
+  return request({ url: '/proj_myx/attendance/task/' + taskId + '/start', method: 'post' })
+}
+
+export function deleteTask(taskId) {
+  return request({ url: '/proj_myx/attendance/task/' + taskId, method: 'delete' })
+}
+
 export function generateQr(taskId, ttlMinutes) {
   return request({ url: '/proj_myx/attendance/task/generateQr', method: 'post', data: { taskId, ttlMinutes } })
 }
