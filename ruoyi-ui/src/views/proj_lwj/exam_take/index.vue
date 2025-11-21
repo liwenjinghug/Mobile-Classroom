@@ -420,28 +420,276 @@ export default {
 </script>
 
 <style scoped>
-.exam-take { padding: 24px; }
-.exam-header { margin-bottom: 24px; }
-.exam-title { font-size: 20px; font-weight: bold; }
-.exam-meta { margin-bottom: 16px; }
-.exam-actions { margin-top: 8px; }
-.exam-body { display: flex; }
-.question-list-pane { border-right: 1px solid #ebeef5; padding-right: 24px; }
-.question-list { width: 100%; }
-.questions-ul { list-style-type: none; padding: 0; margin: 0; }
-.q-item { display: flex; align-items: center; padding: 8px 12px; cursor: pointer; border-radius: 4px; transition: background 0.3s; }
-.q-item:hover { background: #f5f7fa; }
-.q-item.active { background: #e6f7ff; }
-.idx { width: 28px; text-align: center; color: #409eff; }
-.type { width: 80px; text-align: center; }
-.score { width: 80px; text-align: center; }
-.state { display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; border-radius: 50%; background: #e1f5fe; color: #009688; }
-.question-detail-pane { flex: 1; padding-left: 24px; }
-.question-detail { width: 100%; }
-.q-content { margin: 16px 0; }
-.single-choice, .judge-choice, .short-answer { margin-bottom: 16px; }
-.q-ops { margin-top: 16px; }
-.answer-feedback { margin-top: 8px; }
-.dialog-footer { text-align: right; }
-.not-started-tip { padding: 24px; }
+/* Mac Style for Exam Take */
+.exam-take {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
+}
+
+/* Card Styling */
+.exam-take >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+  margin-bottom: 24px;
+}
+
+.exam-take >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+/* Exam Header */
+.exam-header {
+  margin-bottom: 24px;
+}
+
+.exam-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 12px;
+}
+
+.exam-meta {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 14px;
+  color: #86868b;
+}
+
+.exam-meta strong {
+  color: #1d1d1f;
+  font-weight: 600;
+}
+
+.exam-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+/* Button Styling */
+.exam-take >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.exam-take >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+.exam-take >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.exam-take >>> .el-button--warning {
+  background-color: #ff9500;
+  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
+}
+
+.exam-take >>> .el-button--info {
+  background-color: #8e8e93;
+}
+
+/* Question List */
+.question-list-pane {
+  padding-right: 12px;
+}
+
+.question-list {
+  width: 100%;
+}
+
+.questions-ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.q-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: background 0.2s;
+  margin-bottom: 4px;
+}
+
+.q-item:hover {
+  background: #f5f5f7;
+}
+
+.q-item.active {
+  background: #e6f7ff;
+  color: #0071e3;
+}
+
+.idx {
+  width: 32px;
+  text-align: center;
+  color: #86868b;
+  font-weight: 500;
+}
+
+.q-item.active .idx {
+  color: #0071e3;
+}
+
+.type {
+  width: 80px;
+  text-align: center;
+  font-size: 13px;
+  color: #86868b;
+}
+
+.score {
+  width: 80px;
+  text-align: center;
+  font-size: 13px;
+  color: #86868b;
+}
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #34c759;
+  color: white;
+  font-size: 12px;
+  margin-left: auto;
+}
+
+/* Question Detail */
+.question-detail-pane {
+  padding-left: 12px;
+}
+
+.question-detail {
+  width: 100%;
+}
+
+.q-content {
+  margin: 20px 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #1d1d1f;
+}
+
+.single-choice, .judge-choice, .short-answer {
+  margin-bottom: 24px;
+}
+
+.q-ops {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #f5f5f7;
+  padding-top: 20px;
+}
+
+.answer-feedback {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f5f5f7;
+  border-radius: 10px;
+}
+
+/* Form Elements */
+.exam-take >>> .el-radio {
+  display: block;
+  margin-bottom: 12px;
+  margin-left: 0 !important;
+}
+
+.exam-take >>> .el-radio__inner {
+  width: 18px;
+  height: 18px;
+}
+
+.exam-take >>> .el-radio__label {
+  font-size: 15px;
+  padding-left: 12px;
+}
+
+.exam-take >>> .el-textarea__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  padding: 12px;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.exam-take >>> .el-textarea__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+/* Tags */
+.exam-take >>> .el-tag {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+}
+
+/* Dialog Styling */
+.exam-take >>> .el-dialog {
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.exam-take >>> .el-dialog__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.exam-take >>> .el-dialog__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+.exam-take >>> .el-dialog__body {
+  padding: 24px;
+}
+
+.exam-take >>> .el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f5f5f7;
+}
+
+.dialog-footer {
+  text-align: right;
+}
+
+.not-started-tip {
+  padding: 40px;
+  text-align: center;
+}
+
+/* Scrollbar */
+.exam-take >>> .el-scrollbar__wrap {
+  overflow-x: hidden;
+}
 </style>

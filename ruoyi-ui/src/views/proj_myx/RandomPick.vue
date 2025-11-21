@@ -248,53 +248,44 @@ export default {
 <style scoped>
 .random-pick-page {
   padding: 40px 20px;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
 }
 
 .title {
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 700;
   text-align: center;
   margin-bottom: 40px;
-  letter-spacing: -0.02em;
+  color: #1d1d1f;
 }
 
 .board {
   background: #ffffff;
-  border-radius: 24px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+  border-radius: 20px;
   padding: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 0.3s ease;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  margin-bottom: 40px;
+  text-align: center;
 }
 
 .session-chooser {
-  text-align: center;
-  padding: 30px;
-  background-color: #f5f5f7;
-  border-radius: 16px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.session-chooser p {
-  margin-bottom: 16px;
-  font-size: 16px;
-  color: #1d1d1f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 }
 
 .session-chooser input {
   padding: 12px 16px;
-  width: 200px;
-  margin-right: 12px;
-  border: 1px solid #d2d2d7;
   border-radius: 12px;
+  border: 1px solid #d2d2d7;
   font-size: 16px;
+  width: 200px;
   outline: none;
   transition: all 0.2s;
 }
@@ -304,49 +295,22 @@ export default {
   box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
 }
 
-.controls {
-  margin-top: 32px;
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-}
-
 .btn {
+  background-color: #0071e3;
+  color: white;
+  border: none;
   padding: 12px 24px;
   border-radius: 980px;
-  border: none;
-  cursor: pointer;
   font-size: 16px;
-  font-weight: 600;
-  transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
-  background-color: #f5f5f7;
-  color: #1d1d1f;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .btn:hover {
-  background-color: #e5e5ea;
-  transform: translateY(-1px);
-}
-
-.btn:active {
-  transform: scale(0.96);
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn.primary {
-  background-color: #0071e3;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
-}
-
-.btn.primary:hover {
   background-color: #0077ed;
-  box-shadow: 0 6px 16px rgba(0, 113, 227, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
 }
 
 .loading {
@@ -415,12 +379,15 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f5f5f7;
 }
 
 .section-header h4 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
+  color: #1d1d1f;
 }
 
 .history-list {
@@ -429,13 +396,21 @@ export default {
 }
 
 .history-item {
-  padding: 12px 0;
+  padding: 16px 0;
   border-bottom: 1px solid #f5f5f7;
   color: #1d1d1f;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 15px;
+  transition: background-color 0.2s;
+}
+
+.history-item:hover {
+  background-color: #fbfbfd;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-radius: 8px;
 }
 
 .history-item:last-child {
@@ -445,28 +420,36 @@ export default {
 .info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .name {
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 16px;
 }
 
 .no {
   color: #86868b;
+  font-size: 14px;
 }
 
 .remark-tag {
-  background: #f5f5f7;
-  padding: 2px 8px;
-  border-radius: 4px;
+  background: rgba(0, 113, 227, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
   font-size: 12px;
   color: #0071e3;
+  font-weight: 500;
 }
 
 .actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
+}
+
+.actions .el-button {
+  padding: 6px 12px;
+  border-radius: 6px;
 }
 
 .delete-btn {
@@ -477,10 +460,41 @@ export default {
   color: #d70015;
 }
 
+/* Dialog Styling */
+.random-pick-page >>> .el-dialog {
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.random-pick-page >>> .el-dialog__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.random-pick-page >>> .el-dialog__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+.random-pick-page >>> .el-dialog__body {
+  padding: 24px;
+}
+
+.random-pick-page >>> .el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f5f5f7;
+}
+
+.random-pick-page >>> .el-input__inner {
+  border-radius: 10px;
+}
+
 @media print {
   .random-pick-page {
     padding: 0;
     max-width: none;
+    background: white;
   }
   .board, .controls, .tools, .actions, .session-chooser, .title {
     display: none !important;

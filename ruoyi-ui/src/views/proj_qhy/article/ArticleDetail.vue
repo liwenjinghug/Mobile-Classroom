@@ -265,34 +265,40 @@ export default {
 </script>
 
 <style scoped>
+/* Mac Style for Article Detail */
 .article-detail-container {
-  padding: 20px;
-  max-width: 1200px;
+  padding: 40px 20px;
+  max-width: 900px;
   margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
 }
 
 .article-header {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .article-content {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  overflow: hidden;
 }
 
 .article-meta {
-  padding: 30px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 40px 40px 24px;
+  border-bottom: 1px solid #f5f5f7;
 }
 
 .article-title {
-  font-size: 28px;
-  font-weight: 600;
-  color: #1f2d3d;
-  margin-bottom: 20px;
-  line-height: 1.4;
-  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 24px;
+  line-height: 1.2;
+  text-align: left;
 }
 
 .article-info {
@@ -308,169 +314,290 @@ export default {
 }
 
 .author-avatar {
-  background: #409eff;
+  background: #f5f5f7;
+  border: 1px solid #e5e5ea;
 }
 
 .author-details {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .author-name {
-  font-size: 16px;
-  font-weight: 500;
-  color: #1f2d3d;
-  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
 }
 
 .publish-info {
   display: flex;
-  gap: 20px;
+  gap: 12px;
   font-size: 13px;
-  color: #909399;
+  color: #86868b;
 }
 
 .article-type {
-  color: #409eff;
+  color: #0071e3;
+  font-weight: 500;
 }
 
 .article-stats {
   display: flex;
-  gap: 30px;
+  gap: 24px;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
-  color: #606266;
+  font-size: 13px;
+  color: #86868b;
 }
 
 .article-cover {
-  padding: 20px 30px;
+  padding: 0;
 }
 
 .cover-image {
   width: 100%;
-  max-height: 400px;
-  border-radius: 8px;
-  overflow: hidden;
+  max-height: 500px;
+  object-fit: cover;
 }
 
 .image-slot {
   width: 100%;
-  height: 200px;
-  background: #f5f7fa;
+  height: 300px;
+  background: #f5f5f7;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #909399;
+  color: #86868b;
   font-size: 32px;
 }
 
 .article-digest {
-  padding: 0 30px 20px;
+  padding: 24px 40px;
 }
 
 .digest-card {
-  border-left: 4px solid #409eff;
-  background: #f8f9fa;
+  border: none;
+  background: #f5f5f7;
+  border-radius: 12px;
+  padding: 16px;
 }
 
 .digest-content {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 12px;
+  color: #1d1d1f;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 .digest-icon {
-  color: #409eff;
-  font-size: 16px;
-  margin-top: 2px;
+  color: #0071e3;
+  font-size: 18px;
+  margin-top: 3px;
   flex-shrink: 0;
 }
 
 .article-body {
-  padding: 0 30px 30px;
+  padding: 24px 40px 40px;
 }
 
 .content-card {
-  min-height: 200px;
   border: none;
+  box-shadow: none;
 }
 
 .content-html {
   line-height: 1.8;
-  font-size: 16px;
-  color: #2c3e50;
-  padding: 10px;
+  font-size: 17px;
+  color: #1d1d1f;
 }
 
-/* (v-html 样式不变) */
+/* v-html styles */
 .content-html ::v-deep h1,
 .content-html ::v-deep h2,
-.content-html ::v-deep h3,
-.content-html ::v-deep p,
-.content-html ::v-deep img {
-  /* (保留您已有的 v-html 样式) */
+.content-html ::v-deep h3 {
+  color: #1d1d1f;
+  font-weight: 600;
+  margin-top: 24px;
+  margin-bottom: 16px;
 }
 
+.content-html ::v-deep p {
+  margin-bottom: 16px;
+}
+
+.content-html ::v-deep img {
+  max-width: 100%;
+  border-radius: 12px;
+  margin: 16px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
 
 .article-actions {
-  padding: 0 30px 30px;
+  padding: 24px 40px 40px;
+  border-top: 1px solid #f5f5f7;
 }
 
 .actions-card {
-  text-align: center;
   border: none;
+  box-shadow: none;
 }
 
 .action-buttons {
   display: flex;
   justify-content: center;
-  gap: 30px;
+  gap: 24px;
 }
 
 .action-buttons .el-button {
   min-width: 120px;
   height: 44px;
-  font-size: 16px;
+  font-size: 15px;
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  transition: all 0.2s ease;
 }
 
-.liked {
-  background-color: #f56c6c;
-  border-color: #f56c6c;
-  color: white;
+.action-buttons .el-button--primary {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
 }
 
-.hated {
-  background-color: #909399;
-  border-color: #909399;
-  color: white;
+.action-buttons .el-button--primary:hover,
+.action-buttons .el-button--primary.liked {
+  background-color: #ff2d55;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 45, 85, 0.3);
 }
 
-/* (新增) 分享弹窗样式 */
+.action-buttons .el-button--info {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.action-buttons .el-button--info:hover,
+.action-buttons .el-button--info.hated {
+  background-color: #86868b;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.action-buttons .el-button--success {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.action-buttons .el-button--success:hover {
+  background-color: #34c759;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+}
+
+/* Dialog Styling */
+.article-detail-container >>> .el-dialog {
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.article-detail-container >>> .el-dialog__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.article-detail-container >>> .el-dialog__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+.article-detail-container >>> .el-dialog__body {
+  padding: 24px;
+}
+
+.article-detail-container >>> .el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f5f5f7;
+}
+
+/* Share List */
 .group-share-list {
   max-height: 300px;
   overflow-y: auto;
 }
+
 .group-share-item {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 8px 0;
+  padding: 12px;
+  border-radius: 10px;
+  transition: background-color 0.2s;
 }
+
+.group-share-item:hover {
+  background-color: #f5f5f7;
+}
+
 .group-share-name {
-  margin-left: 10px;
+  margin-left: 12px;
+  font-weight: 500;
+  color: #1d1d1f;
 }
-.group-share-item ::v-deep .el-checkbox__label {
+
+.group-share-item >>> .el-checkbox__label {
   display: flex;
   align-items: center;
 }
 
-/* (响应式样式不变) */
+/* Responsive */
 @media (max-width: 768px) {
-  /* (保留您已有的响应式样式) */
+  .article-detail-container {
+    padding: 20px 16px;
+  }
+
+  .article-meta {
+    padding: 24px 20px;
+  }
+
+  .article-title {
+    font-size: 24px;
+  }
+
+  .article-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .article-stats {
+    width: 100%;
+    justify-content: flex-start;
+    padding-top: 16px;
+    border-top: 1px solid #f5f5f7;
+  }
+
+  .article-digest,
+  .article-body,
+  .article-actions {
+    padding: 24px 20px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .action-buttons .el-button {
+    width: 100%;
+  }
 }
 </style>

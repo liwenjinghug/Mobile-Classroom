@@ -559,144 +559,40 @@ export default {
     },
     resetForm() {
       this.form = { id:null, courseId:this.form.courseId, sessionId:this.form.sessionId, examName:'', examType:3, examDuration:60, totalScore:100, passScore:60, examMode:1, questionOrder:0, showAnswer:0, lateTime:0 }
-      this.bool = { antiCheat:false, autoSubmit:true, lateSubmit:false }
+      this.bool = { antiCheat: false, autoSubmit:false, lateSubmit:false }
       this.timeRange = []
     },
-    edit(row) {
-      this.form = {
-        id: row.id, courseId: row.courseId, sessionId: row.sessionId, examName: row.examName,
-        examType: row.examType, startTime: row.startTime, endTime: row.endTime, examDuration: row.examDuration,
-        totalScore: row.totalScore, passScore: row.passScore, examMode: row.examMode, questionOrder: row.questionOrder,
-        showAnswer: row.showAnswer, lateTime: row.lateTime
-      }
-      this.bool = { antiCheat: (row.antiCheat|0) === 1, autoSubmit: (row.autoSubmit|0) === 1, lateSubmit: (row.lateSubmit|0) === 1 }
-      this.timeRange = [row.startTime ? new Date(row.startTime) : null, row.endTime ? new Date(row.endTime) : null].filter(Boolean)
+    validate() {
+      if (!this.form.courseId) { this.$message.error('请选择课程'); return false }
+      if (!this.form.sessionId) { this.$message.error('请选择课堂'); return false }
+      if (!this.form.examName) { this.$message.error('请输入考试名称'); return false }
+      if (!this.timeRange || this.timeRange.length !== 2) { this.$message.error('请选择时间范围'); return false }
+      return true
     },
-    publishDisabledReason(row) {
-      const status = Number(row.status || 0)
-      if (status > 0) return '已发布/进行中/已结束'
-      if (!row.questionCount || row.questionCount === 0) return '尚未配置题目'
-      if (!row.startTime || !row.endTime) return '缺少时间范围'
-      return ''
-    },
-    canStart(row) {
-      // 已发布且在时间范围内可开始
-      const now = Date.now()
-      const start = row.startTime ? new Date(row.startTime).getTime() : 0
-      const end = row.endTime ? new Date(row.endTime).getTime() : 0
-      return now >= start && (!end || now <= end)
-    },
-    // 新增：删除禁用原因计算
-    removeDisabled(row) {
-      const status = Number(row.status || 0)
-      if (status === 2) { // 进行中
-        const end = row.endTime ? new Date(row.endTime).getTime() : 0
-        if (!end || Date.now() < end) {
-          return '进行中的考试尚未到截止时间，禁止删除'
-        }
-      }
-      return ''
-    },
-    remove(row) {
-      const reason = this.removeDisabled(row)
-      if (reason) { this.$message.warning(reason); return }
-      this.$confirm('确定删除该考试吗？此操作不可恢复','提示',{type:'warning'}).then(()=>{
-        delExam(row.id).then(()=>{ this.$message.success('删除成功'); this.loadList() })
-      }).catch(()=>{})
-    },
-    publish(row) {
-      if (this.publishDisabledReason(row)) {
-        this.$message.warning(this.publishDisabledReason(row))
-        return
-      }
-      // 安全兜底：没有题目禁止发布
-      if (!row.questionCount || row.questionCount === 0) {
-        this.$message.warning('该考试还没有配置题目，请先点击“题目配置”添加题目后再发布')
-        return
-      }
-      this.$confirm('确定发布该考试吗？','提示',{type:'warning'}).then(()=>{
-        publishExam(row.id).then(() => {
-          this.$message.success('已发布考试')
-          this.loadList()
-        })
-      }).catch(()=>{})
-    },
-    start(row) {
-      startExam(row.id).then(()=>{ this.$message.success('已开始'); this.loadList() })
-    },
-    end(row) {
-      endExam(row.id).then(()=>{ this.$message.success('已结束'); this.loadList() })
-    },
-    loadList() {
-      if (!this.form.sessionId) { this.list = []; return }
-      this.listLoading = true
-      listExam({ sessionId: this.form.sessionId, examName: this.query.examName, pageNum:1, pageSize:1000 }).then(res=>{
-        this.listLoading = false
-        this.list = (res && (res.rows || res.data)) ? (res.rows || res.data) : (res || [])
-      }).catch(e=>{ this.listLoading = false; console.error(e) })
-    },
-    gotoQuestions(row){
-      const id = row.id
-      if (!id) { this.$message.error('未识别考试ID'); return }
-      const path = `/proj_lwj_exam/exam_questions/${id}`
-      if (this.$router && this.$router.push) {
-        this.$router.push({ path }).catch(() => {})
-      }
-    },
-    openBatch(){
-      if (!this.form.courseId) { this.$message.error('请先选择课程'); return }
-      if (!this.sessions || this.sessions.length === 0) { this.$message.error('该课程暂无课堂'); return }
-      // 预填当前课程
-      this.batch.exam = Object.assign({}, this.batch.exam, { courseId: this.form.courseId })
-      // 清空上次选择
-      this.batch.sessionIds = []
-      this.batch.timeRange = []
-      this.batchVisible = true
-    },
-    submitBatch(){
-      if (!this.form.courseId) { this.$message.error('请先选择课程'); return }
-      if (!this.batch.sessionIds || this.batch.sessionIds.length === 0) { this.$message.error('请选择至少一个课堂'); return }
-      if (!this.batch.exam.examName) { this.$message.error('请输入考试名称'); return }
-      if (!this.batch.timeRange || this.batch.timeRange.length !== 2) { this.$message.error('请选择考试时间段'); return }
-      const [start, end] = this.batch.timeRange
-      const payloadExam = Object.assign({}, this.batch.exam, {
-        courseId: this.form.courseId,
-        startTime: this.formatDateTime(start),
-        endTime: this.formatDateTime(end)
+    buildPayload(publishNow) {
+      const [start, end] = this.timeRange
+      return Object.assign({}, this.form, {
+        startTime: this.formatDateTimeSimple(start),
+        endTime: this.formatDateTimeSimple(end),
+        status: publishNow ? 1 : 0,
+        antiCheat: this.bool.antiCheat ? 1 : 0,
+        autoSubmit: this.bool.autoSubmit ? 1 : 0,
+        lateSubmit: this.bool.lateSubmit ? 1 : 0
       })
-      this.batchLoading = true
-      batchAddExam(payloadExam, this.batch.sessionIds).then(res => {
-        this.batchLoading = false
-        const ok = res && (res.code === 200 || res.code === 0 || res.success)
-        if (ok) {
-          this.$message.success((res.msg || '批量创建成功'))
-          this.batchVisible = false
-          this.loadList()
-        } else {
-          this.$message.error((res && res.msg) || '批量创建失败')
-        }
-      }).catch(err => { this.batchLoading = false; console.error(err); this.$message.error('批量创建失败') })
     },
-    openExamEdit(row) {
-      // 深拷贝行数据到弹窗表单
-      this.examEditForm = {
-        id: row.id,
-        examName: row.examName,
-        examType: Number(row.examType)||3,
-        examDuration: row.examDuration,
-        totalScore: row.totalScore,
-        passScore: row.passScore,
-        examMode: Number(row.examMode)||1,
-        questionOrder: Number(row.questionOrder)||0,
-        showAnswer: Number(row.showAnswer)||0,
-        lateTime: Number(row.lateTime)||0,
-        courseId: row.courseId,
-        sessionId: row.sessionId,
-        questionCount: row.questionCount||0,
-        status: Number(row.status)||0,
-        startTime: row.startTime,
-        endTime: row.endTime
-      }
+    formatDateTimeSimple(d) {
+      if (!d) return ''
+      const date = new Date(d)
+      const pad = n => n < 10 ? '0' + n : n
+      return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + ' ' +
+        pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds())
+    },
+    fmt(s) { return s || '-' },
+    statusText(s) { const map = {0:'草稿',1:'已发布',2:'进行中',3:'已结束'}; return map[Number(s)||0]||'未知' },
+    statusTagType(s) { const n = Number(s)||0; if (n===0) return 'info'; if (n===1) return ''; if (n===2) return 'success'; if (n===3) return 'danger'; return 'info' },
+    rowKey(row) { return row.id },
+    handleEdit(row) {
+      this.examEditForm = Object.assign({}, row)
       this.examEditTimeRange = [row.startTime? new Date(row.startTime): null, row.endTime? new Date(row.endTime): null].filter(Boolean)
       this.examEditBool = {
         antiCheat: (row.antiCheat|0) === 1,
@@ -775,6 +671,182 @@ export default {
 </script>
 
 <style scoped>
-/* 高亮更新行样式 */
-.row-updated td { background: #fff7e6 !important; transition: background 0.6s; }
+/* Mac Style for Exam Publish */
+.app-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
+}
+
+/* Card Styling */
+.app-container >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+  margin-bottom: 24px;
+}
+
+.app-container >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+/* Form Styling */
+.app-container >>> .el-form-item__label {
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.app-container >>> .el-input__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  height: 36px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-input__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+/* Button Styling */
+.app-container >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+.app-container >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.app-container >>> .el-button--success {
+  background-color: #34c759;
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+}
+
+.app-container >>> .el-button--warning {
+  background-color: #ff9500;
+  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
+}
+
+.app-container >>> .el-button--danger {
+  background-color: #ff3b30;
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
+}
+
+.app-container >>> .el-button--text {
+  color: #0071e3;
+  background: none;
+  padding: 0 5px;
+  box-shadow: none;
+}
+
+.app-container >>> .el-button--text:hover {
+  color: #0077ed;
+  background: none;
+  transform: none;
+}
+
+/* Table Styling */
+.app-container >>> .el-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+}
+
+.app-container >>> .el-table th {
+  background-color: #fbfbfd;
+  color: #86868b;
+  font-weight: 600;
+  border-bottom: 1px solid #f5f5f7;
+  padding: 12px 0;
+}
+
+.app-container >>> .el-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+/* Dialog Styling */
+.app-container >>> .el-dialog {
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.app-container >>> .el-dialog__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.app-container >>> .el-dialog__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+.app-container >>> .el-dialog__body {
+  padding: 24px;
+}
+
+.app-container >>> .el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f5f5f7;
+}
+
+/* Tags */
+.app-container >>> .el-tag {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+}
+
+/* Alert Styling */
+.app-container >>> .el-alert {
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+/* Radio Button Styling */
+.app-container >>> .el-radio-button__inner {
+  border-radius: 0;
+  border: 1px solid #dcdfe6;
+  box-shadow: none !important;
+}
+
+.app-container >>> .el-radio-button:first-child .el-radio-button__inner {
+  border-radius: 10px 0 0 10px;
+}
+
+.app-container >>> .el-radio-button:last-child .el-radio-button__inner {
+  border-radius: 0 10px 10px 0;
+}
+
+.app-container >>> .el-radio-button__orig-radio:checked + .el-radio-button__inner {
+  background-color: #0071e3;
+  border-color: #0071e3;
+  box-shadow: -1px 0 0 0 #0071e3;
+}
+
+/* Highlighting */
+.row-updated td {
+  background: #fff7e6 !important;
+  transition: background 0.6s;
+}
 </style>

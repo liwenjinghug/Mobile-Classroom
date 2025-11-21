@@ -349,5 +349,166 @@ export default {
 </script>
 
 <style scoped>
-.search-pane { margin-bottom: 12px; }
+/* Mac Style for Exam Portal */
+.exam-portal {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
+}
+
+/* Card Styling */
+.exam-portal >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+  margin-bottom: 24px;
+}
+
+.exam-portal >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+/* Form Styling */
+.exam-portal >>> .el-form-item__label {
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.exam-portal >>> .el-input__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  height: 36px;
+  transition: all 0.2s ease;
+}
+
+.exam-portal >>> .el-input__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+/* Button Styling */
+.exam-portal >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.exam-portal >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+.exam-portal >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.exam-portal >>> .el-button--success {
+  background-color: #34c759;
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+}
+
+.exam-portal >>> .el-button--text {
+  color: #0071e3;
+  background: none;
+  padding: 0 5px;
+  box-shadow: none;
+}
+
+.exam-portal >>> .el-button--text:hover {
+  color: #0077ed;
+  background: none;
+  transform: none;
+}
+
+/* Table Styling */
+.exam-portal >>> .el-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+}
+
+.exam-portal >>> .el-table th {
+  background-color: #fbfbfd;
+  color: #86868b;
+  font-weight: 600;
+  border-bottom: 1px solid #f5f5f7;
+  padding: 12px 0;
+}
+
+.exam-portal >>> .el-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+/* Radio Button Styling */
+.exam-portal >>> .el-radio-button__inner {
+  border-radius: 0;
+  border: 1px solid #dcdfe6;
+  box-shadow: none !important;
+}
+
+.exam-portal >>> .el-radio-button:first-child .el-radio-button__inner {
+  border-radius: 10px 0 0 10px;
+}
+
+.exam-portal >>> .el-radio-button:last-child .el-radio-button__inner {
+  border-radius: 0 10px 10px 0;
+}
+
+.exam-portal >>> .el-radio-button__orig-radio:checked + .el-radio-button__inner {
+  background-color: #0071e3;
+  border-color: #0071e3;
+  box-shadow: -1px 0 0 0 #0071e3;
+}
+
+/* Alert Styling */
+.exam-portal >>> .el-alert {
+  border-radius: 10px;
+  margin-top: 16px;
+}
+
+/* Descriptions Styling */
+.exam-portal >>> .el-descriptions {
+  margin-bottom: 16px;
+}
+
+.exam-portal >>> .el-descriptions__header {
+  margin-bottom: 12px;
+}
+
+.exam-portal >>> .el-descriptions__title {
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.exam-portal >>> .el-descriptions-item__label {
+  color: #86868b;
+  font-weight: 500;
+}
+
+.exam-portal >>> .el-descriptions-item__content {
+  color: #1d1d1f;
+  font-weight: 600;
+}
+
+/* Tags */
+.exam-portal >>> .el-tag {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+}
+
+.search-pane { margin-bottom: 24px; }
 </style>

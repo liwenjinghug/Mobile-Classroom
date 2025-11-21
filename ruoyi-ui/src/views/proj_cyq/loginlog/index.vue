@@ -464,9 +464,109 @@ ${this.loginlogList.filter(item => item.msg && item.msg.includes('退出')).map(
 </script>
 
 <style scoped>
+.app-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
+}
+
+/* Card Styling */
+.app-container >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+}
+
+.app-container >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+}
+
 .header-title {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+/* Form Styling */
+.app-container >>> .el-form-item__label {
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.app-container >>> .el-input__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  height: 36px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-input__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+/* Button Styling */
+.app-container >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+.app-container >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.app-container >>> .el-button--success {
+  background-color: #34c759;
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+}
+
+.app-container >>> .el-button--danger {
+  background-color: #ff3b30;
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
+}
+
+.app-container >>> .el-button--info {
+  background-color: #8e8e93;
+}
+
+/* Table Styling */
+.app-container >>> .el-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.app-container >>> .el-table th {
+  background-color: #fbfbfd;
+  color: #86868b;
+  font-weight: 600;
+  border-bottom: 1px solid #f5f5f7;
+  padding: 12px 0;
+}
+
+.app-container >>> .el-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+/* Tags */
+.app-container >>> .el-tag {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
 }
 
 .empty-data {
@@ -476,28 +576,28 @@ ${this.loginlogList.filter(item => item.msg && item.msg.includes('退出')).map(
 
 .empty-data p {
   margin: 5px 0;
-  color: #909399;
+  color: #86868b;
 }
 
 /* 操作信息样式 */
 .success-msg {
-  color: #67c23a;
+  color: #34c759;
   font-weight: 500;
 }
 
 .error-msg {
-  color: #f56c6c;
+  color: #ff3b30;
   font-weight: 500;
 }
 
 .warning-msg {
-  color: #e6a23c;
+  color: #ff9500;
   font-weight: 500;
 }
 
 /* 退出成功消息样式 */
 .logout-msg {
-  color: #e6a23c;
+  color: #ff9500;
   font-weight: 500;
   font-style: italic;
 }

@@ -452,226 +452,384 @@ export default {
 </script>
 
 <style scoped>
+/* Mac Style for Group Chat */
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 84px); /* 减去若依头部高度 */
-  background-color: #f5f5f5;
+  height: calc(100vh - 84px);
+  background-color: #f5f5f7;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+
+/* Header */
 .chat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 15px;
-  background-color: #fff;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 16px 24px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
+  z-index: 10;
 }
+
 .back-link {
   cursor: pointer;
-  font-size: 16px;
-  color: #333;
+  font-size: 15px;
+  color: #0071e3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
 }
+
 .group-name {
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1d1d1f;
 }
+
 .details-btn {
   cursor: pointer;
   font-size: 20px;
+  color: #0071e3;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
 }
+
+.details-btn:hover {
+  background-color: rgba(0, 113, 227, 0.1);
+}
+
 .details-btn[style*="visibility: hidden"] {
   cursor: default;
 }
+
+/* Message List */
 .message-list {
   flex-grow: 1;
   overflow-y: auto;
-  padding: 15px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
+
 .message-time {
   text-align: center;
   font-size: 12px;
-  color: #999;
-  margin-bottom: 10px;
+  color: #86868b;
+  margin: 8px 0;
+  font-weight: 500;
 }
+
 .message-item {
   display: flex;
-  margin-bottom: 15px;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 80%;
 }
+
 .message-item .avatar {
-  margin-right: 10px;
   flex-shrink: 0;
+  border: 1px solid rgba(0,0,0,0.05);
 }
+
 .message-content {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 }
+
 .sender-name {
   font-size: 12px;
-  color: #888;
-  margin-bottom: 5px;
+  color: #86868b;
+  margin-left: 4px;
 }
+
 .bubble {
-  padding: 0; /* (卡片/span自带 padding) */
-  border-radius: 10px;
-  max-width: 450px;
-  word-wrap: break-word;
-  cursor: default;
+  padding: 0;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow: hidden;
 }
+
 .bubble span {
-  padding: 10px 12px;
+  padding: 10px 16px;
   display: inline-block;
-  background-color: #fff;
-  border-radius: 10px;
+  background-color: #ffffff;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1d1d1f;
 }
+
 .chat-image {
-  width: 200px;
-  border-radius: 5px;
+  width: 240px;
+  border-radius: 12px;
+  display: block;
 }
-/* 系统消息 */
+
+/* System Message */
 .message-item.system {
   justify-content: center;
+  max-width: 100%;
 }
+
+.message-item.system .bubble {
+  box-shadow: none;
+  background: none;
+}
+
 .message-item.system .bubble span.system-message {
-  background-color: #f0f0f0;
-  color: #888;
+  background-color: rgba(0,0,0,0.05);
+  color: #86868b;
   font-size: 12px;
-  padding: 5px 10px;
+  padding: 4px 12px;
+  border-radius: 980px;
 }
+
 .message-item.system .avatar, .message-item.system .sender-name {
   display: none;
 }
 
-/* 发送的消息 */
+/* Sent Message */
 .message-item.sent {
+  align-self: flex-end;
   flex-direction: row-reverse;
 }
-.message-item.sent .avatar {
-  margin-right: 0;
-  margin-left: 10px;
-}
+
 .message-item.sent .message-content {
   align-items: flex-end;
 }
-.message-item.sent .bubble span {
-  background-color: #a0e959;
-}
+
 .message-item.sent .sender-name {
   display: none;
 }
-.message-item.sent .bubble:hover {
-  cursor: pointer;
+
+.message-item.sent .bubble span {
+  background-color: #0071e3;
+  color: #ffffff;
 }
 
-/* 输入区 */
+.message-item.sent .bubble {
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+/* Input Area */
 .input-area {
   display: flex;
-  padding: 10px;
-  background-color: #fff;
-  border-top: 1px solid #e0e0e0;
+  align-items: center;
+  padding: 16px 24px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
-}
-.upload-btn {
-  font-size: 24px;
-  margin-right: 10px;
-  cursor: pointer;
-  padding-top: 5px;
-  color: #606266;
-}
-/* 只读提示 */
-.read-only-banner {
-  text-align: center;
-  padding: 15px;
-  background-color: #f0f0f0;
-  color: #999;
-  font-size: 14px;
-  flex-shrink: 0;
+  gap: 12px;
 }
 
-/* 详情弹窗 */
+.upload-btn {
+  font-size: 24px;
+  cursor: pointer;
+  color: #86868b;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.upload-btn:hover {
+  color: #0071e3;
+}
+
+.input-area >>> .el-input__inner {
+  border-radius: 20px;
+  border: 1px solid #d2d2d7;
+  background-color: #f5f5f7;
+  height: 40px;
+  transition: all 0.2s ease;
+}
+
+.input-area >>> .el-input__inner:focus {
+  background-color: #ffffff;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+.input-area >>> .el-button {
+  border-radius: 980px;
+  padding: 10px 20px;
+  font-weight: 500;
+  background-color: #0071e3;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.input-area >>> .el-button:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.input-area >>> .el-button.is-disabled {
+  background-color: #e5e5ea;
+  color: #86868b;
+}
+
+/* Read Only Banner */
+.read-only-banner {
+  text-align: center;
+  padding: 16px;
+  background-color: #f5f5f7;
+  color: #86868b;
+  font-size: 14px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Dialog Styling */
+.chat-container >>> .el-dialog {
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.chat-container >>> .el-dialog__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.chat-container >>> .el-dialog__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+.chat-container >>> .el-dialog__body {
+  padding: 24px;
+}
+
+.chat-container >>> .el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f5f5f7;
+}
+
 .dialog-title {
   text-align: center;
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 600;
+  color: #1d1d1f;
 }
+
 .image-slot {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   height: 100%;
-  background: #f5f7fa;
-  color: #909399;
+  background: #f5f5f7;
+  color: #86868b;
 }
+
 .dialog-actions {
-  margin-top: 15px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 15px;
+  margin-top: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f5f5f7;
+  margin-bottom: 24px;
 }
+
 .member-list {
-  max-height: 200px;
+  max-height: 240px;
   overflow-y: auto;
 }
+
 .member-list-title {
-  font-weight: bold;
-  margin-bottom: 10px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #1d1d1f;
+  font-size: 15px;
 }
+
 .member-item {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  padding: 8px 0;
   cursor: pointer;
-}
-.member-name {
-  margin-left: 10px;
+  transition: background-color 0.2s;
+  border-radius: 8px;
 }
 
-/* (新增) 文章卡片样式 */
+.member-item:hover {
+  background-color: #f5f5f7;
+}
+
+.member-name {
+  margin-left: 12px;
+  font-size: 14px;
+  color: #1d1d1f;
+}
+
+/* Article Card */
 .article-card {
-  width: 250px;
-  background-color: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  width: 260px;
+  background-color: #ffffff;
+  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0,0,0,0.05);
 }
+
 .message-item.sent .article-card {
-  background-color: #f0f0f0; /* (让卡片在绿色气泡里也好看点) */
+  background-color: rgba(255,255,255,0.9);
+  border: none;
 }
+
 .article-card:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
+
 .article-card-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  padding: 8px 12px 4px;
+  padding: 12px 12px 4px;
+  color: #1d1d1f;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  line-height: 1.4;
 }
+
 .article-card-digest {
-  font-size: 12px;
-  color: #888;
-  padding: 0 12px 8px;
+  font-size: 13px;
+  color: #86868b;
+  padding: 0 12px 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .article-card-cover {
   width: 100%;
-  height: 120px;
+  height: 140px;
 }
+
 .article-card-cover .el-image {
   width: 100%;
   height: 100%;
 }
+
 .article-card-footer {
   font-size: 12px;
-  color: #b0b0b0;
-  padding: 6px 12px;
-  border-top: 1px solid #f0f0f0;
+  color: #86868b;
+  padding: 8px 12px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  background-color: #fbfbfd;
 }
 </style>

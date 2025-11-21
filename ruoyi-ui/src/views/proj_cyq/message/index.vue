@@ -386,34 +386,100 @@ export default {
 </script>
 
 <style scoped>
-/* 样式保持不变 */
+/* Mac Style for Message Page */
+.app-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
+}
+
 .message-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #e6e6e6;
+  margin-bottom: 32px;
 }
 
+.message-header h3 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  color: #1d1d1f;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Stats Overview */
+.stats-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 16px;
+}
+
+.stats-overview {
+  margin-bottom: 32px;
+}
+
+.stat-item {
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  transition: transform 0.2s;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #86868b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1d1d1f;
+}
+
+.stat-item.unread .stat-value { color: #ff3b30; }
+.stat-item.todo .stat-value { color: #ff9500; }
+.stat-item.homework .stat-value { color: #34c759; }
+
+/* Message List */
 .message-list {
-  border: 1px solid #e6e6e6;
-  border-radius: 4px;
+  background: #ffffff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
 }
 
 .message-item {
   display: flex;
-  padding: 15px;
-  border-bottom: 1px solid #e6e6e6;
-  transition: background-color 0.3s;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+  transition: background-color 0.2s;
 }
 
 .message-item:hover {
-  background-color: #f5f7fa;
+  background-color: #fbfbfd;
 }
 
 .message-item.unread {
-  background-color: #f0f9ff;
+  background-color: rgba(0, 113, 227, 0.03);
 }
 
 .message-item:last-child {
@@ -421,9 +487,7 @@ export default {
 }
 
 .message-avatar {
-  margin-right: 15px;
-  display: flex;
-  align-items: center;
+  margin-right: 20px;
 }
 
 .message-content {
@@ -433,34 +497,28 @@ export default {
 .message-title {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .title-text {
-  font-weight: bold;
-  margin-right: 10px;
-}
-
-.message-title .el-tag {
-  margin-right: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  margin-right: 12px;
+  color: #1d1d1f;
 }
 
 .message-body {
-  color: #606266;
+  color: #424245;
   margin-bottom: 12px;
-  line-height: 1.6;
-}
-
-.homework-info p,
-.todo-info p {
-  margin: 4px 0;
+  line-height: 1.5;
+  font-size: 14px;
 }
 
 .message-meta {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #909399;
+  color: #86868b;
 }
 
 .message-actions {
@@ -472,47 +530,42 @@ export default {
 
 .read-text {
   font-size: 12px;
-  color: #67c23a;
+  color: #34c759;
+  font-weight: 500;
 }
 
 .empty-state {
   padding: 40px 0;
-}
-
-/* 【新增】统计概览标题样式 */
-.stats-title {
-  font-size: 18px; /* 调整了字体大小 */
-  color: #303133;
-  margin-bottom: 15px; /* 增加了和下方卡片的间距 */
-  font-weight: 600; /* 加粗一点 */
-}
-
-/* 统计概览样式 */
-.stats-overview {
-  margin-bottom: 20px;
-}
-.stat-item {
-  padding: 20px;
-  background-color: #f5f7fa;
-  border-radius: 4px;
   text-align: center;
+  color: #86868b;
 }
-.stat-label {
-  font-size: 14px;
-  color: #909399;
-  margin-bottom: 10px;
+
+/* Buttons */
+.app-container >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 10px 20px;
 }
-.stat-value {
-  font-size: 24px;
-  font-weight: bold;
+
+.app-container >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
 }
-.stat-item.unread .stat-value {
-  color: #f56c6c;
+
+.app-container >>> .el-button--default {
+  background-color: #e5e5ea;
+  color: #1d1d1f;
 }
-.stat-item.todo .stat-value {
-  color: #e6a23c;
+
+.app-container >>> .el-button--default:hover {
+  background-color: #d1d1d6;
 }
-.stat-item.homework .stat-value {
-  color: #67c23a;
+
+/* Tags */
+.app-container >>> .el-tag {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
 }
 </style>

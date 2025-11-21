@@ -702,247 +702,398 @@ export default {
 </script>
 
 <style scoped>
-/* (样式与您之前提供的基本一致，只增加了修改/删除按钮的样式) */
+/* Mac Style for Forum */
 .forum-container {
-  padding: 20px;
-  background-color: #fff;
-  min-height: calc(100vh - 140px);
+  padding: 40px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
 }
+
+/* Top Buttons */
 .top-buttons {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: flex;
-  gap: 10px;
+  gap: 12px;
+  justify-content: flex-end;
 }
+
+.top-buttons .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.top-buttons .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+.top-buttons .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.top-buttons .el-button--success {
+  background-color: #34c759;
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+}
+
+.top-buttons .el-button--info {
+  background-color: #86868b;
+  box-shadow: 0 2px 8px rgba(134, 134, 139, 0.2);
+}
+
+/* Post List */
 .post-list {
   display: flex;
   flex-direction: column;
+  gap: 24px;
 }
+
 .post-item {
-  padding: 15px 15px 0 15px; /* 移除底部 padding，由 divider 控制 */
-  background-color: #fff;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  border: none;
 }
+
 .post-content {
   display: flex;
-  gap: 10px;
+  gap: 16px;
 }
+
 .avatar-container {
-  width: 45px;
-  height: 45px;
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
   overflow: hidden;
-  border-radius: 6px; /* 遵从您的圆角正方形要求 */
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+
 .avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
+
 .post-main {
   flex-grow: 1;
 }
+
 .username {
-  font-weight: bold;
-  color: #0A5393; /* 深蓝色 */
+  font-weight: 600;
+  color: #1d1d1f;
   margin-bottom: 8px;
-  font-size: 15px;
+  font-size: 16px;
 }
+
 .post-text {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   line-height: 1.6;
-  color: #333;
-  font-size: 14px;
-  white-space: pre-wrap; /* 保留换行 */
+  color: #1d1d1f;
+  font-size: 15px;
+  white-space: pre-wrap;
 }
+
 .post-images {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
+
 .image-item {
-  width: calc(20% - 4px); /* 一行5张图 */
-  aspect-ratio: 1/1; /* 保持正方形 */
+  width: calc(33.33% - 6px);
+  aspect-ratio: 1/1;
   overflow: hidden;
-  border-radius: 4px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
+
 .post-img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 裁剪中间，不拉伸 */
+  object-fit: cover;
 }
+
 .image-slot {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   height: 100%;
-  background: #f5f7fa;
-  color: #909399;
+  background: #f5f5f7;
+  color: #86868b;
 }
+
 .post-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #888;
+  color: #86868b;
   font-size: 13px;
-  margin-top: 10px;
+  margin-top: 16px;
 }
+
 .post-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
 }
+
 .action-btn {
-  color: #888;
+  color: #86868b;
   font-size: 13px;
   padding: 0;
+  font-weight: 500;
 }
+
 .action-btn:hover {
-  color: #1890ff;
+  color: #0071e3;
 }
+
 .delete-btn:hover {
-  color: #f56c6c;
+  color: #ff3b30;
 }
 
 .like-btn, .comment-btn {
-  background-color: #f5f5f5;
-  color: #333;
+  background-color: #f5f5f7;
+  color: #1d1d1f;
   border: none;
-  padding: 5px 12px;
-  border-radius: 15px;
-  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 980px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
+
+.like-btn:hover, .comment-btn:hover {
+  background-color: #e5e5ea;
+}
+
 .liked-btn {
-  background-color: #f56c6c;
+  background-color: #ff2d55;
   color: white;
   border: none;
-  padding: 5px 12px;
-  border-radius: 15px;
-  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 980px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(255, 45, 85, 0.2);
 }
+
 .post-interactions {
-  background-color: #f7f8fc; /* 浅蓝色底色 */
-  border-radius: 4px;
-  padding: 10px;
-  margin-top: 10px;
-  margin-left: 55px; /* (45px头像 + 10px gap) */
+  background-color: #f5f5f7;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  margin-left: 64px;
 }
+
 .likes-list {
-  margin-bottom: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #eef2f8;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e5ea;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   flex-wrap: wrap;
 }
+
 .likes-list:last-child {
   margin-bottom: 0;
   border-bottom: none;
 }
+
 .heart-icon {
-  color: #555;
+  color: #ff2d55;
   font-size: 14px;
 }
+
 .like-names {
-  color: #0A5393;
+  color: #0071e3;
   font-size: 13px;
   font-weight: 500;
 }
+
 .comments-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
 .comment-item {
-  padding: 2px 0;
+  padding: 4px 0;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
+
 .comment-username {
-  color: #0A5393;
+  color: #0071e3;
   font-weight: 500;
 }
+
 .reply-to {
-  color: #666;
+  color: #86868b;
 }
+
 .comment-colon {
-  color: #666;
+  color: #86868b;
 }
+
 .comment-content {
-  color: #333;
+  color: #1d1d1f;
 }
+
 .divider {
-  height: 1px;
-  background-color: #f0f2f5; /* 淡灰色分隔线 */
-  margin: 15px 0 0 0;
+  display: none;
 }
-.publish-textarea {
-  margin-bottom: 15px;
-  width: 100%;
+
+/* Dialog Styling */
+.forum-container >>> .el-dialog {
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
 }
+
+.forum-container >>> .el-dialog__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.forum-container >>> .el-dialog__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+  text-align: center;
+  display: block;
+}
+
+.forum-container >>> .el-dialog__body {
+  padding: 24px;
+}
+
+.forum-container >>> .el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f5f5f7;
+}
+
+.publish-textarea >>> .el-textarea__inner {
+  border-radius: 12px;
+  border: 1px solid #d2d2d7;
+  padding: 12px;
+  font-family: inherit;
+}
+
+.publish-textarea >>> .el-textarea__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+/* Notice List */
 .notice-list {
   max-height: 400px;
   overflow-y: auto;
-  padding-right: 10px;
+  padding-right: 4px;
 }
+
 .notice-item {
   display: flex;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f7;
 }
+
 .notice-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 6px; /* 圆角 */
+  border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
 }
+
 .notice-content {
   flex-grow: 1;
 }
+
 .notice-username {
-  font-weight: 500;
-  margin-bottom: 3px;
+  font-weight: 600;
+  margin-bottom: 4px;
   font-size: 14px;
-  color: #0A5393;
+  color: #1d1d1f;
 }
+
 .notice-text {
-  color: #333;
-  margin-bottom: 3px;
+  color: #1d1d1f;
+  margin-bottom: 4px;
   font-size: 13px;
 }
+
 .notice-time {
   font-size: 12px;
-  color: #888;
+  color: #86868b;
 }
+
 .no-notice {
   text-align: center;
-  padding: 20px;
-  color: #888;
+  padding: 24px;
+  color: #86868b;
 }
 
-/* * 通知弹窗标题居中加粗
- * 我们使用 ::v-deep 来穿透 Element UI 的组件样式
- */
-.notice-dialog ::v-deep .el-dialog__title {
-  display: block;
-  width: 100%;
-  text-align: center;
-  font-weight: bold;
-  font-size: 18px; /* 稍微放大一点以匹配“加粗”的视觉感 */
+/* Upload Styling */
+.forum-container >>> .el-upload--picture-card {
+  width: 100px;
+  height: 100px;
+  line-height: 100px;
+  border-radius: 12px;
+  border: 1px dashed #d2d2d7;
+  background-color: #f5f5f7;
 }
 
-/* 覆盖el-upload样式 */
-::v-deep .el-upload--picture-card {
-  width: 100px;
-  height: 100px;
-  line-height: 110px;
+.forum-container >>> .el-upload--picture-card:hover {
+  border-color: #0071e3;
+  color: #0071e3;
 }
-::v-deep .el-upload-list--picture-card .el-upload-list-item {
+
+.forum-container >>> .el-upload-list--picture-card .el-upload-list-item {
   width: 100px;
   height: 100px;
+  border-radius: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .forum-container {
+    padding: 20px 16px;
+  }
+
+  .post-item {
+    padding: 20px;
+  }
+
+  .post-content {
+    flex-direction: column;
+  }
+
+  .avatar-container {
+    width: 40px;
+    height: 40px;
+  }
+
+  .post-interactions {
+    margin-left: 0;
+  }
+
+  .image-item {
+    width: calc(50% - 4px);
+  }
 }
 </style>

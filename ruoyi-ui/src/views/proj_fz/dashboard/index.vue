@@ -1778,24 +1778,45 @@ export default {
 </script>
 
 <style scoped>
-/* 基础样式 */
-.dashboard-container {
-  padding: 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  min-height: calc(100vh - 84px);
+/* Mac Style for Dashboard */
+.app-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
 }
 
-/* 天气区域样式 */
+/* Card Styling */
+.app-container >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.app-container >>> .el-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+.app-container >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+}
+
+/* Weather Section */
 .weather-section {
   margin-bottom: 20px;
 }
 
 .weather-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0071e3 0%, #40a9ff 100%) !important;
   color: white;
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .weather-content {
@@ -1806,7 +1827,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px;
+  padding: 24px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -1817,8 +1838,8 @@ export default {
 
 .weather-icon {
   font-size: 48px;
-  margin-right: 20px;
-  opacity: 0.9;
+  margin-right: 24px;
+  opacity: 0.95;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
@@ -1827,30 +1848,43 @@ export default {
 }
 
 .temperature {
-  font-size: 36px;
-  font-weight: bold;
-  margin-bottom: 5px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-size: 42px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .city {
-  font-size: 18px;
-  opacity: 0.9;
-  margin-bottom: 5px;
+  font-size: 20px;
+  opacity: 0.95;
+  margin-bottom: 4px;
+  font-weight: 500;
 }
 
 .current-weather {
   font-size: 16px;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .weather-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
+}
+
+.weather-actions .el-button {
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 980px;
+}
+
+.weather-actions .el-button:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .weather-detail {
-  padding: 20px;
+  padding: 24px;
   background: rgba(255, 255, 255, 0.1);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -1858,26 +1892,27 @@ export default {
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: 20px;
+  margin-bottom: 24px;
 }
 
 .detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
 }
 
 .detail-item .label {
-  opacity: 0.8;
+  opacity: 0.9;
   font-size: 14px;
 }
 
 .detail-item .value {
-  font-weight: bold;
+  font-weight: 600;
   font-size: 16px;
 }
 
@@ -1887,112 +1922,97 @@ export default {
 
 .forecast-title {
   font-size: 16px;
-  opacity: 0.8;
-  margin-bottom: 15px;
-  font-weight: bold;
+  opacity: 0.9;
+  margin-bottom: 20px;
+  font-weight: 600;
 }
 
 .forecast-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 15px;
+  gap: 20px;
 }
 
 .forecast-item {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 15px;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 20px;
+  border-radius: 12px;
   transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .forecast-item:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   transform: translateY(-2px);
 }
 
 .forecast-date {
   font-size: 14px;
-  opacity: 0.8;
-  margin-bottom: 8px;
+  opacity: 0.9;
+  margin-bottom: 10px;
 }
 
 .forecast-icon {
-  font-size: 24px;
-  margin-bottom: 8px;
+  font-size: 28px;
+  margin-bottom: 10px;
   display: block;
 }
 
 .forecast-temp {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
 }
 
 .forecast-weather {
-  font-size: 12px;
-  opacity: 0.8;
+  font-size: 13px;
+  opacity: 0.9;
 }
 
-/* 核心指标卡片样式 */
+/* Metrics Section */
 .metrics-section {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .metric-col {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .core-metric {
-  height: 120px;
+  height: 140px;
   cursor: pointer;
   transition: all 0.3s ease;
   border: none;
-  border-radius: 12px;
+  border-radius: 18px;
   overflow: hidden;
   position: relative;
 }
 
-.core-metric::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
 .core-metric:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-}
-
-.core-metric:hover::before {
-  opacity: 1;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
 }
 
 .metric-content {
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 20px;
+  padding: 24px;
 }
 
 .metric-icon-wrapper {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-right: 20px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .metric-icon {
-  font-size: 24px;
+  font-size: 28px;
   color: white;
 }
 
@@ -2001,141 +2021,139 @@ export default {
 }
 
 .metric-value {
-  font-size: 28px;
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 5px;
-  line-height: 1;
+  font-size: 32px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 4px;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
 }
 
 .metric-title {
-  font-size: 14px;
-  color: #909399;
-  margin-bottom: 5px;
+  font-size: 15px;
+  color: #86868b;
+  margin-bottom: 6px;
+  font-weight: 500;
 }
 
 .metric-subtitle {
-  font-size: 12px;
-  color: #C0C4CC;
+  font-size: 13px;
+  color: #86868b;
   margin-bottom: 8px;
 }
 
 .metric-trend {
   display: inline-flex;
   align-items: center;
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-weight: bold;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 980px;
+  font-weight: 600;
   transition: all 0.3s ease;
 }
 
 .metric-trend.positive {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
-  color: #409EFF;
-  border: 1px solid #d9ecff;
+  background-color: rgba(52, 199, 89, 0.1);
+  color: #34c759;
 }
 
 .metric-trend.negative {
-  background: linear-gradient(135deg, #fef0f0 0%, #fde2e2 100%);
-  color: #F56C6C;
-  border: 1px solid #fcd3d3;
+  background-color: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
 }
 
 .metric-trend.neutral {
-  background: linear-gradient(135deg, #f4f4f5 0%, #f0f0f1 100%);
-  color: #909399;
-  border: 1px solid #e4e7ed;
+  background-color: rgba(142, 142, 147, 0.1);
+  color: #8e8e93;
 }
 
 .metric-trend i {
-  margin-right: 2px;
-  font-size: 10px;
+  margin-right: 4px;
+  font-size: 11px;
 }
 
-/* 图表区域样式 */
+/* Chart Section */
 .chart-section {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .chart-col {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .chart-card {
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
 }
 
 .chart-card:hover {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .main-chart {
-  min-height: 400px;
+  min-height: 420px;
 }
 
 .sub-chart {
-  min-height: 300px;
+  min-height: 320px;
 }
 
 .side-chart {
-  min-height: 280px;
+  min-height: 300px;
 }
 
 .chart-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 0; /* Reset padding as it's inside el-card__header */
 }
 
 .chart-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #303133;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
 }
 
 .chart-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .chart-container {
-  height: 300px;
+  height: 320px;
   width: 100%;
   padding: 10px;
 }
 
 .main-chart .chart-container {
-  height: 320px;
+  height: 340px;
 }
 
 .sub-chart .chart-container {
-  height: 240px;
+  height: 260px;
 }
 
 .side-chart .chart-container {
-  height: 200px;
+  height: 220px;
 }
 
 .chart-summary {
-  margin-top: 15px;
-  padding: 15px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 8px;
-  border-left: 4px solid #409EFF;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f5f5f7;
+  border-radius: 12px;
+  border-left: 4px solid #0071e3;
 }
 
 .summary-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   padding: 4px 0;
 }
 
@@ -2145,365 +2163,68 @@ export default {
 
 .summary-label {
   font-size: 14px;
-  color: #606266;
+  color: #86868b;
+  font-weight: 500;
 }
 
 .summary-value {
-  font-size: 14px;
-  font-weight: bold;
-  color: #303133;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d1d1f;
 }
 
 .sub-charts-row {
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
 .sub-chart-col {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
-/* 功能区域样式 */
+/* Function Section */
 .function-section {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .function-col {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .function-card {
   border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
 }
 
 .function-card:hover {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .function-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 0;
 }
 
 .function-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #303133;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
 }
 
 .function-actions {
   display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* 待办事项样式 */
-.todo-list {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.todo-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 12px 15px;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  border-left: 4px solid #e4e7ed;
-  transition: all 0.3s ease;
-  background: #fafafa;
-}
-
-.todo-item:hover {
-  background: #f0f2f5;
-  transform: translateX(4px);
-}
-
-.todo-item.urgent {
-  background: linear-gradient(135deg, #fef0f0 0%, #fde2e2 100%);
-  border-left-color: #F56C6C;
-}
-
-.todo-item.urgent:hover {
-  background: linear-gradient(135deg, #fde2e2 0%, #fcd3d3 100%);
-}
-
-.todo-item.completed {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
-  border-left-color: #409EFF;
-  opacity: 0.7;
-}
-
-.todo-content {
-  flex: 1;
-}
-
-.todo-title {
-  font-size: 14px;
-  color: #303133;
-  margin-bottom: 4px;
-  font-weight: 500;
-}
-
-.todo-desc {
-  font-size: 12px;
-  color: #909399;
-  margin-bottom: 6px;
-  line-height: 1.4;
-}
-
-.todo-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.todo-time {
-  font-size: 12px;
-  color: #C0C4CC;
-}
-
-.todo-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* 消息列表样式 */
-.message-list {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.message-item {
-  display: flex;
-  align-items: flex-start;
-  padding: 12px 15px;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  background: #fafafa;
-  transition: all 0.3s ease;
-  border-left: 4px solid #e4e7ed;
-}
-
-.message-item:hover {
-  background: #f0f2f5;
-  transform: translateX(4px);
-}
-
-.message-item.unread {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
-  border-left-color: #409EFF;
-}
-
-.message-item.unread:hover {
-  background: linear-gradient(135deg, #e6f7ff 0%, #d9ecff 100%);
-}
-
-.message-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #409EFF 0%, #67C23A 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-  flex-shrink: 0;
-}
-
-.message-avatar i {
-  color: white;
-  font-size: 16px;
-}
-
-.message-content {
-  flex: 1;
-}
-
-.message-text {
-  font-size: 14px;
-  color: #303133;
-  margin-bottom: 4px;
-  line-height: 1.4;
-}
-
-.message-time {
-  font-size: 12px;
-  color: #909399;
-}
-
-.message-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-/* 公告列表样式 */
-.notice-list {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-.notice-item {
-  display: flex;
-  align-items: center;
-  padding: 15px;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  background: #fafafa;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-  border: 1px solid transparent;
-}
-
-.notice-item:hover {
-  background: #f0f2f5;
-  border-color: #409EFF;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.1);
-}
-
-.notice-badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #F56C6C;
-  color: white;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 8px;
-  font-weight: bold;
-}
-
-.notice-content {
-  flex: 1;
-}
-
-.notice-title {
-  font-size: 14px;
-  color: #303133;
-  margin-bottom: 6px;
-  font-weight: 500;
-}
-
-.notice-meta {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 4px;
-}
-
-.notice-author {
-  font-size: 12px;
-  color: #409EFF;
-}
-
-.notice-time {
-  font-size: 12px;
-  color: #909399;
-}
-
-.notice-preview {
-  font-size: 12px;
-  color: #606266;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.notice-arrow {
-  color: #C0C4CC;
-  transition: all 0.3s ease;
-}
-
-.notice-item:hover .notice-arrow {
-  color: #409EFF;
-  transform: translateX(4px);
-}
-
-/* 日志区域样式 */
-.log-section {
-  margin-bottom: 20px;
-}
-
-.log-card {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.log-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.log-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #303133;
-}
-
-.log-actions {
-  display: flex;
-  align-items: center;
   gap: 10px;
 }
 
-.log-container {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-/* 筛选表单样式 */
-.filter-form {
-  margin-bottom: 20px;
-  padding: 0 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 20px;
-}
-
-.filter-form .el-form-item {
-  margin-bottom: 15px;
-  margin-right: 15px;
-}
-
-/* 表格容器样式 */
-.table-container {
-  padding: 0 20px 20px;
-}
-
-.submission-text {
-  font-size: 12px;
-  color: #909399;
-  text-align: center;
-  margin-top: 4px;
-}
-
-/* 空状态样式 */
+/* Empty State */
 .empty-state {
   text-align: center;
-  color: #909399;
+  color: #86868b;
   padding: 60px 20px;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .empty-state i {
@@ -2514,191 +2235,82 @@ export default {
 
 .empty-state p {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 500;
 }
 
-/* 对话框内容样式 */
-.notice-detail-content {
+/* Dialog Content */
+.notice-detail-content, .log-detail-content {
   max-height: 60vh;
   overflow-y: auto;
+  padding: 10px;
 }
 
 .notice-content {
-  line-height: 1.8;
-  font-size: 14px;
-  color: #606266;
+  line-height: 1.6;
+  font-size: 15px;
+  color: #1d1d1f;
 }
 
 .notice-content >>> img {
   max-width: 100%;
   height: auto;
-  border-radius: 4px;
-  margin: 10px 0;
-}
-
-.log-detail-content {
-  max-height: 60vh;
-  overflow-y: auto;
+  border-radius: 12px;
+  margin: 16px 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .weather-management {
   padding: 20px 0;
 }
 
-/* 响应式设计 */
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d2d2d7;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #86868b;
+}
+
+/* Responsive */
 @media (max-width: 1200px) {
   .dashboard-container {
-    padding: 15px;
+    padding: 20px;
   }
-
   .metric-value {
-    font-size: 24px;
-  }
-
-  .metric-icon-wrapper {
-    width: 50px;
-    height: 50px;
-    margin-right: 12px;
-  }
-
-  .metric-icon {
-    font-size: 20px;
+    font-size: 28px;
   }
 }
 
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: 10px;
+    padding: 16px;
   }
-
-  .weather-content {
+  .weather-content, .weather-main, .metric-content {
     flex-direction: column;
     text-align: center;
   }
-
-  .weather-main {
-    flex-direction: column;
-    text-align: center;
-    padding: 15px;
-  }
-
   .weather-icon {
     margin-right: 0;
-    margin-bottom: 10px;
-    font-size: 36px;
+    margin-bottom: 16px;
   }
-
-  .weather-actions {
-    margin-top: 10px;
-    justify-content: center;
-  }
-
-  .detail-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .forecast-list {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  }
-
-  .metric-content {
-    flex-direction: column;
-    text-align: center;
-    padding: 15px;
-  }
-
   .metric-icon-wrapper {
     margin-right: 0;
-    margin-bottom: 10px;
+    margin-bottom: 16px;
   }
-
   .chart-container {
     height: 250px;
   }
-
-  .main-chart .chart-container {
-    height: 280px;
-  }
-
-  .function-actions {
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .filter-form .el-form-item {
-    margin-right: 10px;
-    margin-bottom: 10px;
-    width: 100%;
-  }
-
-  .filter-form .el-form-item :deep(.el-input),
-  .filter-form .el-form-item :deep(.el-select) {
-    width: 100% !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .temperature {
-    font-size: 28px;
-  }
-
-  .city {
-    font-size: 16px;
-  }
-
-  .metric-value {
-    font-size: 20px;
-  }
-
-  .chart-header {
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
-  }
-
-  .chart-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
-  .filter-form {
-    padding: 15px;
-  }
-
-  .filter-form .el-form-item {
-    width: 100%;
-    margin-right: 0;
-  }
-}
-
-/* 滚动条样式 */
-.todo-list::-webkit-scrollbar,
-.message-list::-webkit-scrollbar,
-.notice-list::-webkit-scrollbar,
-.log-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.todo-list::-webkit-scrollbar-track,
-.message-list::-webkit-scrollbar-track,
-.notice-list::-webkit-scrollbar-track,
-.log-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.todo-list::-webkit-scrollbar-thumb,
-.message-list::-webkit-scrollbar-thumb,
-.notice-list::-webkit-scrollbar-thumb,
-.log-container::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-.todo-list::-webkit-scrollbar-thumb:hover,
-.message-list::-webkit-scrollbar-thumb:hover,
-.notice-list::-webkit-scrollbar-thumb:hover,
-.log-container::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
 }
 </style>

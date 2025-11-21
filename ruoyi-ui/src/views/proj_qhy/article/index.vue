@@ -496,57 +496,132 @@ export default {
 </script>
 
 <style scoped>
+/* Mac Style for Article List */
 .app-container {
-  padding: 20px;
-}
-.mb8 {
-  margin-bottom: 8px;
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
 }
 
-/* B站风格文章列表样式 */
+/* Form Styling */
+.app-container >>> .el-form-item__label {
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.app-container >>> .el-input__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  height: 36px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-input__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+/* Button Styling */
+.app-container >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+.app-container >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.app-container >>> .el-button--success {
+  background-color: #34c759;
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+}
+
+.app-container >>> .el-button--warning {
+  background-color: #ff9500;
+  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
+}
+
+.app-container >>> .el-button--danger {
+  background-color: #ff3b30;
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
+}
+
+.app-container >>> .el-button--info {
+  background-color: #86868b;
+  box-shadow: 0 2px 8px rgba(134, 134, 139, 0.2);
+}
+
+.app-container >>> .el-button--text {
+  color: #0071e3;
+  background: none;
+  padding: 0 5px;
+  box-shadow: none;
+}
+
+.app-container >>> .el-button--text:hover {
+  color: #0077ed;
+  background: none;
+  transform: none;
+}
+
+/* Article List Styling */
 .article-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 .article-item {
   display: flex;
-  padding: 16px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 1px solid #e8e8e8;
-  position: relative; /* 为了定位复选框 */
+  border: none;
+  position: relative;
 }
 
 .article-item:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.08);
 }
 
 .article-cover {
   flex-shrink: 0;
-  margin-right: 16px;
+  margin-right: 24px;
 }
 
 .cover-image {
-  width: 160px;
-  height: 100px;
-  border-radius: 6px;
+  width: 200px;
+  height: 130px;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .image-slot {
   width: 100%;
   height: 100%;
-  background: #f5f7fa;
+  background: #f5f5f7;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #909399;
+  color: #86868b;
   font-size: 24px;
 }
 
@@ -561,22 +636,23 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .article-title-section {
   flex: 1;
-  margin-right: 12px;
+  margin-right: 16px;
 }
 
 .article-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #18191c;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d1d1f;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -584,7 +660,13 @@ export default {
 .article-tags {
   display: flex;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 10px;
+}
+
+.app-container >>> .el-tag {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
 }
 
 .action-buttons {
@@ -595,36 +677,38 @@ export default {
 
 .like-btn,
 .hate-btn {
-  padding: 6px 12px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
+  padding: 6px 14px;
+  border: 1px solid #d2d2d7;
+  border-radius: 980px;
   background: #fff;
-  transition: all 0.3s;
-  font-size: 12px;
-  color: #61666d;
+  transition: all 0.2s;
+  font-size: 13px;
+  color: #86868b;
+  font-weight: 500;
 }
 
 .like-btn:hover,
 .like-btn.liked {
-  border-color: #f56c6c;
-  color: #f56c6c;
-  background-color: #fff5f5;
+  border-color: #ff2d55;
+  color: #ff2d55;
+  background-color: rgba(255, 45, 85, 0.05);
 }
 
 .hate-btn:hover,
 .hate-btn.hated {
-  border-color: #909399;
-  color: #909399;
-  background-color: #f4f4f5;
+  border-color: #86868b;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
 }
 
 .article-digest {
-  font-size: 14px;
-  color: #61666d;
-  margin: 0 0 12px 0;
-  line-height: 1.5;
+  font-size: 15px;
+  color: #86868b;
+  margin: 0 0 16px 0;
+  line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -633,62 +717,89 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
 }
 
 .article-author {
-  font-size: 12px;
-  color: #9499a0;
+  color: #1d1d1f;
+  font-weight: 500;
 }
 
 .article-stats {
   display: flex;
   align-items: center;
   gap: 16px;
-  font-size: 12px;
-  color: #9499a0;
+  color: #86868b;
 }
 
 .view-count {
-  color: #61666d;
+  color: #86868b;
 }
 
 .publish-time {
-  color: #9499a0;
+  color: #86868b;
 }
 
 .article-actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   justify-content: flex-end;
+  border-top: 1px solid #f5f5f7;
+  padding-top: 12px;
+  margin-top: auto;
 }
 
-/* 选择模式样式 */
+/* Dialog Styling */
+.app-container >>> .el-dialog {
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.app-container >>> .el-dialog__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.app-container >>> .el-dialog__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+.app-container >>> .el-dialog__body {
+  padding: 24px;
+}
+
+.app-container >>> .el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f5f5f7;
+}
+
+/* Selection Mode */
 .article-checkbox {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 24px;
+  right: 24px;
   z-index: 10;
-}
-/* 当处于选择模式时，卡片增加一个遮罩提示 */
-.article-item:hover {
-  opacity: 0.8;
+  transform: scale(1.2);
 }
 
-/* 响应式设计 */
+/* Responsive */
 @media (max-width: 768px) {
   .article-item {
     flex-direction: column;
+    padding: 20px;
   }
 
   .article-cover {
     margin-right: 0;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
   }
 
   .cover-image {
     width: 100%;
-    height: 180px;
+    height: 200px;
   }
 
   .article-header {
@@ -697,7 +808,7 @@ export default {
   }
 
   .action-buttons {
-    margin-top: 8px;
+    margin-top: 12px;
   }
 
   .article-meta {
@@ -705,5 +816,9 @@ export default {
     align-items: flex-start;
     gap: 8px;
   }
+}
+
+.mb8 {
+  margin-bottom: 16px;
 }
 </style>

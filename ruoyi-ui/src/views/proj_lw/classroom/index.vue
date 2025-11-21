@@ -127,21 +127,82 @@ export default {
 </script>
 
 <style scoped>
-.classroom-container {
-  padding: 20px;
-  background: #f5f7fa;
-  min-height: calc(100vh - 84px);
+/* Mac Style for Classroom Page */
+.app-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
 }
 
+/* Card Styling */
+.app-container >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.app-container >>> .el-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+.app-container >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+/* Button Styling */
+.app-container >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+.app-container >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.app-container >>> .el-button--success {
+  background-color: #34c759;
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+}
+
+.app-container >>> .el-button--warning {
+  background-color: #ff9500;
+  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
+}
+
+.app-container >>> .el-button--info {
+  background-color: #8e8e93;
+}
+
+/* Classroom Header */
 .classroom-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  margin-bottom: 24px;
 }
 
 .classroom-title {
@@ -153,20 +214,20 @@ export default {
   display: flex;
   align-items: center;
   margin: 0;
-  color: #303133;
+  color: #1d1d1f;
   font-size: 28px;
-  font-weight: bold;
+  font-weight: 700;
   position: relative;
 }
 
 .animated-title .text {
-  color: #409EFF;
-  text-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
+  color: #0071e3;
+  text-shadow: 0 2px 4px rgba(0, 113, 227, 0.2);
   animation: textGlow 2s ease-in-out infinite alternate;
 }
 
 .animated-title .dot {
-  color: #409EFF;
+  color: #0071e3;
   opacity: 0;
   animation: dotBlink 1.5s infinite;
 }
@@ -185,10 +246,10 @@ export default {
 
 @keyframes textGlow {
   0% {
-    text-shadow: 0 2px 4px rgba(64, 158, 255, 0.3);
+    text-shadow: 0 2px 4px rgba(0, 113, 227, 0.2);
   }
   100% {
-    text-shadow: 0 2px 8px rgba(64, 158, 255, 0.6), 0 4px 16px rgba(64, 158, 255, 0.4);
+    text-shadow: 0 2px 8px rgba(0, 113, 227, 0.4), 0 4px 16px rgba(0, 113, 227, 0.2);
   }
 }
 
@@ -206,41 +267,47 @@ export default {
 
 .classroom-info {
   flex: 1;
-  margin-left: 30px;
+  margin-left: 40px;
 }
 
 .classroom-info p {
   margin: 8px 0;
-  color: #606266;
-  font-size: 14px;
+  color: #86868b;
+  font-size: 15px;
 }
 
+.classroom-info p strong {
+  color: #1d1d1f;
+  font-weight: 600;
+}
+
+/* Classroom Content */
 .classroom-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.classroom-card {
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: 24px;
 }
 
 .classroom-features {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
 }
 
 .classroom-features .el-button {
-  margin: 5px;
+  margin: 0;
+  height: 44px;
+  padding: 0 24px;
+  font-size: 15px;
 }
 
 .classroom-status p {
-  margin: 10px 0;
-  padding: 8px;
-  background: #f8f9fa;
-  border-radius: 4px;
-  color: #495057;
+  margin: 12px 0;
+  padding: 16px;
+  background: #f5f5f7;
+  border-radius: 12px;
+  color: #1d1d1f;
+  font-size: 15px;
+  font-weight: 500;
 }
 </style>

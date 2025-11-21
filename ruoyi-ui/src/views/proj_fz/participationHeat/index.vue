@@ -377,8 +377,39 @@ export default {
 </script>
 
 <style scoped>
+/* Mac Style for Participation Heat */
+.app-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
+}
+
+/* Card Styling */
+.app-container >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.app-container >>> .el-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+.app-container >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+}
+
+/* Stats Cards */
 .stats-cards {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .stats-card {
@@ -393,29 +424,30 @@ export default {
 .stats-icon {
   width: 60px;
   height: 60px;
-  border-radius: 50%;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 15px;
-  font-size: 24px;
+  margin-right: 20px;
+  font-size: 28px;
   color: #fff;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 
 .stats-icon.attendance {
-  background: #409EFF;
+  background: #0071e3;
 }
 
 .stats-icon.homework {
-  background: #E6A23C;
+  background: #ff9500;
 }
 
 .stats-icon.forum {
-  background: #67C23A;
+  background: #34c759;
 }
 
 .stats-icon.activity {
-  background: #909399;
+  background: #8e8e93;
 }
 
 .stats-info {
@@ -423,27 +455,71 @@ export default {
 }
 
 .stats-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 5px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 4px;
 }
 
 .stats-label {
   font-size: 14px;
-  color: #909399;
+  color: #86868b;
 }
 
+/* Chart Card */
 .chart-card {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
 }
 
+/* Table Styling */
+.app-container >>> .el-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+}
+
+.app-container >>> .el-table th {
+  background-color: #fbfbfd;
+  color: #86868b;
+  font-weight: 600;
+  border-bottom: 1px solid #f5f5f7;
+  padding: 12px 0;
+}
+
+.app-container >>> .el-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+/* Button Styling */
+.app-container >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+.app-container >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+/* Custom Progress Bars */
 .forum-score {
   display: flex;
   flex-direction: column;
@@ -452,14 +528,14 @@ export default {
 
 .score-text {
   font-size: 12px;
-  color: #606266;
+  color: #86868b;
   margin-bottom: 4px;
 }
 
 .score-bar {
   width: 80px;
   height: 6px;
-  background-color: #ebeef5;
+  background-color: #f5f5f7;
   border-radius: 3px;
   overflow: hidden;
 }
@@ -471,15 +547,15 @@ export default {
 }
 
 .score-high {
-  background-color: #67c23a;
+  background-color: #34c759;
 }
 
 .score-medium {
-  background-color: #e6a23c;
+  background-color: #ff9500;
 }
 
 .score-low {
-  background-color: #f56c6c;
+  background-color: #ff3b30;
 }
 
 .participation-progress {
@@ -490,5 +566,12 @@ export default {
 
 .participation-progress .el-progress {
   margin-bottom: 4px;
+}
+
+/* Tags */
+.app-container >>> .el-tag {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
 }
 </style>

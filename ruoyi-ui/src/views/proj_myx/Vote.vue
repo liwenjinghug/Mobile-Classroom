@@ -1,215 +1,201 @@
 <template>
   <div class="vote-page">
-    <h2>课堂投票</h2>
+    <div class="vote-container">
+      <h2 class="vote-title">投票管理</h2>
+      <div class="vote-info">当前 sessionId: {{ sessionId }}</div>
+      
+      <div class="vote-controls">
+        <el-input v-model.number="sessionId" placeholder="请输入 Session ID" style="width: 220px;" @keyup.enter.native="loadVotes" />
+        <el-button type="primary" @click="loadVotes">加载投票</el-button>
+        <el-button v-if="isAdmin" type="success" @click="handleCreate">新建投票</el-button>
+        <el-button v-if="isAdmin" icon="el-icon-download" @click="handleExport">导出列表</el-button>
+        <el-button v-if="isAdmin" icon="el-icon-printer" @click="handlePrint">打印</el-button>
+      </div>
 
-    <div class="actions-bar">
-      <el-button type="primary" @click="loadPolls">加载投票列表</el-button>
-      <el-button v-if="isAdmin" type="success" @click="openCreate">创建投票</el-button>
+      <el-table :data="list" v-loading="loading" style="width: 100%; margin-top: 20px;">
+        <el-table-column label="ID" prop="voteId" align="center" width="80" />
+        <el-table-column label="标题" prop="title" min-width="200" />
+        <el-table-column label="类型" width="100" align="center">
+          <template slot-scope="{row}">
+            <el-tag>{{ row.type === '1' ? '单选' : '多选' }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100" align="center">
+          <template slot-scope="{row}">
+            <el-tag :type="statusType(row.status)">{{ statusText(row.status) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="时间" width="260" align="center">
+          <template slot-scope="{row}">
+            <div v-if="row.startTime" style="font-size:12px">起: {{ parseTime(row.startTime) }}</div>
+            <div v-if="row.endTime" style="font-size:12px">止: {{ parseTime(row.endTime) }}</div>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="300" class-name="ops-col">
+          <template slot-scope="{row}">
+            <div style="display: flex; align-items: center; justify-content: center;">
+               <el-button size="mini" type="primary" @click="handleStats(row)">统计</el-button>
+               
+               <el-button v-if="isAdmin && row.status === '0'" size="mini" type="success" @click="handleStart(row)">开始</el-button>
+               <el-button v-if="isAdmin && row.status === '1'" size="mini" type="warning" @click="handleClose(row)">结束</el-button>
+               
+               <el-button v-if="isAdmin" size="mini" type="text" icon="el-icon-delete" style="color: #C0C4CC; margin-left: 10px;" @click="handleDelete(row)"></el-button>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- Create Dialog -->
+      <el-dialog title="新建投票" :visible.sync="dialogCreateVisible" width="600px">
+        <create-vote :session-id="sessionId" @created="onCreated" v-if="dialogCreateVisible" />
+      </el-dialog>
+
+      <!-- Stats Dialog -->
+      <el-dialog title="投票统计" :visible.sync="dialogStatsVisible" width="600px">
+        <vote-stats :vote-id="currentVoteId" v-if="dialogStatsVisible" />
+      </el-dialog>
     </div>
-
-    <el-table :data="polls" style="width:100%">
-      <el-table-column prop="pollId" label="ID" width="80" />
-      <el-table-column prop="title" label="标题" />
-      <el-table-column prop="type" label="类型" width="120">
-        <template slot-scope="{ row }">
-          <span>{{ row.type === 'single' ? '单选' : '多选' }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="status" label="状态" width="120">
-        <template slot-scope="{ row }">
-          <el-tag :type="row.status === 1 ? 'success' : (row.status===2 ? 'info' : 'warning')">
-            {{ row.status === 1 ? '进行中' : (row.status===2 ? '已结束' : '未开始') }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="300">
-        <template slot-scope="{ row }">
-          <el-button size="mini" type="primary" @click="openVote(row)">投票</el-button>
-          <el-button size="mini" @click="viewResults(row)" style="margin-left:6px">查看结果</el-button>
-          <el-button size="mini" v-if="isAdmin" type="danger" @click="endPoll(row)" style="margin-left:6px">结束投票</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <!-- 创建投票弹窗（本地前端模拟） -->
-    <el-dialog title="创建投票（仅前端模拟）" :visible.sync="showCreateDialog" width="600px">
-      <el-form :model="createForm" label-width="80px">
-        <el-form-item label="标题">
-          <el-input v-model="createForm.title" />
-        </el-form-item>
-        <el-form-item label="类型">
-          <el-radio-group v-model="createForm.type">
-            <el-radio label="single">单选</el-radio>
-            <el-radio label="multi">多选</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="选项">
-          <div v-for="(opt, idx) in createForm.options" :key="idx" style="display:flex;align-items:center;margin-bottom:6px">
-            <el-input v-model="opt.text" placeholder="选项文本" />
-            <el-button type="text" @click="removeOption(idx)">删除</el-button>
-          </div>
-          <el-button size="mini" @click="addOption">添加选项</el-button>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="showCreateDialog = false">取 消</el-button>
-        <el-button type="primary" @click="createPoll">创 建</el-button>
-      </div>
-    </el-dialog>
-
-    <!-- 投票弹窗 -->
-    <el-dialog :title="currentPoll ? currentPoll.title : '投票'" :visible.sync="showVoteDialog" width="520px">
-      <div v-if="currentPoll">
-        <div style="margin-bottom:8px">请选择你的选项：</div>
-        <div v-if="currentPoll.type === 'single'">
-          <el-radio-group v-model="selectedOption">
-            <div v-for="opt in currentPoll.options" :key="opt.id" style="margin-bottom:6px">
-              <el-radio :label="opt.id">{{ opt.text }}</el-radio>
-            </div>
-          </el-radio-group>
-        </div>
-        <div v-else>
-          <el-checkbox-group v-model="selectedOptions">
-            <div v-for="opt in currentPoll.options" :key="opt.id" style="margin-bottom:6px">
-              <el-checkbox :label="opt.id">{{ opt.text }}</el-checkbox>
-            </div>
-          </el-checkbox-group>
-        </div>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="showVoteDialog = false">取 消</el-button>
-        <el-button type="primary" @click="submitVote">提 交</el-button>
-      </div>
-    </el-dialog>
-
-    <!-- 结果弹窗 -->
-    <el-dialog title="投票结果（前端模拟）" :visible.sync="showResultsDialog" width="520px">
-      <div v-if="currentPoll">
-        <div v-for="opt in currentPoll.options" :key="opt.id" class="vote-result-item">
-          <div class="vote-option-text">{{ opt.text }}</div>
-          <div class="vote-count">{{ opt.votes }} 票</div>
-        </div>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="showResultsDialog = false">关 闭</el-button>
-      </div>
-    </el-dialog>
-
   </div>
 </template>
 
 <script>
+import { listVotes, startVote, closeVote, deleteVote } from '@/api/proj_myx/vote'
+import CreateVote from './CreateVote'
+import VoteStats from './VoteStats'
+import { parseTime } from '@/utils/ruoyi'
+
 export default {
   name: 'Vote',
+  components: { CreateVote, VoteStats },
   data() {
     return {
-      polls: [],
-      showCreateDialog: false,
-      createForm: {
-        title: '',
-        type: 'single',
-        options: [ { text: '选项 A' }, { text: '选项 B' } ]
-      },
-      showVoteDialog: false,
-      currentPoll: null,
-      selectedOption: null,
-      selectedOptions: [],
-      showResultsDialog: false
+      sessionId: null,
+      list: [],
+      loading: false,
+      dialogCreateVisible: false,
+      dialogStatsVisible: false,
+      currentVoteId: null
     }
   },
   computed: {
     isAdmin() {
-      const roles = this.$store && this.$store.getters && this.$store.getters.roles
-      return Array.isArray(roles) && roles.includes('admin')
+      const roles = this.$store.getters.roles
+      return roles && roles.includes('admin')
     }
   },
   methods: {
-    // 加载示例投票（本地模拟）
-    loadPolls() {
-      // 示例数据：前端模拟，实际应从后端加载
-      this.polls = [
-        {
-          pollId: 1,
-          title: '本周课程满意度调查',
-          type: 'single',
-          status: 1,
-          options: [ { id: 11, text: '非常满意', votes: 5 }, { id: 12, text: '一般', votes: 2 }, { id: 13, text: '不满意', votes: 0 } ]
-        },
-        {
-          pollId: 2,
-          title: '下次想学的主题（可多选）',
-          type: 'multi',
-          status: 1,
-          options: [ { id: 21, text: '算法', votes: 3 }, { id: 22, text: '前端', votes: 4 }, { id: 23, text: '数据库', votes: 1 } ]
-        }
-      ]
-    },
-    openCreate() {
-      this.showCreateDialog = true
-      // reset form
-      this.createForm = { title: '', type: 'single', options: [ { text: '' }, { text: '' } ] }
-    },
-    addOption() {
-      this.createForm.options.push({ text: '' })
-    },
-    removeOption(idx) {
-      this.createForm.options.splice(idx, 1)
-    },
-    createPoll() {
-      // 前端模拟：将表单内容加入 polls（生成简单 id）
-      const nextId = this.polls.length ? Math.max(...this.polls.map(p => p.pollId)) + 1 : 1
-      const baseOptId = nextId * 10
-      const poll = {
-        pollId: nextId,
-        title: this.createForm.title || '未命名投票',
-        type: this.createForm.type,
-        status: 1,
-        options: this.createForm.options.map((o, i) => ({ id: baseOptId + i + 1, text: o.text || ('选项 ' + (i+1)), votes: 0 }))
+    parseTime,
+    async loadVotes() {
+      if (!this.sessionId) return this.$message.warning('请输入 Session ID');
+      this.loading = true;
+      try {
+        const res = await listVotes(this.sessionId);
+        let list = res.data || [];
+        
+        // Sorting logic: In Progress (1) > Not Started (0) > Ended (2)
+        // Secondary sort: End Time (Descending)
+        list.sort((a, b) => {
+          const statusOrder = { '1': 0, '0': 1, '2': 2 };
+          const sa = statusOrder[a.status] !== undefined ? statusOrder[a.status] : 99;
+          const sb = statusOrder[b.status] !== undefined ? statusOrder[b.status] : 99;
+          
+          if (sa !== sb) {
+            return sa - sb;
+          }
+          
+          // Same status, sort by endTime descending
+          const ta = a.endTime ? new Date(a.endTime).getTime() : 0;
+          const tb = b.endTime ? new Date(b.endTime).getTime() : 0;
+          return tb - ta;
+        });
+        
+        this.list = list;
+      } catch (e) {
+        this.$message.error('加载失败');
+      } finally {
+        this.loading = false;
       }
-      this.polls.unshift(poll)
-      this.showCreateDialog = false
-      this.$message.success('投票已在前端创建（模拟）')
     },
-    openVote(poll) {
-      if (!poll || poll.status !== 1) {
-        this.$message.warning('该投票不可投票（未开始或已结束）')
-        return
-      }
-      this.currentPoll = poll
-      // 重置选择
-      this.selectedOption = null
-      this.selectedOptions = []
-      this.showVoteDialog = true
+    handleCreate() {
+      if (!this.sessionId) return this.$message.warning('请输入 Session ID');
+      this.dialogCreateVisible = true;
     },
-    submitVote() {
-      if (!this.currentPoll) return
-      if (this.currentPoll.type === 'single') {
-        if (this.selectedOption == null) return this.$message.warning('请选择一个选项')
-        const opt = this.currentPoll.options.find(o => o.id === this.selectedOption)
-        if (opt) opt.votes += 1
-      } else {
-        if (!this.selectedOptions || !this.selectedOptions.length) return this.$message.warning('请选择至少一个选项')
-        this.selectedOptions.forEach(id => {
-          const opt = this.currentPoll.options.find(o => o.id === id)
-          if (opt) opt.votes += 1
-        })
-      }
-      this.showVoteDialog = false
-      this.$message.success('投票成功（仅前端模拟）')
-      this.showResults(this.currentPoll)
+    onCreated() {
+      this.dialogCreateVisible = false;
+      this.loadVotes();
     },
-    viewResults(poll) {
-      this.currentPoll = poll
-      this.showResultsDialog = true
+    handleExport() {
+      const tHeader = ['ID', '标题', '类型', '状态', '开始时间', '结束时间'];
+      const filterVal = ['voteId', 'title', 'type', 'status', 'startTime', 'endTime'];
+      
+      const list = this.list.map(item => ({
+        voteId: item.voteId,
+        title: item.title,
+        type: item.type === '1' ? '单选' : '多选',
+        status: this.statusText(item.status),
+        startTime: this.parseTime(item.startTime),
+        endTime: this.parseTime(item.endTime)
+      }));
+      
+      const data = list.map(v => filterVal.map(j => v[j]));
+      data.unshift(tHeader);
+      
+      const csvContent = data.map(row => 
+        row.map(item => {
+          let str = String(item === null || item === undefined ? '' : item);
+          if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            str = '"' + str.replace(/"/g, '""') + '"';
+          }
+          return str;
+        }).join(',')
+      ).join('\n');
+      
+      const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", '投票列表_' + new Date().getTime() + '.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
-    showResults(poll) {
-      this.currentPoll = poll
-      this.showResultsDialog = true
+    handlePrint() {
+      window.print();
     },
-    endPoll(poll) {
-      if (!poll) return
-      poll.status = 2
-      this.$message.info('投票已结束（仅前端模拟）')
+    handleStats(row) {
+      this.currentVoteId = row.voteId;
+      this.dialogStatsVisible = true;
+    },
+    async handleStart(row) {
+      try {
+        await startVote(row.voteId);
+        this.$message.success('已开始');
+        row.status = '1'; // Update local state immediately
+        setTimeout(() => this.loadVotes(), 200); // Reload with slight delay to ensure DB consistency
+      } catch (e) {}
+    },
+    async handleClose(row) {
+      try {
+        await closeVote(row.voteId);
+        this.$message.success('已结束');
+        row.status = '2'; // Update local state immediately
+        setTimeout(() => this.loadVotes(), 200); // Reload with slight delay to ensure DB consistency
+      } catch (e) {}
+    },
+    handleDelete(row) {
+      this.$confirm('确认删除该投票吗？', '提示', { type: 'warning' }).then(async () => {
+        await deleteVote(row.voteId);
+        this.$message.success('删除成功');
+        this.loadVotes();
+      });
+    },
+    statusType(status) {
+      const map = { '0': 'info', '1': 'success', '2': 'danger' };
+      return map[status] || '';
+    },
+    statusText(status) {
+      const map = { '0': '未开始', '1': '进行中', '2': '已结束' };
+      return map[status] || '未知';
     }
   }
 }
@@ -217,43 +203,81 @@ export default {
 
 <style scoped>
 .vote-page {
+  min-height: 100vh;
+  background-color: #f5f5f7;
   padding: 40px 20px;
-  max-width: 1000px;
-  margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1d1d1f;
-  background-color: #f5f5f7;
-  min-height: 100vh;
 }
 
-h2 {
-  font-size: 32px;
+.vote-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.vote-title {
+  font-size: 40px;
   font-weight: 700;
-  margin-bottom: 24px;
   text-align: center;
+  margin-bottom: 10px;
+  color: #1d1d1f;
 }
 
-.actions-bar {
+.vote-info {
+  text-align: center;
+  color: #86868b;
+  margin-bottom: 40px;
+  font-size: 14px;
+}
+
+.vote-controls {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
   margin-bottom: 24px;
   display: flex;
-  justify-content: center;
+  align-items: center;
   gap: 12px;
+  justify-content: center;
 }
 
-.actions-bar >>> .el-button {
+/* Buttons */
+.vote-page >>> .el-button {
   border-radius: 980px;
-  padding: 10px 24px;
   font-weight: 500;
   border: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 10px 20px;
+  transition: all 0.2s ease;
 }
 
-.actions-bar >>> .el-button--primary {
+.vote-page >>> .el-button--primary {
   background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+.vote-page >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
 }
 
-.actions-bar >>> .el-button--success {
+.vote-page >>> .el-button--success {
   background-color: #34c759;
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+}
+.vote-page >>> .el-button--success:hover {
+  background-color: #32d74b;
+  transform: translateY(-1px);
+}
+
+.vote-page >>> .el-button--warning {
+  background-color: #ff9500;
+  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
+}
+
+.vote-page >>> .el-button--danger {
+  background-color: #ff3b30;
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
 }
 
 /* Table Styling */
@@ -261,6 +285,7 @@ h2 {
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
 }
 
 .vote-page >>> .el-table th {
@@ -276,10 +301,23 @@ h2 {
   border-bottom: 1px solid #f5f5f7;
 }
 
+.vote-page >>> .el-table--border, 
+.vote-page >>> .el-table--group {
+  border: none;
+}
+
+.vote-page >>> .el-table::before {
+  display: none;
+}
+
+/* Tags */
 .vote-page >>> .el-tag {
   border-radius: 6px;
   border: none;
   font-weight: 500;
+  padding: 0 10px;
+  height: 28px;
+  line-height: 28px;
 }
 
 .vote-page >>> .el-tag--success {
@@ -297,6 +335,11 @@ h2 {
   color: #8e8e93;
 }
 
+.vote-page >>> .el-tag--danger {
+  background-color: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+}
+
 /* Dialog Styling */
 .vote-page >>> .el-dialog {
   border-radius: 18px;
@@ -311,6 +354,7 @@ h2 {
 .vote-page >>> .el-dialog__title {
   font-weight: 600;
   font-size: 18px;
+  color: #1d1d1f;
 }
 
 .vote-page >>> .el-dialog__body {
@@ -322,11 +366,12 @@ h2 {
   border-top: 1px solid #f5f5f7;
 }
 
-/* Form Items */
+/* Input Styling */
 .vote-page >>> .el-input__inner {
   border-radius: 10px;
   border: 1px solid #d2d2d7;
-  transition: all 0.2s;
+  height: 40px;
+  transition: all 0.2s ease;
 }
 
 .vote-page >>> .el-input__inner:focus {
@@ -334,40 +379,75 @@ h2 {
   box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
 }
 
-/* Option List in Dialog */
-.vote-option-item {
-  background: #fbfbfd;
-  padding: 12px 16px;
-  border-radius: 12px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  transition: background 0.2s;
+/* Operation Buttons in Table */
+.ops-col >>> .el-button {
+  margin: 0 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
 }
 
-.vote-option-item:hover {
-  background: #f5f5f7;
-}
-
-.vote-result-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #f5f5f7;
-}
-
-.vote-result-item:last-child {
-  border-bottom: none;
-}
-
-.vote-count {
-  font-weight: 600;
-  color: #0071e3;
-  background: rgba(0, 113, 227, 0.1);
-  padding: 4px 10px;
-  border-radius: 980px;
-  font-size: 13px;
+@media print {
+  .vote-controls, .v-modal, .sidebar-container, .navbar, .tags-view-container {
+    display: none !important;
+  }
+  .vote-page {
+    padding: 0;
+    background: white;
+    min-height: auto;
+  }
+  .vote-container {
+    max-width: 100%;
+    margin: 0;
+  }
+  .vote-title {
+    margin-top: 0;
+    font-size: 24px;
+  }
+  .vote-info {
+    margin-bottom: 20px;
+  }
+  .el-table {
+    width: 100% !important;
+    border: 1px solid #ebeef5;
+  }
+  .el-table th {
+    background-color: #f5f7fa !important;
+    color: #000 !important;
+  }
+  /* Hide operations column in print */
+  .ops-col {
+    display: none !important;
+  }
+  /* Hide table header for operations column if possible, or just accept it's there */
+  .el-table__header colgroup col:last-child, .el-table__body colgroup col:last-child {
+     display: none;
+  }
+  .el-table th:last-child, .el-table td:last-child {
+    display: none;
+  }
+  
+  /* Ensure dialogs are printable if open */
+  .el-dialog__wrapper {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+  .el-dialog {
+    box-shadow: none !important;
+    margin-top: 0 !important;
+    width: 100% !important;
+    border: none !important;
+  }
+  /* If dialog is open, hide the main page content to avoid clutter */
+  /* This is hard to do with just CSS without a parent class. 
+     But usually the dialog covers the page. 
+     We can try to hide .vote-container if .el-dialog__wrapper is visible? No, CSS can't do that.
+     We'll rely on the dialog covering the content or the user printing what they see.
+  */
 }
 </style>
 

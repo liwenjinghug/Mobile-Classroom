@@ -639,11 +639,191 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+/* Mac Style for Homework Grading */
+.app-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
+}
+
+/* Card/Panel Styling */
+.app-container >>> .el-card,
+.grading-right-panel {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+  margin-bottom: 24px;
+}
+
+.grading-right-panel {
+  padding: 24px !important;
+  border-left: none !important;
+}
+
+/* Header Styling */
+.app-container > div:first-child,
+.grading-right-panel > div:first-child,
+.app-container > div > div:first-child {
+  margin-bottom: 24px !important;
+}
+
+.app-container > div:first-child > div:first-child,
+.grading-right-panel > div:first-child > div:first-child {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1d1d1f;
+}
+
+/* Form/Select Styling */
+.app-container >>> .el-select .el-input__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  height: 36px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-select .el-input__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+/* Button Styling */
+.app-container >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+.app-container >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.app-container >>> .el-button--success {
+  background-color: #34c759;
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+}
+
+.app-container >>> .el-button--info {
+  background-color: #86868b;
+  box-shadow: 0 2px 8px rgba(134, 134, 139, 0.2);
+}
+
+.app-container >>> .el-button--default {
+  background-color: #e5e5ea;
+  color: #1d1d1f;
+}
+
+.app-container >>> .el-button--mini {
+  padding: 7px 15px;
+  font-size: 12px;
+}
+
+/* Table Styling */
+.app-container >>> .el-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+}
+
+.app-container >>> .el-table th {
+  background-color: #fbfbfd;
+  color: #86868b;
+  font-weight: 600;
+  border-bottom: 1px solid #f5f5f7;
+  padding: 12px 0;
+}
+
+.app-container >>> .el-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+/* Dialog Styling */
+.app-container >>> .el-dialog {
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.app-container >>> .el-dialog__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.app-container >>> .el-dialog__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+.app-container >>> .el-dialog__body {
+  padding: 24px;
+}
+
+.app-container >>> .el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f5f5f7;
+}
+
+/* Alert Styling */
+.app-container >>> .el-alert {
+  border-radius: 10px;
+  margin-bottom: 16px;
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+}
+
+.app-container >>> .el-alert--info.is-light {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+}
+
+/* Input Styling in Dialog */
+.app-container >>> .el-input__inner,
+.app-container >>> .el-textarea__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-input__inner:focus,
+.app-container >>> .el-textarea__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+/* Link Styling */
+.app-container >>> a {
+  color: #0071e3;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.app-container >>> a:hover {
+  color: #0077ed;
+  text-decoration: underline;
+}
+
+/* Specific Styles */
+.stats-bar {
+  margin: 6px 0 16px;
+}
+
 .grading-right-panel {
   transition: transform 0.3s ease;
-  /* Optional: Add a transition for smoothness */
 }
-.stats-bar { margin: 6px 0 10px }
-/* Add any additional styles for the right panel here */
 </style>

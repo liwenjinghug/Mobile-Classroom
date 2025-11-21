@@ -955,32 +955,60 @@ export default {
 </script>
 
 <style scoped>
-.homework-dashboard {
-  padding: 20px;
+/* Mac Style for Homework Dashboard */
+.app-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
 }
 
+/* Card Styling */
+.app-container >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.app-container >>> .el-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+.app-container >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+}
+
+/* Dashboard Cards */
 .dashboard-card {
-  margin-bottom: 20px;
+  height: 120px;
+  display: flex;
+  align-items: center;
 }
 
 .card-content {
   display: flex;
   align-items: center;
+  width: 100%;
 }
 
 .card-icon {
   width: 60px;
   height: 60px;
-  border-radius: 8px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 15px;
-}
-
-.card-icon i {
-  font-size: 24px;
+  margin-right: 20px;
   color: white;
+  font-size: 28px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 
 .card-info {
@@ -988,87 +1016,98 @@ export default {
 }
 
 .card-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 5px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 4px;
 }
 
 .card-label {
   font-size: 14px;
-  color: #909399;
+  color: #86868b;
 }
 
-.chart-card,
-.overview-card {
-  height: 500px;
+/* Chart Card */
+.chart-card {
+  min-height: 500px;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
 }
 
 .chart-container {
-  height: 400px;
+  padding: 20px;
 }
 
-.no-data {
-  height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Overview Card */
+.overview-card {
+  height: 500px;
+  overflow: hidden;
 }
 
 .session-list {
-  max-height: 400px;
+  height: 420px;
   overflow-y: auto;
+  padding-right: 10px;
 }
 
 .session-item {
-  padding: 15px 0;
-  border-bottom: 1px solid #ebeef5;
+  padding: 16px;
+  border-bottom: 1px solid #f5f5f7;
+  transition: background-color 0.2s;
 }
 
 .session-item:last-child {
   border-bottom: none;
 }
 
+.session-item:hover {
+  background-color: #f5f5f7;
+  border-radius: 12px;
+}
+
 .session-info {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .session-name {
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 5px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 4px;
 }
 
 .session-course {
-  font-size: 12px;
-  color: #909399;
+  font-size: 13px;
+  color: #86868b;
   margin-bottom: 8px;
 }
 
 .session-stats {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: #606266;
+  font-size: 13px;
+  color: #1d1d1f;
 }
 
 /* 筛选条件样式优化 */
 .filter-container {
-  margin-bottom: 20px;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #ebeef5;
+  margin-bottom: 24px;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
 }
 
 .filter-row {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   display: flex;
   align-items: center;
 }
@@ -1081,44 +1120,103 @@ export default {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
 }
 
 .filter-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .filter-label {
   font-size: 14px;
-  color: #606266;
+  color: #1d1d1f;
+  font-weight: 500;
   white-space: nowrap;
   min-width: 60px;
   text-align: right;
 }
 
-.date-separator {
-  color: #909399;
-  font-size: 14px;
-  margin: 0 8px;
+/* Form Elements */
+.app-container >>> .el-input__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  height: 36px;
+  transition: all 0.2s ease;
 }
 
-.header-actions {
-  display: flex;
-  gap: 10px;
+.app-container >>> .el-input__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
 }
 
-/* 响应式设计 */
+.app-container >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+.app-container >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+/* Table Styling */
+.app-container >>> .el-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+}
+
+.app-container >>> .el-table th {
+  background-color: #fbfbfd;
+  color: #86868b;
+  font-weight: 600;
+  border-bottom: 1px solid #f5f5f7;
+  padding: 12px 0;
+}
+
+.app-container >>> .el-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d2d2d7;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #86868b;
+}
+
+/* Responsive */
 @media (max-width: 1200px) {
   .el-col-16, .el-col-8 {
     width: 100%;
+    margin-bottom: 20px;
   }
-
   .filter-group {
     gap: 12px;
   }
-
   .filter-item {
     flex: 1;
     min-width: 200px;
@@ -1130,12 +1228,10 @@ export default {
     flex-direction: column;
     align-items: stretch;
   }
-
   .filter-group {
     flex-direction: column;
     gap: 12px;
   }
-
   .filter-item {
     flex: none;
   }

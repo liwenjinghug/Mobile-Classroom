@@ -944,32 +944,330 @@ export default {
 </script>
 
 <style scoped>
-.homework-upload-page { padding: 24px; min-height: 100vh; background: #f5f7fa }
-.page-header { margin-bottom: 16px }
-.identity-card, .selection-card, .submissions-card, .work-card { margin-bottom: 16px }
-.identity-row { display: flex; align-items: center; gap: 12px }
-.identity-hint { margin-top:6px; color:#606266; font-size:12px }
-.identity-status.ok { color: #67c23a }
-.identity-status.warn { color: #e6a23c }
-.submissions-card .overlay, .selection-card .overlay { position: absolute; inset: 0; background: rgba(255,255,255,.8); display:flex; align-items:center; justify-content:center; color:#999; font-size:14px }
-.selection-card { position: relative }
-.selection-card.disabled { filter:none; } /* remove grayscale to avoid blurry look */
-.tag-link { cursor: pointer; margin: 2px }
-.text-muted { color: #b3b3b3 }
-.content { max-height: 220px; overflow: auto; padding: 8px; background: #fafafa; border: 1px solid #ebeef5 }
-.overdue { color: #f56c6c }
-.upload-block { margin-bottom: 12px }
-.upload-tip { color: #909399; font-size: 12px; margin-top: 6px }
-.selected-files { margin-bottom: 12px; display:flex; flex-wrap:wrap; gap:4px }
-.submit-row { display:flex; gap:12px }
-.card-header { display:flex; justify-content:space-between; align-items:center }
-.blocked-panel { padding:12px; background:#f9fafc; border:1px dashed #dcdfe6; border-radius:4px; }
-.overlay { z-index: 2 }
-.hint{margin-top:8px;font-size:12px;color:#606266}
-.file-chip { display:flex; align-items:center; margin:4px 0; flex-wrap:wrap }
-.file-tags { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px }
-.dialog-tip { font-size:12px; color:#606266; margin-bottom:6px }
-.filter-bar { background:#fafafa; padding:8px 12px 2px; border:1px solid #ebeef5; border-radius:4px; margin-bottom:8px }
-.filter-count { font-size:12px; color:#606266; }
-.stats-row { margin-top: 8px; }
+/* Mac Style for Homework Upload */
+.homework-upload-page {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
+}
+
+/* Card Styling */
+.homework-upload-page >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+  margin-bottom: 24px;
+}
+
+.homework-upload-page >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: 24px;
+}
+
+.header-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1d1d1f;
+}
+
+/* Form Styling */
+.homework-upload-page >>> .el-form-item__label {
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.homework-upload-page >>> .el-input__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  height: 36px;
+  transition: all 0.2s ease;
+}
+
+.homework-upload-page >>> .el-input__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+/* Button Styling */
+.homework-upload-page >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.homework-upload-page >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+.homework-upload-page >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.homework-upload-page >>> .el-button--success {
+  background-color: #34c759;
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+}
+
+.homework-upload-page >>> .el-button--warning {
+  background-color: #ff9500;
+  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
+}
+
+.homework-upload-page >>> .el-button--danger {
+  background-color: #ff3b30;
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
+}
+
+.homework-upload-page >>> .el-button--text {
+  color: #0071e3;
+  background: none;
+  padding: 0 5px;
+  box-shadow: none;
+}
+
+.homework-upload-page >>> .el-button--text:hover {
+  color: #0077ed;
+  background: none;
+  transform: none;
+}
+
+/* Table Styling */
+.homework-upload-page >>> .el-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+}
+
+.homework-upload-page >>> .el-table th {
+  background-color: #fbfbfd;
+  color: #86868b;
+  font-weight: 600;
+  border-bottom: 1px solid #f5f5f7;
+  padding: 12px 0;
+}
+
+.homework-upload-page >>> .el-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+/* Dialog Styling */
+.homework-upload-page >>> .el-dialog {
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.homework-upload-page >>> .el-dialog__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.homework-upload-page >>> .el-dialog__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+.homework-upload-page >>> .el-dialog__body {
+  padding: 24px;
+}
+
+.homework-upload-page >>> .el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f5f5f7;
+}
+
+/* Tags */
+.homework-upload-page >>> .el-tag {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+}
+
+/* Alert Styling */
+.homework-upload-page >>> .el-alert {
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+/* Descriptions Styling */
+.homework-upload-page >>> .el-descriptions {
+  margin-bottom: 16px;
+}
+
+.homework-upload-page >>> .el-descriptions__header {
+  margin-bottom: 12px;
+}
+
+.homework-upload-page >>> .el-descriptions__title {
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.homework-upload-page >>> .el-descriptions-item__label {
+  color: #86868b;
+  font-weight: 500;
+}
+
+.homework-upload-page >>> .el-descriptions-item__content {
+  color: #1d1d1f;
+  font-weight: 600;
+}
+
+/* Specific Styles */
+.identity-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.identity-hint {
+  margin-top: 8px;
+  color: #86868b;
+  font-size: 13px;
+}
+
+.identity-status.ok {
+  color: #34c759;
+  font-weight: 500;
+}
+
+.identity-status.warn {
+  color: #ff9500;
+  font-weight: 500;
+}
+
+.submissions-card .overlay, .selection-card .overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #86868b;
+  font-size: 14px;
+  z-index: 2;
+  border-radius: 18px;
+}
+
+.selection-card {
+  position: relative;
+}
+
+.tag-link {
+  cursor: pointer;
+  margin: 2px;
+}
+
+.text-muted {
+  color: #86868b;
+}
+
+.content {
+  max-height: 220px;
+  overflow: auto;
+  padding: 12px;
+  background: #f5f5f7;
+  border-radius: 10px;
+  border: none;
+}
+
+.overdue {
+  color: #ff3b30;
+}
+
+.upload-block {
+  margin-bottom: 16px;
+}
+
+.upload-tip {
+  color: #86868b;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.selected-files {
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.submit-row {
+  display: flex;
+  gap: 12px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.blocked-panel {
+  padding: 16px;
+  background: #f5f5f7;
+  border: 1px dashed #d2d2d7;
+  border-radius: 10px;
+}
+
+.hint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #86868b;
+}
+
+.file-chip {
+  display: flex;
+  align-items: center;
+  margin: 4px 0;
+  flex-wrap: wrap;
+}
+
+.file-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.dialog-tip {
+  font-size: 13px;
+  color: #86868b;
+  margin-bottom: 8px;
+}
+
+.filter-bar {
+  background: #f5f5f7;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border: none;
+}
+
+.filter-count {
+  font-size: 13px;
+  color: #86868b;
+}
+
+.stats-row {
+  margin-top: 12px;
+}
 </style>

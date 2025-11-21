@@ -474,54 +474,117 @@ export default {
 </script>
 
 <style scoped>
-/* 保持原有样式不变 */
+/* Mac Style for Session Page */
+.app-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
+  background-color: #f5f5f7;
+  min-height: 100vh;
+}
+
+/* Card Styling */
+.app-container >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.app-container >>> .el-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+
+.app-container >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+}
+
+/* Page Header */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #e6e6e6;
+  margin-bottom: 24px;
 }
 
 .header-left {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .page-title {
-  font-size: 20px;
-  font-weight: bold;
-  color: #303133;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1d1d1f;
 }
 
 .course-name {
-  font-size: 16px;
-  color: #606266;
-  margin-top: 5px;
+  font-size: 18px;
+  color: #86868b;
+  font-weight: 500;
+  margin-top: 6px;
 }
 
+/* Button Styling */
+.app-container >>> .el-button {
+  border-radius: 980px;
+  font-weight: 500;
+  border: none;
+  padding: 9px 20px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-button--primary {
+  background-color: #0071e3;
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+}
+
+.app-container >>> .el-button--primary:hover {
+  background-color: #0077ed;
+  transform: translateY(-1px);
+}
+
+.app-container >>> .el-button--text {
+  color: #0071e3;
+  background: none;
+  padding: 0 5px;
+  box-shadow: none;
+}
+
+.app-container >>> .el-button--text:hover {
+  color: #0077ed;
+  background: none;
+  transform: none;
+}
+
+.app-container >>> .el-button--text[disabled] {
+  color: #c0c4cc !important;
+  cursor: not-allowed !important;
+}
+
+/* Session List */
 .session-list {
   min-height: 200px;
 }
 
 .session-card {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   transition: all 0.3s;
-}
-
-.session-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .session-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f5f5f7;
 }
 
 .session-title {
@@ -529,56 +592,106 @@ export default {
 }
 
 .session-name {
-  margin: 0 0 5px 0;
-  color: #303133;
-  font-size: 18px;
+  margin: 0 0 6px 0;
+  color: #1d1d1f;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .session-id {
   font-size: 14px;
-  color: #909399;
+  color: #86868b;
 }
 
 .session-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .session-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .info-item {
   display: flex;
+  align-items: center;
 }
 
 .label {
-  color: #909399;
+  color: #86868b;
   min-width: 100px;
   font-weight: 500;
+  font-size: 14px;
 }
 
 .value {
-  color: #606266;
+  color: #1d1d1f;
   flex: 1;
+  font-size: 14px;
+}
+
+/* Dialog Styling */
+.app-container >>> .el-dialog {
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.app-container >>> .el-dialog__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f5f5f7;
+}
+
+.app-container >>> .el-dialog__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1d1d1f;
+}
+
+.app-container >>> .el-dialog__body {
+  padding: 24px;
+}
+
+.app-container >>> .el-dialog__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f5f5f7;
+}
+
+/* Form Styling */
+.app-container >>> .el-form-item__label {
+  font-weight: 500;
+  color: #1d1d1f;
+}
+
+.app-container >>> .el-input__inner {
+  border-radius: 10px;
+  border: 1px solid #d2d2d7;
+  height: 36px;
+  transition: all 0.2s ease;
+}
+
+.app-container >>> .el-input__inner:focus {
+  border-color: #0071e3;
+  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+/* Tags */
+.app-container >>> .el-tag {
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
 }
 
 .empty-state {
   text-align: center;
-  padding: 40px 0;
+  padding: 60px 0;
 }
 
 .form-tip {
   font-size: 12px;
-  color: #909399;
-  margin-top: 4px;
-}
-
-.el-button--text[disabled] {
-  color: #c0c4cc !important;
-  cursor: not-allowed !important;
+  color: #86868b;
+  margin-top: 6px;
 }
 </style>
