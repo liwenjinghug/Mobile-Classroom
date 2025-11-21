@@ -38,7 +38,7 @@
             <div style="display: flex; align-items: center;">
               <div style="flex: 1; text-align: center;">
                 <el-button size="mini" @click="openRecords(row)">详情</el-button>
-                <el-button size="mini" type="primary" @click="openStats(row)">统计</el-button>
+                <el-button size="mini" type="primary" style="background-color: #0071e3; border-color: #0071e3;" @click="openStats(row)">统计</el-button>
                 
                 <!-- 状态控制按钮 -->
                 <el-button 

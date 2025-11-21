@@ -31,67 +31,49 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
+    <div style="margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
       <template v-if="!isSelectionMode">
-        <el-col :span="1.5">
-          <el-button
-            type="primary"
-            plain
-            icon="el-icon-plus"
-            @click="handleAdd"
-            v-hasPermi="['proj_qhy:article:add']"
-          >新增</el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            type="warning"
-            plain
-            icon="el-icon-download"
-            @click="handleExport"
-            v-hasPermi="['proj_qhy:article:export']"
-          >导出Excel</el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            type="info"
-            plain
-            icon="el-icon-check"
-            @click="toggleSelectionMode"
-          >选择</el-button>
-        </el-col>
+        <el-button
+          type="primary"
+          icon="el-icon-plus"
+          @click="handleAdd"
+          v-hasPermi="['proj_qhy:article:add']"
+        >新增</el-button>
+        <el-button
+          type="warning"
+          icon="el-icon-download"
+          @click="handleExport"
+          v-hasPermi="['proj_qhy:article:export']"
+        >导出Excel</el-button>
+        <el-button
+          type="info"
+          icon="el-icon-check"
+          @click="toggleSelectionMode"
+        >选择</el-button>
       </template>
 
       <template v-else>
-        <el-col :span="1.5">
-          <el-button
-            type="danger"
-            plain
-            icon="el-icon-delete"
-            :disabled="selectedIds.length === 0"
-            @click="handleDelete"
-            v-hasPermi="['proj_qhy:article:remove']"
-          >批量删除</el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            type="warning"
-            plain
-            icon="el-icon-document"
-            :disabled="selectedIds.length === 0"
-            @click="handleExportPdf"
-            v-hasPermi="['proj_qhy:article:export']"
-          >导出PDF</el-button>
-        </el-col>
-        <el-col :span="1.5">
-          <el-button
-            type="info"
-            plain
-            icon="el-icon-close"
-            @click="toggleSelectionMode"
-          >取消选择</el-button>
-        </el-col>
+        <el-button
+          type="danger"
+          icon="el-icon-delete"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete"
+          v-hasPermi="['proj_qhy:article:remove']"
+        >批量删除</el-button>
+        <el-button
+          type="warning"
+          icon="el-icon-document"
+          :disabled="selectedIds.length === 0"
+          @click="handleExportPdf"
+          v-hasPermi="['proj_qhy:article:export']"
+        >导出PDF</el-button>
+        <el-button
+          type="info"
+          icon="el-icon-close"
+          @click="toggleSelectionMode"
+        >取消选择</el-button>
       </template>
-    </el-row>
+    </div>
 
     <el-checkbox-group v-model="selectedIds">
       <div class="article-list" v-loading="loading">

@@ -29,27 +29,21 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          @click="handleAdd"
-          v-hasPermi="['system:course:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['system:course:remove']"
-        >删除</el-button>
-      </el-col>
-    </el-row>
+    <div style="margin-bottom: 16px; display: flex; gap: 12px;">
+      <el-button
+        type="primary"
+        icon="el-icon-plus"
+        @click="handleAdd"
+        v-hasPermi="['system:course:add']"
+      >新增</el-button>
+      <el-button
+        type="danger"
+        icon="el-icon-delete"
+        :disabled="multiple"
+        @click="handleDelete"
+        v-hasPermi="['system:course:remove']"
+      >删除</el-button>
+    </div>
 
     <el-table v-loading="loading" :data="courseList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />

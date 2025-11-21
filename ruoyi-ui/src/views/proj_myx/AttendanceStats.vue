@@ -30,8 +30,8 @@
       </div>
 
       <div class="actions-footer">
-        <el-button type="primary" plain round @click="exportExcel">导出 Excel</el-button>
-        <el-button icon="el-icon-printer" round @click="handlePrint">打印统计</el-button>
+        <el-button type="primary" round style="background-color: #0071e3; border-color: #0071e3;" @click="exportExcel">导出 Excel</el-button>
+        <el-button type="primary" round style="background-color: #0071e3; border-color: #0071e3;" icon="el-icon-printer" @click="handlePrint">打印统计</el-button>
       </div>
     </div>
   </div>
