@@ -1,7 +1,7 @@
 /*
 Navicat MySQL Data Transfer
 
-Source Server         : localhost
+Source Server         : cyq
 Source Server Version : 80042
 Source Host           : localhost:3306
 Source Database       : ry-vue
@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 80042
 File Encoding         : 65001
 
-Date: 2025-11-22 15:07:19
+Date: 2025-11-23 00:29:40
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -20,31 +20,31 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `class_article`;
 CREATE TABLE `class_article` (
-                                 `id` bigint NOT NULL AUTO_INCREMENT COMMENT '文章ID',
-                                 `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文章标题',
-                                 `digest` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '文章摘要',
-                                 `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '文章内容',
-                                 `cover` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '封面图片',
-                                 `article_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '技术' COMMENT '文章分类',
-                                 `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'editting' COMMENT '状态：editting-编辑中,published-已发布,draft-草稿',
-                                 `view_count` bigint DEFAULT '0' COMMENT '阅读数',
-                                 `comment_count` bigint DEFAULT '0' COMMENT '评论数',
-                                 `like_count` bigint DEFAULT '0' COMMENT '点赞数',
-                                 `hate_count` bigint DEFAULT '0' COMMENT '点踩数',
-                                 `bookmark_count` bigint DEFAULT '0' COMMENT '收藏数',
-                                 `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '作者',
-                                 `user_id` bigint DEFAULT NULL COMMENT '用户ID',
-                                 `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-                                 `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                 `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-                                 `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                 `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-                                 PRIMARY KEY (`id`) USING BTREE,
-                                 KEY `idx_title` (`title`) USING BTREE,
-                                 KEY `idx_author` (`author`) USING BTREE,
-                                 KEY `idx_create_time` (`create_time`) USING BTREE,
-                                 KEY `idx_article_type` (`article_type`) USING BTREE,
-                                 KEY `idx_status` (`status`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '文章ID',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文章标题',
+  `digest` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '文章摘要',
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '文章内容',
+  `cover` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '封面图片',
+  `article_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '技术' COMMENT '文章分类',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'editting' COMMENT '状态：editting-编辑中,published-已发布,draft-草稿',
+  `view_count` bigint DEFAULT '0' COMMENT '阅读数',
+  `comment_count` bigint DEFAULT '0' COMMENT '评论数',
+  `like_count` bigint DEFAULT '0' COMMENT '点赞数',
+  `hate_count` bigint DEFAULT '0' COMMENT '点踩数',
+  `bookmark_count` bigint DEFAULT '0' COMMENT '收藏数',
+  `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '作者',
+  `user_id` bigint DEFAULT NULL COMMENT '用户ID',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_title` (`title`) USING BTREE,
+  KEY `idx_author` (`author`) USING BTREE,
+  KEY `idx_create_time` (`create_time`) USING BTREE,
+  KEY `idx_article_type` (`article_type`) USING BTREE,
+  KEY `idx_status` (`status`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章表';
 
 -- ----------------------------
@@ -55,21 +55,21 @@ INSERT INTO `class_article` VALUES ('2', '生活中的小确幸', '记录生活�
 INSERT INTO `class_article` VALUES ('3', 'Java编程思想', '深入理解Java编程思想', '<p>Java编程思想是每个Java开发者都应该掌握的...</p>', 'https://picsum.photos/id/1/600/400', '技术', 'published', '205', '25', '78', '0', '0', '岂皓月', '1', 'admin', '2025-11-01 23:24:22', '', '2025-11-16 06:05:06', null);
 INSERT INTO `class_article` VALUES ('9', '1', null, '<p>111</p>', '/profile/upload/2025/11/12/一．文件和文件系统_20251112231007A001.png', '技术', 'editting', '5', '0', '0', '0', '0', '若依', null, null, '2025-11-12 23:10:11', '', '2025-11-21 23:12:54', null);
 INSERT INTO `class_article` VALUES ('10', '计算机网络', '1', '<p><img src=\"/dev-api/profile/upload/2025/11/16/屏幕截图 2025-11-06 110411_20251116060547A001.png\"></p>', '/profile/upload/2025/11/16/屏幕截图 2025-11-13 105252_20251116060620A002.png', '技术', 'published', '2', '0', '0', '0', '0', 'admin', '1', null, '2025-11-16 06:06:22', '', '2025-11-21 23:12:45', null);
-INSERT INTO `class_article` VALUES ('11', 'haha', null, '<p>我头像呢</p>', '/profile/upload/2025/11/21/屏幕截图 2025-05-24 014721_20251121231416A004.png', '技术', 'editting', '1', '0', '0', '0', '0', 'admin', '1', null, '2025-11-21 23:13:23', '', '2025-11-21 23:14:18', null);
+INSERT INTO `class_article` VALUES ('11', 'haha', null, '<p>我头像呢</p>', '/profile/upload/2025/11/21/屏幕截图 2025-05-24 014721_20251121231416A004.png', '技术', 'editting', '2', '0', '0', '0', '0', 'admin', '1', null, '2025-11-21 23:13:23', '', '2025-11-22 23:09:14', null);
 
 -- ----------------------------
 -- Table structure for class_article_like
 -- ----------------------------
 DROP TABLE IF EXISTS `class_article_like`;
 CREATE TABLE `class_article_like` (
-                                      `id` bigint NOT NULL AUTO_INCREMENT,
-                                      `article_id` bigint NOT NULL,
-                                      `user_id` bigint NOT NULL,
-                                      `like_status` int NOT NULL COMMENT '1-点赞, -1-点踩, 0-无',
-                                      `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
-                                      `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                      PRIMARY KEY (`id`) USING BTREE,
-                                      UNIQUE KEY `uk_article_user` (`article_id`,`user_id`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `article_id` bigint NOT NULL,
+  `user_id` bigint NOT NULL,
+  `like_status` int NOT NULL COMMENT '1-点赞, -1-点踩, 0-无',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_article_user` (`article_id`,`user_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
@@ -81,27 +81,27 @@ CREATE TABLE `class_article_like` (
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance`;
 CREATE TABLE `class_attendance` (
-                                    `attendance_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到记录唯一ID',
-                                    `session_id` bigint NOT NULL COMMENT '课堂ID（抽人/课堂级统计依赖）',
-                                    `task_id` bigint NOT NULL COMMENT '签到任务ID（对应某次签到动作）',
-                                    `student_id` bigint NOT NULL COMMENT '关联的学生ID',
-                                    `attendance_time` datetime DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
-                                    `attendance_status` tinyint NOT NULL DEFAULT '0' COMMENT '签到状态: 0未签到 1已签到 2迟到 3请假 4早退',
-                                    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
-                                    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-                                    `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到设备IP地址',
-                                    `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
-                                    `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到地理位置',
-                                    PRIMARY KEY (`attendance_id`) USING BTREE,
-                                    UNIQUE KEY `uq_task_student` (`task_id`,`student_id`) USING BTREE,
-                                    KEY `idx_session` (`session_id`) USING BTREE,
-                                    KEY `idx_task` (`task_id`) USING BTREE,
-                                    KEY `idx_student` (`student_id`) USING BTREE,
-                                    KEY `idx_status` (`attendance_status`) USING BTREE,
-                                    KEY `idx_attendance_time` (`attendance_time`) USING BTREE,
-                                    CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-                                    CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-                                    CONSTRAINT `fk_attendance_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `attendance_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到记录唯一ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID（抽人/课堂级统计依赖）',
+  `task_id` bigint NOT NULL COMMENT '签到任务ID（对应某次签到动作）',
+  `student_id` bigint NOT NULL COMMENT '关联的学生ID',
+  `attendance_time` datetime DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
+  `attendance_status` tinyint NOT NULL DEFAULT '0' COMMENT '签到状态: 0未签到 1已签到 2迟到 3请假 4早退',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到设备IP地址',
+  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
+  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到地理位置',
+  PRIMARY KEY (`attendance_id`) USING BTREE,
+  UNIQUE KEY `uq_task_student` (`task_id`,`student_id`) USING BTREE,
+  KEY `idx_session` (`session_id`) USING BTREE,
+  KEY `idx_task` (`task_id`) USING BTREE,
+  KEY `idx_student` (`student_id`) USING BTREE,
+  KEY `idx_status` (`attendance_status`) USING BTREE,
+  KEY `idx_attendance_time` (`attendance_time`) USING BTREE,
+  CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_attendance_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='学生课堂签到记录表（含 session_id + task_id）';
 
 -- ----------------------------
@@ -238,16 +238,16 @@ INSERT INTO `class_attendance` VALUES ('129', '1', '28', '1', '2025-11-21 18:57:
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance_bak`;
 CREATE TABLE `class_attendance_bak` (
-                                        `attendance_id` bigint NOT NULL DEFAULT '0' COMMENT '签到记录唯一ID',
-                                        `session_id` bigint NOT NULL COMMENT '关联的课堂ID',
-                                        `student_id` bigint NOT NULL COMMENT '关联的学生ID',
-                                        `attendance_time` datetime DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
-                                        `attendance_status` tinyint NOT NULL DEFAULT '0' COMMENT '签到状态: 0-未签到 1-已签到 2-迟到 3-请假 4-早退',
-                                        `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
-                                        `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-                                        `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到设备IP地址',
-                                        `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
-                                        `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到地理位置'
+  `attendance_id` bigint NOT NULL DEFAULT '0' COMMENT '签到记录唯一ID',
+  `session_id` bigint NOT NULL COMMENT '关联的课堂ID',
+  `student_id` bigint NOT NULL COMMENT '关联的学生ID',
+  `attendance_time` datetime DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
+  `attendance_status` tinyint NOT NULL DEFAULT '0' COMMENT '签到状态: 0-未签到 1-已签到 2-迟到 3-请假 4-早退',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到设备IP地址',
+  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
+  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到地理位置'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
@@ -299,18 +299,18 @@ INSERT INTO `class_attendance_bak` VALUES ('40', '1', '40', null, '1', '2025-10-
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance_qr`;
 CREATE TABLE `class_attendance_qr` (
-                                       `qr_id` bigint NOT NULL AUTO_INCREMENT COMMENT '二维码 token 主键',
-                                       `task_id` bigint NOT NULL COMMENT '关联的签到任务 task_id',
-                                       `token` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '二维码 token（可为 UUID 或其他）',
-                                       `ttl_seconds` int DEFAULT NULL COMMENT '有效期（秒），null 意味着使用 task.end_time 作为判定',
-                                       `expire_time` datetime DEFAULT NULL COMMENT '到期时间（可根据 ttl_seconds 计算填入）',
-                                       `used` tinyint NOT NULL DEFAULT '0' COMMENT '是否已被使用（可选，用于一次性二维码）',
-                                       `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                                       `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
-                                       PRIMARY KEY (`qr_id`) USING BTREE,
-                                       UNIQUE KEY `uq_token` (`token`) USING BTREE,
-                                       KEY `idx_task_qr` (`task_id`) USING BTREE,
-                                       CONSTRAINT `fk_qr_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `qr_id` bigint NOT NULL AUTO_INCREMENT COMMENT '二维码 token 主键',
+  `task_id` bigint NOT NULL COMMENT '关联的签到任务 task_id',
+  `token` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '二维码 token（可为 UUID 或其他）',
+  `ttl_seconds` int DEFAULT NULL COMMENT '有效期（秒），null 意味着使用 task.end_time 作为判定',
+  `expire_time` datetime DEFAULT NULL COMMENT '到期时间（可根据 ttl_seconds 计算填入）',
+  `used` tinyint NOT NULL DEFAULT '0' COMMENT '是否已被使用（可选，用于一次性二维码）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`qr_id`) USING BTREE,
+  UNIQUE KEY `uq_token` (`token`) USING BTREE,
+  KEY `idx_task_qr` (`task_id`) USING BTREE,
+  CONSTRAINT `fk_qr_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='签到二维码/token 表（用于动态二维码与失效控制）';
 
 -- ----------------------------
@@ -345,22 +345,22 @@ INSERT INTO `class_attendance_qr` VALUES ('70', '28', 'ca3d86609ba646688c370e521
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance_task`;
 CREATE TABLE `class_attendance_task` (
-                                         `task_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到任务主键ID',
-                                         `session_id` bigint NOT NULL COMMENT '关联的课堂 session_id (class_session.session_id)',
-                                         `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'location' COMMENT '签到方式：location 或 qr',
-                                         `center_lat` double DEFAULT NULL COMMENT '位置签到中心纬度（仅 type=location 有效）',
-                                         `center_lng` double DEFAULT NULL COMMENT '位置签到中心经度（仅 type=location 有效）',
-                                         `radius` int DEFAULT NULL COMMENT '有效半径（米）（仅 type=location 有效）',
-                                         `qr_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '二维码静态 token 或默认值（可为空，复杂场景用 class_attendance_qr 存多 token）',
-                                         `start_time` datetime DEFAULT NULL COMMENT '签到开始时间',
-                                         `end_time` datetime DEFAULT NULL COMMENT '签到结束时间',
-                                         `status` tinyint NOT NULL DEFAULT '0' COMMENT '任务状态：0=未开始 1=进行中 2=已结束',
-                                         `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '创建者用户名',
-                                         `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                         PRIMARY KEY (`task_id`) USING BTREE,
-                                         KEY `idx_task_session` (`session_id`) USING BTREE,
-                                         KEY `idx_task_status` (`status`) USING BTREE,
-                                         CONSTRAINT `fk_task_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `task_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到任务主键ID',
+  `session_id` bigint NOT NULL COMMENT '关联的课堂 session_id (class_session.session_id)',
+  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'location' COMMENT '签到方式：location 或 qr',
+  `center_lat` double DEFAULT NULL COMMENT '位置签到中心纬度（仅 type=location 有效）',
+  `center_lng` double DEFAULT NULL COMMENT '位置签到中心经度（仅 type=location 有效）',
+  `radius` int DEFAULT NULL COMMENT '有效半径（米）（仅 type=location 有效）',
+  `qr_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '二维码静态 token 或默认值（可为空，复杂场景用 class_attendance_qr 存多 token）',
+  `start_time` datetime DEFAULT NULL COMMENT '签到开始时间',
+  `end_time` datetime DEFAULT NULL COMMENT '签到结束时间',
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '任务状态：0=未开始 1=进行中 2=已结束',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '创建者用户名',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`task_id`) USING BTREE,
+  KEY `idx_task_session` (`session_id`) USING BTREE,
+  KEY `idx_task_status` (`status`) USING BTREE,
+  CONSTRAINT `fk_task_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='签到任务表（记录签到活动：位置/二维码等）';
 
 -- ----------------------------
@@ -390,22 +390,22 @@ INSERT INTO `class_attendance_task` VALUES ('29', '1', 'qr', null, null, '500', 
 -- ----------------------------
 DROP TABLE IF EXISTS `class_course`;
 CREATE TABLE `class_course` (
-                                `course_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课程ID',
-                                `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程名称',
-                                `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程编号',
-                                `course_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '课程类型',
-                                `college` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '所属学院',
-                                `credit` decimal(3,1) DEFAULT NULL COMMENT '学分',
-                                `introduction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '课程简介',
-                                `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',
-                                `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-                                `class_number` int DEFAULT NULL,
-                                PRIMARY KEY (`course_id`) USING BTREE,
-                                UNIQUE KEY `idx_course_code` (`course_code`) USING BTREE
+  `course_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课程ID',
+  `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程名称',
+  `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程编号',
+  `course_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '课程类型',
+  `college` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '所属学院',
+  `credit` decimal(3,1) DEFAULT NULL COMMENT '学分',
+  `introduction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '课程简介',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+  `class_number` int DEFAULT NULL,
+  PRIMARY KEY (`course_id`) USING BTREE,
+  UNIQUE KEY `idx_course_code` (`course_code`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='课程信息表';
 
 -- ----------------------------
@@ -424,36 +424,36 @@ INSERT INTO `class_course` VALUES ('8', '123123', '112', '212', '11', '0.0', '11
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam`;
 CREATE TABLE `class_exam` (
-                              `id` bigint NOT NULL AUTO_INCREMENT COMMENT '考试ID',
-                              `exam_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '考试名称',
-                              `exam_type` tinyint NOT NULL COMMENT '考试类型(1期中 2期末 3测验 4模拟考 5课堂测验)',
-                              `course_id` bigint NOT NULL COMMENT '课程ID',
-                              `session_id` bigint NOT NULL COMMENT '课堂ID',
-                              `total_score` decimal(5,2) NOT NULL COMMENT '考试总分',
-                              `pass_score` decimal(5,2) NOT NULL COMMENT '及格分数',
-                              `exam_duration` int NOT NULL COMMENT '考试时长(分钟)',
-                              `start_time` datetime NOT NULL COMMENT '考试开始时间',
-                              `end_time` datetime NOT NULL COMMENT '考试结束时间',
-                              `exam_mode` tinyint DEFAULT '1' COMMENT '考试模式(1定时考试 2随到随考)',
-                              `anti_cheat` tinyint DEFAULT '0' COMMENT '防作弊设置(0关闭 1开启)',
-                              `question_order` tinyint DEFAULT '0' COMMENT '题目顺序(0正常 1随机)',
-                              `show_answer` tinyint DEFAULT '0' COMMENT '显示答案(0不显示 1立即显示 2考试结束后)',
-                              `status` tinyint DEFAULT '0' COMMENT '状态(0草稿 1已发布 2进行中 3已结束)',
-                              `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                              `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                              `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                              `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                              `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '备注',
-                              `late_submit` tinyint(1) DEFAULT '0' COMMENT '是否允许迟交',
-                              `late_time` int DEFAULT '0' COMMENT '迟交时间（分钟）',
-                              `auto_submit` tinyint(1) DEFAULT '1' COMMENT '是否自动提交',
-                              `student_count` int DEFAULT '0' COMMENT '学生数量',
-                              `question_count` int DEFAULT '0' COMMENT '题目数量',
-                              PRIMARY KEY (`id`) USING BTREE,
-                              KEY `idx_course_id` (`course_id`) USING BTREE,
-                              KEY `idx_session_id` (`session_id`) USING BTREE,
-                              KEY `idx_status` (`status`) USING BTREE,
-                              KEY `idx_start_time` (`start_time`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '考试ID',
+  `exam_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '考试名称',
+  `exam_type` tinyint NOT NULL COMMENT '考试类型(1期中 2期末 3测验 4模拟考 5课堂测验)',
+  `course_id` bigint NOT NULL COMMENT '课程ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `total_score` decimal(5,2) NOT NULL COMMENT '考试总分',
+  `pass_score` decimal(5,2) NOT NULL COMMENT '及格分数',
+  `exam_duration` int NOT NULL COMMENT '考试时长(分钟)',
+  `start_time` datetime NOT NULL COMMENT '考试开始时间',
+  `end_time` datetime NOT NULL COMMENT '考试结束时间',
+  `exam_mode` tinyint DEFAULT '1' COMMENT '考试模式(1定时考试 2随到随考)',
+  `anti_cheat` tinyint DEFAULT '0' COMMENT '防作弊设置(0关闭 1开启)',
+  `question_order` tinyint DEFAULT '0' COMMENT '题目顺序(0正常 1随机)',
+  `show_answer` tinyint DEFAULT '0' COMMENT '显示答案(0不显示 1立即显示 2考试结束后)',
+  `status` tinyint DEFAULT '0' COMMENT '状态(0草稿 1已发布 2进行中 3已结束)',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '备注',
+  `late_submit` tinyint(1) DEFAULT '0' COMMENT '是否允许迟交',
+  `late_time` int DEFAULT '0' COMMENT '迟交时间（分钟）',
+  `auto_submit` tinyint(1) DEFAULT '1' COMMENT '是否自动提交',
+  `student_count` int DEFAULT '0' COMMENT '学生数量',
+  `question_count` int DEFAULT '0' COMMENT '题目数量',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_course_id` (`course_id`) USING BTREE,
+  KEY `idx_session_id` (`session_id`) USING BTREE,
+  KEY `idx_status` (`status`) USING BTREE,
+  KEY `idx_start_time` (`start_time`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='考试基本信息表';
 
 -- ----------------------------
@@ -473,30 +473,30 @@ INSERT INTO `class_exam` VALUES ('21', '00000', '5', '1', '1', '6.00', '4.00', '
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_answer`;
 CREATE TABLE `class_exam_answer` (
-                                     `id` bigint NOT NULL AUTO_INCREMENT COMMENT '答案ID',
-                                     `exam_id` bigint NOT NULL COMMENT '考试ID',
-                                     `student_id` bigint NOT NULL COMMENT '学生ID',
-                                     `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
-                                     `question_id` bigint NOT NULL COMMENT '题目ID',
-                                     `student_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '学生答案',
-                                     `answer_files` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件文件(多个用逗号分隔)',
-                                     `is_correct` tinyint DEFAULT NULL COMMENT '是否正确(客观题)',
-                                     `score` decimal(5,2) DEFAULT '0.00' COMMENT '得分',
-                                     `corrector_id` bigint DEFAULT NULL COMMENT '批改人ID',
-                                     `correct_time` datetime DEFAULT NULL COMMENT '批改时间',
-                                     `correct_comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '批改评语',
-                                     `answer_duration` int DEFAULT '0' COMMENT '答题耗时(秒)',
-                                     `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                     `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                     `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目内容快照',
-                                     `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目选项快照(JSON)',
-                                     `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '正确答案快照',
-                                     PRIMARY KEY (`id`) USING BTREE,
-                                     UNIQUE KEY `uk_exam_student_question` (`exam_id`,`student_id`,`question_id`) USING BTREE,
-                                     KEY `idx_student_no` (`student_no`) USING BTREE,
-                                     KEY `idx_question_id` (`question_id`) USING BTREE,
-                                     KEY `idx_corrector_id` (`corrector_id`) USING BTREE,
-                                     KEY `idx_student_id` (`student_id`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '答案ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `student_id` bigint NOT NULL COMMENT '学生ID',
+  `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
+  `question_id` bigint NOT NULL COMMENT '题目ID',
+  `student_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '学生答案',
+  `answer_files` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件文件(多个用逗号分隔)',
+  `is_correct` tinyint DEFAULT NULL COMMENT '是否正确(客观题)',
+  `score` decimal(5,2) DEFAULT '0.00' COMMENT '得分',
+  `corrector_id` bigint DEFAULT NULL COMMENT '批改人ID',
+  `correct_time` datetime DEFAULT NULL COMMENT '批改时间',
+  `correct_comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '批改评语',
+  `answer_duration` int DEFAULT '0' COMMENT '答题耗时(秒)',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目内容快照',
+  `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目选项快照(JSON)',
+  `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '正确答案快照',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_exam_student_question` (`exam_id`,`student_id`,`question_id`) USING BTREE,
+  KEY `idx_student_no` (`student_no`) USING BTREE,
+  KEY `idx_question_id` (`question_id`) USING BTREE,
+  KEY `idx_corrector_id` (`corrector_id`) USING BTREE,
+  KEY `idx_student_id` (`student_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='学生答案表';
 
 -- ----------------------------
@@ -538,21 +538,21 @@ INSERT INTO `class_exam_answer` VALUES ('34', '17', '38', '2023141460368', '39',
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_monitor`;
 CREATE TABLE `class_exam_monitor` (
-                                      `id` bigint NOT NULL AUTO_INCREMENT COMMENT '监控ID',
-                                      `exam_id` bigint NOT NULL COMMENT '考试ID',
-                                      `student_id` bigint NOT NULL COMMENT '学生ID',
-                                      `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
-                                      `event_type` tinyint NOT NULL COMMENT '事件类型(1切屏 2异常IP 3强制交卷 4开始考试 5提交试卷)',
-                                      `event_time` datetime NOT NULL COMMENT '事件时间',
-                                      `event_detail` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '事件详情',
-                                      `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IP地址',
-                                      `handled` tinyint DEFAULT '0' COMMENT '是否已处理(0否 1是)',
-                                      `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                      PRIMARY KEY (`id`) USING BTREE,
-                                      KEY `idx_student_no` (`student_no`) USING BTREE,
-                                      KEY `idx_exam_student` (`exam_id`,`student_id`) USING BTREE,
-                                      KEY `idx_event_type` (`event_type`) USING BTREE,
-                                      KEY `idx_event_time` (`event_time`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '监控ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `student_id` bigint NOT NULL COMMENT '学生ID',
+  `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
+  `event_type` tinyint NOT NULL COMMENT '事件类型(1切屏 2异常IP 3强制交卷 4开始考试 5提交试卷)',
+  `event_time` datetime NOT NULL COMMENT '事件时间',
+  `event_detail` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '事件详情',
+  `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IP地址',
+  `handled` tinyint DEFAULT '0' COMMENT '是否已处理(0否 1是)',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_student_no` (`student_no`) USING BTREE,
+  KEY `idx_exam_student` (`exam_id`,`student_id`) USING BTREE,
+  KEY `idx_event_type` (`event_type`) USING BTREE,
+  KEY `idx_event_time` (`event_time`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='考试监控记录表';
 
 -- ----------------------------
@@ -564,30 +564,30 @@ CREATE TABLE `class_exam_monitor` (
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_participant`;
 CREATE TABLE `class_exam_participant` (
-                                          `id` bigint NOT NULL AUTO_INCREMENT COMMENT '记录ID',
-                                          `exam_id` bigint NOT NULL COMMENT '考试ID',
-                                          `student_id` bigint NOT NULL COMMENT '学生ID',
-                                          `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
-                                          `student_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学生姓名',
-                                          `participant_status` tinyint DEFAULT '0' COMMENT '参与状态(0未开始 1进行中 2已完成 3缺考)',
-                                          `start_time` datetime DEFAULT NULL COMMENT '开始时间',
-                                          `submit_time` datetime DEFAULT NULL COMMENT '提交时间',
-                                          `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IP地址',
-                                          `device_info` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '设备信息',
-                                          `total_score` decimal(5,2) DEFAULT '0.00' COMMENT '总得分',
-                                          `time_used` int DEFAULT '0' COMMENT '用时(秒)',
-                                          `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                          `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                          `objective_score` decimal(5,2) DEFAULT '0.00' COMMENT '客观题得分',
-                                          `subjective_score` decimal(5,2) DEFAULT '0.00' COMMENT '主观题得分',
-                                          `correct_status` tinyint DEFAULT '0' COMMENT '批改状态(0未批改 1已批改)',
-                                          `pass_status` tinyint DEFAULT '0' COMMENT '及格状态(0不及格 1及格)',
-                                          PRIMARY KEY (`id`) USING BTREE,
-                                          UNIQUE KEY `uk_exam_student` (`exam_id`,`student_id`) USING BTREE,
-                                          KEY `idx_student_no` (`student_no`) USING BTREE,
-                                          KEY `idx_participant_status` (`participant_status`) USING BTREE,
-                                          KEY `idx_student_id` (`student_id`) USING BTREE,
-                                          KEY `idx_submit_time` (`submit_time`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `student_id` bigint NOT NULL COMMENT '学生ID',
+  `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
+  `student_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学生姓名',
+  `participant_status` tinyint DEFAULT '0' COMMENT '参与状态(0未开始 1进行中 2已完成 3缺考)',
+  `start_time` datetime DEFAULT NULL COMMENT '开始时间',
+  `submit_time` datetime DEFAULT NULL COMMENT '提交时间',
+  `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IP地址',
+  `device_info` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '设备信息',
+  `total_score` decimal(5,2) DEFAULT '0.00' COMMENT '总得分',
+  `time_used` int DEFAULT '0' COMMENT '用时(秒)',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `objective_score` decimal(5,2) DEFAULT '0.00' COMMENT '客观题得分',
+  `subjective_score` decimal(5,2) DEFAULT '0.00' COMMENT '主观题得分',
+  `correct_status` tinyint DEFAULT '0' COMMENT '批改状态(0未批改 1已批改)',
+  `pass_status` tinyint DEFAULT '0' COMMENT '及格状态(0不及格 1及格)',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_exam_student` (`exam_id`,`student_id`) USING BTREE,
+  KEY `idx_student_no` (`student_no`) USING BTREE,
+  KEY `idx_participant_status` (`participant_status`) USING BTREE,
+  KEY `idx_student_id` (`student_id`) USING BTREE,
+  KEY `idx_submit_time` (`submit_time`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='考试参与记录表';
 
 -- ----------------------------
@@ -607,26 +607,26 @@ INSERT INTO `class_exam_participant` VALUES ('9', '19', '38', '2023141460368', '
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_question`;
 CREATE TABLE `class_exam_question` (
-                                       `id` bigint NOT NULL AUTO_INCREMENT COMMENT '题目ID',
-                                       `exam_id` bigint NOT NULL COMMENT '考试ID',
-                                       `question_type` tinyint NOT NULL COMMENT '题型(1单选 2多选 3判断 4填空 5简答 6文件)',
-                                       `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '题目内容',
-                                       `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '选项(JSON格式: ["选项A","选项B","选项C","选项D"])',
-                                       `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '正确答案',
-                                       `analysis` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目解析',
-                                       `score` decimal(5,2) NOT NULL COMMENT '题目分值',
-                                       `difficulty` tinyint DEFAULT '1' COMMENT '难度系数(1简单 2一般 3困难)',
-                                       `sort_order` int DEFAULT '0' COMMENT '排序序号',
-                                       `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                       `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                       `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                       `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                       `subject` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '学科分类(如: 数学/英语/物理)',
-                                       PRIMARY KEY (`id`) USING BTREE,
-                                       KEY `idx_exam_id` (`exam_id`) USING BTREE,
-                                       KEY `idx_question_type` (`question_type`) USING BTREE,
-                                       KEY `idx_difficulty` (`difficulty`) USING BTREE,
-                                       KEY `idx_exam_question_subject` (`exam_id`,`subject`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '题目ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `question_type` tinyint NOT NULL COMMENT '题型(1单选 2多选 3判断 4填空 5简答 6文件)',
+  `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '题目内容',
+  `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '选项(JSON格式: ["选项A","选项B","选项C","选项D"])',
+  `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '正确答案',
+  `analysis` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目解析',
+  `score` decimal(5,2) NOT NULL COMMENT '题目分值',
+  `difficulty` tinyint DEFAULT '1' COMMENT '难度系数(1简单 2一般 3困难)',
+  `sort_order` int DEFAULT '0' COMMENT '排序序号',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `subject` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '学科分类(如: 数学/英语/物理)',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_exam_id` (`exam_id`) USING BTREE,
+  KEY `idx_question_type` (`question_type`) USING BTREE,
+  KEY `idx_difficulty` (`difficulty`) USING BTREE,
+  KEY `idx_exam_question_subject` (`exam_id`,`subject`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='题目表';
 
 -- ----------------------------
@@ -684,14 +684,14 @@ INSERT INTO `class_exam_question` VALUES ('56', '21', '3', '6', '', 'true', '', 
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_session`;
 CREATE TABLE `class_exam_session` (
-                                      `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
-                                      `exam_id` bigint NOT NULL COMMENT '考试ID',
-                                      `session_id` bigint NOT NULL COMMENT '课堂ID',
-                                      `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                      PRIMARY KEY (`id`) USING BTREE,
-                                      UNIQUE KEY `uk_exam_session` (`exam_id`,`session_id`) USING BTREE,
-                                      KEY `idx_exam_id` (`exam_id`) USING BTREE,
-                                      KEY `idx_session_id` (`session_id`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_exam_session` (`exam_id`,`session_id`) USING BTREE,
+  KEY `idx_exam_id` (`exam_id`) USING BTREE,
+  KEY `idx_session_id` (`session_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='考试与课堂关联表';
 
 -- ----------------------------
@@ -703,23 +703,23 @@ CREATE TABLE `class_exam_session` (
 -- ----------------------------
 DROP TABLE IF EXISTS `class_forum_comment`;
 CREATE TABLE `class_forum_comment` (
-                                       `comment_id` bigint NOT NULL AUTO_INCREMENT COMMENT '评论ID',
-                                       `post_id` bigint NOT NULL COMMENT '帖子ID',
-                                       `user_id` bigint NOT NULL COMMENT '评论用户ID',
-                                       `parent_id` bigint DEFAULT '0' COMMENT '父评论ID（0表示顶级评论）',
-                                       `reply_to_user_id` bigint DEFAULT NULL COMMENT '回复目标用户ID',
-                                       `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '评论内容',
-                                       `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                                       `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                       `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                       `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                       `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                       PRIMARY KEY (`comment_id`) USING BTREE,
-                                       KEY `idx_comment_post_id` (`post_id`) USING BTREE,
-                                       KEY `idx_comment_user_id` (`user_id`) USING BTREE,
-                                       KEY `idx_parent_id` (`parent_id`) USING BTREE,
-                                       CONSTRAINT `fk_comment_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                                       CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `comment_id` bigint NOT NULL AUTO_INCREMENT COMMENT '评论ID',
+  `post_id` bigint NOT NULL COMMENT '帖子ID',
+  `user_id` bigint NOT NULL COMMENT '评论用户ID',
+  `parent_id` bigint DEFAULT '0' COMMENT '父评论ID（0表示顶级评论）',
+  `reply_to_user_id` bigint DEFAULT NULL COMMENT '回复目标用户ID',
+  `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '评论内容',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`comment_id`) USING BTREE,
+  KEY `idx_comment_post_id` (`post_id`) USING BTREE,
+  KEY `idx_comment_user_id` (`user_id`) USING BTREE,
+  KEY `idx_parent_id` (`parent_id`) USING BTREE,
+  CONSTRAINT `fk_comment_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='论坛评论表';
 
 -- ----------------------------
@@ -748,19 +748,19 @@ INSERT INTO `class_forum_comment` VALUES ('117', '125', '1', '0', null, '呕', '
 -- ----------------------------
 DROP TABLE IF EXISTS `class_forum_like`;
 CREATE TABLE `class_forum_like` (
-                                    `like_id` bigint NOT NULL AUTO_INCREMENT COMMENT '点赞ID',
-                                    `post_id` bigint NOT NULL COMMENT '帖子ID',
-                                    `user_id` bigint NOT NULL COMMENT '点赞用户ID',
-                                    `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                                    `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                    `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                    `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                    PRIMARY KEY (`like_id`) USING BTREE,
-                                    UNIQUE KEY `idx_post_user` (`post_id`,`user_id`) USING BTREE,
-                                    KEY `idx_like_user_id` (`user_id`) USING BTREE,
-                                    CONSTRAINT `fk_like_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                                    CONSTRAINT `fk_like_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `like_id` bigint NOT NULL AUTO_INCREMENT COMMENT '点赞ID',
+  `post_id` bigint NOT NULL COMMENT '帖子ID',
+  `user_id` bigint NOT NULL COMMENT '点赞用户ID',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`like_id`) USING BTREE,
+  UNIQUE KEY `idx_post_user` (`post_id`,`user_id`) USING BTREE,
+  KEY `idx_like_user_id` (`user_id`) USING BTREE,
+  CONSTRAINT `fk_like_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_like_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='论坛点赞表';
 
 -- ----------------------------
@@ -791,22 +791,22 @@ INSERT INTO `class_forum_like` VALUES ('122', '125', '1', '2', 'admin', '2025-11
 -- ----------------------------
 DROP TABLE IF EXISTS `class_forum_post`;
 CREATE TABLE `class_forum_post` (
-                                    `post_id` bigint NOT NULL AUTO_INCREMENT COMMENT '帖子ID',
-                                    `user_id` bigint NOT NULL COMMENT '发布用户ID',
-                                    `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '帖子内容',
-                                    `image_urls` varchar(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '图片URL列表，逗号分隔',
-                                    `like_count` int DEFAULT '0' COMMENT '点赞数',
-                                    `comment_count` int DEFAULT '0' COMMENT '评论数',
-                                    `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
-                                    `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                                    `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                    `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                    `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                    `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-                                    PRIMARY KEY (`post_id`) USING BTREE,
-                                    KEY `idx_user_id` (`user_id`) USING BTREE,
-                                    CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `post_id` bigint NOT NULL AUTO_INCREMENT COMMENT '帖子ID',
+  `user_id` bigint NOT NULL COMMENT '发布用户ID',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '帖子内容',
+  `image_urls` varchar(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '图片URL列表，逗号分隔',
+  `like_count` int DEFAULT '0' COMMENT '点赞数',
+  `comment_count` int DEFAULT '0' COMMENT '评论数',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`post_id`) USING BTREE,
+  KEY `idx_user_id` (`user_id`) USING BTREE,
+  CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=126 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='论坛帖子表';
 
 -- ----------------------------
@@ -833,22 +833,22 @@ INSERT INTO `class_forum_post` VALUES ('125', '1', 'well', '/profile/forum_20251
 -- ----------------------------
 DROP TABLE IF EXISTS `class_group`;
 CREATE TABLE `class_group` (
-                               `group_id` bigint NOT NULL AUTO_INCREMENT COMMENT '小组ID',
-                               `group_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '小组名称',
-                               `owner_user_id` bigint NOT NULL COMMENT '创建者ID (FK sys_user)',
-                               `group_number` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '小组号 (唯一)',
-                               `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '小组头像URL',
-                               `qr_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '小组二维码URL (占位)',
-                               `latest_message_id` bigint DEFAULT NULL COMMENT '最新消息ID (FK class_group_message)',
-                               `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                               `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                               `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                               `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                               `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                               PRIMARY KEY (`group_id`) USING BTREE,
-                               UNIQUE KEY `idx_group_number` (`group_number`) USING BTREE,
-                               KEY `idx_owner_user_id` (`owner_user_id`) USING BTREE,
-                               CONSTRAINT `fk_group_owner` FOREIGN KEY (`owner_user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `group_id` bigint NOT NULL AUTO_INCREMENT COMMENT '小组ID',
+  `group_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '小组名称',
+  `owner_user_id` bigint NOT NULL COMMENT '创建者ID (FK sys_user)',
+  `group_number` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '小组号 (唯一)',
+  `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '小组头像URL',
+  `qr_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '小组二维码URL (占位)',
+  `latest_message_id` bigint DEFAULT NULL COMMENT '最新消息ID (FK class_group_message)',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`group_id`) USING BTREE,
+  UNIQUE KEY `idx_group_number` (`group_number`) USING BTREE,
+  KEY `idx_owner_user_id` (`owner_user_id`) USING BTREE,
+  CONSTRAINT `fk_group_owner` FOREIGN KEY (`owner_user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='小组讨论-信息表';
 
 -- ----------------------------
@@ -865,21 +865,21 @@ INSERT INTO `class_group` VALUES ('104', '金融大数据', '1', '061244', '/pro
 -- ----------------------------
 DROP TABLE IF EXISTS `class_group_member`;
 CREATE TABLE `class_group_member` (
-                                      `member_id` bigint NOT NULL AUTO_INCREMENT COMMENT '成员ID',
-                                      `group_id` bigint NOT NULL COMMENT '小组ID (FK)',
-                                      `user_id` bigint NOT NULL COMMENT '用户ID (FK)',
-                                      `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 2已移除）',
-                                      `last_read_message_id` bigint DEFAULT '0' COMMENT '最后已读消息ID (用于计算未读)',
-                                      `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                                      `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '邀请者/加入者',
-                                      `create_time` datetime DEFAULT NULL COMMENT '加入时间',
-                                      `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                      `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                      PRIMARY KEY (`member_id`) USING BTREE,
-                                      UNIQUE KEY `idx_group_user` (`group_id`,`user_id`) USING BTREE,
-                                      KEY `fk_member_user` (`user_id`) USING BTREE,
-                                      CONSTRAINT `fk_member_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                                      CONSTRAINT `fk_member_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `member_id` bigint NOT NULL AUTO_INCREMENT COMMENT '成员ID',
+  `group_id` bigint NOT NULL COMMENT '小组ID (FK)',
+  `user_id` bigint NOT NULL COMMENT '用户ID (FK)',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 2已移除）',
+  `last_read_message_id` bigint DEFAULT '0' COMMENT '最后已读消息ID (用于计算未读)',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '邀请者/加入者',
+  `create_time` datetime DEFAULT NULL COMMENT '加入时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`member_id`) USING BTREE,
+  UNIQUE KEY `idx_group_user` (`group_id`,`user_id`) USING BTREE,
+  KEY `fk_member_user` (`user_id`) USING BTREE,
+  CONSTRAINT `fk_member_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_member_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=218 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='小组讨论-成员表';
 
 -- ----------------------------
@@ -904,19 +904,19 @@ INSERT INTO `class_group_member` VALUES ('217', '104', '1', '0', '363', '0', 'ad
 -- ----------------------------
 DROP TABLE IF EXISTS `class_group_message`;
 CREATE TABLE `class_group_message` (
-                                       `message_id` bigint NOT NULL AUTO_INCREMENT COMMENT '消息ID',
-                                       `group_id` bigint NOT NULL COMMENT '小组ID (FK)',
-                                       `sender_user_id` bigint NOT NULL COMMENT '发送者ID (FK)',
-                                       `message_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '消息类型（0文本 1图片 9系统）',
-                                       `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息内容（文本/图片URL/系统提示）',
-                                       `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                                       `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                       `create_time` datetime DEFAULT NULL COMMENT '发送时间',
-                                       PRIMARY KEY (`message_id`) USING BTREE,
-                                       KEY `idx_group_time` (`group_id`,`create_time` DESC) USING BTREE,
-                                       KEY `fk_message_sender` (`sender_user_id`) USING BTREE,
-                                       CONSTRAINT `fk_message_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                                       CONSTRAINT `fk_message_sender` FOREIGN KEY (`sender_user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `message_id` bigint NOT NULL AUTO_INCREMENT COMMENT '消息ID',
+  `group_id` bigint NOT NULL COMMENT '小组ID (FK)',
+  `sender_user_id` bigint NOT NULL COMMENT '发送者ID (FK)',
+  `message_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '消息类型（0文本 1图片 9系统）',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息内容（文本/图片URL/系统提示）',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '发送时间',
+  PRIMARY KEY (`message_id`) USING BTREE,
+  KEY `idx_group_time` (`group_id`,`create_time` DESC) USING BTREE,
+  KEY `fk_message_sender` (`sender_user_id`) USING BTREE,
+  CONSTRAINT `fk_message_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_message_sender` FOREIGN KEY (`sender_user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=364 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='小组讨论-消息表';
 
 -- ----------------------------
@@ -992,28 +992,28 @@ INSERT INTO `class_group_message` VALUES ('363', '104', '1', '0', '吃饭', '0',
 -- ----------------------------
 DROP TABLE IF EXISTS `class_homework`;
 CREATE TABLE `class_homework` (
-                                  `homework_id` bigint NOT NULL AUTO_INCREMENT COMMENT '作业ID',
-                                  `course_id` bigint NOT NULL COMMENT '课程ID',
-                                  `session_id` bigint NOT NULL COMMENT '课堂ID',
-                                  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '作业标题',
-                                  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业内容',
-                                  `requirement` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业要求',
-                                  `total_score` decimal(5,2) DEFAULT NULL COMMENT '作业总分',
-                                  `deadline` datetime NOT NULL COMMENT '截止时间',
-                                  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件路径',
-                                  `attachment_names` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件原名',
-                                  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
-                                  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-                                  `message_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-                                  `message_read` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-                                  PRIMARY KEY (`homework_id`) USING BTREE,
-                                  KEY `idx_course_id` (`course_id`) USING BTREE,
-                                  KEY `idx_session_id` (`session_id`) USING BTREE,
-                                  KEY `idx_deadline` (`deadline`) USING BTREE
+  `homework_id` bigint NOT NULL AUTO_INCREMENT COMMENT '作业ID',
+  `course_id` bigint NOT NULL COMMENT '课程ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '作业标题',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业内容',
+  `requirement` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业要求',
+  `total_score` decimal(5,2) DEFAULT NULL COMMENT '作业总分',
+  `deadline` datetime NOT NULL COMMENT '截止时间',
+  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件路径',
+  `attachment_names` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件原名',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+  `message_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `message_read` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  PRIMARY KEY (`homework_id`) USING BTREE,
+  KEY `idx_course_id` (`course_id`) USING BTREE,
+  KEY `idx_session_id` (`session_id`) USING BTREE,
+  KEY `idx_deadline` (`deadline`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='作业主表';
 
 -- ----------------------------
@@ -1041,17 +1041,17 @@ INSERT INTO `class_homework` VALUES ('53', '1', '1', 'QTTTT', '', null, '100.00'
 -- ----------------------------
 DROP TABLE IF EXISTS `class_login_log`;
 CREATE TABLE `class_login_log` (
-                                   `login_id` bigint NOT NULL AUTO_INCREMENT COMMENT '访问ID',
-                                   `user_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '用户账号',
-                                   `ipaddr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录IP地址',
-                                   `login_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录地点',
-                                   `browser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '浏览器类型',
-                                   `os` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作系统',
-                                   `status` int DEFAULT '0' COMMENT '登录状态（0成功 1失败）',
-                                   `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '提示消息',
-                                   `login_time` datetime DEFAULT NULL COMMENT '访问时间',
-                                   PRIMARY KEY (`login_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=128 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='系统登录日志';
+  `login_id` bigint NOT NULL AUTO_INCREMENT COMMENT '访问ID',
+  `user_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '用户账号',
+  `ipaddr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录IP地址',
+  `login_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录地点',
+  `browser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '浏览器类型',
+  `os` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作系统',
+  `status` int DEFAULT '0' COMMENT '登录状态（0成功 1失败）',
+  `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '提示消息',
+  `login_time` datetime DEFAULT NULL COMMENT '访问时间',
+  PRIMARY KEY (`login_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=132 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='系统登录日志';
 
 -- ----------------------------
 -- Records of class_login_log
@@ -1183,28 +1183,32 @@ INSERT INTO `class_login_log` VALUES ('124', '未知用户', '127.0.0.1', '内�
 INSERT INTO `class_login_log` VALUES ('125', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', '0', '登录成功', '2025-11-21 23:24:55');
 INSERT INTO `class_login_log` VALUES ('126', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-21 23:26:16');
 INSERT INTO `class_login_log` VALUES ('127', 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', '0', '登录成功', '2025-11-21 23:26:23');
+INSERT INTO `class_login_log` VALUES ('128', 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', '0', '登录成功', '2025-11-22 23:08:24');
+INSERT INTO `class_login_log` VALUES ('129', '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-22 23:22:39');
+INSERT INTO `class_login_log` VALUES ('130', 'admin', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', '0', '登录成功', '2025-11-22 23:22:49');
+INSERT INTO `class_login_log` VALUES ('131', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-22 23:30:16');
 
 -- ----------------------------
 -- Table structure for class_material
 -- ----------------------------
 DROP TABLE IF EXISTS `class_material`;
 CREATE TABLE `class_material` (
-                                  `material_id` bigint NOT NULL AUTO_INCREMENT COMMENT '资料ID',
-                                  `session_id` bigint NOT NULL COMMENT '课堂ID',
-                                  `material_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '资料名称',
-                                  `file_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '文件类型',
-                                  `file_size` bigint DEFAULT '0' COMMENT '文件大小(字节)',
-                                  `file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '文件路径',
-                                  `push_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '推送状态（0未推送 1已推送）',
-                                  `push_time` datetime DEFAULT NULL COMMENT '推送时间',
-                                  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-                                  PRIMARY KEY (`material_id`) USING BTREE,
-                                  KEY `idx_session_id` (`session_id`) USING BTREE,
-                                  KEY `idx_push_status` (`push_status`) USING BTREE
+  `material_id` bigint NOT NULL AUTO_INCREMENT COMMENT '资料ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `material_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '资料名称',
+  `file_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '文件类型',
+  `file_size` bigint DEFAULT '0' COMMENT '文件大小(字节)',
+  `file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '文件路径',
+  `push_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '推送状态（0未推送 1已推送）',
+  `push_time` datetime DEFAULT NULL COMMENT '推送时间',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`material_id`) USING BTREE,
+  KEY `idx_session_id` (`session_id`) USING BTREE,
+  KEY `idx_push_status` (`push_status`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='资料表';
 
 -- ----------------------------
@@ -1220,15 +1224,15 @@ INSERT INTO `class_material` VALUES ('13', '9', 'PS1.docx', 'docx', '16522', '20
 -- ----------------------------
 DROP TABLE IF EXISTS `class_notice`;
 CREATE TABLE `class_notice` (
-                                `notice_id` bigint NOT NULL AUTO_INCREMENT,
-                                `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `create_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
-                                `update_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                                `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-                                `del_flag` tinyint(1) DEFAULT '0' COMMENT '0=存在,1=已删除',
-                                PRIMARY KEY (`notice_id`) USING BTREE
+  `notice_id` bigint NOT NULL AUTO_INCREMENT,
+  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `create_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `del_flag` tinyint(1) DEFAULT '0' COMMENT '0=存在,1=已删除',
+  PRIMARY KEY (`notice_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='课堂模块：通告表';
 
 -- ----------------------------
@@ -1243,24 +1247,24 @@ INSERT INTO `class_notice` VALUES ('3', '哭哭哭', '<p>，</p>', 'admin', '202
 -- ----------------------------
 DROP TABLE IF EXISTS `class_oper_log`;
 CREATE TABLE `class_oper_log` (
-                                  `oper_id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志主键',
-                                  `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '模块标题',
-                                  `business_type` int DEFAULT '0' COMMENT '业务类型（0其它 1新增 2修改 3删除）',
-                                  `method` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '方法名称',
-                                  `request_method` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求方式',
-                                  `operator_type` int DEFAULT '0' COMMENT '操作类别（0其它 1后台用户 2手机端用户）',
-                                  `oper_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作人员',
-                                  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '部门名称',
-                                  `oper_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求URL',
-                                  `oper_ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '主机地址',
-                                  `oper_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作地点',
-                                  `oper_param` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求参数',
-                                  `json_result` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '返回参数',
-                                  `status` int DEFAULT '0' COMMENT '操作状态（0正常 1异常）',
-                                  `error_msg` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '错误消息',
-                                  `oper_time` datetime DEFAULT NULL COMMENT '操作时间',
-                                  PRIMARY KEY (`oper_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=208 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='操作日志记录';
+  `oper_id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志主键',
+  `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '模块标题',
+  `business_type` int DEFAULT '0' COMMENT '业务类型（0其它 1新增 2修改 3删除）',
+  `method` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '方法名称',
+  `request_method` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求方式',
+  `operator_type` int DEFAULT '0' COMMENT '操作类别（0其它 1后台用户 2手机端用户）',
+  `oper_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作人员',
+  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '部门名称',
+  `oper_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求URL',
+  `oper_ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '主机地址',
+  `oper_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作地点',
+  `oper_param` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求参数',
+  `json_result` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '返回参数',
+  `status` int DEFAULT '0' COMMENT '操作状态（0正常 1异常）',
+  `error_msg` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '错误消息',
+  `oper_time` datetime DEFAULT NULL COMMENT '操作时间',
+  PRIMARY KEY (`oper_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=211 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='操作日志记录';
 
 -- ----------------------------
 -- Records of class_oper_log
@@ -1469,6 +1473,9 @@ INSERT INTO `class_oper_log` VALUES ('204', '密码重置', '2', 'com.ruoyi.web.
 INSERT INTO `class_oper_log` VALUES ('205', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":2,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"msg\\\":\\\"密码重置成功，请使用新密码登录\\\",\\\"code\\\":200}\",\"method\":\"com.ruoyi.web.controller.proj_cyq.ClassPasswordResetController.resetPassword()\",\"operId\":204,\"operIp\":\"127.0.0.1\",\"operName\":\"系统用户\",\"operParam\":\"{\\\"token\\\":\\\"28040e1d6a284750a673f0fe8a0ce520\\\",\\\"newPassword\\\":\\\"admin123\\\"}\",\"operTime\":\"2025-11-21 23:24:34\",\"operUrl\":\"/proj_cyq/password/reset-password\",\"operatorType\":1,\"params\":{},\"requestMethod\":\"POST\",\"status\":0,\"title\":\"密码重置\"},{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"msg\\\":\\\"重置邮件已发送（chenrabbitcyq@163.com），请在30分钟内查收。\\\",\\\"code\\\":200}\",\"method\":\"com.ruoyi.web.controller.proj_cyq.ClassPasswordResetController.requestReset()\",\"operId\":203,\"operIp\":\"127.0.0.1\",\"operName\":\"系统用户\",\"operParam\":\"{\\\"userName\\\":\\\"teacher_zhang\\\"}\",\"operTime\":\"2025-11-21 23:22:33\",\"operUrl\":\"/proj_cyq/password/request-reset\",\"operatorType\":1,\"params\":{},\"requestMethod\":\"POST\",\"status\":0,\"title\":\"密码重置\"},{\"businessType\":0,\"deptName\":\"系统部门\",\"errorMsg\":\"\\r\\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_password_reset\' doesn\'t exist\\r\\n### The error may exist in com/ruoyi/proj_cyq/mapper/ClassPasswordResetMapper.java (best guess)\\r\\n### The error may involve com.ruoyi.proj_cyq.mapper.ClassPasswordResetMapper.insert-Inline\\r\\n### The error occurred while setting parameters\\r\\n### SQL: INSERT INTO class_password_reset(user_id, email, token, expire_time, used_flag, create_time) VALUES(?, ?, ?, ?, 0, NOW())\\r\\n### Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_password_reset\' doesn\'t exist\\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_password_reset\' doesn\'t exist\",\"method\":\"com.ruoyi.web.controller.proj_cyq.ClassPasswordResetController.requestReset()\",\"operId\":202,\"operIp\":\"127.0.0.1\",\"operName\":\"系统用户\",\"operParam\":\"{\\\"userName\\\":\\\"teacher_zhang\\\"}\",\"operTime\":\"2025-11-21 23:17:42\",\"operUrl\":\"/proj_c', '0', null, '2025-11-21 23:25:29');
 INSERT INTO `class_oper_log` VALUES ('206', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"businessType\\\":2,\\\"deptName\\\":\\\"系统部门\\\",\\\"jsonResult\\\":\\\"{\\\\\\\"msg\\\\\\\":\\\\\\\"密码重置成功，请使用新密码登录\\\\\\\",\\\\\\\"code\\\\\\\":200}\\\",\\\"method\\\":\\\"com.ruoyi.web.controller.proj_cyq.ClassPasswordResetController.resetPassword()\\\",\\\"operId\\\":204,\\\"operIp\\\":\\\"127.0.0.1\\\",\\\"operName\\\":\\\"系统用户\\\",\\\"operParam\\\":\\\"{\\\\\\\"token\\\\\\\":\\\\\\\"28040e1d6a284750a673f0fe8a0ce520\\\\\\\",\\\\\\\"newPassword\\\\\\\":\\\\\\\"admin123\\\\\\\"}\\\",\\\"operTime\\\":\\\"2025-11-21 23:24:34\\\",\\\"operUrl\\\":\\\"/proj_cyq/password/reset-password\\\",\\\"operatorType\\\":1,\\\"params\\\":{},\\\"requestMethod\\\":\\\"POST\\\",\\\"status\\\":0,\\\"title\\\":\\\"密码重置\\\"},{\\\"businessType\\\":0,\\\"deptName\\\":\\\"系统部门\\\",\\\"jsonResult\\\":\\\"{\\\\\\\"msg\\\\\\\":\\\\\\\"重置邮件已发送（chenrabbitcyq@163.com），请在30分钟内查收。\\\\\\\",\\\\\\\"code\\\\\\\":200}\\\",\\\"method\\\":\\\"com.ruoyi.web.controller.proj_cyq.ClassPasswordResetController.requestReset()\\\",\\\"operId\\\":203,\\\"operIp\\\":\\\"127.0.0.1\\\",\\\"operName\\\":\\\"系统用户\\\",\\\"operParam\\\":\\\"{\\\\\\\"userName\\\\\\\":\\\\\\\"teacher_zhang\\\\\\\"}\\\",\\\"operTime\\\":\\\"2025-11-21 23:22:33\\\",\\\"operUrl\\\":\\\"/proj_cyq/password/request-reset\\\",\\\"operatorType\\\":1,\\\"params\\\":{},\\\"requestMethod\\\":\\\"POST\\\",\\\"status\\\":0,\\\"title\\\":\\\"密码重置\\\"},{\\\"businessType\\\":0,\\\"deptName\\\":\\\"系统部门\\\",\\\"errorMsg\\\":\\\"\\\\r\\\\n### Error updating database.  Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_password_reset\' doesn\'t exist\\\\r\\\\n### The error may exist in com/ruoyi/proj_cyq/mapper/ClassPasswordResetMapper.java (best guess)\\\\r\\\\n### The error may involve com.ruoyi.proj_cyq.mapper.ClassPasswordResetMapper.insert-Inline\\\\r\\\\n### The error occurred while setting parameters\\\\r\\\\n### SQL: INSERT INTO class_password_reset(user_id, email, token, expire_time, used_flag, create_time) VALUES(?, ?, ?, ?, 0, NOW())\\\\r\\\\n### Cause: java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_password_reset\' doesn\'t exist\\\\n; bad SQL grammar []; nested exception is java.sql.SQLSyntaxErrorException: Table \'ry-vue.class_password_', '0', null, '2025-11-21 23:25:35');
 INSERT INTO `class_oper_log` VALUES ('207', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":125,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 23:24:55\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":124,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 23:17:12\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"未知用户\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":123,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 22:49:16\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":122,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 21:50:29\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":121,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 19:30:46\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":120,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 18:55:37\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":119,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 06:09:27\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":118,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-20 23:52:47\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":117,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-20 20:03:45\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":116,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-18 16:52:43\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"}],\"total\":125}', '0', null, '2025-11-21 23:25:38');
+INSERT INTO `class_oper_log` VALUES ('208', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":128,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-22 23:08:24\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":127,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 23:26:23\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":126,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 23:26:16\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":125,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 23:24:55\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":124,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 23:17:12\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"未知用户\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":123,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 22:49:16\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":122,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 21:50:29\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":121,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 19:30:46\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":120,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 18:55:37\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":119,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 06:09:27\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"}],\"total\":128}', '0', null, '2025-11-22 23:10:13');
+INSERT INTO `class_oper_log` VALUES ('209', '操作日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassOperLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/operlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"businessType\":0,\"deptName\":\"系统部门\",\"jsonResult\":\"{\\\"code\\\":200,\\\"msg\\\":\\\"查询成功\\\",\\\"rows\\\":[{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":128,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-22 23:08:24\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":127,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-21 23:26:23\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":126,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-21 23:26:16\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"teacher_zhang\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":125,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-21 23:24:55\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"teacher_zhang\\\"},{\\\"browser\\\":\\\"Chrome 14\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":124,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-21 23:17:12\\\",\\\"msg\\\":\\\"退出成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"未知用户\\\"},{\\\"browser\\\":\\\"Chrome\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":123,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-21 22:49:16\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Microsoft Edge\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":122,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-21 21:50:29\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Microsoft Edge\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":121,\\\"loginLocation\\\":\\\"内网IP\\\",\\\"loginTime\\\":\\\"2025-11-21 19:30:46\\\",\\\"msg\\\":\\\"登录成功\\\",\\\"os\\\":\\\"Windows 10\\\",\\\"params\\\":{},\\\"status\\\":0,\\\"userName\\\":\\\"admin\\\"},{\\\"browser\\\":\\\"Microsoft Edge\\\",\\\"ipaddr\\\":\\\"127.0.0.1\\\",\\\"loginId\\\":120,\\\"logi', '0', null, '2025-11-22 23:10:38');
+INSERT INTO `class_oper_log` VALUES ('210', '登录日志', '0', 'com.ruoyi.web.controller.proj_cyq.ClassLoginLogController.list()', 'GET', '1', '系统用户', '系统部门', '/proj_cyq/loginlog/list', '127.0.0.1', null, '{\"params\":{}}', '{\"code\":200,\"msg\":\"查询成功\",\"rows\":[{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":128,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-22 23:08:24\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":127,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 23:26:23\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":126,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 23:26:16\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":125,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 23:24:55\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"teacher_zhang\"},{\"browser\":\"Chrome 14\",\"ipaddr\":\"127.0.0.1\",\"loginId\":124,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 23:17:12\",\"msg\":\"退出成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"未知用户\"},{\"browser\":\"Chrome\",\"ipaddr\":\"127.0.0.1\",\"loginId\":123,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 22:49:16\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":122,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 21:50:29\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":121,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 19:30:46\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":120,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 18:55:37\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"},{\"browser\":\"Microsoft Edge\",\"ipaddr\":\"127.0.0.1\",\"loginId\":119,\"loginLocation\":\"内网IP\",\"loginTime\":\"2025-11-21 06:09:27\",\"msg\":\"登录成功\",\"os\":\"Windows 10\",\"params\":{},\"status\":0,\"userName\":\"admin\"}],\"total\":128}', '0', null, '2025-11-22 23:10:45');
 
 -- ----------------------------
 -- Table structure for class_password_reset
@@ -2206,7 +2213,7 @@ INSERT INTO `sys_config` VALUES ('1', '主框架页-默认皮肤样式名称', '
 INSERT INTO `sys_config` VALUES ('2', '用户管理-账号初始密码', 'sys.user.initPassword', '123456', 'Y', 'admin', '2025-10-30 17:06:55', '', null, '初始化密码 123456');
 INSERT INTO `sys_config` VALUES ('3', '主框架页-侧边栏主题', 'sys.index.sideTheme', 'theme-dark', 'Y', 'admin', '2025-10-30 17:06:55', '', null, '深色主题theme-dark，浅色主题theme-light');
 INSERT INTO `sys_config` VALUES ('4', '账号自助-验证码开关', 'sys.account.captchaEnabled', 'true', 'Y', 'admin', '2025-10-30 17:06:55', '', null, '是否开启验证码功能（true开启，false关闭）');
-INSERT INTO `sys_config` VALUES ('5', '账号自助-是否开启用户注册功能', 'sys.account.registerUser', 'false', 'Y', 'admin', '2025-10-30 17:06:55', '', null, '是否开启注册用户功能（true开启，false关闭）');
+INSERT INTO `sys_config` VALUES ('5', '账号自助-是否开启用户注册功能', 'sys.account.registerUser', 'true', 'Y', 'admin', '2025-10-30 17:06:55', 'admin', '2025-11-22 23:22:30', '是否开启注册用户功能（true开启，false关闭）');
 INSERT INTO `sys_config` VALUES ('6', '用户登录-黑名单列表', 'sys.login.blackIPList', '', 'Y', 'admin', '2025-10-30 17:06:55', '', null, '设置登录IP黑名单限制，多个匹配项以;分隔，支持匹配（*通配、网段）');
 INSERT INTO `sys_config` VALUES ('7', '用户管理-初始密码修改策略', 'sys.account.initPasswordModify', '1', 'Y', 'admin', '2025-10-30 17:06:55', '', null, '0：初始密码修改策略关闭，没有任何提示，1：提醒用户，如果未修改初始密码，则在登录时就会提醒修改密码对话框');
 INSERT INTO `sys_config` VALUES ('8', '用户管理-账号密码更新周期', 'sys.account.passwordValidateDays', '0', 'Y', 'admin', '2025-10-30 17:06:55', '', null, '密码更新周期（填写数字，数据初始化值为0不限制，若修改必须为大于0小于365的正整数），如果超过这个周期登录系统时，则在登录时就会提醒修改密码对话框');
@@ -2428,7 +2435,7 @@ CREATE TABLE `sys_logininfor` (
   PRIMARY KEY (`info_id`) USING BTREE,
   KEY `idx_sys_logininfor_s` (`status`) USING BTREE,
   KEY `idx_sys_logininfor_lt` (`login_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=357 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='系统访问记录';
+) ENGINE=InnoDB AUTO_INCREMENT=361 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='系统访问记录';
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -2690,6 +2697,10 @@ INSERT INTO `sys_logininfor` VALUES ('353', 'admin', '127.0.0.1', '内网IP', 'C
 INSERT INTO `sys_logininfor` VALUES ('354', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-21 23:24:55');
 INSERT INTO `sys_logininfor` VALUES ('355', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-21 23:26:15');
 INSERT INTO `sys_logininfor` VALUES ('356', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-21 23:26:23');
+INSERT INTO `sys_logininfor` VALUES ('357', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-22 23:08:24');
+INSERT INTO `sys_logininfor` VALUES ('358', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-22 23:22:38');
+INSERT INTO `sys_logininfor` VALUES ('359', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-22 23:22:49');
+INSERT INTO `sys_logininfor` VALUES ('360', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-22 23:30:15');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -2904,7 +2915,7 @@ CREATE TABLE `sys_oper_log` (
   KEY `idx_sys_oper_log_bt` (`business_type`) USING BTREE,
   KEY `idx_sys_oper_log_s` (`status`) USING BTREE,
   KEY `idx_sys_oper_log_ot` (`oper_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=667 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='操作日志记录';
+) ENGINE=InnoDB AUTO_INCREMENT=668 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='操作日志记录';
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -3476,6 +3487,7 @@ INSERT INTO `sys_oper_log` VALUES ('663', '作业提交', '2', 'com.ruoyi.web.co
 INSERT INTO `sys_oper_log` VALUES ('664', '菜单管理', '1', 'com.ruoyi.web.controller.system.SysMenuController.add()', 'POST', '1', 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createBy\":\"admin\",\"icon\":\"color\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuName\":\"参与热力\",\"menuType\":\"C\",\"orderNum\":4,\"params\":{},\"parentId\":2009,\"path\":\"participationHeat\",\"status\":\"0\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-21 23:10:59', '37');
 INSERT INTO `sys_oper_log` VALUES ('665', '文章管理', '1', 'com.ruoyi.web.controller.proj_qhy.BbsArticleController.add()', 'POST', '1', 'admin', '研发部门', '/proj_qhy/article', '127.0.0.1', '内网IP', '{\"articleType\":\"技术\",\"author\":\"admin\",\"bookmarkCount\":0,\"commentCount\":0,\"content\":\"<p>我头像呢</p>\",\"hateCount\":0,\"id\":11,\"likeCount\":0,\"params\":{},\"status\":\"editting\",\"title\":\"haha\",\"userId\":1,\"viewCount\":0}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-21 23:13:23', '14');
 INSERT INTO `sys_oper_log` VALUES ('666', '文章管理', '2', 'com.ruoyi.web.controller.proj_qhy.BbsArticleController.edit()', 'PUT', '1', 'admin', '研发部门', '/proj_qhy/article', '127.0.0.1', '内网IP', '{\"articleType\":\"技术\",\"author\":\"admin\",\"bookmarkCount\":0,\"commentCount\":0,\"content\":\"<p>我头像呢</p>\",\"cover\":\"/profile/upload/2025/11/21/屏幕截图 2025-05-24 014721_20251121231416A004.png\",\"createTime\":\"2025-11-21 23:13:23\",\"hateCount\":0,\"id\":11,\"likeCount\":0,\"params\":{},\"status\":\"editting\",\"title\":\"haha\",\"updateBy\":\"\",\"updateTime\":\"2025-11-21 23:13:26\",\"userId\":1,\"viewCount\":1}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-21 23:14:18', '34');
+INSERT INTO `sys_oper_log` VALUES ('667', '参数管理', '2', 'com.ruoyi.web.controller.system.SysConfigController.edit()', 'PUT', '1', 'admin', '研发部门', '/system/config', '127.0.0.1', '内网IP', '{\"configId\":5,\"configKey\":\"sys.account.registerUser\",\"configName\":\"账号自助-是否开启用户注册功能\",\"configType\":\"Y\",\"configValue\":\"true\",\"createBy\":\"admin\",\"createTime\":\"2025-10-30 17:06:55\",\"params\":{},\"remark\":\"是否开启注册用户功能（true开启，false关闭）\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-22 23:22:30', '9');
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -3944,7 +3956,7 @@ CREATE TABLE `sys_user` (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES ('1', '103', 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-21 23:26:23', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', null, '管理员');
+INSERT INTO `sys_user` VALUES ('1', '103', 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-22 23:22:49', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', null, '管理员');
 INSERT INTO `sys_user` VALUES ('2', '105', 'ry', '张三', '00', 'ry@qq.com', '15666666666', '1', 'https://img0.baidu.com/it/u=3661017254,2148146033&fm=253&app=138&f=JPEG?w=500&h=500', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-16 05:31:17', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', null, '测试员');
 INSERT INTO `sys_user` VALUES ('3', '103', 'student1', '李比', '00', 'student1@school.com', '13800138001', '0', 'https://img0.baidu.com/it/u=2660145230,331641081&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=625', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-15 23:16:27', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', null, '学生');
 INSERT INTO `sys_user` VALUES ('4', '105', 'teacher1', '王老师', '01', 'teacher1@school.com', '13900139001', '1', 'https://picsum.photos/200/200?random=2', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 11:20:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', null, '教师');

@@ -89,6 +89,14 @@ public class CaptchaController
 
         ajax.put("uuid", uuid);
         ajax.put("img", Base64.encode(os.toByteArray()));
+
+        // ========== ↓↓↓ 添加这一行 ↓↓↓ ==========
+        // 手动将注册开关状态放入返回结果中
+        // 注意：如果您的版本没有 selectRegisterEnabled 方法，可以使用 selectConfigByKey("sys.account.registerUser")
+        boolean registerEnabled = Boolean.parseBoolean(configService.selectConfigByKey("sys.account.registerUser"));
+        ajax.put("register", registerEnabled);
+        // ========== ↑↑↑ 添加结束 ↑↑↑ ==========
+
         return ajax;
     }
 }

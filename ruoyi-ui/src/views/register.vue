@@ -59,9 +59,7 @@
         </div>
       </el-form-item>
     </el-form>
-    <!--  底部  -->
     <div class="el-register-footer">
-      <span>Copyright © 2018-2025 ruoyi.vip All Rights Reserved.</span>
     </div>
   </div>
 </template>
@@ -159,26 +157,66 @@ export default {
 .title {
   margin: 0px auto 30px auto;
   text-align: center;
-  color: #707070;
+  color: #F2F6FC;      /* 登录页的标题颜色 */
+  font-size: 30px;     /* 登录页的大小 */
+  font-weight: 600;    /* 登录页的粗细 */
+  letter-spacing: 1px;
 }
 
 .register-form {
   border-radius: 6px;
-  background: #ffffff;
+  /* 修改为玻璃拟态背景 */
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   width: 400px;
   padding: 25px 25px 5px 25px;
+
   .el-input {
     height: 38px;
     input {
       height: 38px;
+      /* 输入框样式修改 */
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid #FFFFFF;
+      border-radius: 0;
+      color: #ffffff;
+
+      &::placeholder {
+        color: #ffffff;
+      }
     }
   }
   .input-icon {
     height: 39px;
     width: 14px;
     margin-left: 2px;
+    color: #ffffff; /* 图标改为白色 */
+  }
+
+  /* 按钮样式修改 */
+  .el-form-item .el-button--primary {
+    width: 100% !important;
+    background: linear-gradient(90deg, #f05d49, #4285f4) !important;
+    border: none !important;
+    border-radius: 18px !important;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+  /* 链接样式修改 */
+  .link-type {
+    color: #ffffff;
+    text-decoration: none;
+    &:hover {
+      color: #c3d770;
+    }
   }
 }
+
 .register-tip {
   font-size: 13px;
   text-align: center;
