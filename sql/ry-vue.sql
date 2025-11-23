@@ -1,7 +1,7 @@
 /*
 Navicat MySQL Data Transfer
 
-Source Server         : cyq
+Source Server         : localhost
 Source Server Version : 80042
 Source Host           : localhost:3306
 Source Database       : ry-vue
@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 80042
 File Encoding         : 65001
 
-Date: 2025-11-23 22:50:37
+Date: 2025-11-23 23:08:28
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -20,31 +20,31 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `class_article`;
 CREATE TABLE `class_article` (
-                                 `id` bigint NOT NULL AUTO_INCREMENT COMMENT '文章ID',
-                                 `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文章标题',
-                                 `digest` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '文章摘要',
-                                 `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '文章内容',
-                                 `cover` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '封面图片',
-                                 `article_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '技术' COMMENT '文章分类',
-                                 `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'editting' COMMENT '状态：editting-编辑中,published-已发布,draft-草稿',
-                                 `view_count` bigint DEFAULT '0' COMMENT '阅读数',
-                                 `comment_count` bigint DEFAULT '0' COMMENT '评论数',
-                                 `like_count` bigint DEFAULT '0' COMMENT '点赞数',
-                                 `hate_count` bigint DEFAULT '0' COMMENT '点踩数',
-                                 `bookmark_count` bigint DEFAULT '0' COMMENT '收藏数',
-                                 `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '作者',
-                                 `user_id` bigint DEFAULT NULL COMMENT '用户ID',
-                                 `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-                                 `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                 `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-                                 `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                 `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-                                 PRIMARY KEY (`id`) USING BTREE,
-                                 KEY `idx_title` (`title`) USING BTREE,
-                                 KEY `idx_author` (`author`) USING BTREE,
-                                 KEY `idx_create_time` (`create_time`) USING BTREE,
-                                 KEY `idx_article_type` (`article_type`) USING BTREE,
-                                 KEY `idx_status` (`status`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '文章ID',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文章标题',
+  `digest` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '文章摘要',
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '文章内容',
+  `cover` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '封面图片',
+  `article_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '技术' COMMENT '文章分类',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'editting' COMMENT '状态：editting-编辑中,published-已发布,draft-草稿',
+  `view_count` bigint DEFAULT '0' COMMENT '阅读数',
+  `comment_count` bigint DEFAULT '0' COMMENT '评论数',
+  `like_count` bigint DEFAULT '0' COMMENT '点赞数',
+  `hate_count` bigint DEFAULT '0' COMMENT '点踩数',
+  `bookmark_count` bigint DEFAULT '0' COMMENT '收藏数',
+  `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '作者',
+  `user_id` bigint DEFAULT NULL COMMENT '用户ID',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_title` (`title`) USING BTREE,
+  KEY `idx_author` (`author`) USING BTREE,
+  KEY `idx_create_time` (`create_time`) USING BTREE,
+  KEY `idx_article_type` (`article_type`) USING BTREE,
+  KEY `idx_status` (`status`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章表';
 
 -- ----------------------------
@@ -62,14 +62,14 @@ INSERT INTO `class_article` VALUES ('11', 'haha', null, '<p>我头像呢</p>', '
 -- ----------------------------
 DROP TABLE IF EXISTS `class_article_like`;
 CREATE TABLE `class_article_like` (
-                                      `id` bigint NOT NULL AUTO_INCREMENT,
-                                      `article_id` bigint NOT NULL,
-                                      `user_id` bigint NOT NULL,
-                                      `like_status` int NOT NULL COMMENT '1-点赞, -1-点踩, 0-无',
-                                      `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
-                                      `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                                      PRIMARY KEY (`id`) USING BTREE,
-                                      UNIQUE KEY `uk_article_user` (`article_id`,`user_id`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `article_id` bigint NOT NULL,
+  `user_id` bigint NOT NULL,
+  `like_status` int NOT NULL COMMENT '1-点赞, -1-点踩, 0-无',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_article_user` (`article_id`,`user_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
@@ -81,27 +81,27 @@ CREATE TABLE `class_article_like` (
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance`;
 CREATE TABLE `class_attendance` (
-                                    `attendance_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到记录唯一ID',
-                                    `session_id` bigint NOT NULL COMMENT '课堂ID（抽人/课堂级统计依赖）',
-                                    `task_id` bigint NOT NULL COMMENT '签到任务ID（对应某次签到动作）',
-                                    `student_id` bigint NOT NULL COMMENT '关联的学生ID',
-                                    `attendance_time` datetime DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
-                                    `attendance_status` tinyint NOT NULL DEFAULT '0' COMMENT '签到状态: 0未签到 1已签到 2迟到 3请假 4早退',
-                                    `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
-                                    `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-                                    `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到设备IP地址',
-                                    `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
-                                    `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到地理位置',
-                                    PRIMARY KEY (`attendance_id`) USING BTREE,
-                                    UNIQUE KEY `uq_task_student` (`task_id`,`student_id`) USING BTREE,
-                                    KEY `idx_session` (`session_id`) USING BTREE,
-                                    KEY `idx_task` (`task_id`) USING BTREE,
-                                    KEY `idx_student` (`student_id`) USING BTREE,
-                                    KEY `idx_status` (`attendance_status`) USING BTREE,
-                                    KEY `idx_attendance_time` (`attendance_time`) USING BTREE,
-                                    CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-                                    CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-                                    CONSTRAINT `fk_attendance_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `attendance_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到记录唯一ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID（抽人/课堂级统计依赖）',
+  `task_id` bigint NOT NULL COMMENT '签到任务ID（对应某次签到动作）',
+  `student_id` bigint NOT NULL COMMENT '关联的学生ID',
+  `attendance_time` datetime DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
+  `attendance_status` tinyint NOT NULL DEFAULT '0' COMMENT '签到状态: 0未签到 1已签到 2迟到 3请假 4早退',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到设备IP地址',
+  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
+  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到地理位置',
+  PRIMARY KEY (`attendance_id`) USING BTREE,
+  UNIQUE KEY `uq_task_student` (`task_id`,`student_id`) USING BTREE,
+  KEY `idx_session` (`session_id`) USING BTREE,
+  KEY `idx_task` (`task_id`) USING BTREE,
+  KEY `idx_student` (`student_id`) USING BTREE,
+  KEY `idx_status` (`attendance_status`) USING BTREE,
+  KEY `idx_attendance_time` (`attendance_time`) USING BTREE,
+  CONSTRAINT `fk_attendance_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_attendance_student` FOREIGN KEY (`student_id`) REFERENCES `class_student` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_attendance_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=130 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='学生课堂签到记录表（含 session_id + task_id）';
 
 -- ----------------------------
@@ -238,16 +238,16 @@ INSERT INTO `class_attendance` VALUES ('129', '1', '28', '1', '2025-11-21 18:57:
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance_bak`;
 CREATE TABLE `class_attendance_bak` (
-                                        `attendance_id` bigint NOT NULL DEFAULT '0' COMMENT '签到记录唯一ID',
-                                        `session_id` bigint NOT NULL COMMENT '关联的课堂ID',
-                                        `student_id` bigint NOT NULL COMMENT '关联的学生ID',
-                                        `attendance_time` datetime DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
-                                        `attendance_status` tinyint NOT NULL DEFAULT '0' COMMENT '签到状态: 0-未签到 1-已签到 2-迟到 3-请假 4-早退',
-                                        `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
-                                        `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
-                                        `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到设备IP地址',
-                                        `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
-                                        `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到地理位置'
+  `attendance_id` bigint NOT NULL DEFAULT '0' COMMENT '签到记录唯一ID',
+  `session_id` bigint NOT NULL COMMENT '关联的课堂ID',
+  `student_id` bigint NOT NULL COMMENT '关联的学生ID',
+  `attendance_time` datetime DEFAULT NULL COMMENT '实际签到时间（NULL表示未签到）',
+  `attendance_status` tinyint NOT NULL DEFAULT '0' COMMENT '签到状态: 0-未签到 1-已签到 2-迟到 3-请假 4-早退',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间',
+  `device_ip` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到设备IP地址',
+  `device_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '设备类型（Web/iOS/Android）',
+  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '签到地理位置'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
@@ -299,18 +299,18 @@ INSERT INTO `class_attendance_bak` VALUES ('40', '1', '40', null, '1', '2025-10-
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance_qr`;
 CREATE TABLE `class_attendance_qr` (
-                                       `qr_id` bigint NOT NULL AUTO_INCREMENT COMMENT '二维码 token 主键',
-                                       `task_id` bigint NOT NULL COMMENT '关联的签到任务 task_id',
-                                       `token` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '二维码 token（可为 UUID 或其他）',
-                                       `ttl_seconds` int DEFAULT NULL COMMENT '有效期（秒），null 意味着使用 task.end_time 作为判定',
-                                       `expire_time` datetime DEFAULT NULL COMMENT '到期时间（可根据 ttl_seconds 计算填入）',
-                                       `used` tinyint NOT NULL DEFAULT '0' COMMENT '是否已被使用（可选，用于一次性二维码）',
-                                       `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                                       `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
-                                       PRIMARY KEY (`qr_id`) USING BTREE,
-                                       UNIQUE KEY `uq_token` (`token`) USING BTREE,
-                                       KEY `idx_task_qr` (`task_id`) USING BTREE,
-                                       CONSTRAINT `fk_qr_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `qr_id` bigint NOT NULL AUTO_INCREMENT COMMENT '二维码 token 主键',
+  `task_id` bigint NOT NULL COMMENT '关联的签到任务 task_id',
+  `token` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '二维码 token（可为 UUID 或其他）',
+  `ttl_seconds` int DEFAULT NULL COMMENT '有效期（秒），null 意味着使用 task.end_time 作为判定',
+  `expire_time` datetime DEFAULT NULL COMMENT '到期时间（可根据 ttl_seconds 计算填入）',
+  `used` tinyint NOT NULL DEFAULT '0' COMMENT '是否已被使用（可选，用于一次性二维码）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`qr_id`) USING BTREE,
+  UNIQUE KEY `uq_token` (`token`) USING BTREE,
+  KEY `idx_task_qr` (`task_id`) USING BTREE,
+  CONSTRAINT `fk_qr_task` FOREIGN KEY (`task_id`) REFERENCES `class_attendance_task` (`task_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=71 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='签到二维码/token 表（用于动态二维码与失效控制）';
 
 -- ----------------------------
@@ -345,22 +345,22 @@ INSERT INTO `class_attendance_qr` VALUES ('70', '28', 'ca3d86609ba646688c370e521
 -- ----------------------------
 DROP TABLE IF EXISTS `class_attendance_task`;
 CREATE TABLE `class_attendance_task` (
-                                         `task_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到任务主键ID',
-                                         `session_id` bigint NOT NULL COMMENT '关联的课堂 session_id (class_session.session_id)',
-                                         `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'location' COMMENT '签到方式：location 或 qr',
-                                         `center_lat` double DEFAULT NULL COMMENT '位置签到中心纬度（仅 type=location 有效）',
-                                         `center_lng` double DEFAULT NULL COMMENT '位置签到中心经度（仅 type=location 有效）',
-                                         `radius` int DEFAULT NULL COMMENT '有效半径（米）（仅 type=location 有效）',
-                                         `qr_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '二维码静态 token 或默认值（可为空，复杂场景用 class_attendance_qr 存多 token）',
-                                         `start_time` datetime DEFAULT NULL COMMENT '签到开始时间',
-                                         `end_time` datetime DEFAULT NULL COMMENT '签到结束时间',
-                                         `status` tinyint NOT NULL DEFAULT '0' COMMENT '任务状态：0=未开始 1=进行中 2=已结束',
-                                         `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '创建者用户名',
-                                         `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                         PRIMARY KEY (`task_id`) USING BTREE,
-                                         KEY `idx_task_session` (`session_id`) USING BTREE,
-                                         KEY `idx_task_status` (`status`) USING BTREE,
-                                         CONSTRAINT `fk_task_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `task_id` bigint NOT NULL AUTO_INCREMENT COMMENT '签到任务主键ID',
+  `session_id` bigint NOT NULL COMMENT '关联的课堂 session_id (class_session.session_id)',
+  `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'location' COMMENT '签到方式：location 或 qr',
+  `center_lat` double DEFAULT NULL COMMENT '位置签到中心纬度（仅 type=location 有效）',
+  `center_lng` double DEFAULT NULL COMMENT '位置签到中心经度（仅 type=location 有效）',
+  `radius` int DEFAULT NULL COMMENT '有效半径（米）（仅 type=location 有效）',
+  `qr_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '二维码静态 token 或默认值（可为空，复杂场景用 class_attendance_qr 存多 token）',
+  `start_time` datetime DEFAULT NULL COMMENT '签到开始时间',
+  `end_time` datetime DEFAULT NULL COMMENT '签到结束时间',
+  `status` tinyint NOT NULL DEFAULT '0' COMMENT '任务状态：0=未开始 1=进行中 2=已结束',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '创建者用户名',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`task_id`) USING BTREE,
+  KEY `idx_task_session` (`session_id`) USING BTREE,
+  KEY `idx_task_status` (`status`) USING BTREE,
+  CONSTRAINT `fk_task_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='签到任务表（记录签到活动：位置/二维码等）';
 
 -- ----------------------------
@@ -390,21 +390,21 @@ INSERT INTO `class_attendance_task` VALUES ('29', '1', 'qr', null, null, '500', 
 -- ----------------------------
 DROP TABLE IF EXISTS `class_course`;
 CREATE TABLE `class_course` (
-                                `course_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课程ID',
-                                `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程名称',
-                                `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程编号',
-                                `course_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '课程类型',
-                                `college` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '所属学院',
-                                `credit` decimal(3,1) DEFAULT NULL COMMENT '学分',
-                                `introduction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '课程简介',
-                                `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',
-                                `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-                                PRIMARY KEY (`course_id`) USING BTREE,
-                                UNIQUE KEY `idx_course_code` (`course_code`) USING BTREE
+  `course_id` bigint NOT NULL AUTO_INCREMENT COMMENT '课程ID',
+  `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程名称',
+  `course_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '课程编号',
+  `course_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '课程类型',
+  `college` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '所属学院',
+  `credit` decimal(3,1) DEFAULT NULL COMMENT '学分',
+  `introduction` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '课程简介',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1停用）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`course_id`) USING BTREE,
+  UNIQUE KEY `idx_course_code` (`course_code`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='课程信息表';
 
 -- ----------------------------
@@ -419,41 +419,143 @@ INSERT INTO `class_course` VALUES ('7', '121', '12', '1', '222', '0.0', '1', '0'
 INSERT INTO `class_course` VALUES ('8', '123123', '112', '212', '11', '0.0', '111', '0', 'admin', '2025-11-04 22:22:02', '', null, null);
 
 -- ----------------------------
+-- Table structure for class_debate
+-- ----------------------------
+DROP TABLE IF EXISTS `class_debate`;
+CREATE TABLE `class_debate` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '辩论ID',
+  `title` varchar(255) NOT NULL COMMENT '辩题',
+  `pro_viewpoint` varchar(255) NOT NULL COMMENT '正方观点',
+  `con_viewpoint` varchar(255) NOT NULL COMMENT '反方观点',
+  `invite_code` varchar(20) NOT NULL COMMENT '邀请码',
+  `status` char(1) DEFAULT '0' COMMENT '状态（0未开始 1进行中 2已结束）',
+  `winner` char(1) DEFAULT NULL COMMENT '获胜方（1正方 2反方 0平局）',
+  `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `speech_limit` int DEFAULT '60' COMMENT '每轮发言时长(秒)',
+  `current_turn` int DEFAULT '0' COMMENT '当前回合数(1-10)',
+  `current_role` char(1) DEFAULT NULL COMMENT '当前发言方(1正 2反)',
+  `turn_start_time` datetime DEFAULT NULL COMMENT '当前回合开始时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='课堂辩论主表';
+
+-- ----------------------------
+-- Records of class_debate
+-- ----------------------------
+INSERT INTO `class_debate` VALUES ('1', 'AI是否会取代人类', 'AI会取代人类', 'AI是人类的工具', 'A1B2C3', '2', '1', 'admin', '2025-11-23 19:17:34', 'admin', '2025-11-23 20:07:19', '60', '0', null, null);
+INSERT INTO `class_debate` VALUES ('2', '躺平还是内卷?', '躺平', '内卷', 'CB0B4A', '2', '2', 'admin', '2025-11-23 20:38:45', 'admin', '2025-11-23 20:52:42', '60', '4', '1', '2025-11-23 20:52:25');
+INSERT INTO `class_debate` VALUES ('3', '理解需不需要共情', '需要', '不需要', '032BF1', '0', null, 'admin', '2025-11-23 21:15:06', '', null, '60', '0', null, null);
+
+-- ----------------------------
+-- Table structure for class_debate_like
+-- ----------------------------
+DROP TABLE IF EXISTS `class_debate_like`;
+CREATE TABLE `class_debate_like` (
+  `like_id` bigint NOT NULL AUTO_INCREMENT COMMENT '点赞ID',
+  `debate_id` bigint NOT NULL COMMENT '辩论ID',
+  `user_id` bigint NOT NULL COMMENT '点赞用户ID',
+  `team` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '支持的队伍（P=正方, N=反方）',
+  `create_time` datetime DEFAULT NULL COMMENT '点赞时间',
+  PRIMARY KEY (`like_id`),
+  UNIQUE KEY `uk_debate_user_like` (`debate_id`,`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=302 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='辩论点赞记录表';
+
+-- ----------------------------
+-- Records of class_debate_like
+-- ----------------------------
+INSERT INTO `class_debate_like` VALUES ('301', '101', '1', 'P', '2025-11-23 18:05:39');
+
+-- ----------------------------
+-- Table structure for class_debate_msg
+-- ----------------------------
+DROP TABLE IF EXISTS `class_debate_msg`;
+CREATE TABLE `class_debate_msg` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `debate_id` bigint NOT NULL,
+  `user_id` bigint NOT NULL,
+  `nick_name` varchar(64) DEFAULT NULL,
+  `role` char(1) NOT NULL COMMENT '发送者当时身份',
+  `content` varchar(1000) DEFAULT NULL COMMENT '内容',
+  `create_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='辩论消息表';
+
+-- ----------------------------
+-- Records of class_debate_msg
+-- ----------------------------
+INSERT INTO `class_debate_msg` VALUES ('1', '1', '3', '李比', '2', '我是正方辩手', '2025-11-23 19:42:02');
+INSERT INTO `class_debate_msg` VALUES ('2', '1', '3', '李比', '2', '说错了，反方，', '2025-11-23 19:42:16');
+INSERT INTO `class_debate_msg` VALUES ('3', '1', '3', '李比', '2', '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111', '2025-11-23 19:42:35');
+INSERT INTO `class_debate_msg` VALUES ('4', '1', '2', '张三', '1', '我是正方', '2025-11-23 20:06:49');
+INSERT INTO `class_debate_msg` VALUES ('5', '2', '3', '李比', '2', '我是反方一', '2025-11-23 20:50:12');
+INSERT INTO `class_debate_msg` VALUES ('6', '2', '2', '张三', '1', '我是正方一', '2025-11-23 20:50:57');
+
+-- ----------------------------
+-- Table structure for class_debate_user
+-- ----------------------------
+DROP TABLE IF EXISTS `class_debate_user`;
+CREATE TABLE `class_debate_user` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `debate_id` bigint NOT NULL COMMENT '辩论ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `nick_name` varchar(64) DEFAULT NULL COMMENT '用户昵称',
+  `role` char(1) NOT NULL COMMENT '身份（1正方 2反方 3观众）',
+  `vote_side` char(1) DEFAULT NULL COMMENT '投票支持方（1正方 2反方）',
+  `join_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_debate_user` (`debate_id`,`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='辩论参与用户表';
+
+-- ----------------------------
+-- Records of class_debate_user
+-- ----------------------------
+INSERT INTO `class_debate_user` VALUES ('1', '1', '1', '若依', '3', '1', '2025-11-23 19:17:34');
+INSERT INTO `class_debate_user` VALUES ('2', '1', '2', '张三', '1', null, '2025-11-23 19:35:25');
+INSERT INTO `class_debate_user` VALUES ('3', '1', '3', '李比', '2', null, '2025-11-23 19:36:22');
+INSERT INTO `class_debate_user` VALUES ('4', '2', '1', '若依', '3', '2', '2025-11-23 20:38:45');
+INSERT INTO `class_debate_user` VALUES ('5', '2', '2', '张三', '1', null, '2025-11-23 20:42:10');
+INSERT INTO `class_debate_user` VALUES ('6', '2', '3', '李比', '2', null, '2025-11-23 20:42:30');
+INSERT INTO `class_debate_user` VALUES ('7', '2', '101', '李同学', '3', '2', '2025-11-23 20:48:55');
+INSERT INTO `class_debate_user` VALUES ('8', '3', '1', '若依', '3', null, '2025-11-23 21:15:05');
+
+-- ----------------------------
 -- Table structure for class_exam
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam`;
 CREATE TABLE `class_exam` (
-                              `id` bigint NOT NULL AUTO_INCREMENT COMMENT '考试ID',
-                              `exam_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '考试名称',
-                              `exam_type` tinyint NOT NULL COMMENT '考试类型(1期中 2期末 3测验 4模拟考 5课堂测验)',
-                              `course_id` bigint NOT NULL COMMENT '课程ID',
-                              `session_id` bigint NOT NULL COMMENT '课堂ID',
-                              `total_score` decimal(5,2) NOT NULL COMMENT '考试总分',
-                              `pass_score` decimal(5,2) NOT NULL COMMENT '及格分数',
-                              `exam_duration` int NOT NULL COMMENT '考试时长(分钟)',
-                              `start_time` datetime NOT NULL COMMENT '考试开始时间',
-                              `end_time` datetime NOT NULL COMMENT '考试结束时间',
-                              `exam_mode` tinyint DEFAULT '1' COMMENT '考试模式(1定时考试 2随到随考)',
-                              `anti_cheat` tinyint DEFAULT '0' COMMENT '防作弊设置(0关闭 1开启)',
-                              `question_order` tinyint DEFAULT '0' COMMENT '题目顺序(0正常 1随机)',
-                              `show_answer` tinyint DEFAULT '0' COMMENT '显示答案(0不显示 1立即显示 2考试结束后)',
-                              `status` tinyint DEFAULT '0' COMMENT '状态(0草稿 1已发布 2进行中 3已结束)',
-                              `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                              `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                              `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                              `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                              `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '备注',
-                              `late_submit` tinyint(1) DEFAULT '0' COMMENT '是否允许迟交',
-                              `late_time` int DEFAULT '0' COMMENT '迟交时间（分钟）',
-                              `auto_submit` tinyint(1) DEFAULT '1' COMMENT '是否自动提交',
-                              `student_count` int DEFAULT '0' COMMENT '学生数量',
-                              `question_count` int DEFAULT '0' COMMENT '题目数量',
-                              PRIMARY KEY (`id`) USING BTREE,
-                              UNIQUE KEY `uk_session_exam_name` (`session_id`,`exam_name`) USING BTREE,
-                              KEY `idx_course_id` (`course_id`) USING BTREE,
-                              KEY `idx_session_id` (`session_id`) USING BTREE,
-                              KEY `idx_status` (`status`) USING BTREE,
-                              KEY `idx_start_time` (`start_time`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '考试ID',
+  `exam_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '考试名称',
+  `exam_type` tinyint NOT NULL COMMENT '考试类型(1期中 2期末 3测验 4模拟考 5课堂测验)',
+  `course_id` bigint NOT NULL COMMENT '课程ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `total_score` decimal(5,2) NOT NULL COMMENT '考试总分',
+  `pass_score` decimal(5,2) NOT NULL COMMENT '及格分数',
+  `exam_duration` int NOT NULL COMMENT '考试时长(分钟)',
+  `start_time` datetime NOT NULL COMMENT '考试开始时间',
+  `end_time` datetime NOT NULL COMMENT '考试结束时间',
+  `exam_mode` tinyint DEFAULT '1' COMMENT '考试模式(1定时考试 2随到随考)',
+  `anti_cheat` tinyint DEFAULT '0' COMMENT '防作弊设置(0关闭 1开启)',
+  `question_order` tinyint DEFAULT '0' COMMENT '题目顺序(0正常 1随机)',
+  `show_answer` tinyint DEFAULT '0' COMMENT '显示答案(0不显示 1立即显示 2考试结束后)',
+  `status` tinyint DEFAULT '0' COMMENT '状态(0草稿 1已发布 2进行中 3已结束)',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '备注',
+  `late_submit` tinyint(1) DEFAULT '0' COMMENT '是否允许迟交',
+  `late_time` int DEFAULT '0' COMMENT '迟交时间（分钟）',
+  `auto_submit` tinyint(1) DEFAULT '1' COMMENT '是否自动提交',
+  `student_count` int DEFAULT '0' COMMENT '学生数量',
+  `question_count` int DEFAULT '0' COMMENT '题目数量',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_session_exam_name` (`session_id`,`exam_name`) USING BTREE,
+  KEY `idx_course_id` (`course_id`) USING BTREE,
+  KEY `idx_session_id` (`session_id`) USING BTREE,
+  KEY `idx_status` (`status`) USING BTREE,
+  KEY `idx_start_time` (`start_time`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='考试基本信息表';
 
 -- ----------------------------
@@ -477,30 +579,30 @@ INSERT INTO `class_exam` VALUES ('27', '5', '3', '1', '1', '10.00', '6.00', '6',
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_answer`;
 CREATE TABLE `class_exam_answer` (
-                                     `id` bigint NOT NULL AUTO_INCREMENT COMMENT '答案ID',
-                                     `exam_id` bigint NOT NULL COMMENT '考试ID',
-                                     `student_id` bigint NOT NULL COMMENT '学生ID',
-                                     `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
-                                     `question_id` bigint NOT NULL COMMENT '题目ID',
-                                     `student_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '学生答案',
-                                     `answer_files` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件文件(多个用逗号分隔)',
-                                     `is_correct` tinyint DEFAULT NULL COMMENT '是否正确(客观题)',
-                                     `score` decimal(5,2) DEFAULT '0.00' COMMENT '得分',
-                                     `corrector_id` bigint DEFAULT NULL COMMENT '批改人ID',
-                                     `correct_time` datetime DEFAULT NULL COMMENT '批改时间',
-                                     `correct_comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '批改评语',
-                                     `answer_duration` int DEFAULT '0' COMMENT '答题耗时(秒)',
-                                     `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                     `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                     `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目内容快照',
-                                     `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目选项快照(JSON)',
-                                     `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '正确答案快照',
-                                     PRIMARY KEY (`id`) USING BTREE,
-                                     UNIQUE KEY `uk_exam_student_question` (`exam_id`,`student_id`,`question_id`) USING BTREE,
-                                     KEY `idx_student_no` (`student_no`) USING BTREE,
-                                     KEY `idx_question_id` (`question_id`) USING BTREE,
-                                     KEY `idx_corrector_id` (`corrector_id`) USING BTREE,
-                                     KEY `idx_student_id` (`student_id`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '答案ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `student_id` bigint NOT NULL COMMENT '学生ID',
+  `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
+  `question_id` bigint NOT NULL COMMENT '题目ID',
+  `student_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '学生答案',
+  `answer_files` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件文件(多个用逗号分隔)',
+  `is_correct` tinyint DEFAULT NULL COMMENT '是否正确(客观题)',
+  `score` decimal(5,2) DEFAULT '0.00' COMMENT '得分',
+  `corrector_id` bigint DEFAULT NULL COMMENT '批改人ID',
+  `correct_time` datetime DEFAULT NULL COMMENT '批改时间',
+  `correct_comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '批改评语',
+  `answer_duration` int DEFAULT '0' COMMENT '答题耗时(秒)',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目内容快照',
+  `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目选项快照(JSON)',
+  `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '正确答案快照',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_exam_student_question` (`exam_id`,`student_id`,`question_id`) USING BTREE,
+  KEY `idx_student_no` (`student_no`) USING BTREE,
+  KEY `idx_question_id` (`question_id`) USING BTREE,
+  KEY `idx_corrector_id` (`corrector_id`) USING BTREE,
+  KEY `idx_student_id` (`student_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='学生答案表';
 
 -- ----------------------------
@@ -563,31 +665,31 @@ INSERT INTO `class_exam_answer` VALUES ('55', '27', '38', '2023141460368', '91',
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_backup`;
 CREATE TABLE `class_exam_backup` (
-                                     `id` bigint NOT NULL DEFAULT '0' COMMENT '考试ID',
-                                     `exam_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '考试名称',
-                                     `exam_type` tinyint NOT NULL COMMENT '考试类型(1期中 2期末 3测验 4模拟考 5课堂测验)',
-                                     `course_id` bigint NOT NULL COMMENT '课程ID',
-                                     `session_id` bigint NOT NULL COMMENT '课堂ID',
-                                     `total_score` decimal(5,2) NOT NULL COMMENT '考试总分',
-                                     `pass_score` decimal(5,2) NOT NULL COMMENT '及格分数',
-                                     `exam_duration` int NOT NULL COMMENT '考试时长(分钟)',
-                                     `start_time` datetime NOT NULL COMMENT '考试开始时间',
-                                     `end_time` datetime NOT NULL COMMENT '考试结束时间',
-                                     `exam_mode` tinyint DEFAULT '1' COMMENT '考试模式(1定时考试 2随到随考)',
-                                     `anti_cheat` tinyint DEFAULT '0' COMMENT '防作弊设置(0关闭 1开启)',
-                                     `question_order` tinyint DEFAULT '0' COMMENT '题目顺序(0正常 1随机)',
-                                     `show_answer` tinyint DEFAULT '0' COMMENT '显示答案(0不显示 1立即显示 2考试结束后)',
-                                     `status` tinyint DEFAULT '0' COMMENT '状态(0草稿 1已发布 2进行中 3已结束)',
-                                     `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                     `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                     `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                     `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                     `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '备注',
-                                     `late_submit` tinyint(1) DEFAULT '0' COMMENT '是否允许迟交',
-                                     `late_time` int DEFAULT '0' COMMENT '迟交时间（分钟）',
-                                     `auto_submit` tinyint(1) DEFAULT '1' COMMENT '是否自动提交',
-                                     `student_count` int DEFAULT '0' COMMENT '学生数量',
-                                     `question_count` int DEFAULT '0' COMMENT '题目数量'
+  `id` bigint NOT NULL DEFAULT '0' COMMENT '考试ID',
+  `exam_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '考试名称',
+  `exam_type` tinyint NOT NULL COMMENT '考试类型(1期中 2期末 3测验 4模拟考 5课堂测验)',
+  `course_id` bigint NOT NULL COMMENT '课程ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `total_score` decimal(5,2) NOT NULL COMMENT '考试总分',
+  `pass_score` decimal(5,2) NOT NULL COMMENT '及格分数',
+  `exam_duration` int NOT NULL COMMENT '考试时长(分钟)',
+  `start_time` datetime NOT NULL COMMENT '考试开始时间',
+  `end_time` datetime NOT NULL COMMENT '考试结束时间',
+  `exam_mode` tinyint DEFAULT '1' COMMENT '考试模式(1定时考试 2随到随考)',
+  `anti_cheat` tinyint DEFAULT '0' COMMENT '防作弊设置(0关闭 1开启)',
+  `question_order` tinyint DEFAULT '0' COMMENT '题目顺序(0正常 1随机)',
+  `show_answer` tinyint DEFAULT '0' COMMENT '显示答案(0不显示 1立即显示 2考试结束后)',
+  `status` tinyint DEFAULT '0' COMMENT '状态(0草稿 1已发布 2进行中 3已结束)',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '备注',
+  `late_submit` tinyint(1) DEFAULT '0' COMMENT '是否允许迟交',
+  `late_time` int DEFAULT '0' COMMENT '迟交时间（分钟）',
+  `auto_submit` tinyint(1) DEFAULT '1' COMMENT '是否自动提交',
+  `student_count` int DEFAULT '0' COMMENT '学生数量',
+  `question_count` int DEFAULT '0' COMMENT '题目数量'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
@@ -601,21 +703,21 @@ INSERT INTO `class_exam_backup` VALUES ('20', '第一次测试', '3', '1', '1', 
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_monitor`;
 CREATE TABLE `class_exam_monitor` (
-                                      `id` bigint NOT NULL AUTO_INCREMENT COMMENT '监控ID',
-                                      `exam_id` bigint NOT NULL COMMENT '考试ID',
-                                      `student_id` bigint NOT NULL COMMENT '学生ID',
-                                      `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
-                                      `event_type` tinyint NOT NULL COMMENT '事件类型(1切屏 2异常IP 3强制交卷 4开始考试 5提交试卷)',
-                                      `event_time` datetime NOT NULL COMMENT '事件时间',
-                                      `event_detail` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '事件详情',
-                                      `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IP地址',
-                                      `handled` tinyint DEFAULT '0' COMMENT '是否已处理(0否 1是)',
-                                      `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                      PRIMARY KEY (`id`) USING BTREE,
-                                      KEY `idx_student_no` (`student_no`) USING BTREE,
-                                      KEY `idx_exam_student` (`exam_id`,`student_id`) USING BTREE,
-                                      KEY `idx_event_type` (`event_type`) USING BTREE,
-                                      KEY `idx_event_time` (`event_time`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '监控ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `student_id` bigint NOT NULL COMMENT '学生ID',
+  `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
+  `event_type` tinyint NOT NULL COMMENT '事件类型(1切屏 2异常IP 3强制交卷 4开始考试 5提交试卷)',
+  `event_time` datetime NOT NULL COMMENT '事件时间',
+  `event_detail` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '事件详情',
+  `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IP地址',
+  `handled` tinyint DEFAULT '0' COMMENT '是否已处理(0否 1是)',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_student_no` (`student_no`) USING BTREE,
+  KEY `idx_exam_student` (`exam_id`,`student_id`) USING BTREE,
+  KEY `idx_event_type` (`event_type`) USING BTREE,
+  KEY `idx_event_time` (`event_time`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='考试监控记录表';
 
 -- ----------------------------
@@ -627,30 +729,30 @@ CREATE TABLE `class_exam_monitor` (
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_participant`;
 CREATE TABLE `class_exam_participant` (
-                                          `id` bigint NOT NULL AUTO_INCREMENT COMMENT '记录ID',
-                                          `exam_id` bigint NOT NULL COMMENT '考试ID',
-                                          `student_id` bigint NOT NULL COMMENT '学生ID',
-                                          `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
-                                          `student_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学生姓名',
-                                          `participant_status` tinyint DEFAULT '0' COMMENT '参与状态(0未开始 1进行中 2已完成 3缺考)',
-                                          `start_time` datetime DEFAULT NULL COMMENT '开始时间',
-                                          `submit_time` datetime DEFAULT NULL COMMENT '提交时间',
-                                          `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IP地址',
-                                          `device_info` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '设备信息',
-                                          `total_score` decimal(5,2) DEFAULT '0.00' COMMENT '总得分',
-                                          `time_used` int DEFAULT '0' COMMENT '用时(秒)',
-                                          `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                          `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                          `objective_score` decimal(5,2) DEFAULT '0.00' COMMENT '客观题得分',
-                                          `subjective_score` decimal(5,2) DEFAULT '0.00' COMMENT '主观题得分',
-                                          `correct_status` tinyint DEFAULT '0' COMMENT '批改状态(0未批改 1已批改)',
-                                          `pass_status` tinyint DEFAULT '0' COMMENT '及格状态(0不及格 1及格)',
-                                          PRIMARY KEY (`id`) USING BTREE,
-                                          UNIQUE KEY `uk_exam_student` (`exam_id`,`student_id`) USING BTREE,
-                                          KEY `idx_student_no` (`student_no`) USING BTREE,
-                                          KEY `idx_participant_status` (`participant_status`) USING BTREE,
-                                          KEY `idx_student_id` (`student_id`) USING BTREE,
-                                          KEY `idx_submit_time` (`submit_time`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `student_id` bigint NOT NULL COMMENT '学生ID',
+  `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学号',
+  `student_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学生姓名',
+  `participant_status` tinyint DEFAULT '0' COMMENT '参与状态(0未开始 1进行中 2已完成 3缺考)',
+  `start_time` datetime DEFAULT NULL COMMENT '开始时间',
+  `submit_time` datetime DEFAULT NULL COMMENT '提交时间',
+  `ip_address` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IP地址',
+  `device_info` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '设备信息',
+  `total_score` decimal(5,2) DEFAULT '0.00' COMMENT '总得分',
+  `time_used` int DEFAULT '0' COMMENT '用时(秒)',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `objective_score` decimal(5,2) DEFAULT '0.00' COMMENT '客观题得分',
+  `subjective_score` decimal(5,2) DEFAULT '0.00' COMMENT '主观题得分',
+  `correct_status` tinyint DEFAULT '0' COMMENT '批改状态(0未批改 1已批改)',
+  `pass_status` tinyint DEFAULT '0' COMMENT '及格状态(0不及格 1及格)',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_exam_student` (`exam_id`,`student_id`) USING BTREE,
+  KEY `idx_student_no` (`student_no`) USING BTREE,
+  KEY `idx_participant_status` (`participant_status`) USING BTREE,
+  KEY `idx_student_id` (`student_id`) USING BTREE,
+  KEY `idx_submit_time` (`submit_time`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='考试参与记录表';
 
 -- ----------------------------
@@ -674,27 +776,27 @@ INSERT INTO `class_exam_participant` VALUES ('15', '27', '38', '2023141460368', 
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_question`;
 CREATE TABLE `class_exam_question` (
-                                       `id` bigint NOT NULL AUTO_INCREMENT COMMENT '题目ID',
-                                       `exam_id` bigint NOT NULL COMMENT '考试ID',
-                                       `question_type` tinyint NOT NULL COMMENT '题型(1单选 2多选 3判断 4填空 5简答 6文件)',
-                                       `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '题目内容',
-                                       `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '选项(JSON格式: ["选项A","选项B","选项C","选项D"])',
-                                       `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '正确答案',
-                                       `analysis` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目解析',
-                                       `score` decimal(5,2) NOT NULL COMMENT '题目分值',
-                                       `difficulty` tinyint DEFAULT '1' COMMENT '难度系数(1简单 2一般 3困难)',
-                                       `sort_order` int DEFAULT '0' COMMENT '排序序号',
-                                       `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                       `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                       `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                       `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                       `subject` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '学科分类(如: 数学/英语/物理)',
-                                       PRIMARY KEY (`id`) USING BTREE,
-                                       UNIQUE KEY `uk_exam_question_content` (`exam_id`,`question_content`(255)) USING BTREE,
-                                       KEY `idx_exam_id` (`exam_id`) USING BTREE,
-                                       KEY `idx_question_type` (`question_type`) USING BTREE,
-                                       KEY `idx_difficulty` (`difficulty`) USING BTREE,
-                                       KEY `idx_exam_question_subject` (`exam_id`,`subject`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '题目ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `question_type` tinyint NOT NULL COMMENT '题型(1单选 2多选 3判断 4填空 5简答 6文件)',
+  `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '题目内容',
+  `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '选项(JSON格式: ["选项A","选项B","选项C","选项D"])',
+  `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '正确答案',
+  `analysis` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目解析',
+  `score` decimal(5,2) NOT NULL COMMENT '题目分值',
+  `difficulty` tinyint DEFAULT '1' COMMENT '难度系数(1简单 2一般 3困难)',
+  `sort_order` int DEFAULT '0' COMMENT '排序序号',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `subject` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '学科分类(如: 数学/英语/物理)',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_exam_question_content` (`exam_id`,`question_content`(255)) USING BTREE,
+  KEY `idx_exam_id` (`exam_id`) USING BTREE,
+  KEY `idx_question_type` (`question_type`) USING BTREE,
+  KEY `idx_difficulty` (`difficulty`) USING BTREE,
+  KEY `idx_exam_question_subject` (`exam_id`,`subject`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=92 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='题目表';
 
 -- ----------------------------
@@ -783,21 +885,21 @@ INSERT INTO `class_exam_question` VALUES ('91', '27', '3', '珠穆朗玛峰是�
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_question_backup`;
 CREATE TABLE `class_exam_question_backup` (
-                                              `id` bigint NOT NULL DEFAULT '0' COMMENT '题目ID',
-                                              `exam_id` bigint NOT NULL COMMENT '考试ID',
-                                              `question_type` tinyint NOT NULL COMMENT '题型(1单选 2多选 3判断 4填空 5简答 6文件)',
-                                              `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '题目内容',
-                                              `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '选项(JSON格式: ["选项A","选项B","选项C","选项D"])',
-                                              `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '正确答案',
-                                              `analysis` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目解析',
-                                              `score` decimal(5,2) NOT NULL COMMENT '题目分值',
-                                              `difficulty` tinyint DEFAULT '1' COMMENT '难度系数(1简单 2一般 3困难)',
-                                              `sort_order` int DEFAULT '0' COMMENT '排序序号',
-                                              `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                              `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                              `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                              `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                                              `subject` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '学科分类(如: 数学/英语/物理)'
+  `id` bigint NOT NULL DEFAULT '0' COMMENT '题目ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `question_type` tinyint NOT NULL COMMENT '题型(1单选 2多选 3判断 4填空 5简答 6文件)',
+  `question_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '题目内容',
+  `question_options` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '选项(JSON格式: ["选项A","选项B","选项C","选项D"])',
+  `correct_answer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '正确答案',
+  `analysis` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '题目解析',
+  `score` decimal(5,2) NOT NULL COMMENT '题目分值',
+  `difficulty` tinyint DEFAULT '1' COMMENT '难度系数(1简单 2一般 3困难)',
+  `sort_order` int DEFAULT '0' COMMENT '排序序号',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `subject` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '学科分类(如: 数学/英语/物理)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC;
 
 -- ----------------------------
@@ -817,14 +919,14 @@ INSERT INTO `class_exam_question_backup` VALUES ('44', '18', '3', '3', '', 'true
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam_session`;
 CREATE TABLE `class_exam_session` (
-                                      `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
-                                      `exam_id` bigint NOT NULL COMMENT '考试ID',
-                                      `session_id` bigint NOT NULL COMMENT '课堂ID',
-                                      `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                                      PRIMARY KEY (`id`) USING BTREE,
-                                      UNIQUE KEY `uk_exam_session` (`exam_id`,`session_id`) USING BTREE,
-                                      KEY `idx_exam_id` (`exam_id`) USING BTREE,
-                                      KEY `idx_session_id` (`session_id`) USING BTREE
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `exam_id` bigint NOT NULL COMMENT '考试ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_exam_session` (`exam_id`,`session_id`) USING BTREE,
+  KEY `idx_exam_id` (`exam_id`) USING BTREE,
+  KEY `idx_session_id` (`session_id`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='考试与课堂关联表';
 
 -- ----------------------------
@@ -836,23 +938,23 @@ CREATE TABLE `class_exam_session` (
 -- ----------------------------
 DROP TABLE IF EXISTS `class_forum_comment`;
 CREATE TABLE `class_forum_comment` (
-                                       `comment_id` bigint NOT NULL AUTO_INCREMENT COMMENT '评论ID',
-                                       `post_id` bigint NOT NULL COMMENT '帖子ID',
-                                       `user_id` bigint NOT NULL COMMENT '评论用户ID',
-                                       `parent_id` bigint DEFAULT '0' COMMENT '父评论ID（0表示顶级评论）',
-                                       `reply_to_user_id` bigint DEFAULT NULL COMMENT '回复目标用户ID',
-                                       `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '评论内容',
-                                       `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                                       `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                       `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                       `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                       `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                       PRIMARY KEY (`comment_id`) USING BTREE,
-                                       KEY `idx_comment_post_id` (`post_id`) USING BTREE,
-                                       KEY `idx_comment_user_id` (`user_id`) USING BTREE,
-                                       KEY `idx_parent_id` (`parent_id`) USING BTREE,
-                                       CONSTRAINT `fk_comment_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                                       CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `comment_id` bigint NOT NULL AUTO_INCREMENT COMMENT '评论ID',
+  `post_id` bigint NOT NULL COMMENT '帖子ID',
+  `user_id` bigint NOT NULL COMMENT '评论用户ID',
+  `parent_id` bigint DEFAULT '0' COMMENT '父评论ID（0表示顶级评论）',
+  `reply_to_user_id` bigint DEFAULT NULL COMMENT '回复目标用户ID',
+  `content` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '评论内容',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`comment_id`) USING BTREE,
+  KEY `idx_comment_post_id` (`post_id`) USING BTREE,
+  KEY `idx_comment_user_id` (`user_id`) USING BTREE,
+  KEY `idx_parent_id` (`parent_id`) USING BTREE,
+  CONSTRAINT `fk_comment_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_comment_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='论坛评论表';
 
 -- ----------------------------
@@ -881,19 +983,19 @@ INSERT INTO `class_forum_comment` VALUES ('117', '125', '1', '0', null, '呕', '
 -- ----------------------------
 DROP TABLE IF EXISTS `class_forum_like`;
 CREATE TABLE `class_forum_like` (
-                                    `like_id` bigint NOT NULL AUTO_INCREMENT COMMENT '点赞ID',
-                                    `post_id` bigint NOT NULL COMMENT '帖子ID',
-                                    `user_id` bigint NOT NULL COMMENT '点赞用户ID',
-                                    `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                                    `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                    `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                    `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                    PRIMARY KEY (`like_id`) USING BTREE,
-                                    UNIQUE KEY `idx_post_user` (`post_id`,`user_id`) USING BTREE,
-                                    KEY `idx_like_user_id` (`user_id`) USING BTREE,
-                                    CONSTRAINT `fk_like_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                                    CONSTRAINT `fk_like_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `like_id` bigint NOT NULL AUTO_INCREMENT COMMENT '点赞ID',
+  `post_id` bigint NOT NULL COMMENT '帖子ID',
+  `user_id` bigint NOT NULL COMMENT '点赞用户ID',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`like_id`) USING BTREE,
+  UNIQUE KEY `idx_post_user` (`post_id`,`user_id`) USING BTREE,
+  KEY `idx_like_user_id` (`user_id`) USING BTREE,
+  CONSTRAINT `fk_like_post` FOREIGN KEY (`post_id`) REFERENCES `class_forum_post` (`post_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_like_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=123 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='论坛点赞表';
 
 -- ----------------------------
@@ -924,22 +1026,22 @@ INSERT INTO `class_forum_like` VALUES ('122', '125', '1', '2', 'admin', '2025-11
 -- ----------------------------
 DROP TABLE IF EXISTS `class_forum_post`;
 CREATE TABLE `class_forum_post` (
-                                    `post_id` bigint NOT NULL AUTO_INCREMENT COMMENT '帖子ID',
-                                    `user_id` bigint NOT NULL COMMENT '发布用户ID',
-                                    `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '帖子内容',
-                                    `image_urls` varchar(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '图片URL列表，逗号分隔',
-                                    `like_count` int DEFAULT '0' COMMENT '点赞数',
-                                    `comment_count` int DEFAULT '0' COMMENT '评论数',
-                                    `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
-                                    `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                                    `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                    `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                    `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                    `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-                                    PRIMARY KEY (`post_id`) USING BTREE,
-                                    KEY `idx_user_id` (`user_id`) USING BTREE,
-                                    CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `post_id` bigint NOT NULL AUTO_INCREMENT COMMENT '帖子ID',
+  `user_id` bigint NOT NULL COMMENT '发布用户ID',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '帖子内容',
+  `image_urls` varchar(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '图片URL列表，逗号分隔',
+  `like_count` int DEFAULT '0' COMMENT '点赞数',
+  `comment_count` int DEFAULT '0' COMMENT '评论数',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`post_id`) USING BTREE,
+  KEY `idx_user_id` (`user_id`) USING BTREE,
+  CONSTRAINT `fk_post_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=126 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='论坛帖子表';
 
 -- ----------------------------
@@ -966,22 +1068,22 @@ INSERT INTO `class_forum_post` VALUES ('125', '1', 'well', '/profile/forum_20251
 -- ----------------------------
 DROP TABLE IF EXISTS `class_group`;
 CREATE TABLE `class_group` (
-                               `group_id` bigint NOT NULL AUTO_INCREMENT COMMENT '小组ID',
-                               `group_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '小组名称',
-                               `owner_user_id` bigint NOT NULL COMMENT '创建者ID (FK sys_user)',
-                               `group_number` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '小组号 (唯一)',
-                               `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '小组头像URL',
-                               `qr_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '小组二维码URL (占位)',
-                               `latest_message_id` bigint DEFAULT NULL COMMENT '最新消息ID (FK class_group_message)',
-                               `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                               `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                               `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                               `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                               `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                               PRIMARY KEY (`group_id`) USING BTREE,
-                               UNIQUE KEY `idx_group_number` (`group_number`) USING BTREE,
-                               KEY `idx_owner_user_id` (`owner_user_id`) USING BTREE,
-                               CONSTRAINT `fk_group_owner` FOREIGN KEY (`owner_user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `group_id` bigint NOT NULL AUTO_INCREMENT COMMENT '小组ID',
+  `group_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '小组名称',
+  `owner_user_id` bigint NOT NULL COMMENT '创建者ID (FK sys_user)',
+  `group_number` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '小组号 (唯一)',
+  `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '小组头像URL',
+  `qr_code` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '小组二维码URL (占位)',
+  `latest_message_id` bigint DEFAULT NULL COMMENT '最新消息ID (FK class_group_message)',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`group_id`) USING BTREE,
+  UNIQUE KEY `idx_group_number` (`group_number`) USING BTREE,
+  KEY `idx_owner_user_id` (`owner_user_id`) USING BTREE,
+  CONSTRAINT `fk_group_owner` FOREIGN KEY (`owner_user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='小组讨论-信息表';
 
 -- ----------------------------
@@ -998,21 +1100,21 @@ INSERT INTO `class_group` VALUES ('104', '金融大数据', '1', '061244', '/pro
 -- ----------------------------
 DROP TABLE IF EXISTS `class_group_member`;
 CREATE TABLE `class_group_member` (
-                                      `member_id` bigint NOT NULL AUTO_INCREMENT COMMENT '成员ID',
-                                      `group_id` bigint NOT NULL COMMENT '小组ID (FK)',
-                                      `user_id` bigint NOT NULL COMMENT '用户ID (FK)',
-                                      `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 2已移除）',
-                                      `last_read_message_id` bigint DEFAULT '0' COMMENT '最后已读消息ID (用于计算未读)',
-                                      `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                                      `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '邀请者/加入者',
-                                      `create_time` datetime DEFAULT NULL COMMENT '加入时间',
-                                      `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                      `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                      PRIMARY KEY (`member_id`) USING BTREE,
-                                      UNIQUE KEY `idx_group_user` (`group_id`,`user_id`) USING BTREE,
-                                      KEY `fk_member_user` (`user_id`) USING BTREE,
-                                      CONSTRAINT `fk_member_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                                      CONSTRAINT `fk_member_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `member_id` bigint NOT NULL AUTO_INCREMENT COMMENT '成员ID',
+  `group_id` bigint NOT NULL COMMENT '小组ID (FK)',
+  `user_id` bigint NOT NULL COMMENT '用户ID (FK)',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 2已移除）',
+  `last_read_message_id` bigint DEFAULT '0' COMMENT '最后已读消息ID (用于计算未读)',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '邀请者/加入者',
+  `create_time` datetime DEFAULT NULL COMMENT '加入时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`member_id`) USING BTREE,
+  UNIQUE KEY `idx_group_user` (`group_id`,`user_id`) USING BTREE,
+  KEY `fk_member_user` (`user_id`) USING BTREE,
+  CONSTRAINT `fk_member_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_member_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=218 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='小组讨论-成员表';
 
 -- ----------------------------
@@ -1037,19 +1139,19 @@ INSERT INTO `class_group_member` VALUES ('217', '104', '1', '0', '363', '0', 'ad
 -- ----------------------------
 DROP TABLE IF EXISTS `class_group_message`;
 CREATE TABLE `class_group_message` (
-                                       `message_id` bigint NOT NULL AUTO_INCREMENT COMMENT '消息ID',
-                                       `group_id` bigint NOT NULL COMMENT '小组ID (FK)',
-                                       `sender_user_id` bigint NOT NULL COMMENT '发送者ID (FK)',
-                                       `message_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '消息类型（0文本 1图片 9系统）',
-                                       `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息内容（文本/图片URL/系统提示）',
-                                       `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
-                                       `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                       `create_time` datetime DEFAULT NULL COMMENT '发送时间',
-                                       PRIMARY KEY (`message_id`) USING BTREE,
-                                       KEY `idx_group_time` (`group_id`,`create_time` DESC) USING BTREE,
-                                       KEY `fk_message_sender` (`sender_user_id`) USING BTREE,
-                                       CONSTRAINT `fk_message_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-                                       CONSTRAINT `fk_message_sender` FOREIGN KEY (`sender_user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  `message_id` bigint NOT NULL AUTO_INCREMENT COMMENT '消息ID',
+  `group_id` bigint NOT NULL COMMENT '小组ID (FK)',
+  `sender_user_id` bigint NOT NULL COMMENT '发送者ID (FK)',
+  `message_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '消息类型（0文本 1图片 9系统）',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息内容（文本/图片URL/系统提示）',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '发送时间',
+  PRIMARY KEY (`message_id`) USING BTREE,
+  KEY `idx_group_time` (`group_id`,`create_time` DESC) USING BTREE,
+  KEY `fk_message_sender` (`sender_user_id`) USING BTREE,
+  CONSTRAINT `fk_message_group` FOREIGN KEY (`group_id`) REFERENCES `class_group` (`group_id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_message_sender` FOREIGN KEY (`sender_user_id`) REFERENCES `sys_user` (`user_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=364 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='小组讨论-消息表';
 
 -- ----------------------------
@@ -1125,28 +1227,28 @@ INSERT INTO `class_group_message` VALUES ('363', '104', '1', '0', '吃饭', '0',
 -- ----------------------------
 DROP TABLE IF EXISTS `class_homework`;
 CREATE TABLE `class_homework` (
-                                  `homework_id` bigint NOT NULL AUTO_INCREMENT COMMENT '作业ID',
-                                  `course_id` bigint NOT NULL COMMENT '课程ID',
-                                  `session_id` bigint NOT NULL COMMENT '课堂ID',
-                                  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '作业标题',
-                                  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业内容',
-                                  `requirement` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业要求',
-                                  `total_score` decimal(5,2) DEFAULT NULL COMMENT '作业总分',
-                                  `deadline` datetime NOT NULL COMMENT '截止时间',
-                                  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件路径',
-                                  `attachment_names` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件原名',
-                                  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
-                                  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-                                  `message_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-                                  `message_read` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-                                  PRIMARY KEY (`homework_id`) USING BTREE,
-                                  KEY `idx_course_id` (`course_id`) USING BTREE,
-                                  KEY `idx_session_id` (`session_id`) USING BTREE,
-                                  KEY `idx_deadline` (`deadline`) USING BTREE
+  `homework_id` bigint NOT NULL AUTO_INCREMENT COMMENT '作业ID',
+  `course_id` bigint NOT NULL COMMENT '课程ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '作业标题',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业内容',
+  `requirement` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT '作业要求',
+  `total_score` decimal(5,2) DEFAULT NULL COMMENT '作业总分',
+  `deadline` datetime NOT NULL COMMENT '截止时间',
+  `attachments` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件路径',
+  `attachment_names` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '附件原名',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '状态（0正常 1关闭）',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+  `message_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `message_read` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  PRIMARY KEY (`homework_id`) USING BTREE,
+  KEY `idx_course_id` (`course_id`) USING BTREE,
+  KEY `idx_session_id` (`session_id`) USING BTREE,
+  KEY `idx_deadline` (`deadline`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='作业主表';
 
 -- ----------------------------
@@ -1175,17 +1277,17 @@ INSERT INTO `class_homework` VALUES ('54', '1', '1', '测试', '1', null, '100.0
 -- ----------------------------
 DROP TABLE IF EXISTS `class_join_application`;
 CREATE TABLE `class_join_application` (
-                                          `application_id` bigint NOT NULL AUTO_INCREMENT,
-                                          `session_id` bigint NOT NULL COMMENT '课堂ID',
-                                          `student_id` bigint NOT NULL COMMENT '学生ID',
-                                          `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '学号',
-                                          `student_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '学生姓名',
-                                          `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '0待审核 1通过 2拒绝',
-                                          `apply_time` datetime DEFAULT CURRENT_TIMESTAMP,
-                                          `audit_time` datetime DEFAULT NULL,
-                                          `audit_user_id` bigint DEFAULT NULL,
-                                          `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-                                          PRIMARY KEY (`application_id`) USING BTREE
+  `application_id` bigint NOT NULL AUTO_INCREMENT,
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `student_id` bigint NOT NULL COMMENT '学生ID',
+  `student_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '学号',
+  `student_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '学生姓名',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '0待审核 1通过 2拒绝',
+  `apply_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `audit_time` datetime DEFAULT NULL,
+  `audit_user_id` bigint DEFAULT NULL,
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`application_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='课堂加入申请表';
 
 -- ----------------------------
@@ -1199,16 +1301,16 @@ INSERT INTO `class_join_application` VALUES ('2', '4', '19', '2023141460348', '�
 -- ----------------------------
 DROP TABLE IF EXISTS `class_login_log`;
 CREATE TABLE `class_login_log` (
-                                   `login_id` bigint NOT NULL AUTO_INCREMENT COMMENT '访问ID',
-                                   `user_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '用户账号',
-                                   `ipaddr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录IP地址',
-                                   `login_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录地点',
-                                   `browser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '浏览器类型',
-                                   `os` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作系统',
-                                   `status` int DEFAULT '0' COMMENT '登录状态（0成功 1失败）',
-                                   `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '提示消息',
-                                   `login_time` datetime DEFAULT NULL COMMENT '访问时间',
-                                   PRIMARY KEY (`login_id`) USING BTREE
+  `login_id` bigint NOT NULL AUTO_INCREMENT COMMENT '访问ID',
+  `user_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '用户账号',
+  `ipaddr` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录IP地址',
+  `login_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '登录地点',
+  `browser` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '浏览器类型',
+  `os` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作系统',
+  `status` int DEFAULT '0' COMMENT '登录状态（0成功 1失败）',
+  `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '提示消息',
+  `login_time` datetime DEFAULT NULL COMMENT '访问时间',
+  PRIMARY KEY (`login_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=135 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='系统登录日志';
 
 -- ----------------------------
@@ -1354,22 +1456,22 @@ INSERT INTO `class_login_log` VALUES ('134', 'admin', '127.0.0.1', '内网IP', '
 -- ----------------------------
 DROP TABLE IF EXISTS `class_material`;
 CREATE TABLE `class_material` (
-                                  `material_id` bigint NOT NULL AUTO_INCREMENT COMMENT '资料ID',
-                                  `session_id` bigint NOT NULL COMMENT '课堂ID',
-                                  `material_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '资料名称',
-                                  `file_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '文件类型',
-                                  `file_size` bigint DEFAULT '0' COMMENT '文件大小(字节)',
-                                  `file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '文件路径',
-                                  `push_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '推送状态（0未推送 1已推送）',
-                                  `push_time` datetime DEFAULT NULL COMMENT '推送时间',
-                                  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
-                                  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-                                  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
-                                  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-                                  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-                                  PRIMARY KEY (`material_id`) USING BTREE,
-                                  KEY `idx_session_id` (`session_id`) USING BTREE,
-                                  KEY `idx_push_status` (`push_status`) USING BTREE
+  `material_id` bigint NOT NULL AUTO_INCREMENT COMMENT '资料ID',
+  `session_id` bigint NOT NULL COMMENT '课堂ID',
+  `material_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '资料名称',
+  `file_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '文件类型',
+  `file_size` bigint DEFAULT '0' COMMENT '文件大小(字节)',
+  `file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '文件路径',
+  `push_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '推送状态（0未推送 1已推送）',
+  `push_time` datetime DEFAULT NULL COMMENT '推送时间',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '创建者',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`material_id`) USING BTREE,
+  KEY `idx_session_id` (`session_id`) USING BTREE,
+  KEY `idx_push_status` (`push_status`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='资料表';
 
 -- ----------------------------
@@ -1385,15 +1487,15 @@ INSERT INTO `class_material` VALUES ('13', '9', 'PS1.docx', 'docx', '16522', '20
 -- ----------------------------
 DROP TABLE IF EXISTS `class_notice`;
 CREATE TABLE `class_notice` (
-                                `notice_id` bigint NOT NULL AUTO_INCREMENT,
-                                `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-                                `create_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                                `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
-                                `update_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                                `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-                                `del_flag` tinyint(1) DEFAULT '0' COMMENT '0=存在,1=已删除',
-                                PRIMARY KEY (`notice_id`) USING BTREE
+  `notice_id` bigint NOT NULL AUTO_INCREMENT,
+  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `create_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_by` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `del_flag` tinyint(1) DEFAULT '0' COMMENT '0=存在,1=已删除',
+  PRIMARY KEY (`notice_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='课堂模块：通告表';
 
 -- ----------------------------
@@ -1408,23 +1510,23 @@ INSERT INTO `class_notice` VALUES ('3', '哭哭哭', '<p>，</p>', 'admin', '202
 -- ----------------------------
 DROP TABLE IF EXISTS `class_oper_log`;
 CREATE TABLE `class_oper_log` (
-                                  `oper_id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志主键',
-                                  `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '模块标题',
-                                  `business_type` int DEFAULT '0' COMMENT '业务类型（0其它 1新增 2修改 3删除）',
-                                  `method` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '方法名称',
-                                  `request_method` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求方式',
-                                  `operator_type` int DEFAULT '0' COMMENT '操作类别（0其它 1后台用户 2手机端用户）',
-                                  `oper_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作人员',
-                                  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '部门名称',
-                                  `oper_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求URL',
-                                  `oper_ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '主机地址',
-                                  `oper_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作地点',
-                                  `oper_param` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求参数',
-                                  `json_result` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '返回参数',
-                                  `status` int DEFAULT '0' COMMENT '操作状态（0正常 1异常）',
-                                  `error_msg` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '错误消息',
-                                  `oper_time` datetime DEFAULT NULL COMMENT '操作时间',
-                                  PRIMARY KEY (`oper_id`) USING BTREE
+  `oper_id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志主键',
+  `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '模块标题',
+  `business_type` int DEFAULT '0' COMMENT '业务类型（0其它 1新增 2修改 3删除）',
+  `method` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '方法名称',
+  `request_method` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求方式',
+  `operator_type` int DEFAULT '0' COMMENT '操作类别（0其它 1后台用户 2手机端用户）',
+  `oper_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作人员',
+  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '部门名称',
+  `oper_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求URL',
+  `oper_ip` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '主机地址',
+  `oper_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '操作地点',
+  `oper_param` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '请求参数',
+  `json_result` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '返回参数',
+  `status` int DEFAULT '0' COMMENT '操作状态（0正常 1异常）',
+  `error_msg` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '' COMMENT '错误消息',
+  `oper_time` datetime DEFAULT NULL COMMENT '操作时间',
+  PRIMARY KEY (`oper_id`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=210 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci ROW_FORMAT=DYNAMIC COMMENT='操作日志记录';
 
 -- ----------------------------
@@ -2150,101 +2252,6 @@ CREATE TABLE `local_question_bank` (
 -- ----------------------------
 -- Records of local_question_bank
 -- ----------------------------
-INSERT INTO `local_question_bank` VALUES ('1', 'HTML是什么的缩写？', '1', '1', '计算机', '[\"超文本标记语言\", \"高性能文本\", \"编程语言\", \"文本传输协议\"]', '超文本标记语言', 'HTML是HyperText Markup Language的缩写。', '2', '计算机,HTML,前端', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('2', '下面哪个不是JavaScript的数据类型？', '1', '2', '计算机', '[\"number\", \"string\", \"character\", \"boolean\"]', 'character', 'JavaScript没有character类型，有string类型。', '3', '编程,JavaScript,数据类型', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('3', 'CSS中设置文字颜色的属性是？', '1', '1', '计算机', '[\"color\", \"font-color\", \"text-color\", \"background-color\"]', 'color', 'CSS中使用color属性设置文字颜色。', '2', 'CSS,前端,样式', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('4', 'Python中列表使用什么符号表示？', '1', '1', '计算机', '[\"[]\", \"{}\", \"()\", \"<>\"]', '[]', 'Python中列表使用方括号[]表示。', '2', 'Python,编程,数据结构', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('5', 'HTTP状态码200表示？', '1', '2', '计算机', '[\"成功\", \"未找到\", \"服务器错误\", \"重定向\"]', '成功', 'HTTP 200状态码表示请求成功。', '3', '网络,HTTP,状态码', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('6', '圆的周长公式是？', '1', '1', '数学', '[\"2πr\", \"πr²\", \"πd\", \"2πd\"]', '2πr', '圆的周长公式是2πr，其中r是半径。', '2', '数学,几何,圆', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('7', '一元二次方程ax²+bx+c=0的求根公式是？', '1', '2', '数学', '[\"(-b±√(b²-4ac))/2a\", \"(-b±√(b²-4ac))/a\", \"(-b±√(b²-ac))/2a\", \"(-b±b²-4ac)/2a\"]', '(-b±√(b²-4ac))/2a', '这是一元二次方程的标准求根公式。', '3', '数学,代数,方程', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('8', '勾股定理适用于什么三角形？', '1', '1', '数学', '[\"直角三角形\", \"等边三角形\", \"等腰三角形\", \"任意三角形\"]', '直角三角形', '勾股定理只适用于直角三角形。', '2', '数学,几何,勾股定理', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('9', '中国历史上第一个封建王朝是？', '1', '1', '历史', '[\"夏朝\", \"商朝\", \"周朝\", \"秦朝\"]', '夏朝', '夏朝是中国史书中记载的第一个世袭制朝代。', '2', '历史,朝代,夏朝', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('10', '秦始皇统一六国是在哪一年？', '1', '2', '历史', '[\"公元前221年\", \"公元前206年\", \"公元前202年\", \"公元前210年\"]', '公元前221年', '公元前221年秦始皇完成统一大业。', '3', '历史,秦朝,秦始皇', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('11', '《红楼梦》的作者是？', '1', '1', '文学', '[\"曹雪芹\", \"罗贯中\", \"施耐庵\", \"吴承恩\"]', '曹雪芹', '《红楼梦》前80回由曹雪芹所作。', '2', '文学,红楼梦,曹雪芹', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('12', '世界上面积最大的国家是？', '1', '1', '地理', '[\"俄罗斯\", \"加拿大\", \"中国\", \"美国\"]', '俄罗斯', '俄罗斯国土面积约1709万平方公里。', '2', '地理,国家,面积', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('13', '长江注入什么海？', '1', '1', '地理', '[\"东海\", \"南海\", \"黄海\", \"渤海\"]', '东海', '长江在上海市注入东海。', '2', '地理,长江,河流', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('14', '中国最大的淡水湖是？', '1', '2', '地理', '[\"鄱阳湖\", \"洞庭湖\", \"太湖\", \"青海湖\"]', '鄱阳湖', '鄱阳湖是中国第一大淡水湖。', '3', '地理,湖泊,鄱阳湖', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('15', '水的沸点是多少摄氏度？', '1', '1', '物理', '[\"100℃\", \"90℃\", \"0℃\", \"50℃\"]', '100℃', '在标准大气压下，水的沸点是100℃。', '2', '物理,水,沸点', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('16', '光合作用中植物释放什么气体？', '1', '1', '生物', '[\"氧气\", \"二氧化碳\", \"氮气\", \"氢气\"]', '氧气', '光合作用中植物吸收二氧化碳，释放氧气。', '2', '生物,光合作用,植物', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('17', '人体最大的器官是？', '1', '2', '生物', '[\"皮肤\", \"肝脏\", \"肺\", \"心脏\"]', '皮肤', '皮肤是人体最大的器官。', '3', '生物,人体,器官', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('18', '计算机内存的基本单位是？', '1', '1', '计算机', '[\"字节\", \"字\", \"位\", \"兆\"]', '字节', '字节(Byte)是计算机内存的基本单位。', '2', '计算机,内存,单位', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('19', 'Java语言的发明者是？', '1', '2', '计算机', '[\"James Gosling\", \"Dennis Ritchie\", \"Bjarne Stroustrup\", \"Guido van Rossum\"]', 'James Gosling', 'Java由James Gosling在Sun公司开发。', '3', '编程,Java,历史', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('20', 'TCP/IP协议有几层？', '1', '3', '计算机', '[\"4层\", \"5层\", \"7层\", \"3层\"]', '4层', 'TCP/IP协议分为4层：应用层、传输层、网络层、网络接口层。', '4', '网络,TCP/IP,协议', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('21', '光的传播速度是？', '1', '2', '物理', '[\"3×10⁸ m/s\", \"3×10⁵ m/s\", \"340 m/s\", \"1000 m/s\"]', '3×10⁸ m/s', '光在真空中的传播速度约为3×10⁸米/秒。', '3', '物理,光速', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('22', '地球的自转周期是？', '1', '1', '地理', '[\"24小时\", \"12小时\", \"365天\", \"30天\"]', '24小时', '地球自转一周大约需要24小时。', '2', '地理,地球,自转', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('23', '《西游记》中唐僧的原型是？', '1', '2', '文学', '[\"玄奘\", \"鉴真\", \"慧能\", \"达摩\"]', '玄奘', '唐僧的原型是唐代高僧玄奘法师。', '3', '文学,西游记,玄奘', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('24', '世界上使用人数最多的语言是？', '1', '2', '文化', '[\"汉语\", \"英语\", \"西班牙语\", \"印地语\"]', '汉语', '汉语是世界上使用人数最多的语言。', '3', '文化,语言,汉语', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('25', 'Excel中求平均值的函数是？', '1', '1', '计算机', '[\"AVERAGE\", \"SUM\", \"MAX\", \"COUNT\"]', 'AVERAGE', 'AVERAGE函数用于计算平均值。', '2', '计算机,Excel,函数', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('26', '人体血液中含量最多的细胞是？', '1', '3', '生物', '[\"红细胞\", \"白细胞\", \"血小板\", \"淋巴细胞\"]', '红细胞', '红细胞在血液中数量最多。', '4', '生物,血液,细胞', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('27', '中国最大的岛屿是？', '1', '1', '地理', '[\"台湾岛\", \"海南岛\", \"崇明岛\", \"舟山岛\"]', '台湾岛', '台湾岛是中国第一大岛。', '2', '地理,岛屿,台湾', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('28', '《三国演义》中\"桃园三结义\"不包括谁？', '1', '2', '文学', '[\"曹操\", \"刘备\", \"关羽\", \"张飞\"]', '曹操', '桃园三结义的是刘备、关羽、张飞。', '3', '文学,三国演义', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('29', '水的密度最大时的温度是？', '1', '3', '物理', '[\"4℃\", \"0℃\", \"10℃\", \"100℃\"]', '4℃', '水在4℃时密度最大。', '4', '物理,水,密度', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('30', 'Photoshop是什么类型的软件？', '1', '1', '计算机', '[\"图像处理\", \"视频编辑\", \"办公软件\", \"编程工具\"]', '图像处理', 'Photoshop是专业的图像处理软件。', '2', '计算机,软件,Photoshop', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('31', '人体中最坚硬的物质是？', '1', '2', '生物', '[\"牙釉质\", \"骨骼\", \"指甲\", \"头发\"]', '牙釉质', '牙釉质是人体中最坚硬的物质。', '3', '生物,人体,牙齿', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('32', '中国抗日战争持续了多少年？', '1', '2', '历史', '[\"14年\", \"8年\", \"10年\", \"12年\"]', '14年', '从1931年九一八事变到1945年日本投降，共14年。', '3', '历史,抗日战争', '2025-11-23 00:15:42', '2025-11-23 00:15:42', 'system');
-INSERT INTO `local_question_bank` VALUES ('33', '请简述面向对象编程的三大特性及其含义。', '3', '2', '计算机', null, '封装：将数据和操作数据的方法绑定在一起，隐藏内部实现细节。继承：子类可以继承父类的属性和方法，实现代码复用。多态：同一操作作用于不同的对象可以有不同的解释和执行结果。', '面向对象编程的核心思想，提高代码的可维护性和复用性。', '5', '编程,面向对象,OOP', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('34', '简述HTTP和HTTPS的主要区别。', '3', '2', '计算机', null, 'HTTP是超文本传输协议，数据传输是明文的，不安全。HTTPS是HTTP的安全版本，通过SSL/TLS协议对数据进行加密传输，更加安全。主要区别在于安全性、端口号(HTTP:80, HTTPS:443)和证书要求。', 'HTTPS在HTTP基础上增加了安全性保障。', '6', '网络,HTTP,HTTPS,安全', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('35', '什么是数据库事务？请说明ACID特性。', '3', '3', '计算机', null, '数据库事务是指作为单个逻辑工作单元执行的一系列操作。ACID特性包括：原子性(Atomicity)-事务中的所有操作要么全部完成，要么全部不完成；一致性(Consistency)-事务必须使数据库从一个一致性状态变换到另一个一致性状态；隔离性(Isolation)-并发事务之间相互隔离；持久性(Durability)-事务完成后，对数据库的修改是永久性的。', '事务是保证数据库数据完整性的重要机制。', '8', '数据库,事务,ACID', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('36', '请简述TCP和UDP的主要区别及适用场景。', '3', '3', '计算机', null, 'TCP是面向连接的、可靠的、基于字节流的传输层协议，保证数据顺序和可靠性，但开销较大。UDP是无连接的、不可靠的、基于数据报的传输层协议，不保证数据顺序和可靠性，但传输效率高。TCP适用于要求可靠传输的场景(如文件传输、网页浏览)，UDP适用于实时性要求高的场景(如视频流、在线游戏)。', '根据应用需求选择合适的传输层协议。', '7', '网络,TCP,UDP,协议', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('37', '请简述勾股定理的内容并给出证明思路。', '3', '2', '数学', null, '勾股定理：在直角三角形中，两条直角边的平方和等于斜边的平方，即a²+b²=c²。证明思路可以通过构造正方形，利用面积关系证明，或者通过相似三角形的性质证明。', '勾股定理是几何学的基础定理之一。', '6', '数学,几何,勾股定理', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('38', '请简述牛顿三大定律的内容。', '3', '2', '物理', null, '第一定律(惯性定律)：物体在不受外力作用时，总保持静止或匀速直线运动状态。第二定律：物体的加速度与作用力成正比，与质量成反比，方向与作用力方向相同(F=ma)。第三定律：作用力与反作用力大小相等，方向相反，作用在同一直线上。', '牛顿三大定律是经典力学的基础。', '7', '物理,牛顿,定律', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('39', '请简述光合作用的过程和意义。', '3', '2', '生物', null, '光合作用是植物利用光能，将二氧化碳和水转化为有机物，并释放氧气的过程。反应式：6CO₂ + 6H₂O + 光能 → C₆H₁₂O₆ + 6O₂。意义：为生物提供有机物和氧气，维持大气中氧气和二氧化碳的平衡，是生态系统能量流动的基础。', '光合作用是地球上生命存在的基础。', '6', '生物,光合作用,植物', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('40', '请简述软件开发的生命周期。', '3', '2', '计算机', null, '软件开发生命周期包括：需求分析、系统设计、编码实现、测试、部署、维护等阶段。需求分析确定软件功能；系统设计规划软件架构；编码实现具体功能；测试发现和修复缺陷；部署将软件交付使用；维护进行后续更新和优化。', '规范的开发流程保证软件质量。', '6', '软件工程,开发流程', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('41', '请说明什么是递归函数，并举例说明。', '3', '2', '计算机', null, '递归函数是指在函数定义中调用函数自身的方法。递归需要满足两个条件：基线条件(递归终止条件)和递归条件。例如计算阶乘：function factorial(n) { if (n === 1) return 1; return n * factorial(n-1); }', '递归可以简化某些问题的解决方案。', '5', '编程,递归,算法', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('42', '请简述全球变暖的主要原因和影响。', '3', '2', '环境科学', null, '主要原因：人类活动导致温室气体(二氧化碳、甲烷等)排放增加，森林砍伐减少碳吸收。影响：冰川融化、海平面上升、极端天气频发、生态系统破坏、农业生产受影响等。', '全球变暖是当前重要的环境问题。', '6', '环境,全球变暖,气候', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('43', '请说明什么是人工智能及其主要应用领域。', '3', '2', '计算机', null, '人工智能是研究、开发用于模拟、延伸和扩展人的智能的理论、方法、技术及应用系统的一门技术科学。主要应用领域：机器学习、自然语言处理、计算机视觉、 robotics、专家系统、智能推荐等。', 'AI正在深刻改变各个行业。', '7', '人工智能,AI,技术', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('44', '请简述中国改革开放的主要成就。', '3', '2', '政治', null, '经济快速增长，成为世界第二大经济体；人民生活水平显著提高；科技创新能力大幅提升；基础设施建设成就显著；国际地位和影响力显著提高；社会主义市场经济体制基本建立。', '改革开放是中国发展的关键转折点。', '6', '政治,改革开放,历史', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('45', '请说明什么是大数据及其特征。', '3', '2', '计算机', null, '大数据是指无法在一定时间范围内用常规软件工具进行捕捉、管理和处理的数据集合。特征包括：Volume(大量)、Velocity(高速)、Variety(多样)、Value(低价值密度)、Veracity(真实性)。', '大数据技术正在改变数据处理方式。', '5', '计算机,大数据,技术', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('46', '请简述细胞的结构和功能。', '3', '2', '生物', null, '细胞基本结构包括：细胞膜(控制物质进出)、细胞质(进行各种代谢活动)、细胞核(储存遗传信息)。植物细胞还有细胞壁(支持和保护)和叶绿体(光合作用)。功能包括新陈代谢、生长繁殖、遗传变异等。', '细胞是生命活动的基本单位。', '6', '生物,细胞,结构', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('47', '请说明什么是云计算及其服务模式。', '3', '2', '计算机', null, '云计算是通过网络按需提供计算资源的模式。服务模式包括：IaaS(基础设施即服务)-提供虚拟机、存储等基础设施；PaaS(平台即服务)-提供开发平台和工具；SaaS(软件即服务)-提供可直接使用的软件应用。', '云计算改变了IT资源的使用方式。', '6', '计算机,云计算,服务', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('48', '请简述中国书法的历史发展。', '3', '2', '艺术', null, '中国书法历史悠久，主要发展阶段：甲骨文(商代)-金文(周代)-小篆(秦代统一)-隶书(汉代)-楷书、行书、草书(魏晋至今)。著名书法家：王羲之(书圣)、颜真卿、柳公权、苏轼等。', '书法是中国传统文化的瑰宝。', '5', '艺术,书法,历史', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('49', '请说明什么是区块链技术及其特点。', '3', '3', '计算机', null, '区块链是一种分布式数据库技术，通过密码学保证数据不可篡改和伪造。特点：去中心化、不可篡改、透明可追溯、集体维护、匿名性。应用：加密货币、智能合约、供应链管理、数字身份等。', '区块链技术具有革命性潜力。', '7', '计算机,区块链,技术', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('50', '请简述中国四大发明的历史意义。', '3', '2', '历史', null, '造纸术：促进了文化传播和教育发展；印刷术：加快了知识传播速度；指南针：推动了航海技术和地理大发现；火药：改变了战争方式和矿业开发。四大发明对世界文明发展产生了深远影响。', '四大发明是中国古代科技成就的代表。', '6', '历史,四大发明,科技', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('51', '请说明什么是机器学习及其主要类型。', '3', '3', '计算机', null, '机器学习是人工智能的一个分支，让计算机通过数据自动学习和改进。主要类型：监督学习(有标签数据，如分类、回归)、无监督学习(无标签数据，如聚类、降维)、强化学习(通过奖励机制学习最优策略)。', '机器学习是实现人工智能的重要方法。', '7', '人工智能,机器学习', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('52', '请简述地球的圈层结构。', '3', '2', '地理', null, '地球内部圈层：地壳(最外层)、地幔(中间层)、地核(最内层)。外部圈层：大气圈(气体包围)、水圈(水体组成)、生物圈(生命存在)。各圈层相互联系、相互影响，构成完整的地球系统。', '了解地球结构有助于认识自然环境。', '6', '地理,地球,圈层', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('53', '请说明什么是物联网及其应用场景。', '3', '2', '计算机', null, '物联网是指通过信息传感设备，按约定的协议，将任何物品与互联网相连接，进行信息交换和通信，以实现智能化识别、定位、跟踪、监控和管理的一种网络。应用场景：智能家居、智慧城市、工业物联网、智能医疗、车联网等。', '物联网正在构建万物互联的智能世界。', '6', '计算机,物联网,应用', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('54', '请简述中国传统文化中的\"仁义礼智信\"。', '3', '2', '文化', null, '仁：爱人，仁慈善良；义：正义，道义责任；礼：礼仪，行为规范；智：智慧，明辨是非；信：诚信，言出必行。这是儒家思想的核心价值观，强调个人修养和社会伦理。', '传统价值观对现代社会仍有指导意义。', '5', '文化,儒家,价值观', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('55', '请说明什么是虚拟现实技术及其应用。', '3', '2', '计算机', null, '虚拟现实技术利用计算机生成模拟环境，通过多源信息融合的交互式三维动态视景和实体行为的系统仿真，使用户沉浸到该环境中。应用：游戏娱乐、教育培训、医疗康复、军事训练、建筑设计等。', 'VR技术提供沉浸式体验。', '6', '计算机,虚拟现实,VR', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('56', '请简述水的循环过程。', '3', '2', '地理', null, '水循环包括蒸发(水体蒸发为水蒸气)、凝结(水蒸气凝结成云)、降水(云中水分以降水流形式返回地面)、径流(降水在地表或地下流动返回海洋)。这一过程周而复始，维持着地球水资源的平衡。', '水循环是地球上重要的自然过程。', '5', '地理,水循环,自然', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('57', '请说明什么是深度学习及其与机器学习的关系。', '3', '3', '计算机', null, '深度学习是机器学习的一个分支，基于人工神经网络，特别是深层神经网络。与机器学习的关系：深度学习是机器学习的子集，但能够自动学习特征表示，在处理复杂模式识别任务上表现更优，但需要更多数据和计算资源。', '深度学习推动了人工智能的新发展。', '7', '人工智能,深度学习', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('58', '请简述中国茶文化的特点。', '3', '2', '文化', null, '中国茶文化特点：历史悠久(始于神农时代)、种类丰富(绿茶、红茶、乌龙茶等)、讲究茶道(泡茶技艺和品茶礼仪)、与哲学思想结合(茶禅一味)、具有社交功能(以茶会友)。茶文化体现了中国人的生活智慧和审美情趣。', '茶文化是中国传统文化的重要组成部分。', '5', '文化,茶道,传统', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('59', '请说明什么是5G技术及其优势。', '3', '2', '计算机', null, '5G是第五代移动通信技术，主要优势：高速率(峰值速率可达10Gbps)、低延迟(毫秒级)、大连接(每平方公里百万级连接)。应用场景：增强移动宽带、海量物联网、关键任务服务等，将推动物联网、自动驾驶、远程医疗等发展。', '5G将开启万物互联的新时代。', '6', '计算机,5G,通信', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('60', '请简述中国科举制度的历史作用。', '3', '2', '历史', null, '科举制度的历史作用：打破世族垄断，为寒门子弟提供晋升通道；促进社会流动，维护社会稳定；推动教育发展，形成重视读书的社会风气；选拔了大量人才，为历代王朝提供官员；对世界文官制度产生重要影响。但后期也导致思想僵化等问题。', '科举制度是中国古代重要的选官制度。', '6', '历史,科举,制度', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('61', '请说明什么是网络安全及其重要性。', '3', '2', '计算机', null, '网络安全是指保护网络系统的硬件、软件及其系统中的数据不受偶然或恶意的破坏、更改、泄露，确保系统连续可靠正常运行。重要性：保护个人隐私、保障企业数据安全、维护国家安全、防止经济损失、确保关键基础设施正常运行。', '网络安全在数字化时代至关重要。', '6', '计算机,网络安全', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('62', '请简述中国传统节日的文化内涵。', '3', '2', '文化', null, '春节：团圆、迎新；清明节：祭祖、踏青；端午节：纪念屈原、驱邪避疫；中秋节：团圆、赏月；重阳节：敬老、登高。传统节日承载着中华民族的历史记忆、伦理观念和审美情趣，是民族文化的重要载体。', '传统节日是民族文化认同的重要体现。', '5', '文化,节日,传统', '2025-11-23 00:17:38', '2025-11-23 00:17:38', 'system');
-INSERT INTO `local_question_bank` VALUES ('63', 'Java和JavaScript是同一种编程语言。', '2', '1', '计算机', '[\"正确\", \"错误\"]', '错误', 'Java和JavaScript是两种不同的编程语言。', '1', '编程,Java,JavaScript', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('64', 'Python是解释型语言。', '2', '2', '计算机', '[\"正确\", \"错误\"]', '正确', 'Python是解释型语言，不需要编译。', '2', '编程,Python,语言类型', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('65', 'HTML是一种编程语言。', '2', '1', '计算机', '[\"正确\", \"错误\"]', '错误', 'HTML是标记语言，不是编程语言。', '1', 'HTML,编程语言', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('66', '数据库索引可以提高查询速度。', '2', '2', '计算机', '[\"正确\", \"错误\"]', '正确', '索引可以显著提高数据库查询性能。', '2', '数据库,索引,性能', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('67', 'Git和GitHub是同一个东西。', '2', '2', '计算机', '[\"正确\", \"错误\"]', '错误', 'Git是版本控制系统，GitHub是基于Git的代码托管平台。', '2', 'Git,GitHub,版本控制', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('68', '任何数的0次方都等于1。', '2', '2', '数学', '[\"正确\", \"错误\"]', '错误', '0的0次方没有定义，其他数的0次方等于1。', '2', '数学,指数,幂运算', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('69', '三角形的内角和总是180度。', '2', '1', '数学', '[\"正确\", \"错误\"]', '正确', '在欧几里得几何中，三角形内角和恒为180度。', '1', '数学,几何,三角形', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('70', '质数都是奇数。', '2', '2', '数学', '[\"正确\", \"错误\"]', '错误', '2是质数但不是奇数。', '2', '数学,质数,奇数', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('71', '声音在真空中可以传播。', '2', '1', '物理', '[\"正确\", \"错误\"]', '错误', '声音需要介质传播，真空中无法传播声音。', '1', '物理,声音,传播', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('72', '所有金属都能被磁铁吸引。', '2', '1', '物理', '[\"正确\", \"错误\"]', '错误', '只有铁、钴、镍等铁磁性金属能被磁铁吸引。', '1', '物理,磁铁,金属', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('73', '植物在夜间进行光合作用。', '2', '1', '生物', '[\"正确\", \"错误\"]', '错误', '植物在白天进行光合作用，夜间进行呼吸作用。', '1', '生物,光合作用,植物', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('74', '长城是在秦朝时期开始修建的。', '2', '2', '历史', '[\"正确\", \"错误\"]', '错误', '长城修建始于春秋战国时期，秦朝进行了连接和扩建。', '2', '历史,长城,秦朝', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('75', '黄河是中国最长的河流。', '2', '1', '地理', '[\"正确\", \"错误\"]', '错误', '长江是中国最长的河流，黄河第二长。', '1', '地理,河流,长江黄河', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('76', '北京是中国的经济中心。', '2', '2', '地理', '[\"正确\", \"错误\"]', '错误', '上海是中国的经济中心，北京是政治文化中心。', '2', '地理,城市,功能', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('77', 'Python中列表是可变的。', '2', '2', '计算机', '[\"正确\", \"错误\"]', '正确', 'Python列表是可变数据类型。', '2', 'Python,列表,可变', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('78', 'HTTP是安全的传输协议。', '2', '2', '计算机', '[\"正确\", \"错误\"]', '错误', 'HTTP是不安全的，HTTPS才是安全的。', '2', '网络,HTTP,安全', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('79', '地球是太阳系中最大的行星。', '2', '1', '地理', '[\"正确\", \"错误\"]', '错误', '木星是太阳系中最大的行星。', '1', '地理,太阳系,行星', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('80', '《水浒传》的作者是施耐庵。', '2', '2', '文学', '[\"正确\", \"错误\"]', '正确', '《水浒传》一般认为是施耐庵所著。', '2', '文学,水浒传,作者', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('81', '哺乳动物都是胎生的。', '2', '3', '生物', '[\"正确\", \"错误\"]', '错误', '鸭嘴兽是哺乳动物但是卵生的。', '3', '生物,哺乳动物,生殖', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('82', 'Excel是数据库管理软件。', '2', '1', '计算机', '[\"正确\", \"错误\"]', '错误', 'Excel是电子表格软件，不是专业的数据库软件。', '1', '计算机,Excel,数据库', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('83', '光年是时间单位。', '2', '1', '物理', '[\"正确\", \"错误\"]', '错误', '光年是距离单位，指光在一年中传播的距离。', '1', '物理,光年,单位', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('84', '中国有56个民族。', '2', '1', '文化', '[\"正确\", \"错误\"]', '正确', '中国是一个统一的多民族国家，有56个民族。', '1', '文化,民族', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('85', 'Windows操作系统是开源的。', '2', '1', '计算机', '[\"正确\", \"错误\"]', '错误', 'Windows是闭源的商业操作系统。', '1', '计算机,Windows,开源', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('86', '水的冰点是0华氏度。', '2', '2', '物理', '[\"正确\", \"错误\"]', '错误', '水的冰点是0摄氏度，32华氏度。', '2', '物理,水,冰点', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('87', '鲁迅原名周树人。', '2', '1', '文学', '[\"正确\", \"错误\"]', '正确', '鲁迅是笔名，原名周树人。', '1', '文学,鲁迅,周树人', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('88', '所有的昆虫都有六条腿。', '2', '2', '生物', '[\"正确\", \"错误\"]', '正确', '这是昆虫的基本特征之一。', '2', '生物,昆虫,特征', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('89', '珠穆朗玛峰是世界第一高峰。', '2', '1', '地理', '[\"正确\", \"错误\"]', '正确', '珠穆朗玛峰海拔8848.86米，是世界最高峰。', '1', '地理,珠穆朗玛峰', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('90', '秦始皇统一了文字。', '2', '2', '历史', '[\"正确\", \"错误\"]', '正确', '秦始皇推行\"书同文\"政策，统一了小篆。', '2', '历史,秦始皇,文字', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('91', 'Java是微软开发的编程语言。', '2', '1', '计算机', '[\"正确\", \"错误\"]', '错误', 'Java是Sun公司开发的，现属于Oracle。', '1', '编程,Java,公司', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('92', '月亮本身会发光。', '2', '1', '地理', '[\"正确\", \"错误\"]', '错误', '月亮反射太阳光，自身不发光。', '1', '地理,月亮,发光', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('93', '《论语》是孔子所著。', '2', '2', '文学', '[\"正确\", \"错误\"]', '错误', '《论语》是孔子弟子及再传弟子记录孔子及其弟子言行而编成的。', '2', '文学,论语,孔子', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('94', '人类有23对染色体。', '2', '2', '生物', '[\"正确\", \"错误\"]', '正确', '正常人类体细胞有23对染色体。', '2', '生物,人类,染色体', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
-INSERT INTO `local_question_bank` VALUES ('95', 'Photoshop是微软公司的产品。', '2', '1', '计算机', '[\"正确\", \"错误\"]', '错误', 'Photoshop是Adobe公司的产品。', '1', '计算机,软件,公司', '2025-11-23 00:19:54', '2025-11-23 00:19:54', 'system');
 
 -- ----------------------------
 -- Table structure for qrtz_calendars
@@ -2721,7 +2728,7 @@ CREATE TABLE `sys_logininfor` (
   PRIMARY KEY (`info_id`) USING BTREE,
   KEY `idx_sys_logininfor_s` (`status`) USING BTREE,
   KEY `idx_sys_logininfor_lt` (`login_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=366 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='系统访问记录';
+) ENGINE=InnoDB AUTO_INCREMENT=385 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='系统访问记录';
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -2983,15 +2990,34 @@ INSERT INTO `sys_logininfor` VALUES ('353', 'admin', '127.0.0.1', '内网IP', 'C
 INSERT INTO `sys_logininfor` VALUES ('354', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-21 23:24:55');
 INSERT INTO `sys_logininfor` VALUES ('355', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-21 23:26:15');
 INSERT INTO `sys_logininfor` VALUES ('356', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-21 23:26:23');
-INSERT INTO `sys_logininfor` VALUES ('357', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-22 23:23:10');
-INSERT INTO `sys_logininfor` VALUES ('358', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-22 23:49:38');
-INSERT INTO `sys_logininfor` VALUES ('359', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-22 23:50:44');
-INSERT INTO `sys_logininfor` VALUES ('360', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-22 23:50:49');
-INSERT INTO `sys_logininfor` VALUES ('361', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-23 00:06:09');
-INSERT INTO `sys_logininfor` VALUES ('362', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 00:06:26');
-INSERT INTO `sys_logininfor` VALUES ('363', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 00:41:06');
-INSERT INTO `sys_logininfor` VALUES ('364', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-23 18:27:29');
-INSERT INTO `sys_logininfor` VALUES ('365', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 18:27:35');
+INSERT INTO `sys_logininfor` VALUES ('357', 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-23 14:37:35');
+INSERT INTO `sys_logininfor` VALUES ('358', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 14:54:47');
+INSERT INTO `sys_logininfor` VALUES ('359', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 16:23:15');
+INSERT INTO `sys_logininfor` VALUES ('360', 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-23 16:43:35');
+INSERT INTO `sys_logininfor` VALUES ('361', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码已失效', '2025-11-23 17:16:48');
+INSERT INTO `sys_logininfor` VALUES ('362', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 17:16:52');
+INSERT INTO `sys_logininfor` VALUES ('363', 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-23 17:18:34');
+INSERT INTO `sys_logininfor` VALUES ('364', 'teacher1', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-23 17:18:52');
+INSERT INTO `sys_logininfor` VALUES ('365', 'teacher1', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-23 17:19:22');
+INSERT INTO `sys_logininfor` VALUES ('366', 'teacher1', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 17:19:26');
+INSERT INTO `sys_logininfor` VALUES ('367', 'teacher1', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-23 17:20:42');
+INSERT INTO `sys_logininfor` VALUES ('368', 'teacher_li', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-23 17:21:02');
+INSERT INTO `sys_logininfor` VALUES ('369', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-23 17:21:17');
+INSERT INTO `sys_logininfor` VALUES ('370', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-11-23 17:21:25');
+INSERT INTO `sys_logininfor` VALUES ('371', 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-11-23 17:21:29');
+INSERT INTO `sys_logininfor` VALUES ('372', 'teacher1', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码已失效', '2025-11-23 17:23:30');
+INSERT INTO `sys_logininfor` VALUES ('373', 'teacher1', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 17:23:35');
+INSERT INTO `sys_logininfor` VALUES ('374', 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-23 18:47:33');
+INSERT INTO `sys_logininfor` VALUES ('375', 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-23 19:26:00');
+INSERT INTO `sys_logininfor` VALUES ('376', 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '退出成功', '2025-11-23 19:33:20');
+INSERT INTO `sys_logininfor` VALUES ('377', 'admin', '127.0.0.1', '内网IP', 'Chrome 12', 'Windows 10', '0', '登录成功', '2025-11-23 19:33:27');
+INSERT INTO `sys_logininfor` VALUES ('378', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 19:34:42');
+INSERT INTO `sys_logininfor` VALUES ('379', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-23 19:35:48');
+INSERT INTO `sys_logininfor` VALUES ('380', 'student1', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 19:36:08');
+INSERT INTO `sys_logininfor` VALUES ('381', 'student1', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-11-23 20:06:09');
+INSERT INTO `sys_logininfor` VALUES ('382', 'ry', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 20:06:26');
+INSERT INTO `sys_logininfor` VALUES ('383', 'student1', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-11-23 20:39:34');
+INSERT INTO `sys_logininfor` VALUES ('384', 'student_li', '127.0.0.1', '内网IP', 'Firefox 14', 'Windows 10', '0', '登录成功', '2025-11-23 20:48:10');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -3019,7 +3045,7 @@ CREATE TABLE `sys_menu` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '备注',
   PRIMARY KEY (`menu_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2048 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='菜单权限表';
+) ENGINE=InnoDB AUTO_INCREMENT=2051 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='菜单权限表';
 
 -- ----------------------------
 -- Records of sys_menu
@@ -3155,7 +3181,10 @@ INSERT INTO `sys_menu` VALUES ('2043', '驾驶舱', '2009', '2', 'dashboard', nu
 INSERT INTO `sys_menu` VALUES ('2044', '小组讨论', '2011', '3', 'group', null, null, '', '1', '0', 'C', '0', '0', null, 'peoples', 'admin', '2025-11-18 15:12:53', '', null, '');
 INSERT INTO `sys_menu` VALUES ('2045', '聊天', '2011', '4', 'group/chat/:groupId(\\d+)', null, null, '', '1', '0', 'C', '1', '0', null, '#', 'admin', '2025-11-18 15:13:37', '', null, '');
 INSERT INTO `sys_menu` VALUES ('2046', '参与热力', '2009', '4', 'participationHeat', null, null, '', '1', '0', 'C', '0', '0', null, 'color', 'admin', '2025-11-21 23:10:59', '', null, '');
-INSERT INTO `sys_menu` VALUES ('2047', '资料管理', '2006', '3', 'material', null, null, '', '1', '0', 'M', '0', '0', '', 'education', 'admin', '2025-11-23 01:58:19', 'admin', '2025-11-23 01:59:12', '');
+INSERT INTO `sys_menu` VALUES ('2047', '辩论管理', '2011', '5', 'dabate', 'proj_qhy/debate/index', null, '', '1', '0', 'C', '0', '0', 'proj_qhy:debate:list', 'people', 'admin', '2025-11-23 16:24:46', 'admin', '2025-11-23 16:32:29', '');
+INSERT INTO `sys_menu` VALUES ('2048', '辩论室', '2047', '1', 'debate-room/:id', null, null, '', '1', '0', 'C', '1', '0', null, '#', 'admin', '2025-11-23 19:27:43', '', null, '');
+INSERT INTO `sys_menu` VALUES ('2049', '辩论管理', '2011', '5', 'dabate', 'proj_qhy/debate/index', null, '', '1', '0', 'C', '0', '0', 'proj_qhy:debate:list', 'people', 'admin', '2025-11-23 16:24:46', 'admin', '2025-11-23 16:32:29', '');
+INSERT INTO `sys_menu` VALUES ('2050', '辩论室', '2047', '1', 'debate-room/:id', null, null, '', '1', '0', 'C', '1', '0', null, '#', 'admin', '2025-11-23 19:27:43', '', null, '');
 
 -- ----------------------------
 -- Table structure for sys_notice
@@ -3207,7 +3236,7 @@ CREATE TABLE `sys_oper_log` (
   KEY `idx_sys_oper_log_bt` (`business_type`) USING BTREE,
   KEY `idx_sys_oper_log_s` (`status`) USING BTREE,
   KEY `idx_sys_oper_log_ot` (`oper_time`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=759 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='操作日志记录';
+) ENGINE=InnoDB AUTO_INCREMENT=679 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='操作日志记录';
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -3779,98 +3808,18 @@ INSERT INTO `sys_oper_log` VALUES ('663', '作业提交', '2', 'com.ruoyi.web.co
 INSERT INTO `sys_oper_log` VALUES ('664', '菜单管理', '1', 'com.ruoyi.web.controller.system.SysMenuController.add()', 'POST', '1', 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createBy\":\"admin\",\"icon\":\"color\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuName\":\"参与热力\",\"menuType\":\"C\",\"orderNum\":4,\"params\":{},\"parentId\":2009,\"path\":\"participationHeat\",\"status\":\"0\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-21 23:10:59', '37');
 INSERT INTO `sys_oper_log` VALUES ('665', '文章管理', '1', 'com.ruoyi.web.controller.proj_qhy.BbsArticleController.add()', 'POST', '1', 'admin', '研发部门', '/proj_qhy/article', '127.0.0.1', '内网IP', '{\"articleType\":\"技术\",\"author\":\"admin\",\"bookmarkCount\":0,\"commentCount\":0,\"content\":\"<p>我头像呢</p>\",\"hateCount\":0,\"id\":11,\"likeCount\":0,\"params\":{},\"status\":\"editting\",\"title\":\"haha\",\"userId\":1,\"viewCount\":0}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-21 23:13:23', '14');
 INSERT INTO `sys_oper_log` VALUES ('666', '文章管理', '2', 'com.ruoyi.web.controller.proj_qhy.BbsArticleController.edit()', 'PUT', '1', 'admin', '研发部门', '/proj_qhy/article', '127.0.0.1', '内网IP', '{\"articleType\":\"技术\",\"author\":\"admin\",\"bookmarkCount\":0,\"commentCount\":0,\"content\":\"<p>我头像呢</p>\",\"cover\":\"/profile/upload/2025/11/21/屏幕截图 2025-05-24 014721_20251121231416A004.png\",\"createTime\":\"2025-11-21 23:13:23\",\"hateCount\":0,\"id\":11,\"likeCount\":0,\"params\":{},\"status\":\"editting\",\"title\":\"haha\",\"updateBy\":\"\",\"updateTime\":\"2025-11-21 23:13:26\",\"userId\":1,\"viewCount\":1}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-21 23:14:18', '34');
-INSERT INTO `sys_oper_log` VALUES ('667', '考试管理', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"createBy\":\"admin\",\"endTime\":\"2025-11-24 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"1\",\"examType\":3,\"id\":22,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":6,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-20 00:00:00\",\"status\":0,\"totalScore\":10}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-22 23:24:51', '64');
-INSERT INTO `sys_oper_log` VALUES ('668', '考试管理', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"createBy\":\"admin\",\"endTime\":\"2025-11-23 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"1\",\"examType\":3,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":6,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-20 00:00:00\",\"status\":0,\"totalScore\":10}', null, '1', '同一课堂下考试名称已存在，请更换名称', '2025-11-22 23:27:05', '103');
-INSERT INTO `sys_oper_log` VALUES ('669', '考试管理', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"createBy\":\"admin\",\"endTime\":\"2025-11-23 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"2\",\"examType\":3,\"id\":23,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":6,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-20 00:00:00\",\"status\":0,\"totalScore\":10}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-22 23:27:10', '29');
-INSERT INTO `sys_oper_log` VALUES ('670', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"true\",\"difficulty\":1,\"examId\":22,\"id\":57,\"params\":{},\"questionContent\":\"1\",\"questionOptions\":\"\",\"questionType\":3,\"score\":1,\"sortOrder\":1,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-22 23:51:39', '71');
-INSERT INTO `sys_oper_log` VALUES ('671', '考试管理', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.edit()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"endTime\":\"2025-11-24 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"1\",\"examType\":3,\"id\":22,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":6,\"questionCount\":1,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-20 00:00:00\",\"status\":0,\"totalScore\":10,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 00:06:54', '37');
-INSERT INTO `sys_oper_log` VALUES ('672', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":22,\"id\":58,\"params\":{},\"questionContent\":\"Photoshop是微软公司的产品。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":2,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 01:50:00', '122');
-INSERT INTO `sys_oper_log` VALUES ('673', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":2,\"examId\":22,\"id\":59,\"params\":{},\"questionContent\":\"人类有23对染色体。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":3,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 01:50:00', '44');
-INSERT INTO `sys_oper_log` VALUES ('674', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":2,\"examId\":22,\"id\":60,\"params\":{},\"questionContent\":\"《论语》是孔子所著。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":4,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 01:50:00', '44');
-INSERT INTO `sys_oper_log` VALUES ('675', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":22,\"id\":61,\"params\":{},\"questionContent\":\"月亮本身会发光。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":5,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 01:50:00', '36');
-INSERT INTO `sys_oper_log` VALUES ('676', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":1,\"examId\":22,\"id\":62,\"params\":{},\"questionContent\":\"珠穆朗玛峰是世界第一高峰。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":6,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 01:50:01', '30');
-INSERT INTO `sys_oper_log` VALUES ('677', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":2,\"examId\":22,\"id\":63,\"params\":{},\"questionContent\":\"所有的昆虫都有六条腿。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":7,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 01:50:01', '48');
-INSERT INTO `sys_oper_log` VALUES ('678', '考试管理', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.edit()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"endTime\":\"2025-11-24 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"1\",\"examType\":3,\"id\":22,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":6,\"questionCount\":7,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-20 00:00:00\",\"status\":1,\"totalScore\":10,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 01:50:10', '28');
-INSERT INTO `sys_oper_log` VALUES ('679', '考试状态更新', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.changeStatus()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam/status/22/1', '127.0.0.1', '内网IP', '22 1', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 01:50:10', '22');
-INSERT INTO `sys_oper_log` VALUES ('680', '考试状态更新', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.changeStatus()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam/status/22/2', '127.0.0.1', '内网IP', '22 2', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 01:50:50', '15');
-INSERT INTO `sys_oper_log` VALUES ('681', '菜单管理', '1', 'com.ruoyi.web.controller.system.SysMenuController.add()', 'POST', '1', 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createBy\":\"admin\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuName\":\"资料管理\",\"menuType\":\"M\",\"orderNum\":3,\"params\":{},\"parentId\":2006,\"path\":\"material\",\"status\":\"0\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 01:58:19', '29');
-INSERT INTO `sys_oper_log` VALUES ('682', '菜单管理', '2', 'com.ruoyi.web.controller.system.SysMenuController.edit()', 'PUT', '1', 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createTime\":\"2025-11-23 01:58:19\",\"icon\":\"education\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuId\":2047,\"menuName\":\"资料管理\",\"menuType\":\"M\",\"orderNum\":3,\"params\":{},\"parentId\":2006,\"path\":\"material\",\"perms\":\"\",\"routeName\":\"\",\"status\":\"0\",\"updateBy\":\"admin\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 01:59:12', '31');
-INSERT INTO `sys_oper_log` VALUES ('683', '考试提交', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.submitExam()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/participant/submit', '127.0.0.1', '内网IP', '{\"examId\":22,\"params\":{},\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctStatus\":1,\"courseName\":\"研究与开发实践\",\"createTime\":\"2025-11-23 01:50:28\",\"examId\":22,\"examName\":\"1\",\"id\":12,\"objectiveScore\":0,\"params\":{},\"participantStatus\":2,\"passStatus\":0,\"startTime\":\"2025-11-23 01:50:28\",\"studentId\":38,\"studentName\":\"黎文靖\",\"studentNo\":\"2023141460368\",\"subjectiveScore\":0,\"submitTime\":\"2025-11-23 02:03:36\",\"timeUsed\":788,\"totalScore\":0,\"updateTime\":\"2025-11-23 01:50:28\"}}', '0', null, '2025-11-23 02:03:36', '56');
-INSERT INTO `sys_oper_log` VALUES ('684', '考试管理', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"createBy\":\"admin\",\"endTime\":\"2025-11-24 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"测试考试\",\"examType\":3,\"id\":24,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":5,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-22 00:00:00\",\"status\":0,\"totalScore\":10}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:04:45', '29');
-INSERT INTO `sys_oper_log` VALUES ('685', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":24,\"id\":64,\"params\":{},\"questionContent\":\"Photoshop是微软公司的产品。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":1,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:03', '44');
-INSERT INTO `sys_oper_log` VALUES ('686', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":2,\"examId\":24,\"id\":65,\"params\":{},\"questionContent\":\"人类有23对染色体。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":2,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:03', '28');
-INSERT INTO `sys_oper_log` VALUES ('687', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":2,\"examId\":24,\"id\":66,\"params\":{},\"questionContent\":\"《论语》是孔子所著。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":3,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:03', '29');
-INSERT INTO `sys_oper_log` VALUES ('688', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":24,\"id\":67,\"params\":{},\"questionContent\":\"月亮本身会发光。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":4,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:04', '36');
-INSERT INTO `sys_oper_log` VALUES ('689', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":24,\"id\":68,\"params\":{},\"questionContent\":\"Java是微软开发的编程语言。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":5,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:04', '32');
-INSERT INTO `sys_oper_log` VALUES ('690', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":2,\"examId\":24,\"id\":69,\"params\":{},\"questionContent\":\"秦始皇统一了文字。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":6,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:04', '41');
-INSERT INTO `sys_oper_log` VALUES ('691', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":1,\"examId\":24,\"id\":70,\"params\":{},\"questionContent\":\"鲁迅原名周树人。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":7,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:04', '37');
-INSERT INTO `sys_oper_log` VALUES ('692', '考试管理', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.edit()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"endTime\":\"2025-11-24 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"测试考试\",\"examType\":3,\"id\":24,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":5,\"questionCount\":7,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-22 00:00:00\",\"status\":1,\"totalScore\":10,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:07', '11');
-INSERT INTO `sys_oper_log` VALUES ('693', '考试状态更新', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.changeStatus()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam/status/24/1', '127.0.0.1', '内网IP', '24 1', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:08', '27');
-INSERT INTO `sys_oper_log` VALUES ('694', '考试状态更新', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.changeStatus()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam/status/22/3', '127.0.0.1', '内网IP', '22 3', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:19', '27');
-INSERT INTO `sys_oper_log` VALUES ('695', '考试管理', '3', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.remove()', 'DELETE', '1', 'admin', '研发部门', '/proj_lwj/exam/23', '127.0.0.1', '内网IP', '[23]', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:24', '49');
-INSERT INTO `sys_oper_log` VALUES ('696', '考试状态更新', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.changeStatus()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam/status/24/2', '127.0.0.1', '内网IP', '24 2', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:05:31', '13');
-INSERT INTO `sys_oper_log` VALUES ('697', '考试管理', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"createBy\":\"admin\",\"endTime\":\"2025-11-29 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"3\",\"examType\":3,\"id\":25,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":5,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-22 00:00:00\",\"status\":0,\"totalScore\":10}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:06:57', '11');
-INSERT INTO `sys_oper_log` VALUES ('698', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":25,\"id\":71,\"params\":{},\"questionContent\":\"Photoshop是微软公司的产品。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":1,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:07:21', '18');
-INSERT INTO `sys_oper_log` VALUES ('699', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":2,\"examId\":25,\"id\":72,\"params\":{},\"questionContent\":\"人类有23对染色体。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":2,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:07:21', '29');
-INSERT INTO `sys_oper_log` VALUES ('700', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":2,\"examId\":25,\"id\":73,\"params\":{},\"questionContent\":\"《论语》是孔子所著。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":3,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:07:21', '23');
-INSERT INTO `sys_oper_log` VALUES ('701', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":25,\"id\":74,\"params\":{},\"questionContent\":\"月亮本身会发光。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":4,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:07:21', '26');
-INSERT INTO `sys_oper_log` VALUES ('702', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":25,\"id\":75,\"params\":{},\"questionContent\":\"光年是时间单位。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":5,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:07:21', '17');
-INSERT INTO `sys_oper_log` VALUES ('703', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":1,\"examId\":25,\"id\":76,\"params\":{},\"questionContent\":\"中国有56个民族。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":6,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:07:22', '22');
-INSERT INTO `sys_oper_log` VALUES ('704', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":25,\"id\":77,\"params\":{},\"questionContent\":\"地球是太阳系中最大的行星。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":7,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:07:22', '24');
-INSERT INTO `sys_oper_log` VALUES ('705', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":25,\"id\":78,\"params\":{},\"questionContent\":\"Excel是数据库管理软件。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":8,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:07:22', '17');
-INSERT INTO `sys_oper_log` VALUES ('706', '考试管理', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.edit()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"endTime\":\"2025-11-29 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"3\",\"examType\":3,\"id\":25,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":5,\"questionCount\":8,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-22 00:00:00\",\"status\":0,\"totalScore\":10,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:07:28', '14');
-INSERT INTO `sys_oper_log` VALUES ('707', '考试状态更新', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.changeStatus()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam/status/25/1', '127.0.0.1', '内网IP', '25 1', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:07:40', '13');
-INSERT INTO `sys_oper_log` VALUES ('708', '考试状态更新', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.changeStatus()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam/status/25/2', '127.0.0.1', '内网IP', '25 2', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:07:42', '13');
-INSERT INTO `sys_oper_log` VALUES ('709', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":35,\"isCorrect\":0,\"params\":{},\"questionContent\":\"Photoshop是微软公司的产品。\",\"questionId\":71,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":35,\"isCorrect\":0,\"params\":{},\"questionContent\":\"Photoshop是微软公司的产品。\",\"questionId\":71,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:07:59', '65');
-INSERT INTO `sys_oper_log` VALUES ('710', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":25,\"id\":36,\"isCorrect\":0,\"params\":{},\"questionContent\":\"人类有23对染色体。\",\"questionId\":72,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":25,\"id\":36,\"isCorrect\":0,\"params\":{},\"questionContent\":\"人类有23对染色体。\",\"questionId\":72,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:08:02', '35');
-INSERT INTO `sys_oper_log` VALUES ('711', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":37,\"isCorrect\":0,\"params\":{},\"questionContent\":\"《论语》是孔子所著。\",\"questionId\":73,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":37,\"isCorrect\":0,\"params\":{},\"questionContent\":\"《论语》是孔子所著。\",\"questionId\":73,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:08:05', '28');
-INSERT INTO `sys_oper_log` VALUES ('712', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":38,\"isCorrect\":0,\"params\":{},\"questionContent\":\"月亮本身会发光。\",\"questionId\":74,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":38,\"isCorrect\":0,\"params\":{},\"questionContent\":\"月亮本身会发光。\",\"questionId\":74,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:08:08', '27');
-INSERT INTO `sys_oper_log` VALUES ('713', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":39,\"isCorrect\":0,\"params\":{},\"questionContent\":\"光年是时间单位。\",\"questionId\":75,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":39,\"isCorrect\":0,\"params\":{},\"questionContent\":\"光年是时间单位。\",\"questionId\":75,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:08:11', '30');
-INSERT INTO `sys_oper_log` VALUES ('714', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":25,\"id\":40,\"isCorrect\":0,\"params\":{},\"questionContent\":\"中国有56个民族。\",\"questionId\":76,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":25,\"id\":40,\"isCorrect\":0,\"params\":{},\"questionContent\":\"中国有56个民族。\",\"questionId\":76,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:08:13', '40');
-INSERT INTO `sys_oper_log` VALUES ('715', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":41,\"isCorrect\":0,\"params\":{},\"questionContent\":\"地球是太阳系中最大的行星。\",\"questionId\":77,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":41,\"isCorrect\":0,\"params\":{},\"questionContent\":\"地球是太阳系中最大的行星。\",\"questionId\":77,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:08:17', '39');
-INSERT INTO `sys_oper_log` VALUES ('716', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":42,\"isCorrect\":0,\"params\":{},\"questionContent\":\"Excel是数据库管理软件。\",\"questionId\":78,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":25,\"id\":42,\"isCorrect\":0,\"params\":{},\"questionContent\":\"Excel是数据库管理软件。\",\"questionId\":78,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:08:20', '44');
-INSERT INTO `sys_oper_log` VALUES ('717', '考试提交', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.submitExam()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/participant/submit', '127.0.0.1', '内网IP', '{\"examId\":25,\"params\":{},\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctStatus\":1,\"courseName\":\"研究与开发实践\",\"createTime\":\"2025-11-23 02:07:54\",\"examId\":25,\"examName\":\"3\",\"id\":13,\"objectiveScore\":10.00,\"params\":{},\"participantStatus\":2,\"passStatus\":1,\"startTime\":\"2025-11-23 02:07:54\",\"studentId\":38,\"studentName\":\"黎文靖\",\"studentNo\":\"2023141460368\",\"subjectiveScore\":10.00,\"submitTime\":\"2025-11-23 02:08:22\",\"timeUsed\":28,\"totalScore\":10.00,\"updateTime\":\"2025-11-23 02:08:20\"}}', '0', null, '2025-11-23 02:08:22', '24');
-INSERT INTO `sys_oper_log` VALUES ('718', '考试管理', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"createBy\":\"admin\",\"endTime\":\"2025-11-29 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"4\",\"examType\":3,\"id\":26,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":6,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-16 00:00:00\",\"status\":0,\"totalScore\":10}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:24:27', '280');
-INSERT INTO `sys_oper_log` VALUES ('719', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":2,\"examId\":26,\"id\":79,\"params\":{},\"questionContent\":\"Python是解释型语言。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":1,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:24:51', '44');
-INSERT INTO `sys_oper_log` VALUES ('720', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":26,\"id\":80,\"params\":{},\"questionContent\":\"HTML是一种编程语言。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":2,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:24:51', '40');
-INSERT INTO `sys_oper_log` VALUES ('721', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":2,\"examId\":26,\"id\":81,\"params\":{},\"questionContent\":\"数据库索引可以提高查询速度。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":3,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:24:51', '35');
-INSERT INTO `sys_oper_log` VALUES ('722', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":2,\"examId\":26,\"id\":82,\"params\":{},\"questionContent\":\"Git和GitHub是同一个东西。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":4,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:24:51', '33');
-INSERT INTO `sys_oper_log` VALUES ('723', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":2,\"examId\":26,\"id\":83,\"params\":{},\"questionContent\":\"任何数的0次方都等于1。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":5,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:24:51', '34');
-INSERT INTO `sys_oper_log` VALUES ('724', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":1,\"examId\":26,\"id\":84,\"params\":{},\"questionContent\":\"三角形的内角和总是180度。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":6,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:24:52', '35');
-INSERT INTO `sys_oper_log` VALUES ('725', '考试管理', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.edit()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"endTime\":\"2025-11-29 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"4\",\"examType\":3,\"id\":26,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":6,\"questionCount\":6,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-16 00:00:00\",\"status\":1,\"totalScore\":10,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:24:54', '19');
-INSERT INTO `sys_oper_log` VALUES ('726', '考试状态更新', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.changeStatus()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam/status/26/1', '127.0.0.1', '内网IP', '26 1', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:24:54', '24');
-INSERT INTO `sys_oper_log` VALUES ('727', '考试状态更新', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.changeStatus()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam/status/26/2', '127.0.0.1', '内网IP', '26 2', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 02:25:10', '19');
-INSERT INTO `sys_oper_log` VALUES ('728', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":26,\"id\":43,\"isCorrect\":1,\"params\":{},\"questionContent\":\"Python是解释型语言。\",\"questionId\":79,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":26,\"id\":43,\"isCorrect\":1,\"params\":{},\"questionContent\":\"Python是解释型语言。\",\"questionId\":79,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:25:33', '73');
-INSERT INTO `sys_oper_log` VALUES ('729', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":26,\"id\":44,\"isCorrect\":0,\"params\":{},\"questionContent\":\"HTML是一种编程语言。\",\"questionId\":80,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":26,\"id\":44,\"isCorrect\":0,\"params\":{},\"questionContent\":\"HTML是一种编程语言。\",\"questionId\":80,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:25:35', '61');
-INSERT INTO `sys_oper_log` VALUES ('730', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"examId\":26,\"isCorrect\":1,\"params\":{},\"questionContent\":\"HTML是一种编程语言。\",\"questionId\":80,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createTime\":\"2025-11-23 02:25:35\",\"examId\":26,\"id\":44,\"isCorrect\":1,\"params\":{},\"questionContent\":\"HTML是一种编程语言。\",\"questionId\":80,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\",\"updateBy\":\"admin\",\"updateTime\":\"2025-11-23 02:25:35\"}}', '0', null, '2025-11-23 02:25:36', '63');
-INSERT INTO `sys_oper_log` VALUES ('731', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":26,\"id\":45,\"isCorrect\":1,\"params\":{},\"questionContent\":\"数据库索引可以提高查询速度。\",\"questionId\":81,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":26,\"id\":45,\"isCorrect\":1,\"params\":{},\"questionContent\":\"数据库索引可以提高查询速度。\",\"questionId\":81,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:25:39', '60');
-INSERT INTO `sys_oper_log` VALUES ('732', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":26,\"id\":46,\"isCorrect\":0,\"params\":{},\"questionContent\":\"Git和GitHub是同一个东西。\",\"questionId\":82,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":26,\"id\":46,\"isCorrect\":0,\"params\":{},\"questionContent\":\"Git和GitHub是同一个东西。\",\"questionId\":82,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:25:42', '44');
-INSERT INTO `sys_oper_log` VALUES ('733', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":26,\"id\":47,\"isCorrect\":0,\"params\":{},\"questionContent\":\"任何数的0次方都等于1。\",\"questionId\":83,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":26,\"id\":47,\"isCorrect\":0,\"params\":{},\"questionContent\":\"任何数的0次方都等于1。\",\"questionId\":83,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:25:47', '47');
-INSERT INTO `sys_oper_log` VALUES ('734', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":26,\"id\":48,\"isCorrect\":1,\"params\":{},\"questionContent\":\"三角形的内角和总是180度。\",\"questionId\":84,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":26,\"id\":48,\"isCorrect\":1,\"params\":{},\"questionContent\":\"三角形的内角和总是180度。\",\"questionId\":84,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 02:25:51', '64');
-INSERT INTO `sys_oper_log` VALUES ('735', '考试提交', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.submitExam()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/participant/submit', '127.0.0.1', '内网IP', '{\"examId\":26,\"params\":{},\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctStatus\":1,\"courseName\":\"研究与开发实践\",\"createTime\":\"2025-11-23 02:25:29\",\"examId\":26,\"examName\":\"4\",\"id\":14,\"objectiveScore\":10.00,\"params\":{},\"participantStatus\":2,\"passStatus\":1,\"startTime\":\"2025-11-23 02:25:29\",\"studentId\":38,\"studentName\":\"黎文靖\",\"studentNo\":\"2023141460368\",\"subjectiveScore\":10.00,\"submitTime\":\"2025-11-23 02:25:53\",\"timeUsed\":24,\"totalScore\":10.00,\"updateTime\":\"2025-11-23 02:25:51\"}}', '0', null, '2025-11-23 02:25:53', '33');
-INSERT INTO `sys_oper_log` VALUES ('736', '考试管理', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"createBy\":\"admin\",\"endTime\":\"2025-11-24 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"5\",\"examType\":3,\"id\":27,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":6,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-21 00:00:00\",\"status\":0,\"totalScore\":10}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:28:34', '41');
-INSERT INTO `sys_oper_log` VALUES ('737', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":27,\"id\":85,\"params\":{},\"questionContent\":\"Photoshop是微软公司的产品。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":1,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:28:54', '33');
-INSERT INTO `sys_oper_log` VALUES ('738', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":2,\"examId\":27,\"id\":86,\"params\":{},\"questionContent\":\"人类有23对染色体。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":2,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:28:54', '27');
-INSERT INTO `sys_oper_log` VALUES ('739', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":2,\"examId\":27,\"id\":87,\"params\":{},\"questionContent\":\"《论语》是孔子所著。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":3,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:28:54', '26');
-INSERT INTO `sys_oper_log` VALUES ('740', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":27,\"id\":88,\"params\":{},\"questionContent\":\"月亮本身会发光。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":4,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:28:55', '28');
-INSERT INTO `sys_oper_log` VALUES ('741', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"错误\",\"difficulty\":1,\"examId\":27,\"id\":89,\"params\":{},\"questionContent\":\"Java是微软开发的编程语言。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":5,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:28:55', '28');
-INSERT INTO `sys_oper_log` VALUES ('742', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":2,\"examId\":27,\"id\":90,\"params\":{},\"questionContent\":\"秦始皇统一了文字。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":2,\"sortOrder\":6,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:28:55', '33');
-INSERT INTO `sys_oper_log` VALUES ('743', '考试题目', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamQuestionController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/question', '127.0.0.1', '内网IP', '{\"analysis\":\"\",\"correctAnswer\":\"正确\",\"difficulty\":1,\"examId\":27,\"id\":91,\"params\":{},\"questionContent\":\"珠穆朗玛峰是世界第一高峰。\",\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"questionType\":3,\"score\":1,\"sortOrder\":7,\"subject\":\"研究与开发实践\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:28:55', '31');
-INSERT INTO `sys_oper_log` VALUES ('744', '考试管理', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.edit()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam', '127.0.0.1', '内网IP', '{\"antiCheat\":0,\"autoSubmit\":1,\"courseId\":1,\"endTime\":\"2025-11-24 00:00:00\",\"examDuration\":6,\"examMode\":1,\"examName\":\"5\",\"examType\":3,\"id\":27,\"lateSubmit\":0,\"lateTime\":0,\"params\":{},\"passScore\":6,\"questionCount\":7,\"questionOrder\":0,\"sessionId\":1,\"showAnswer\":0,\"startTime\":\"2025-11-21 00:00:00\",\"status\":1,\"totalScore\":10,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:28:59', '8');
-INSERT INTO `sys_oper_log` VALUES ('745', '考试状态更新', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.changeStatus()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam/status/27/1', '127.0.0.1', '内网IP', '27 1', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:29:00', '12');
-INSERT INTO `sys_oper_log` VALUES ('746', '考试状态更新', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.changeStatus()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/exam/status/27/2', '127.0.0.1', '内网IP', '27 2', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:29:19', '21');
-INSERT INTO `sys_oper_log` VALUES ('747', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":27,\"id\":49,\"isCorrect\":0,\"params\":{},\"questionContent\":\"Photoshop是微软公司的产品。\",\"questionId\":85,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":0,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":27,\"id\":49,\"isCorrect\":0,\"params\":{},\"questionContent\":\"Photoshop是微软公司的产品。\",\"questionId\":85,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":0,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 18:29:40', '58');
-INSERT INTO `sys_oper_log` VALUES ('748', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":27,\"id\":50,\"isCorrect\":1,\"params\":{},\"questionContent\":\"人类有23对染色体。\",\"questionId\":86,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2.00,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":27,\"id\":50,\"isCorrect\":1,\"params\":{},\"questionContent\":\"人类有23对染色体。\",\"questionId\":86,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":2.00,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 18:29:42', '32');
-INSERT INTO `sys_oper_log` VALUES ('749', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":27,\"id\":51,\"isCorrect\":0,\"params\":{},\"questionContent\":\"《论语》是孔子所著。\",\"questionId\":87,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":0,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":27,\"id\":51,\"isCorrect\":0,\"params\":{},\"questionContent\":\"《论语》是孔子所著。\",\"questionId\":87,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":0,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 18:29:44', '43');
-INSERT INTO `sys_oper_log` VALUES ('750', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":27,\"id\":52,\"isCorrect\":1,\"params\":{},\"questionContent\":\"月亮本身会发光。\",\"questionId\":88,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1.00,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":27,\"id\":52,\"isCorrect\":1,\"params\":{},\"questionContent\":\"月亮本身会发光。\",\"questionId\":88,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1.00,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 18:29:46', '44');
-INSERT INTO `sys_oper_log` VALUES ('751', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":27,\"id\":53,\"isCorrect\":0,\"params\":{},\"questionContent\":\"Java是微软开发的编程语言。\",\"questionId\":89,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":0,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createBy\":\"admin\",\"examId\":27,\"id\":53,\"isCorrect\":0,\"params\":{},\"questionContent\":\"Java是微软开发的编程语言。\",\"questionId\":89,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":0,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 18:29:51', '39');
-INSERT INTO `sys_oper_log` VALUES ('752', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"错误\",\"examId\":27,\"isCorrect\":1,\"params\":{},\"questionContent\":\"Java是微软开发的编程语言。\",\"questionId\":89,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1.00,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"错误\",\"createTime\":\"2025-11-23 18:29:51\",\"examId\":27,\"id\":53,\"isCorrect\":1,\"params\":{},\"questionContent\":\"Java是微软开发的编程语言。\",\"questionId\":89,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1.00,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\",\"updateBy\":\"admin\",\"updateTime\":\"2025-11-23 18:29:51\"}}', '0', null, '2025-11-23 18:29:53', '50');
-INSERT INTO `sys_oper_log` VALUES ('753', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":27,\"id\":54,\"isCorrect\":0,\"params\":{},\"questionContent\":\"秦始皇统一了文字。\",\"questionId\":90,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":0,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":27,\"id\":54,\"isCorrect\":0,\"params\":{},\"questionContent\":\"秦始皇统一了文字。\",\"questionId\":90,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":0,\"studentAnswer\":\"false\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 18:29:59', '42');
-INSERT INTO `sys_oper_log` VALUES ('754', '保存答案', '1', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.saveAnswer()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/answer/save', '127.0.0.1', '内网IP', '{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":27,\"id\":55,\"isCorrect\":1,\"params\":{},\"questionContent\":\"珠穆朗玛峰是世界第一高峰。\",\"questionId\":91,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1.00,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctAnswer\":\"正确\",\"createBy\":\"admin\",\"examId\":27,\"id\":55,\"isCorrect\":1,\"params\":{},\"questionContent\":\"珠穆朗玛峰是世界第一高峰。\",\"questionId\":91,\"questionOptions\":\"[\\\"正确\\\",\\\"错误\\\"]\",\"score\":1.00,\"studentAnswer\":\"true\",\"studentId\":38,\"studentNo\":\"2023141460368\"}}', '0', null, '2025-11-23 18:30:01', '45');
-INSERT INTO `sys_oper_log` VALUES ('755', '考试提交', '2', 'com.ruoyi.web.controller.proj_lwj.ClassExamController.submitExam()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/exam/participant/submit', '127.0.0.1', '内网IP', '{\"examId\":27,\"params\":{},\"studentNo\":\"2023141460368\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"correctStatus\":1,\"courseName\":\"研究与开发实践\",\"createTime\":\"2025-11-23 18:29:35\",\"examId\":27,\"examName\":\"5\",\"id\":15,\"objectiveScore\":5.00,\"params\":{},\"participantStatus\":2,\"passStatus\":0,\"startTime\":\"2025-11-23 18:29:35\",\"studentId\":38,\"studentName\":\"黎文靖\",\"studentNo\":\"2023141460368\",\"subjectiveScore\":5.00,\"submitTime\":\"2025-11-23 18:30:03\",\"timeUsed\":28,\"totalScore\":5.00,\"updateTime\":\"2025-11-23 18:30:01\"}}', '0', null, '2025-11-23 18:30:03', '33');
-INSERT INTO `sys_oper_log` VALUES ('756', '作业管理', '1', 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.add()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/homework', '127.0.0.1', '内网IP', '{\"attachments\":\"/profile/upload/2025/11/23/测试作业_20251123185542A001.docx\",\"content\":\"1\",\"courseId\":1,\"createBy\":\"admin\",\"deadline\":\"2025-11-24 00:00:00\",\"homeworkId\":54,\"params\":{},\"sessionId\":1,\"title\":\"测试\",\"totalScore\":100}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:55:43', '31');
-INSERT INTO `sys_oper_log` VALUES ('757', '作业提交', '1', 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', '1', 'admin', '研发部门', '/proj_lwj/homework/submit', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"homeworkId\":54,\"params\":{},\"status\":1,\"studentHomeworkId\":25,\"studentId\":38,\"studentNo\":\"2023141460368\",\"submissionFiles\":\"/profile/upload/2025/11/23/测试作业_20251123185614A002.docx\",\"submitTime\":\"2025-11-23 18:56:18\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:56:18', '87');
-INSERT INTO `sys_oper_log` VALUES ('758', '作业批改', '2', 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.gradeSubmission()', 'PUT', '1', 'admin', '研发部门', '/proj_lwj/homework/grade', '127.0.0.1', '内网IP', '{\"correctedBy\":1,\"correctedTime\":\"2025-11-23 18:56:44\",\"homeworkId\":54,\"isGraded\":1,\"params\":{},\"remark\":\"\",\"score\":100,\"status\":2,\"studentHomeworkId\":25,\"studentId\":38,\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 18:56:44', '12');
+INSERT INTO `sys_oper_log` VALUES ('667', '菜单管理', '1', 'com.ruoyi.web.controller.system.SysMenuController.add()', 'POST', '1', 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createBy\":\"admin\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuName\":\"辩论管理\",\"menuType\":\"C\",\"orderNum\":5,\"params\":{},\"parentId\":2011,\"path\":\"dabate\",\"status\":\"0\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 16:24:46', '65');
+INSERT INTO `sys_oper_log` VALUES ('668', '菜单管理', '2', 'com.ruoyi.web.controller.system.SysMenuController.edit()', 'PUT', '1', 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createTime\":\"2025-11-23 16:24:46\",\"icon\":\"people\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuId\":2047,\"menuName\":\"辩论管理\",\"menuType\":\"C\",\"orderNum\":5,\"params\":{},\"parentId\":2011,\"path\":\"dabate\",\"perms\":\"\",\"routeName\":\"\",\"status\":\"0\",\"updateBy\":\"admin\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 16:26:13', '18');
+INSERT INTO `sys_oper_log` VALUES ('669', '角色管理', '2', 'com.ruoyi.web.controller.system.SysRoleController.edit()', 'PUT', '1', 'admin', '研发部门', '/system/role', '127.0.0.1', '内网IP', '{\"admin\":false,\"createTime\":\"2025-10-30 17:06:55\",\"dataScope\":\"2\",\"delFlag\":\"0\",\"deptCheckStrictly\":true,\"flag\":false,\"menuCheckStrictly\":true,\"menuIds\":[2009,2004,2005,2018,2019,2006,2007,2008,2011,2012,2032,2033,2034,2035,2036,2037,2013,2022,2044,2045,2047,2000,2002,2003,2023,2024,2010,2014,2015,2016,2017,2020,2021,100,1000,1001,1002,1003,1004,1005,1006,101,1007,1008,1009,1010,1011,2025,2026,2027,2028,2029,2030,2031,1,102,1012,1013,1014,1015,103,1016,1017,1018,1019,104,1020,1021,1022,1023,1024,105,1025,1026,1027,1028,1029,106,1030,1031,1032,1033,1034,107,1035,1036,1037,1038,108,500,1039,1040,1041,501,1042,1043,1044,1045,2,109,1046,1047,1048,110,1049,1050,1051,1052,1053,1054,111,112,113,114,3,115,116,1055,1056,1057,1058,1059,1060,117,4],\"params\":{},\"remark\":\"普通角色\",\"roleId\":2,\"roleKey\":\"common\",\"roleName\":\"普通角色\",\"roleSort\":2,\"status\":\"0\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 16:27:19', '111');
+INSERT INTO `sys_oper_log` VALUES ('670', '菜单管理', '2', 'com.ruoyi.web.controller.system.SysMenuController.edit()', 'PUT', '1', 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createTime\":\"2025-11-23 16:24:46\",\"icon\":\"people\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuId\":2047,\"menuName\":\"辩论管理\",\"menuType\":\"C\",\"orderNum\":5,\"params\":{},\"parentId\":2011,\"path\":\"dabate\",\"perms\":\"proj_qhy:debate:list\",\"routeName\":\"\",\"status\":\"0\",\"updateBy\":\"admin\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 16:29:22', '20');
+INSERT INTO `sys_oper_log` VALUES ('671', '菜单管理', '2', 'com.ruoyi.web.controller.system.SysMenuController.edit()', 'PUT', '1', 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"component\":\"proj_qhy/debate/index\",\"createTime\":\"2025-11-23 16:24:46\",\"icon\":\"people\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuId\":2047,\"menuName\":\"辩论管理\",\"menuType\":\"C\",\"orderNum\":5,\"params\":{},\"parentId\":2011,\"path\":\"dabate\",\"perms\":\"proj_qhy:debate:list\",\"routeName\":\"\",\"status\":\"0\",\"updateBy\":\"admin\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 16:32:29', '20');
+INSERT INTO `sys_oper_log` VALUES ('672', '辩论管理', '1', 'com.ruoyi.web.controller.proj_qhy.ClassDebateController.add()', 'POST', '1', 'admin', '研发部门', '/proj_qhy/debate', '127.0.0.1', '内网IP', '{\"createBy\":\"admin\",\"debateId\":102,\"joinCode\":\"EVW1HJ\",\"negativeArgument\":\"大学专业选择应优先考虑就业前景\",\"params\":{},\"positiveArgument\":\"大学专业选择应优先考虑兴趣\",\"speechDuration\":180,\"status\":\"0\",\"topic\":\"大学专业选择应优先考虑兴趣还是就业前景\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 16:53:41', '80');
+INSERT INTO `sys_oper_log` VALUES ('673', '角色管理', '2', 'com.ruoyi.web.controller.system.SysRoleController.edit()', 'PUT', '1', 'admin', '研发部门', '/system/role', '127.0.0.1', '内网IP', '{\"admin\":false,\"createTime\":\"2025-11-12 01:28:13\",\"dataScope\":\"1\",\"delFlag\":\"0\",\"deptCheckStrictly\":true,\"flag\":false,\"menuCheckStrictly\":true,\"menuIds\":[2004,2000,2009,2014,2025,2005,2006,2007,2008,2011,2012,2032,2033,2034,2035,2036,2037,2013,2022,2044,2045,2047,2002,2010,2015,2016,2017,2020,2021,100,1000,1001,1002,1003,1004,1005,1006,101,1007,1008,1009,1010,1011,2026,2031,1,102,1012,1013,1014,1015,103,1016,1017,1018,1019,104,1020,1021,1022,1023,1024,105,1025,1026,1027,1028,1029,106,1030,1031,1032,1033,1034,107,1035,1036,1037,1038,108,500,1039,1040,1041,501,1042,1043,1044,1045],\"params\":{},\"roleId\":100,\"roleKey\":\"teacher\",\"roleName\":\"teacher\",\"roleSort\":3,\"status\":\"0\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 17:24:39', '47');
+INSERT INTO `sys_oper_log` VALUES ('674', '角色管理', '2', 'com.ruoyi.web.controller.system.SysRoleController.edit()', 'PUT', '1', 'admin', '研发部门', '/system/role', '127.0.0.1', '内网IP', '{\"admin\":false,\"createTime\":\"2025-11-12 01:31:32\",\"dataScope\":\"1\",\"delFlag\":\"0\",\"deptCheckStrictly\":true,\"flag\":false,\"menuCheckStrictly\":true,\"menuIds\":[2009,2004,2005,2018,2019,2006,2007,2008,2011,2012,2032,2033,2034,2035,2036,2037,2013,2022,2044,2045,2047,2000,2002,2003,2023,2024,2010,2014,2015,2016,2017,2020,2021,100,1000,1001,1002,1003,1004,1005,1006,101,1007,1008,1009,1010,1011,2025,2026,2027,2028,2029,2030,2031,1,102,1012,1013,1014,1015,103,1016,1017,1018,1019,104,1020,1021,1022,1023,1024,105,1025,1026,1027,1028,1029,106,1030,1031,1032,1033,1034,107,1035,1036,1037,1038,108,500,1039,1040,1041,501,1042,1043,1044,1045,2,109,1046,1047,1048,110,1049,1050,1051,1052,1053,1054,111,112,113,114,3,115,116,1055,1056,1057,1058,1059,1060,117,4],\"params\":{},\"roleId\":101,\"roleKey\":\"student\",\"roleName\":\"student\",\"roleSort\":4,\"status\":\"0\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 17:24:53', '82');
+INSERT INTO `sys_oper_log` VALUES ('675', '菜单管理', '1', 'com.ruoyi.web.controller.system.SysMenuController.add()', 'POST', '1', 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createBy\":\"admin\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuName\":\"辩论室\",\"menuType\":\"C\",\"orderNum\":1,\"params\":{},\"parentId\":2047,\"path\":\"debate-room/:id\",\"status\":\"0\",\"visible\":\"1\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 19:27:44', '48');
+INSERT INTO `sys_oper_log` VALUES ('676', '辩论管理', '1', 'com.ruoyi.web.controller.proj_qhy.ClassDebateController.add()', 'POST', '1', 'admin', '研发部门', '/proj_qhy/debate', '127.0.0.1', '内网IP', '{\"conViewpoint\":\"内卷\",\"createBy\":\"admin\",\"createTime\":\"2025-11-23 20:38:44\",\"id\":2,\"inviteCode\":\"CB0B4A\",\"joined\":false,\"params\":{},\"proViewpoint\":\"躺平\",\"speechLimit\":60,\"status\":\"0\",\"title\":\"躺平还是内卷\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 20:38:45', '598');
+INSERT INTO `sys_oper_log` VALUES ('677', '辩论管理', '2', 'com.ruoyi.web.controller.proj_qhy.ClassDebateController.edit()', 'PUT', '1', 'admin', '研发部门', '/proj_qhy/debate', '127.0.0.1', '内网IP', '{\"conViewpoint\":\"内卷\",\"id\":2,\"joined\":false,\"params\":{},\"proViewpoint\":\"躺平\",\"speechLimit\":60,\"title\":\"躺平还是内卷?\",\"updateBy\":\"admin\",\"updateTime\":\"2025-11-23 20:49:18\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 20:49:18', '18');
+INSERT INTO `sys_oper_log` VALUES ('678', '辩论管理', '1', 'com.ruoyi.web.controller.proj_qhy.ClassDebateController.add()', 'POST', '1', 'admin', '研发部门', '/proj_qhy/debate', '127.0.0.1', '内网IP', '{\"conViewpoint\":\"不需要\",\"createBy\":\"admin\",\"createTime\":\"2025-11-23 21:15:05\",\"id\":3,\"inviteCode\":\"032BF1\",\"joined\":false,\"params\":{},\"proViewpoint\":\"需要\",\"speechLimit\":60,\"status\":\"0\",\"title\":\"理解需不需要共情\"}', '{\"msg\":\"操作成功\",\"code\":200}', '0', null, '2025-11-23 21:15:05', '16');
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -3924,9 +3873,9 @@ CREATE TABLE `sys_role` (
 -- Records of sys_role
 -- ----------------------------
 INSERT INTO `sys_role` VALUES ('1', '超级管理员', 'admin', '1', '1', '1', '1', '0', '0', 'admin', '2025-10-30 17:06:55', '', null, '超级管理员');
-INSERT INTO `sys_role` VALUES ('2', '普通角色', 'common', '2', '2', '1', '1', '0', '0', 'admin', '2025-10-30 17:06:55', 'admin', '2025-11-14 11:11:03', '普通角色');
-INSERT INTO `sys_role` VALUES ('100', 'teacher', 'teacher', '3', '1', '1', '1', '0', '0', 'admin', '2025-11-12 01:28:13', 'admin', '2025-11-14 11:11:21', null);
-INSERT INTO `sys_role` VALUES ('101', 'student', 'student', '4', '1', '1', '1', '0', '0', 'admin', '2025-11-12 01:31:32', 'admin', '2025-11-14 11:11:27', null);
+INSERT INTO `sys_role` VALUES ('2', '普通角色', 'common', '2', '2', '1', '1', '0', '0', 'admin', '2025-10-30 17:06:55', 'admin', '2025-11-23 16:27:19', '普通角色');
+INSERT INTO `sys_role` VALUES ('100', 'teacher', 'teacher', '3', '1', '1', '1', '0', '0', 'admin', '2025-11-12 01:28:13', 'admin', '2025-11-23 17:24:39', null);
+INSERT INTO `sys_role` VALUES ('101', 'student', 'student', '4', '1', '1', '1', '0', '0', 'admin', '2025-11-12 01:31:32', 'admin', '2025-11-23 17:24:52', null);
 
 -- ----------------------------
 -- Table structure for sys_role_dept
@@ -4082,6 +4031,9 @@ INSERT INTO `sys_role_menu` VALUES ('2', '2034');
 INSERT INTO `sys_role_menu` VALUES ('2', '2035');
 INSERT INTO `sys_role_menu` VALUES ('2', '2036');
 INSERT INTO `sys_role_menu` VALUES ('2', '2037');
+INSERT INTO `sys_role_menu` VALUES ('2', '2044');
+INSERT INTO `sys_role_menu` VALUES ('2', '2045');
+INSERT INTO `sys_role_menu` VALUES ('2', '2047');
 INSERT INTO `sys_role_menu` VALUES ('100', '1');
 INSERT INTO `sys_role_menu` VALUES ('100', '100');
 INSERT INTO `sys_role_menu` VALUES ('100', '101');
@@ -4168,6 +4120,9 @@ INSERT INTO `sys_role_menu` VALUES ('100', '2034');
 INSERT INTO `sys_role_menu` VALUES ('100', '2035');
 INSERT INTO `sys_role_menu` VALUES ('100', '2036');
 INSERT INTO `sys_role_menu` VALUES ('100', '2037');
+INSERT INTO `sys_role_menu` VALUES ('100', '2044');
+INSERT INTO `sys_role_menu` VALUES ('100', '2045');
+INSERT INTO `sys_role_menu` VALUES ('100', '2047');
 INSERT INTO `sys_role_menu` VALUES ('101', '1');
 INSERT INTO `sys_role_menu` VALUES ('101', '2');
 INSERT INTO `sys_role_menu` VALUES ('101', '3');
@@ -4290,6 +4245,9 @@ INSERT INTO `sys_role_menu` VALUES ('101', '2034');
 INSERT INTO `sys_role_menu` VALUES ('101', '2035');
 INSERT INTO `sys_role_menu` VALUES ('101', '2036');
 INSERT INTO `sys_role_menu` VALUES ('101', '2037');
+INSERT INTO `sys_role_menu` VALUES ('101', '2044');
+INSERT INTO `sys_role_menu` VALUES ('101', '2045');
+INSERT INTO `sys_role_menu` VALUES ('101', '2047');
 
 -- ----------------------------
 -- Table structure for sys_todo
@@ -4339,13 +4297,13 @@ CREATE TABLE `sys_user` (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES ('1', '103', 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-23 18:27:35', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', null, '管理员');
-INSERT INTO `sys_user` VALUES ('2', '105', 'ry', '张三', '00', 'ry@qq.com', '15666666666', '1', 'https://img0.baidu.com/it/u=3661017254,2148146033&fm=253&app=138&f=JPEG?w=500&h=500', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-16 05:31:17', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', null, '测试员');
-INSERT INTO `sys_user` VALUES ('3', '103', 'student1', '李比', '00', 'student1@school.com', '13800138001', '0', 'https://img0.baidu.com/it/u=2660145230,331641081&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=625', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-15 23:16:27', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', null, '学生');
-INSERT INTO `sys_user` VALUES ('4', '105', 'teacher1', '王老师', '01', 'teacher1@school.com', '13900139001', '1', 'https://picsum.photos/200/200?random=2', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 11:20:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', null, '教师');
+INSERT INTO `sys_user` VALUES ('1', '103', 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-23 19:33:27', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', null, '管理员');
+INSERT INTO `sys_user` VALUES ('2', '105', 'ry', '张三', '00', 'ry@qq.com', '15666666666', '1', 'https://img0.baidu.com/it/u=3661017254,2148146033&fm=253&app=138&f=JPEG?w=500&h=500', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-23 20:06:26', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', null, '测试员');
+INSERT INTO `sys_user` VALUES ('3', '103', 'student1', '李比', '00', 'student1@school.com', '13800138001', '0', 'https://img0.baidu.com/it/u=2660145230,331641081&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=625', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-23 20:39:34', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', null, '学生');
+INSERT INTO `sys_user` VALUES ('4', '105', 'teacher1', '王老师', '01', 'teacher1@school.com', '13900139001', '1', 'https://picsum.photos/200/200?random=2', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-23 17:23:36', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', null, '教师');
 INSERT INTO `sys_user` VALUES ('5', '103', 'student2', '赵六', '00', 'student2@school.com', '13700137001', '0', 'https://picsum.photos/200/200?random=3', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 09:15:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', null, '学生');
 INSERT INTO `sys_user` VALUES ('100', null, 'teacher_zhang', '张老师', '00', 'chenrabbitcyq@163.com', '13800000001', '0', '', '$2a$10$ldKvLfpL/LOTr8YoBPsFOuoEQqqp/fiI1UqnTDZLByjgjK2zINCO2', '0', '0', '127.0.0.1', '2025-11-21 23:24:55', '2025-11-21 23:24:33', 'admin', '2025-11-12 01:32:46', '', '2025-11-21 23:24:33', null);
-INSERT INTO `sys_user` VALUES ('101', null, 'student_li', '李同学', '00', '', '13800000002', '1', '', '$2a$10$76UxrSPYQSpNnfhy7PcKcukg9nPYHs9Q00ereE6msATSUELIOIybC', '0', '0', '127.0.0.1', '2025-11-16 05:14:45', null, 'admin', '2025-11-12 01:33:19', 'admin', '2025-11-12 01:34:13', null);
+INSERT INTO `sys_user` VALUES ('101', null, 'student_li', '李同学', '00', '', '13800000002', '1', '', '$2a$10$76UxrSPYQSpNnfhy7PcKcukg9nPYHs9Q00ereE6msATSUELIOIybC', '0', '0', '127.0.0.1', '2025-11-23 20:48:10', null, 'admin', '2025-11-12 01:33:19', 'admin', '2025-11-12 01:34:13', null);
 
 -- ----------------------------
 -- Table structure for sys_user_post
@@ -4379,5 +4337,7 @@ CREATE TABLE `sys_user_role` (
 INSERT INTO `sys_user_role` VALUES ('1', '1');
 INSERT INTO `sys_user_role` VALUES ('2', '2');
 INSERT INTO `sys_user_role` VALUES ('3', '100');
+INSERT INTO `sys_user_role` VALUES ('4', '100');
+INSERT INTO `sys_user_role` VALUES ('5', '101');
 INSERT INTO `sys_user_role` VALUES ('100', '100');
 INSERT INTO `sys_user_role` VALUES ('101', '101');
