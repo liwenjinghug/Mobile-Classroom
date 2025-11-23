@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <!-- 打印区域 - 始终隐藏，只在打印时显示 -->
+    <!-- 打印区域 -->
     <div ref="printContent" class="print-content" style="display: none;">
       <div class="print-header">
         <h2>学生参与热力数据报表</h2>
@@ -72,6 +72,7 @@
     </div>
 
     <el-row :gutter="20">
+      <!-- 统计卡片 -->
       <el-col :span="24">
         <el-row :gutter="20" class="stats-cards">
           <el-col :xs="24" :sm="12" :lg="6">
@@ -201,6 +202,7 @@
         </el-card>
       </el-col>
 
+      <!-- 图表区域 -->
       <el-col :span="12">
         <el-card shadow="hover" class="chart-card">
           <template #header>
@@ -223,8 +225,9 @@
         </el-card>
       </el-col>
 
+      <!-- 数据表格 -->
       <el-col :span="24">
-        <el-card shadow="hover">
+        <el-card shadow="hover" class="table-card">
           <template #header>
             <div class="card-header">
               <span>学生参与热力详情</span>
@@ -232,7 +235,6 @@
             </div>
           </template>
 
-          <!-- 可滚动表格容器 -->
           <div class="table-container">
             <el-table
               v-loading="loading"
@@ -240,44 +242,47 @@
               style="width: 100%"
               :max-height="tableHeight"
               stripe
+              border
+              size="medium"
             >
-              <el-table-column label="学号" align="center" prop="student_no" width="120" fixed="left" />
+              <el-table-column label="学号" align="center" prop="student_no" width="140" fixed="left" />
               <el-table-column label="姓名" align="center" prop="student_name" width="100" fixed="left" />
-              <el-table-column label="签到率" align="center" prop="attendance_rate" width="100">
+              <el-table-column label="签到率" align="center" prop="attendance_rate" width="110">
                 <template #default="scope">
-                  <el-tag :type="getScoreType(scope.row.attendance_rate)">
+                  <el-tag :type="getScoreType(scope.row.attendance_rate)" size="medium">
                     {{ scope.row.attendance_rate }}%
                   </el-tag>
                 </template>
               </el-table-column>
               <el-table-column label="作业提交率" align="center" prop="homework_rate" width="120">
                 <template #default="scope">
-                  <el-tag :type="getScoreType(scope.row.homework_rate)">
+                  <el-tag :type="getScoreType(scope.row.homework_rate)" size="medium">
                     {{ scope.row.homework_rate }}%
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="论坛活跃度" align="center" prop="forum_score" width="120">
+              <el-table-column label="论坛活跃度" align="center" prop="forum_score" width="130">
                 <template #default="scope">
                   <div class="forum-score">
                     <span class="score-text">{{ scope.row.forum_score }}分</span>
                     <div class="score-bar">
                       <div
                         class="score-fill"
-                        :style="{ width: Math.min(scope.row.forum_score / 2, 100) + '%' }"
+                        :style="{ width: Math.min(scope.row.forum_score, 100) + '%' }"
                         :class="getForumScoreClass(scope.row.forum_score)"
                       ></div>
                     </div>
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column label="综合参与度" align="center" prop="participation_score" width="120">
+              <el-table-column label="综合参与度" align="center" prop="participation_score" width="130">
                 <template #default="scope">
                   <div class="participation-progress">
                     <el-progress
                       :percentage="scope.row.participation_score"
                       :color="getProgressColor(scope.row.participation_score)"
-                      :show-text="false">
+                      :show-text="false"
+                      :stroke-width="12">
                     </el-progress>
                     <span class="score-text">{{ scope.row.participation_score }}分</span>
                   </div>
@@ -285,7 +290,7 @@
               </el-table-column>
               <el-table-column label="参与等级" align="center" prop="participation_level" width="100" fixed="right">
                 <template #default="scope">
-                  <el-tag :type="getLevelType(scope.row.participation_level)">
+                  <el-tag :type="getLevelType(scope.row.participation_level)" size="medium">
                     {{ scope.row.participation_level }}
                   </el-tag>
                 </template>
@@ -992,17 +997,23 @@ export default {
 </script>
 
 <style scoped>
+.app-container {
+  padding: 20px;
+}
+
 .stats-cards {
   margin-bottom: 20px;
 }
 
 .stats-card {
   margin-bottom: 20px;
+  height: 100px;
 }
 
 .stats-content {
   display: flex;
   align-items: center;
+  height: 100%;
 }
 
 .stats-icon {
@@ -1060,6 +1071,11 @@ export default {
 
 .chart-card {
   margin-bottom: 20px;
+  height: 400px;
+}
+
+.table-card {
+  margin-bottom: 20px;
 }
 
 .table-container {
@@ -1069,45 +1085,100 @@ export default {
 .forum-score {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .score-text {
-  margin-right: 10px;
   min-width: 40px;
+  font-weight: 500;
 }
 
 .score-bar {
   flex: 1;
-  height: 8px;
+  height: 12px;
   background-color: #f0f0f0;
-  border-radius: 4px;
+  border-radius: 6px;
   overflow: hidden;
 }
 
 .score-fill {
   height: 100%;
   transition: width 0.3s;
+  border-radius: 6px;
 }
 
 .score-high {
-  background-color: #67C23A;
+  background: linear-gradient(90deg, #67C23A, #85ce61);
 }
 
 .score-medium {
-  background-color: #E6A23C;
+  background: linear-gradient(90deg, #E6A23C, #ebb563);
 }
 
 .score-low {
-  background-color: #F56C6C;
+  background: linear-gradient(90deg, #F56C6C, #f78989);
 }
 
 .participation-progress {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .participation-progress .el-progress {
   flex: 1;
-  margin-right: 10px;
+}
+</style>
+
+<style>
+/* 全局样式用于深度选择器 */
+.table-container .el-progress-bar {
+  padding-right: 0 !important;
+}
+
+.table-container .el-table {
+  font-size: 14px;
+  width: 100%;
+}
+
+.table-container .el-table th {
+  background-color: #f5f7fa;
+  font-weight: 600;
+  color: #303133;
+}
+
+.table-container .el-table--border {
+  border: 1px solid #ebeef5;
+}
+
+.table-container .el-table--border th,
+.table-container .el-table--border td {
+  border-right: 1px solid #ebeef5;
+}
+
+.table-container .el-table .cell {
+  padding: 8px 12px;
+}
+
+.table-container .el-table--medium .el-table__cell {
+  padding: 8px 0;
+}
+
+.table-container .el-table__body,
+.table-container .el-table__header {
+  width: 100% !important;
+}
+
+.table-container .el-table__row {
+  width: 100%;
+}
+
+.table-container .el-table__cell {
+  border-bottom: 1px solid #ebeef5;
+}
+
+.table-container .el-table__fixed,
+.table-container .el-table__fixed-right {
+  height: 100% !important;
 }
 </style>

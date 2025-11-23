@@ -15,7 +15,6 @@ export function getParticipationStats() {
   })
 }
 
-// 新增API方法
 export function listParticipationHeatByFilter(data) {
   return request({
     url: '/proj_fz/participationHeat/listByFilter',
@@ -40,7 +39,6 @@ export function getFilterOptions() {
   })
 }
 
-// 添加参与度分布统计API
 export function getParticipationDistribution(data) {
   return request({
     url: '/proj_fz/participationHeat/distribution',
