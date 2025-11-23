@@ -37,12 +37,15 @@
           <img :src="codeUrl" @click="getCode" class="login-code-img"/>
         </div>
       </el-form-item>
-      <el-checkbox v-model="loginForm.rememberMe" style="margin:0px 0px 25px 0px;">记住密码</el-checkbox>
-<!--      cyq新增-->
-      <div style="float: right; margin-top: 3px; margin-right: 5px;">
+<!--      开始修改-->
+      <div class="login-options">
+        <el-checkbox v-model="loginForm.rememberMe">记住密码</el-checkbox>
+
+        <router-link v-if="register" class="link-type" :to="'/register'">立即注册</router-link>
+
         <router-link class="link-type" :to="'/reset-password'">忘记密码？</router-link>
       </div>
-<!--新增结束-->
+<!--修改结束-->
       <el-form-item style="width:100%;">
         <el-button
           :loading="loading"
@@ -54,9 +57,9 @@
           <span v-if="!loading">登 录</span>
           <span v-else>登 录 中...</span>
         </el-button>
-        <div style="float: right;" v-if="register">
-          <router-link class="link-type" :to="'/register'">立即注册</router-link>
-        </div>
+<!--        <div style="float: right;" v-if="register">-->
+<!--          <router-link class="link-type" :to="'/register'">立即注册</router-link>-->
+<!--        </div>-->
       </el-form-item>
     </el-form>
     <!--  底部  -->
@@ -121,6 +124,10 @@ export default {
           this.codeUrl = "data:image/gif;base64," + res.img
           this.loginForm.uuid = res.uuid
         }
+        // ========== ↓↓↓ 添加这一行 ↓↓↓ ==========
+        // 读取后端返回的注册开关状态
+        this.register = res.register === undefined ? false : res.register
+        // ========== ↑↑↑ 添加结束 ↑↑↑ ==========
       })
     },
     getCookie() {
@@ -213,6 +220,21 @@ export default {
     margin-left: 2px;
     color: #ffffff; // 图标颜色
   }
+
+  /* ========== 新增：登录选项容器样式 ========== */
+  .login-options {
+    display: flex;            /* 启用 Flex 布局 */
+    justify-content: space-between; /* 两端对齐，中间元素自动居中 */
+    align-items: center;      /* 垂直居中对齐 */
+    margin-bottom: 25px;      /* 底部留出间距，替换掉原先 el-checkbox 的 margin */
+    font-size: 14px;          /* 统一字体大小 */
+  }
+
+  /* 调整复选框的样式，去掉它自带的 margin */
+  .el-checkbox {
+    margin: 0 !important;
+  }
+  /* ========== 新增结束 ========== */
 
   //新增
   // --- 关键修改 2: 登录按钮样式 (参考图1) ---
