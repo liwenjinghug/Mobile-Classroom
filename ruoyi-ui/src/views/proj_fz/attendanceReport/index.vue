@@ -904,7 +904,7 @@ export default {
       this.getList();
     },
 
-    /** 导出按钮操作 - 修复导出参数 */
+    /** 导出按钮操作 - 使用新的导出接口 */
     handleExport() {
       if (this.dataList.length === 0) {
         this.$message.warning('没有数据可以导出');
@@ -924,9 +924,9 @@ export default {
         (this.sessionList.find(s => s.sessionId === this.queryParams.sessionId) || {}).className : '全部课堂';
       const dateRangeText = params.startDate && params.endDate ?
         `${params.startDate.replace(/-/g,'')}-${params.endDate.replace(/-/g,'')}` : this.getCurrentTime();
-      const filename = `考勤报表_${this.getDimensionText()}_${className}_${dateRangeText}.xlsx`;
+      const dimensionText = this.getDimensionText();
+      const filename = `考勤报表_${dimensionText}_${className}_${dateRangeText}.xlsx`;
 
-      // 使用POST请求导出
       exportAttendanceReport(params, filename).then(() => {
         this.$message.success('导出成功');
         this.exportLoading = false;

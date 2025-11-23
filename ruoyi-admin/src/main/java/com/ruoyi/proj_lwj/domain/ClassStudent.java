@@ -4,8 +4,8 @@ public class ClassStudent {
     private Long studentId;
     private String studentNo;
     private String studentName;
-    private String courseCode;
-    private Long sessionId;
+    private String courseCode; // 旧模型字段：如果迁移完成，可考虑删除；当前为兼容保留
+    private Long sessionId;   // 旧模型字段：课堂与学生正式通过 class_session_student 关联
 
     public Long getStudentId() { return studentId; }
     public void setStudentId(Long studentId) { this.studentId = studentId; }
@@ -22,4 +22,3 @@ public class ClassStudent {
     public Long getSessionId() { return sessionId; }
     public void setSessionId(Long sessionId) { this.sessionId = sessionId; }
 }
-

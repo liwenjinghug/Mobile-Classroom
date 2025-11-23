@@ -2,6 +2,7 @@ package com.ruoyi.proj_fz.service;
 
 import com.ruoyi.proj_fz.domain.AttendanceStatisticsDTO;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -30,4 +31,7 @@ public interface IAttendanceStatisticsService {
     List<AttendanceStatisticsDTO> getExportSessionStatistics(Long sessionId, Date startDate, Date endDate);
     List<AttendanceStatisticsDTO> getExportTimeStatistics(Long sessionId, Date startDate, Date endDate);
     List<AttendanceStatisticsDTO> getExportAttendanceDetails(Long sessionId, Date startDate, Date endDate, Integer attendanceStatus);
+
+    // 新增导出数据方法
+    void exportAttendanceData(Map<String, Object> params, HttpServletResponse response);
 }

@@ -2,15 +2,15 @@
   <div class="app-container">
     <el-row>
       <el-col :span="24">
-        <el-card>
-          <div slot="header" class="clearfix">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix notice-header no-print">
             <span class="header-title">操作日志</span>
-            <el-button style="float: right;" type="primary" icon="el-icon-arrow-left" @click="handleBack">
+            <el-button style="float: right;" type="info" plain icon="el-icon-arrow-left" size="mini" @click="handleBack" class="mac-btn">
               返回
             </el-button>
           </div>
 
-          <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+          <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px" class="no-print">
             <el-form-item label="系统模块" prop="title">
               <el-input
                 v-model="queryParams.title"
@@ -76,46 +76,62 @@
               ></el-date-picker>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery">搜索</el-button>
-              <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
+              <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery" class="mac-btn">搜索</el-button>
+              <el-button icon="el-icon-refresh" size="mini" @click="resetQuery" class="mac-btn">重置</el-button>
             </el-form-item>
           </el-form>
 
-          <el-row :gutter="10" class="mb8">
+          <el-row :gutter="10" class="mb8 no-print">
             <el-col :span="1.5">
               <el-button
                 type="danger"
-                plain
                 icon="el-icon-delete"
-                size="small"
+                size="mini"
                 :disabled="multiple"
                 @click="handleDelete"
+                class="mac-btn"
               >删除</el-button>
             </el-col>
             <el-col :span="1.5">
               <el-button
                 type="danger"
-                plain
                 icon="el-icon-delete"
-                size="small"
+                size="mini"
                 @click="handleClean"
+                class="mac-btn"
               >清空</el-button>
             </el-col>
             <el-col :span="1.5">
               <el-button
                 type="warning"
-                plain
                 icon="el-icon-download"
-                size="small"
+                size="mini"
                 @click="handleExport"
                 :loading="exportLoading"
+                class="mac-btn"
               >导出</el-button>
+            </el-col>
+            <el-col :span="1.5">
+              <el-button
+                type="primary"
+                icon="el-icon-printer"
+                size="mini"
+                @click="handlePrint"
+                class="mac-btn"
+              >打印</el-button>
             </el-col>
             <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
           </el-row>
 
-          <el-table v-loading="loading" :data="operlogList" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="55" align="center" />
+          <h2 class="print-title" style="display: none;">操作日志列表</h2>
+
+          <el-table
+            v-loading="loading"
+            :data="operlogList"
+            @selection-change="handleSelectionChange"
+            class="print-table"
+          >
+            <el-table-column type="selection" width="55" align="center" class-name="no-print-col" />
             <el-table-column label="日志编号" align="center" prop="operId" />
             <el-table-column label="系统模块" align="center" prop="title" />
             <el-table-column label="操作类型" align="center" prop="businessType" :formatter="businessTypeFormat" />
@@ -123,13 +139,19 @@
             <el-table-column label="操作人员" align="center" prop="operName" />
             <el-table-column label="操作地址" align="center" prop="operIp" width="130" :show-overflow-tooltip="true" />
             <el-table-column label="操作地点" align="center" prop="operLocation" :show-overflow-tooltip="true" />
-            <el-table-column label="操作状态" align="center" prop="status" :formatter="statusFormat" />
+            <el-table-column label="操作状态" align="center" prop="status" :formatter="statusFormat">
+              <template slot-scope="scope">
+                <el-tag :type="scope.row.status === 0 ? 'success' : 'danger'">
+                  {{ statusFormat(scope.row) }}
+                </el-tag>
+              </template>
+            </el-table-column>
             <el-table-column label="操作日期" align="center" prop="operTime" width="180">
               <template slot-scope="scope">
                 <span>{{ parseTime(scope.row.operTime) }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+            <el-table-column label="操作" align="center" class-name="small-padding fixed-width no-print-col">
               <template slot-scope="scope">
                 <el-button
                   size="mini"
@@ -147,12 +169,12 @@
             :page.sync="queryParams.pageNum"
             :limit.sync="queryParams.pageSize"
             @pagination="getList"
+            class="no-print"
           />
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 操作日志详细 -->
     <el-dialog title="操作日志详细" :visible.sync="open" width="700px" append-to-body>
       <el-form ref="form" :model="form" label-width="100px" size="mini">
         <el-row>
@@ -176,7 +198,7 @@
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="open = false">关 闭</el-button>
+        <el-button @click="open = false" class="mac-btn">关 闭</el-button>
       </div>
     </el-dialog>
   </div>
@@ -203,7 +225,7 @@ export default {
       operlogList: [],
       // 是否显示弹出层
       open: false,
-      // 类型数据字典 - 使用硬编码
+      // 类型数据字典
       businessTypeOptions: [
         {value: '0', label: '其它'},
         {value: '1', label: '新增'},
@@ -216,7 +238,7 @@ export default {
         {value: '8', label: '生成代码'},
         {value: '9', label: '清空数据'}
       ],
-      // 状态数据字典 - 使用硬编码
+      // 状态数据字典
       statusOptions: [
         {value: '0', label: '成功'},
         {value: '1', label: '失败'}
@@ -324,20 +346,23 @@ export default {
       });
     },
 
-    /** 导出按钮操作 - 修复版本 */
+    /** 导出按钮操作 */
     handleExport() {
       this.$modal.confirm('是否确认导出所有操作日志数据项？').then(() => {
         this.exportLoading = true;
-        // 不传递任何参数，使用 GET 请求
         return exportOperlog();
       }).then(response => {
-        // 直接使用响应数据创建下载
         this.handleExportResponse(response);
       }).catch((error) => {
         console.error('导出失败:', error);
         this.exportLoading = false;
         this.$modal.msgError("导出失败：" + (error.message || '未知错误'));
       });
+    },
+
+    /** 【新增】打印功能 */
+    handlePrint() {
+      window.print();
     },
 
     /** 处理导出响应 */
@@ -379,7 +404,6 @@ export default {
 </script>
 
 <style scoped>
-/* Mac Style for Operlog Page */
 .app-container {
   padding: 40px 20px;
   max-width: 1200px;
@@ -427,65 +451,90 @@ export default {
   box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
 }
 
-/* Button Styling */
-.app-container >>> .el-button {
-  border-radius: 980px;
+/* ============================================
+   【核心修改】按钮样式优化 (高对比度 & 圆润风格)
+   ============================================ */
+.mac-btn {
+  border-radius: 20px;
   font-weight: 500;
-  border: none;
-  padding: 9px 20px;
-  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.app-container >>> .el-button--primary {
+/* 1. 主操作按钮 (搜索、重新加载、打印)：深蓝色实心，白字 */
+.app-container >>> .el-button--primary:not(.is-plain) {
   background-color: #0071e3;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+  border-color: #0071e3;
+  color: #ffffff !important; /* 强制白字 */
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.3);
 }
-.app-container >>> .el-button--primary:hover {
+.app-container >>> .el-button--primary:not(.is-plain):hover {
   background-color: #0077ed;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
 }
 
-.app-container >>> .el-button--success {
-  background-color: #34c759;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
-}
-
-.app-container >>> .el-button--warning {
-  background-color: #ff9500;
-  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
-}
-
+/* 2. 危险操作按钮 (删除/清空)：红色实心，白字 */
 .app-container >>> .el-button--danger {
   background-color: #ff3b30;
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
+  border-color: #ff3b30;
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.3);
+  color: #ffffff !important; /* 强制白字 */
+}
+.app-container >>> .el-button--danger:hover {
+  background-color: #ff453a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
 }
 
-.app-container >>> .el-button--info {
-  background-color: #8e8e93;
+/* 3. 警告操作按钮 (导出)：橙色实心，白字 */
+.app-container >>> .el-button--warning {
+  background-color: #ff9f0a;
+  border-color: #ff9f0a;
+  color: #ffffff !important; /* 强制白字 */
+  box-shadow: 0 2px 6px rgba(255, 159, 10, 0.3);
+}
+.app-container >>> .el-button--warning:hover {
+  background-color: #ffb340;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 159, 10, 0.4);
+}
+
+/* 4. 辅助操作按钮 (返回/重置)：白底灰边，黑字 */
+.app-container >>> .el-button--default,
+.app-container >>> .el-button--info.is-plain {
+  background-color: #ffffff;
+  border: 1px solid #dcdfe6;
+  color: #606266 !important; /* 强制深灰字 */
+}
+.app-container >>> .el-button--default:hover,
+.app-container >>> .el-button--info.is-plain:hover {
+  border-color: #c6e2ff;
+  color: #409eff !important;
+  background-color: #ecf5ff;
 }
 
 /* Table Styling */
 .app-container >>> .el-table {
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
+  margin-top: 15px;
 }
 
 .app-container >>> .el-table th {
   background-color: #fbfbfd;
   color: #86868b;
   font-weight: 600;
-  border-bottom: 1px solid #f5f5f7;
-  padding: 12px 0;
+  height: 50px;
 }
 
 .app-container >>> .el-table td {
   padding: 12px 0;
-  border-bottom: 1px solid #f5f5f7;
 }
 
 /* Dialog Styling */
 .app-container >>> .el-dialog {
-  border-radius: 18px;
+  border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.15);
 }
 
@@ -514,5 +563,75 @@ export default {
   border-radius: 6px;
   border: none;
   font-weight: 500;
+}
+
+/* ==============================
+   【打印样式】
+   ============================== */
+@media print {
+  .no-print,
+  .navbar,
+  .sidebar-container,
+  .tags-view-container,
+  .el-dialog__wrapper,
+  .v-modal,
+  .el-pagination {
+    display: none !important;
+  }
+
+  .no-print-col {
+    display: none !important;
+  }
+  .el-table__fixed-right {
+    display: none !important;
+  }
+
+  .print-title {
+    display: block !important;
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+
+  .app-container {
+    padding: 0;
+    margin: 0;
+    width: 100% !important;
+    background-color: white;
+  }
+
+  .app-container >>> .el-card {
+    box-shadow: none;
+    border: none;
+  }
+  .app-container >>> .el-card__body {
+    padding: 0;
+  }
+
+  .print-table {
+    border: 1px solid #000 !important;
+    font-size: 12px;
+    width: 100% !important;
+  }
+
+  .print-table td,
+  .print-table th {
+    border: 1px solid #000 !important;
+    color: #000 !important;
+    padding: 8px 5px !important;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* 打印时移除el-tag的背景，只显示文字 */
+  .app-container >>> .el-tag {
+    border: 1px solid #000 !important;
+    background: none !important;
+    color: #000 !important;
+    padding: 0 5px;
+  }
 }
 </style>

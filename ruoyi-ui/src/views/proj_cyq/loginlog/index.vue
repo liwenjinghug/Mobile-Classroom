@@ -2,15 +2,22 @@
   <div class="app-container">
     <el-row>
       <el-col :span="24">
-        <el-card>
-          <div slot="header" class="clearfix">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix notice-header no-print">
             <span class="header-title">登录日志</span>
-            <el-button style="float: right;" type="primary" icon="el-icon-arrow-left" @click="handleBack">
+            <el-button
+              style="float: right;"
+              type="info"
+              plain
+              icon="el-icon-arrow-left"
+              size="mini"
+              @click="handleBack"
+              class="mac-btn"
+            >
               返回
             </el-button>
           </div>
 
-          <!-- 调试信息 -->
           <el-alert
             v-if="debugInfo.show"
             :title="debugInfo.title"
@@ -20,9 +27,10 @@
             closable
             @close="debugInfo.show = false"
             style="margin-bottom: 15px;"
+            class="no-print"
           />
 
-          <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+          <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px" class="no-print">
             <el-form-item label="用户账号" prop="userName">
               <el-input
                 v-model="queryParams.userName"
@@ -82,47 +90,63 @@
               ></el-date-picker>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery">搜索</el-button>
-              <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
-              <el-button type="info" icon="el-icon-info" size="small" @click="showDebugInfo">调试信息</el-button>
+              <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery" class="mac-btn">搜索</el-button>
+              <el-button icon="el-icon-refresh" size="mini" @click="resetQuery" class="mac-btn">重置</el-button>
+              <el-button type="info" icon="el-icon-info" size="mini" @click="showDebugInfo" class="mac-btn">调试</el-button>
             </el-form-item>
           </el-form>
 
-          <el-row :gutter="10" class="mb8">
+          <el-row :gutter="10" class="mb8 no-print">
             <el-col :span="1.5">
               <el-button
                 type="danger"
-                plain
                 icon="el-icon-delete"
-                size="small"
+                size="mini"
                 :disabled="multiple"
                 @click="handleDelete"
+                class="mac-btn"
               >删除</el-button>
             </el-col>
             <el-col :span="1.5">
               <el-button
                 type="danger"
-                plain
                 icon="el-icon-delete"
-                size="small"
+                size="mini"
                 @click="handleClean"
+                class="mac-btn"
               >清空</el-button>
             </el-col>
             <el-col :span="1.5">
               <el-button
                 type="warning"
-                plain
                 icon="el-icon-download"
-                size="small"
+                size="mini"
                 @click="handleExport"
                 :loading="exportLoading"
+                class="mac-btn"
               >导出</el-button>
+            </el-col>
+            <el-col :span="1.5">
+              <el-button
+                type="primary"
+                icon="el-icon-printer"
+                size="mini"
+                @click="handlePrint"
+                class="mac-btn"
+              >打印</el-button>
             </el-col>
             <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
           </el-row>
 
-          <el-table v-loading="loading" :data="loginlogList" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="55" align="center" />
+          <h2 class="print-title" style="display: none;">登录日志列表</h2>
+
+          <el-table
+            v-loading="loading"
+            :data="loginlogList"
+            @selection-change="handleSelectionChange"
+            class="print-table"
+          >
+            <el-table-column type="selection" width="55" align="center" class-name="no-print-col" />
             <el-table-column label="访问编号" align="center" prop="loginId" />
             <el-table-column label="用户账号" align="center" prop="userName" />
             <el-table-column label="登录地址" align="center" prop="ipaddr" width="130" :show-overflow-tooltip="true" />
@@ -154,17 +178,17 @@
             :page.sync="queryParams.pageNum"
             :limit.sync="queryParams.pageSize"
             @pagination="getList"
+            class="no-print"
           />
 
-          <!-- 空数据提示 -->
-          <div v-if="!loading && loginlogList.length === 0" class="empty-data">
+          <div v-if="!loading && loginlogList.length === 0" class="empty-data no-print">
             <el-empty description="暂无登录日志数据">
               <div slot="description">
                 <p>暂无登录日志数据，可能的原因：</p>
                 <p>1. 还没有用户登录过系统</p>
                 <p>2. 登录日志记录功能未正常工作</p>
                 <p>3. 数据库连接异常</p>
-                <el-button type="primary" @click="getList">重新加载</el-button>
+                <el-button type="primary" @click="getList" class="mac-btn">重新加载</el-button>
               </div>
             </el-empty>
           </div>
@@ -247,39 +271,22 @@ export default {
     /** 查询系统登录日志列表 */
     getList() {
       this.loading = true;
-      console.log('查询参数:', this.queryParams);
-
       listLoginlog(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
-        console.log('API响应数据:', response);
-
         if (response && response.code === 200) {
           this.loginlogList = response.rows || [];
           this.total = response.total || 0;
-
-          console.log('加载的登录日志数据:', this.loginlogList);
-          console.log('总记录数:', this.total);
-
-          // 检查是否有退出成功记录
-          const logoutRecords = this.loginlogList.filter(item =>
-            item.msg && (item.msg.includes('退出成功') || item.msg.includes('退出系统'))
-          );
-          console.log('退出成功记录数量:', logoutRecords.length);
-
           if (this.loginlogList.length === 0) {
             this.showDebugAlert('warning', '数据为空', '当前没有登录日志数据，请确认：1. 用户已登录过系统 2. 登录日志记录功能正常');
           } else {
             this.debugInfo.show = false;
           }
         } else {
-          console.error('API返回错误:', response);
           this.showDebugAlert('error', 'API错误', `接口返回错误: ${response.msg || '未知错误'}`);
           this.loginlogList = [];
           this.total = 0;
         }
-
         this.loading = false;
       }).catch(error => {
-        console.error('获取登录日志列表失败:', error);
         this.loading = false;
         this.loginlogList = [];
         this.total = 0;
@@ -289,31 +296,12 @@ export default {
 
     /** 显示调试信息 */
     showDebugInfo() {
-      const logoutCount = this.loginlogList.filter(item =>
-        item.msg && (item.msg.includes('退出成功') || item.msg.includes('退出系统'))
-      ).length;
-
       const info = `
 当前状态：
 - 数据条数: ${this.loginlogList.length}
-- 退出成功记录: ${logoutCount}
 - 总记录数: ${this.total}
 - 加载状态: ${this.loading ? '加载中' : '完成'}
-- 查询参数: ${JSON.stringify(this.queryParams)}
-- 字典数据: ${this.statusOptions.length} 条
-
-退出成功记录检查：
-${this.loginlogList.filter(item => item.msg && item.msg.includes('退出')).map(item =>
-        `- 用户: ${item.userName}, 消息: ${item.msg}, 状态: ${item.status}, 时间: ${this.parseTime(item.loginTime)}`
-      ).join('\n') || '暂无退出记录'}
-
-建议检查：
-1. 确认用户已登录并退出过系统
-2. 检查浏览器控制台网络请求
-3. 查看服务器日志确认切面是否工作
-4. 确认数据库表 class_login_log 存在退出记录
       `;
-
       this.$modal.alert(info, '调试信息', {
         confirmButtonText: '确定',
         customClass: 'debug-modal'
@@ -334,7 +322,6 @@ ${this.loginlogList.filter(item => item.msg && item.msg.includes('退出')).map(
     statusFormat(row, column) {
       const status = row.status;
       if (status === 0) {
-        // 如果是退出成功，显示为退出成功，否则显示登录成功
         if (row.msg && (row.msg.includes('退出成功') || row.msg.includes('退出系统'))) {
           return '退出成功';
         }
@@ -349,16 +336,14 @@ ${this.loginlogList.filter(item => item.msg && item.msg.includes('退出')).map(
     /** 根据操作信息设置样式 */
     getMsgClass(msg) {
       if (!msg) return '';
-
-      // 优先判断退出成功
       if (msg.includes('退出成功')) {
-        return 'logout-msg';  // 退出成功使用特殊样式
+        return 'logout-msg';
       } else if (msg.includes('成功') && !msg.includes('退出成功')) {
         return 'success-msg';
       } else if (msg.includes('错误') || msg.includes('失败')) {
         return 'error-msg';
       } else if (msg.includes('退出') || msg.includes('登出')) {
-        return 'logout-msg';  // 其他退出相关消息
+        return 'logout-msg';
       }
       return '';
     },
@@ -407,52 +392,41 @@ ${this.loginlogList.filter(item => item.msg && item.msg.includes('退出')).map(
     handleExport() {
       this.$modal.confirm('是否确认导出所有登录日志数据项？').then(() => {
         this.exportLoading = true;
-
-        // 构建查询参数
         const params = {
           ...this.queryParams,
-          // 添加日期范围参数
           beginTime: this.dateRange && this.dateRange[0] ? this.dateRange[0] : undefined,
           endTime: this.dateRange && this.dateRange[1] ? this.dateRange[1] : undefined
         };
-
-        // 移除空参数
         Object.keys(params).forEach(key => {
           if (params[key] === undefined || params[key] === '' || params[key] === null) {
             delete params[key];
           }
         });
-
-        console.log('导出参数:', params);
-
         return exportLoginlog(params);
       }).then(response => {
-        // 创建Blob对象并下载
         const blob = new Blob([response], { type: 'application/vnd.ms-excel' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-
-        // 设置文件名，包含当前时间
         const now = new Date();
         const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
         const filename = `登录日志数据_${timestamp}.xlsx`;
         link.setAttribute('download', filename);
-
         document.body.appendChild(link);
         link.click();
-
-        // 清理
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
-
         this.exportLoading = false;
         this.$modal.msgSuccess("导出成功");
       }).catch(error => {
-        console.error('导出失败:', error);
         this.exportLoading = false;
         this.$modal.msgError("导出失败: " + (error.message || '未知错误'));
       });
+    },
+
+    /** 【新增】打印操作 */
+    handlePrint() {
+      window.print();
     },
 
     /** 返回按钮操作 */
@@ -485,6 +459,9 @@ ${this.loginlogList.filter(item => item.msg && item.msg.includes('退出')).map(
 .app-container >>> .el-card__header {
   border-bottom: 1px solid #f5f5f7;
   padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .header-title {
@@ -511,55 +488,85 @@ ${this.loginlogList.filter(item => item.msg && item.msg.includes('退出')).map(
   box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
 }
 
-/* Button Styling */
-.app-container >>> .el-button {
-  border-radius: 980px;
+/* ============================================
+   【核心修改】按钮样式优化 (高对比度 & 圆润风格)
+   ============================================ */
+.mac-btn {
+  border-radius: 20px;
   font-weight: 500;
-  border: none;
-  padding: 9px 20px;
-  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.app-container >>> .el-button--primary {
+/* 1. 主操作按钮 (搜索、重新加载、打印)：深蓝色实心，白字 */
+.app-container >>> .el-button--primary:not(.is-plain) {
   background-color: #0071e3;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+  border-color: #0071e3;
+  color: #ffffff !important; /* 强制白字 */
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.3);
 }
-.app-container >>> .el-button--primary:hover {
+.app-container >>> .el-button--primary:not(.is-plain):hover {
   background-color: #0077ed;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
 }
 
-.app-container >>> .el-button--success {
-  background-color: #34c759;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
-}
-
+/* 2. 危险操作按钮 (删除/清空)：红色实心，白字 */
 .app-container >>> .el-button--danger {
   background-color: #ff3b30;
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
+  border-color: #ff3b30;
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.3);
+  color: #ffffff !important; /* 强制白字 */
+}
+.app-container >>> .el-button--danger:hover {
+  background-color: #ff453a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
 }
 
-.app-container >>> .el-button--info {
-  background-color: #8e8e93;
+/* 3. 警告操作按钮 (导出)：橙色实心，白字 */
+.app-container >>> .el-button--warning {
+  background-color: #ff9f0a;
+  border-color: #ff9f0a;
+  color: #ffffff !important; /* 强制白字 */
+  box-shadow: 0 2px 6px rgba(255, 159, 10, 0.3);
+}
+.app-container >>> .el-button--warning:hover {
+  background-color: #ffb340;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 159, 10, 0.4);
+}
+
+/* 4. 辅助操作按钮 (返回/重置/调试)：白底灰边，黑字 */
+.app-container >>> .el-button--default,
+.app-container >>> .el-button--info.is-plain {
+  background-color: #ffffff;
+  border: 1px solid #dcdfe6;
+  color: #606266 !important; /* 强制深灰字 */
+}
+.app-container >>> .el-button--default:hover,
+.app-container >>> .el-button--info.is-plain:hover {
+  border-color: #c6e2ff;
+  color: #409eff !important;
+  background-color: #ecf5ff;
 }
 
 /* Table Styling */
 .app-container >>> .el-table {
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
+  margin-top: 15px;
 }
 
 .app-container >>> .el-table th {
   background-color: #fbfbfd;
   color: #86868b;
   font-weight: 600;
-  border-bottom: 1px solid #f5f5f7;
-  padding: 12px 0;
+  height: 50px;
 }
 
 .app-container >>> .el-table td {
   padding: 12px 0;
-  border-bottom: 1px solid #f5f5f7;
 }
 
 /* Tags */
@@ -600,6 +607,76 @@ ${this.loginlogList.filter(item => item.msg && item.msg.includes('退出')).map(
   color: #ff9500;
   font-weight: 500;
   font-style: italic;
+}
+
+/* ==============================
+   【打印样式】
+   ============================== */
+@media print {
+  .no-print,
+  .navbar,
+  .sidebar-container,
+  .tags-view-container,
+  .el-dialog__wrapper,
+  .v-modal,
+  .el-pagination {
+    display: none !important;
+  }
+
+  .no-print-col {
+    display: none !important;
+  }
+  .el-table__fixed-right {
+    display: none !important;
+  }
+
+  .print-title {
+    display: block !important;
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+
+  .app-container {
+    padding: 0;
+    margin: 0;
+    width: 100% !important;
+    background-color: white;
+  }
+
+  .app-container >>> .el-card {
+    box-shadow: none;
+    border: none;
+  }
+  .app-container >>> .el-card__body {
+    padding: 0;
+  }
+
+  .print-table {
+    border: 1px solid #000 !important;
+    font-size: 12px;
+    width: 100% !important;
+  }
+
+  .print-table td,
+  .print-table th {
+    border: 1px solid #000 !important;
+    color: #000 !important;
+    padding: 8px 5px !important;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* 打印时移除el-tag的背景，只显示文字 */
+  .app-container >>> .el-tag {
+    border: 1px solid #000 !important;
+    background: none !important;
+    color: #000 !important;
+    padding: 0 5px;
+  }
 }
 </style>
 

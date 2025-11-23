@@ -1,96 +1,35 @@
 package com.ruoyi.proj_lwj.mapper;
 
 import com.ruoyi.proj_lwj.domain.ClassExamParticipant;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 @Mapper
 public interface ClassExamParticipantMapper {
-
-    @Select("<script>SELECT p.* FROM class_exam_participant p <where>"
-            + "<if test='examId != null'> AND p.exam_id = #{examId}</if>"
-            + "<if test='studentId != null'> AND p.student_id = #{studentId}</if>"
-            + "<if test='studentNo != null and studentNo != \"\"'> AND p.student_no = #{studentNo}</if>"
-            + "<if test='participantStatus != null'> AND p.participant_status = #{participantStatus}</if>"
-            + " AND EXISTS(SELECT 1 FROM class_exam e WHERE e.id = p.exam_id)"
-            + "</where> ORDER BY p.id DESC</script>")
-    @Results({
-            @Result(property = "id", column = "id"),
-            @Result(property = "examId", column = "exam_id"),
-            @Result(property = "studentId", column = "student_id"),
-            @Result(property = "studentNo", column = "student_no"),
-            @Result(property = "studentName", column = "student_name"),
-            @Result(property = "participantStatus", column = "participant_status"),
-            @Result(property = "startTime", column = "start_time"),
-            @Result(property = "submitTime", column = "submit_time"),
-            @Result(property = "ipAddress", column = "ip_address"),
-            @Result(property = "deviceInfo", column = "device_info"),
-            @Result(property = "totalScore", column = "total_score"),
-            @Result(property = "timeUsed", column = "time_used"),
-            @Result(property = "objectiveScore", column = "objective_score"),
-            @Result(property = "subjectiveScore", column = "subjective_score"),
-            @Result(property = "correctStatus", column = "correct_status"),
-            @Result(property = "passStatus", column = "pass_status"),
-            @Result(property = "createTime", column = "create_time"),
-            @Result(property = "updateTime", column = "update_time")
-    })
+    /**
+     * 列表查询（使用 XML 中的 <select id="selectList"> 映射）
+     */
     List<ClassExamParticipant> selectList(ClassExamParticipant p);
 
-    @Select("SELECT * FROM class_exam_participant WHERE id=#{id}")
-    @Results({
-            @Result(property = "id", column = "id"),
-            @Result(property = "examId", column = "exam_id"),
-            @Result(property = "studentId", column = "student_id"),
-            @Result(property = "studentNo", column = "student_no"),
-            @Result(property = "studentName", column = "student_name"),
-            @Result(property = "participantStatus", column = "participant_status"),
-            @Result(property = "startTime", column = "start_time"),
-            @Result(property = "submitTime", column = "submit_time"),
-            @Result(property = "ipAddress", column = "ip_address"),
-            @Result(property = "deviceInfo", column = "device_info"),
-            @Result(property = "totalScore", column = "total_score"),
-            @Result(property = "timeUsed", column = "time_used"),
-            @Result(property = "objectiveScore", column = "objective_score"),
-            @Result(property = "subjectiveScore", column = "subjective_score"),
-            @Result(property = "correctStatus", column = "correct_status"),
-            @Result(property = "passStatus", column = "pass_status")
-    })
+    /** 根据主键查询 */
     ClassExamParticipant selectById(Long id);
 
-    @Select("SELECT * FROM class_exam_participant WHERE exam_id=#{examId} AND student_id=#{studentId} LIMIT 1")
-    @Results({
-            @Result(property = "id", column = "id"),
-            @Result(property = "examId", column = "exam_id"),
-            @Result(property = "studentId", column = "student_id"),
-            @Result(property = "studentNo", column = "student_no"),
-            @Result(property = "studentName", column = "student_name"),
-            @Result(property = "participantStatus", column = "participant_status"),
-            @Result(property = "startTime", column = "start_time"),
-            @Result(property = "submitTime", column = "submit_time"),
-            @Result(property = "ipAddress", column = "ip_address"),
-            @Result(property = "deviceInfo", column = "device_info"),
-            @Result(property = "totalScore", column = "total_score"),
-            @Result(property = "timeUsed", column = "time_used"),
-            @Result(property = "objectiveScore", column = "objective_score"),
-            @Result(property = "subjectiveScore", column = "subjective_score"),
-            @Result(property = "correctStatus", column = "correct_status"),
-            @Result(property = "passStatus", column = "pass_status")
-    })
+    /** 根据考试与学生查询单条 */
     ClassExamParticipant selectByExamStudent(@Param("examId") Long examId, @Param("studentId") Long studentId);
 
-    @Insert("INSERT INTO class_exam_participant (exam_id, student_id, student_no, student_name, participant_status, start_time, submit_time, ip_address, device_info, total_score, time_used, objective_score, subjective_score, correct_status, pass_status, create_time) VALUES (#{examId}, #{studentId}, #{studentNo}, #{studentName}, #{participantStatus}, #{startTime}, #{submitTime}, #{ipAddress}, #{deviceInfo}, #{totalScore}, #{timeUsed}, #{objectiveScore}, #{subjectiveScore}, #{correctStatus}, #{passStatus}, NOW())")
-    @Options(useGeneratedKeys = true, keyProperty = "id")
+    /** 插入记录 */
     int insert(ClassExamParticipant p);
 
-    @Update("UPDATE class_exam_participant SET participant_status=#{participantStatus}, start_time=#{startTime}, submit_time=#{submitTime}, ip_address=#{ipAddress}, device_info=#{deviceInfo}, total_score=#{totalScore}, time_used=#{timeUsed}, objective_score=#{objectiveScore}, subjective_score=#{subjectiveScore}, correct_status=#{correctStatus}, pass_status=#{passStatus}, update_time=NOW() WHERE id=#{id}")
+    /** 更新记录 */
     int update(ClassExamParticipant p);
 
-    @Delete("DELETE FROM class_exam_participant WHERE id=#{id}")
+    /** 删除单条 */
     int deleteById(Long id);
 
-    @Delete("<script>DELETE FROM class_exam_participant WHERE id IN <foreach item='i' collection='array' open='(' separator=',' close=')'>#{i}</foreach></script>")
+    /** 批量删除 */
     int deleteByIds(Long[] ids);
 
-    @Delete("DELETE FROM class_exam_participant WHERE exam_id=#{examId}")
+    /** 按考试删除参与记录 */
     int deleteByExamId(Long examId);
 }

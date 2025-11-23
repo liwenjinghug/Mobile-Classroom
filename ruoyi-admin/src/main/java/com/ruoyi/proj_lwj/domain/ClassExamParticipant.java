@@ -12,6 +12,8 @@ public class ClassExamParticipant extends BaseEntity {
 
     private Long id; // 记录ID
     private Long examId;
+    private String examName; // 新增：用于 MyBatis 查询结果映射（考试名称）
+    private String courseName; // 新增：用于 MyBatis 查询结果映射（课程名称）
     private Long studentId;
     private String studentNo;
     private String studentName;
@@ -35,6 +37,10 @@ public class ClassExamParticipant extends BaseEntity {
     public void setId(Long id) { this.id = id; }
     public Long getExamId() { return examId; }
     public void setExamId(Long examId) { this.examId = examId; }
+    public String getExamName() { return examName; }
+    public void setExamName(String examName) { this.examName = examName; }
+    public String getCourseName() { return courseName; }
+    public void setCourseName(String courseName) { this.courseName = courseName; }
     public Long getStudentId() { return studentId; }
     public void setStudentId(Long studentId) { this.studentId = studentId; }
     public String getStudentNo() { return studentNo; }
