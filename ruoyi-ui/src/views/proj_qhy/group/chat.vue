@@ -401,7 +401,7 @@ export default {
         type: 'error'
       }).then(() => {
         groupApi.disbandGroup(this.groupId).then(() => {
-          this.$message.success("小组已解T散")
+          this.$message.success("小组已解散")
           this.detailsVisible = false
           this.$router.push('/proj_qhy/group')
         })

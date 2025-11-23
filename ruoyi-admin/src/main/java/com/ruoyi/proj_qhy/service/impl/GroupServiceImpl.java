@@ -565,13 +565,13 @@ public class GroupServiceImpl implements IGroupService {
             checkActiveAuth(groupId, userId);
 
             // 3.2 发送系统消息
-            GroupMessage systemMessage = new GroupMessage();
-            systemMessage.setGroupId(groupId);
-            systemMessage.setSenderUserId(userId);
-            systemMessage.setMessageType("9"); // 9=系统
-            systemMessage.setContent("\"" + nickName + "\" 分享了一篇文章");
-            systemMessage.setCreateBy(username);
-            sendMessageInternal(systemMessage); // 发送 "xx分享了..."
+            //GroupMessage systemMessage = new GroupMessage();
+            //systemMessage.setGroupId(groupId);
+            //systemMessage.setSenderUserId(userId);
+            //systemMessage.setMessageType("9"); // 9=系统
+            //systemMessage.setContent("\"" + nickName + "\" 分享了一篇文章");
+            //systemMessage.setCreateBy(username);
+            //sendMessageInternal(systemMessage); // 发送 "xx分享了..."
 
             // 3.3 发送文章卡片消息
             GroupMessage articleMessage = new GroupMessage();

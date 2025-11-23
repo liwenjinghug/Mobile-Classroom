@@ -79,6 +79,21 @@
             <version>1.17.2</version>
         </dependency>
 
+        <!-- WebSocket -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version> <!-- 建议使用较新版本，可以到 Maven 中央仓库查询最新版 -->
+            <scope>provided</scope>
+        </dependency>
+
+
+
     </dependencies>
 
     <build>

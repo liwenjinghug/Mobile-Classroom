@@ -419,6 +419,108 @@ INSERT INTO `class_course` VALUES ('7', '121', '12', '1', '222', '0.0', '1', '0'
 INSERT INTO `class_course` VALUES ('8', '123123', '112', '212', '11', '0.0', '111', '0', 'admin', '2025-11-04 22:22:02', '', null, null, '1');
 
 -- ----------------------------
+-- Table structure for class_debate
+-- ----------------------------
+DROP TABLE IF EXISTS `class_debate`;
+CREATE TABLE `class_debate` (
+                                `id` bigint NOT NULL AUTO_INCREMENT COMMENT '辩论ID',
+                                `title` varchar(255) NOT NULL COMMENT '辩题',
+                                `pro_viewpoint` varchar(255) NOT NULL COMMENT '正方观点',
+                                `con_viewpoint` varchar(255) NOT NULL COMMENT '反方观点',
+                                `invite_code` varchar(20) NOT NULL COMMENT '邀请码',
+                                `status` char(1) DEFAULT '0' COMMENT '状态（0未开始 1进行中 2已结束）',
+                                `winner` char(1) DEFAULT NULL COMMENT '获胜方（1正方 2反方 0平局）',
+                                `create_by` varchar(64) DEFAULT '' COMMENT '创建者',
+                                `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                `update_by` varchar(64) DEFAULT '' COMMENT '更新者',
+                                `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+                                `speech_limit` int DEFAULT '60' COMMENT '每轮发言时长(秒)',
+                                `current_turn` int DEFAULT '0' COMMENT '当前回合数(1-10)',
+                                `current_role` char(1) DEFAULT NULL COMMENT '当前发言方(1正 2反)',
+                                `turn_start_time` datetime DEFAULT NULL COMMENT '当前回合开始时间',
+                                PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='课堂辩论主表';
+
+-- ----------------------------
+-- Records of class_debate
+-- ----------------------------
+INSERT INTO `class_debate` VALUES ('1', 'AI是否会取代人类', 'AI会取代人类', 'AI是人类的工具', 'A1B2C3', '2', '1', 'admin', '2025-11-23 19:17:34', 'admin', '2025-11-23 20:07:19', '60', '0', null, null);
+INSERT INTO `class_debate` VALUES ('2', '躺平还是内卷?', '躺平', '内卷', 'CB0B4A', '2', '2', 'admin', '2025-11-23 20:38:45', 'admin', '2025-11-23 20:52:42', '60', '4', '1', '2025-11-23 20:52:25');
+INSERT INTO `class_debate` VALUES ('3', '理解需不需要共情', '需要', '不需要', '032BF1', '0', null, 'admin', '2025-11-23 21:15:06', '', null, '60', '0', null, null);
+
+-- ----------------------------
+-- Table structure for class_debate_like
+-- ----------------------------
+DROP TABLE IF EXISTS `class_debate_like`;
+CREATE TABLE `class_debate_like` (
+                                     `like_id` bigint NOT NULL AUTO_INCREMENT COMMENT '点赞ID',
+                                     `debate_id` bigint NOT NULL COMMENT '辩论ID',
+                                     `user_id` bigint NOT NULL COMMENT '点赞用户ID',
+                                     `team` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '支持的队伍（P=正方, N=反方）',
+                                     `create_time` datetime DEFAULT NULL COMMENT '点赞时间',
+                                     PRIMARY KEY (`like_id`),
+                                     UNIQUE KEY `uk_debate_user_like` (`debate_id`,`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=302 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='辩论点赞记录表';
+
+-- ----------------------------
+-- Records of class_debate_like
+-- ----------------------------
+INSERT INTO `class_debate_like` VALUES ('301', '101', '1', 'P', '2025-11-23 18:05:39');
+
+-- ----------------------------
+-- Table structure for class_debate_msg
+-- ----------------------------
+DROP TABLE IF EXISTS `class_debate_msg`;
+CREATE TABLE `class_debate_msg` (
+                                    `id` bigint NOT NULL AUTO_INCREMENT,
+                                    `debate_id` bigint NOT NULL,
+                                    `user_id` bigint NOT NULL,
+                                    `nick_name` varchar(64) DEFAULT NULL,
+                                    `role` char(1) NOT NULL COMMENT '发送者当时身份',
+                                    `content` varchar(1000) DEFAULT NULL COMMENT '内容',
+                                    `create_time` datetime DEFAULT NULL,
+                                    PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='辩论消息表';
+
+-- ----------------------------
+-- Records of class_debate_msg
+-- ----------------------------
+INSERT INTO `class_debate_msg` VALUES ('1', '1', '3', '李比', '2', '我是正方辩手', '2025-11-23 19:42:02');
+INSERT INTO `class_debate_msg` VALUES ('2', '1', '3', '李比', '2', '说错了，反方，', '2025-11-23 19:42:16');
+INSERT INTO `class_debate_msg` VALUES ('3', '1', '3', '李比', '2', '1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111', '2025-11-23 19:42:35');
+INSERT INTO `class_debate_msg` VALUES ('4', '1', '2', '张三', '1', '我是正方', '2025-11-23 20:06:49');
+INSERT INTO `class_debate_msg` VALUES ('5', '2', '3', '李比', '2', '我是反方一', '2025-11-23 20:50:12');
+INSERT INTO `class_debate_msg` VALUES ('6', '2', '2', '张三', '1', '我是正方一', '2025-11-23 20:50:57');
+
+-- ----------------------------
+-- Table structure for class_debate_user
+-- ----------------------------
+DROP TABLE IF EXISTS `class_debate_user`;
+CREATE TABLE `class_debate_user` (
+                                     `id` bigint NOT NULL AUTO_INCREMENT,
+                                     `debate_id` bigint NOT NULL COMMENT '辩论ID',
+                                     `user_id` bigint NOT NULL COMMENT '用户ID',
+                                     `nick_name` varchar(64) DEFAULT NULL COMMENT '用户昵称',
+                                     `role` char(1) NOT NULL COMMENT '身份（1正方 2反方 3观众）',
+                                     `vote_side` char(1) DEFAULT NULL COMMENT '投票支持方（1正方 2反方）',
+                                     `join_time` datetime DEFAULT NULL,
+                                     PRIMARY KEY (`id`),
+                                     UNIQUE KEY `uk_debate_user` (`debate_id`,`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='辩论参与用户表';
+
+-- ----------------------------
+-- Records of class_debate_user
+-- ----------------------------
+INSERT INTO `class_debate_user` VALUES ('1', '1', '1', '若依', '3', '1', '2025-11-23 19:17:34');
+INSERT INTO `class_debate_user` VALUES ('2', '1', '2', '张三', '1', null, '2025-11-23 19:35:25');
+INSERT INTO `class_debate_user` VALUES ('3', '1', '3', '李比', '2', null, '2025-11-23 19:36:22');
+INSERT INTO `class_debate_user` VALUES ('4', '2', '1', '若依', '3', '2', '2025-11-23 20:38:45');
+INSERT INTO `class_debate_user` VALUES ('5', '2', '2', '张三', '1', null, '2025-11-23 20:42:10');
+INSERT INTO `class_debate_user` VALUES ('6', '2', '3', '李比', '2', null, '2025-11-23 20:42:30');
+INSERT INTO `class_debate_user` VALUES ('7', '2', '101', '李同学', '3', '2', '2025-11-23 20:48:55');
+INSERT INTO `class_debate_user` VALUES ('8', '3', '1', '若依', '3', null, '2025-11-23 21:15:05');
+
+-- ----------------------------
 -- Table structure for class_exam
 -- ----------------------------
 DROP TABLE IF EXISTS `class_exam`;
@@ -2913,9 +3015,9 @@ INSERT INTO `sys_menu` VALUES ('2042', '考勤报表', '2009', '1', 'attendanceR
 INSERT INTO `sys_menu` VALUES ('2043', '驾驶舱', '2009', '2', 'dashboard', null, null, '', '1', '0', 'C', '0', '0', '', 'dashboard', 'admin', '2025-11-17 23:21:52', 'admin', '2025-11-17 23:22:03', '');
 INSERT INTO `sys_menu` VALUES ('2044', '小组讨论', '2011', '3', 'group', null, null, '', '1', '0', 'C', '0', '0', null, 'peoples', 'admin', '2025-11-18 15:12:53', '', null, '');
 INSERT INTO `sys_menu` VALUES ('2045', '聊天', '2011', '4', 'group/chat/:groupId(\\d+)', null, null, '', '1', '0', 'C', '1', '0', null, '#', 'admin', '2025-11-18 15:13:37', '', null, '');
-INSERT INTO `sys_menu` VALUES ('2046', '资料管理', '2006', '2', 'material', null, null, '', '1', '0', 'M', '0', '0', '', 'clipboard', 'admin', '2025-11-22 16:01:36', 'admin', '2025-11-22 16:04:06', '');
-INSERT INTO `sys_menu` VALUES ('2047', '学生课堂', '2006', '3', 'student-class', null, null, '', '1', '0', 'M', '0', '0', '', 'peoples', 'admin', '2025-11-22 16:05:45', 'admin', '2025-11-22 16:30:09', '');
-INSERT INTO `sys_menu` VALUES ('2050', '教师课堂', '2006', '4', 'teacher-class', null, null, '', '1', '0', 'M', '0', '0', null, 'user', 'admin', '2025-11-22 16:31:03', '', null, '');
+INSERT INTO `sys_menu` VALUES ('2046', '参与热力', '2009', '4', 'participationHeat', null, null, '', '1', '0', 'C', '0', '0', null, 'color', 'admin', '2025-11-21 23:10:59', '', null, '');
+INSERT INTO `sys_menu` VALUES ('2047', '辩论管理', '2011', '5', 'dabate', 'proj_qhy/debate/index', null, '', '1', '0', 'C', '0', '0', 'proj_qhy:debate:list', 'people', 'admin', '2025-11-23 16:24:46', 'admin', '2025-11-23 16:32:29', '');
+INSERT INTO `sys_menu` VALUES ('2048', '辩论室', '2047', '1', 'debate-room/:id', null, null, '', '1', '0', 'C', '1', '0', null, '#', 'admin', '2025-11-23 19:27:43', '', null, '');
 
 -- ----------------------------
 -- Table structure for sys_notice
@@ -4061,5 +4163,7 @@ CREATE TABLE `sys_user_role` (
 INSERT INTO `sys_user_role` VALUES ('1', '1');
 INSERT INTO `sys_user_role` VALUES ('2', '2');
 INSERT INTO `sys_user_role` VALUES ('3', '100');
+INSERT INTO `sys_user_role` VALUES ('4', '100');
+INSERT INTO `sys_user_role` VALUES ('5', '101');
 INSERT INTO `sys_user_role` VALUES ('100', '100');
 INSERT INTO `sys_user_role` VALUES ('101', '101');
