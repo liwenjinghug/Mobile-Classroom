@@ -1,12 +1,10 @@
 package com.ruoyi.web.controller.proj_cyq;
 
-// 【修复】导入你自定义的 @Log 注解
 import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.proj_cyq.domain.ClassNotice;
 import com.ruoyi.proj_cyq.service.IClassNoticeService;
@@ -36,12 +34,11 @@ public class ClassNoticeController extends BaseController {
     }
 
     /**
-     * 导出公告列表 - 修改为GET请求，不接收参数
+     * 导出公告列表
      */
     @PreAuthorize("@ss.hasPermi('proj_cyq:notice:export')")
-    // 此注解现在会正确指向 ClassLogAspect
     @Log(title = "通告管理", businessType = BusinessType.EXPORT)
-    @GetMapping("/export")  // 改为GET请求
+    @GetMapping("/export")
     public void export(HttpServletResponse response) {
         List<ClassNotice> list = classNoticeService.selectClassNoticeList(new ClassNotice());
         ExcelUtil<ClassNotice> util = new ExcelUtil<>(ClassNotice.class);
@@ -85,5 +82,11 @@ public class ClassNoticeController extends BaseController {
     @DeleteMapping("/{noticeIds}")
     public AjaxResult remove(@PathVariable Long[] noticeIds) {
         return toAjax(classNoticeService.deleteClassNoticeByIds(noticeIds));
+    }
+
+    // ========== 【新增】统计接口 ==========
+    @GetMapping("/stats")
+    public AjaxResult getStats() {
+        return success(classNoticeService.getNoticeStats());
     }
 }

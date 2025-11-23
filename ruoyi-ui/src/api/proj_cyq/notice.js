@@ -44,11 +44,19 @@ export function delNotice(noticeIds) {
   })
 }
 
-// 导出公告 - 参考操作日志的方式，使用GET请求，不传递参数
+// 导出公告
 export function exportNotice() {
   return request({
     url: '/proj_cyq/notice/export',
     method: 'get',
     responseType: 'blob'
+  })
+}
+
+// 【新增】获取通告统计数据
+export function getNoticeStats() {
+  return request({
+    url: '/proj_cyq/notice/stats',
+    method: 'get'
   })
 }

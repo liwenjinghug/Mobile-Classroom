@@ -5,6 +5,7 @@ import com.ruoyi.proj_cyq.domain.ClassNotice;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
+import java.util.Map; // 【新增】
 
 @Mapper
 public interface ClassNoticeMapper {
@@ -61,4 +62,18 @@ public interface ClassNoticeMapper {
             "</foreach>" +
             "</script>")
     int deleteClassNoticeByIds(@Param("array") Long[] noticeIds, @Param("updateBy") String updateBy);
+
+    // ========== 【新增】统计查询方法 ==========
+
+    // 1. 按创建人统计
+    @Select("SELECT create_by as name, COUNT(*) as value FROM class_notice WHERE del_flag = 0 GROUP BY create_by")
+    List<Map<String, Object>> selectNoticeStatsByCreator();
+
+    // 2. 按日期统计 (最近7天) - MySQL语法
+    @Select("SELECT DATE_FORMAT(create_time, '%Y-%m-%d') as name, COUNT(*) as value " +
+            "FROM class_notice " +
+            "WHERE del_flag = 0 " +
+            "GROUP BY DATE_FORMAT(create_time, '%Y-%m-%d') " +
+            "ORDER BY name DESC LIMIT 7")
+    List<Map<String, Object>> selectNoticeStatsByDate();
 }

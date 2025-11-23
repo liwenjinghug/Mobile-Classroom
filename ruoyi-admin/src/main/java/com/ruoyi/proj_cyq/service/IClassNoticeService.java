@@ -3,6 +3,7 @@ package com.ruoyi.proj_cyq.service;
 
 import com.ruoyi.proj_cyq.domain.ClassNotice;
 import java.util.List;
+import java.util.Map; // 【新增】
 
 public interface IClassNoticeService {
 
@@ -35,4 +36,9 @@ public interface IClassNoticeService {
      * 批量删除公告
      */
     int deleteClassNoticeByIds(Long[] noticeIds);
+
+    /**
+     * 【新增】获取通告统计信息
+     */
+    Map<String, Object> getNoticeStats();
 }
