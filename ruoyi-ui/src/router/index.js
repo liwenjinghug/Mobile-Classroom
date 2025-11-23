@@ -149,26 +149,45 @@ export const constantRoutes = [
         path: 'course',
         component: () => import('@/views/proj_lw/course/index.vue'),
         name: 'ProjLw_Course',
-        meta: { title: '课程管理', icon: 'list' }
+        meta: { title: '课程管理', icon: 'list', roles: ['teacher', 'admin']}
       },
       {
         path: 'material',
         component: () => import('@/views/proj_lw/material/index.vue'),
         name: 'ProjLw_Material',
-        meta: { title: '资料管理', icon: 'document' },
+        meta: { title: '资料管理', icon: 'document', roles: ['teacher', 'admin']},
       },
       {
         path: 'session',
         component: () => import('@/views/proj_lw/session/index.vue'),
         name: 'ProjLw_Session',
-        meta: { title: '课堂详情', icon: 'education' },
+        meta: { title: '课堂详情', icon: 'education', roles: ['teacher', 'admin']},
         hidden: true
       },
       {
         path: 'classroom',
         component: () => import('@/views/proj_lw/classroom/index.vue'),
         name: 'Classroom',
-        meta: { title: '正在上课', icon: 'video' },
+        meta: { title: '正在上课', icon: 'video', roles: ['teacher', 'admin']},
+        hidden: true
+      },
+      {
+        path: 'student-class',
+        component: () => import('@/views/proj_lw/my-class/student/index'),
+        name: 'StudentClass',
+        meta: { title: '学生课堂', icon: 'user', roles: ['student','admin'] }
+      },
+      {
+        path: 'teacher-class',
+        component: () => import('@/views/proj_lw/my-class/teacher/index'),
+        name: 'TeacherClass',
+        meta: { title: '教师课堂', icon: 'peoples'}
+      },
+      {
+        path: 'class-management',
+        component: () => import('@/views/proj_lw/my-class/manage/index'),
+        name: 'ClassManagement',
+        meta: { title: '课堂人员管理', icon: 'people', roles: ['teacher', 'admin'] },
         hidden: true
       },
     ]
