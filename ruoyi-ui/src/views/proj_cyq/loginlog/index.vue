@@ -5,17 +5,27 @@
         <el-card class="box-card">
           <div slot="header" class="clearfix notice-header no-print">
             <span class="header-title">登录日志</span>
-            <el-button
-              style="float: right;"
-              type="info"
-              plain
-              icon="el-icon-arrow-left"
-              size="mini"
-              @click="handleBack"
-              class="mac-btn"
-            >
-              返回
-            </el-button>
+            <div class="header-btn-group">
+              <el-button
+                type="primary"
+                icon="el-icon-s-data"
+                size="mini"
+                @click="handleStats"
+                class="mac-btn"
+              >
+                统计
+              </el-button>
+              <el-button
+                type="info"
+                plain
+                icon="el-icon-arrow-left"
+                size="mini"
+                @click="handleBack"
+                class="mac-btn"
+              >
+                返回
+              </el-button>
+            </div>
           </div>
 
           <el-alert
@@ -195,11 +205,55 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <el-dialog title="登录日志统计" :visible.sync="statsOpen" width="800px" append-to-body class="no-print">
+      <div v-loading="statsLoading">
+        <el-row :gutter="20" class="stats-overview">
+          <el-col :span="24" style="text-align: center; margin-bottom: 20px;">
+            <div class="stat-value" style="font-size: 36px; color: #409EFF;">{{ stats.totalCount }}</div>
+            <div class="stat-label">总登录次数</div>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20" style="margin-bottom: 20px;">
+          <el-col :span="24">
+            <h4 class="stats-subtitle">登录状态分布</h4>
+            <div style="display: flex; justify-content: center; gap: 40px;">
+              <div v-for="item in stats.statusStats" :key="item.name" class="stat-box" :class="item.name === '成功' ? 'success' : 'danger'">
+                <div class="stat-name">{{ item.name }}</div>
+                <div class="stat-num">{{ item.value }}</div>
+              </div>
+            </div>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <h4 class="stats-subtitle">浏览器统计</h4>
+            <el-table :data="stats.browserStats" border size="mini" height="250">
+              <el-table-column prop="name" label="浏览器" align="center"/>
+              <el-table-column prop="value" label="次数" align="center" width="80"/>
+            </el-table>
+          </el-col>
+          <el-col :span="12">
+            <h4 class="stats-subtitle">操作系统统计</h4>
+            <el-table :data="stats.osStats" border size="mini" height="250">
+              <el-table-column prop="name" label="操作系统" align="center"/>
+              <el-table-column prop="value" label="次数" align="center" width="80"/>
+            </el-table>
+          </el-col>
+        </el-row>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="statsOpen = false" class="mac-btn">关 闭</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
-import { listLoginlog, delLoginlog, cleanLoginlog, exportLoginlog } from "@/api/proj_cyq/loginlog";
+import { listLoginlog, delLoginlog, cleanLoginlog, exportLoginlog, getLoginLogStats } from "@/api/proj_cyq/loginlog";
 
 export default {
   name: "Loginlog",
@@ -238,6 +292,16 @@ export default {
         title: '',
         type: 'info',
         description: ''
+      },
+
+      // 【新增】统计相关数据
+      statsOpen: false,
+      statsLoading: false,
+      stats: {
+        totalCount: 0,
+        statusStats: [],
+        browserStats: [],
+        osStats: []
       }
     };
   },
@@ -260,7 +324,6 @@ export default {
         console.log('获取字典数据成功:', this.statusOptions);
       }).catch(error => {
         console.error('获取字典数据失败:', error);
-        // 使用默认字典数据
         this.statusOptions = [
           { dictValue: '0', dictLabel: '成功' },
           { dictValue: '1', dictLabel: '失败' }
@@ -291,6 +354,21 @@ export default {
         this.loginlogList = [];
         this.total = 0;
         this.showDebugAlert('error', '请求失败', `获取数据失败: ${error.message || '未知错误'}`);
+      });
+    },
+
+    /** 【新增】处理统计 */
+    handleStats() {
+      this.statsOpen = true;
+      this.statsLoading = true;
+      getLoginLogStats().then(response => {
+        if (response.code === 200) {
+          this.stats = response.data;
+        }
+        this.statsLoading = false;
+      }).catch(() => {
+        this.statsLoading = false;
+        this.$modal.msgError("获取统计数据失败");
       });
     },
 
@@ -348,26 +426,22 @@ export default {
       return '';
     },
 
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
       this.getList();
     },
 
-    /** 重置按钮操作 */
     resetQuery() {
       this.dateRange = [];
       this.resetForm("queryForm");
       this.handleQuery();
     },
 
-    // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.loginId)
       this.multiple = !selection.length
     },
 
-    /** 删除按钮操作 */
     handleDelete(row) {
       const loginIds = row.loginId || this.ids;
       this.$modal.confirm('是否确认删除登录日志编号为"' + loginIds + '"的数据项？').then(() => {
@@ -378,7 +452,6 @@ export default {
       }).catch(() => {});
     },
 
-    /** 清空按钮操作 */
     handleClean() {
       this.$modal.confirm('是否确认清空所有登录日志数据项？').then(() => {
         return cleanLoginlog();
@@ -388,7 +461,6 @@ export default {
       }).catch(() => {});
     },
 
-    /** 导出按钮操作 */
     handleExport() {
       this.$modal.confirm('是否确认导出所有登录日志数据项？').then(() => {
         this.exportLoading = true;
@@ -429,7 +501,6 @@ export default {
       window.print();
     },
 
-    /** 返回按钮操作 */
     handleBack() {
       this.$router.push('/proj_cyq/index');
     }
@@ -438,9 +509,10 @@ export default {
 </script>
 
 <style scoped>
+/* 统一的 Mac 风格样式 */
 .app-container {
-  padding: 40px 20px;
-  max-width: 1200px;
+  padding: 30px;
+  max-width: 1400px;
   margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1d1d1f;
@@ -448,20 +520,10 @@ export default {
   min-height: 100vh;
 }
 
-/* Card Styling */
-.app-container >>> .el-card {
-  border-radius: 18px;
-  border: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-  background-color: #ffffff;
-}
-
-.app-container >>> .el-card__header {
-  border-bottom: 1px solid #f5f5f7;
-  padding: 20px 24px;
+.notice-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
 }
 
 .header-title {
@@ -470,27 +532,33 @@ export default {
   color: #1d1d1f;
 }
 
-/* Form Styling */
-.app-container >>> .el-form-item__label {
-  font-weight: 500;
-  color: #1d1d1f;
+.header-btn-group {
+  display: flex;
+  gap: 10px;
 }
 
+/* 卡片 */
+.app-container >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+}
+.app-container >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+}
+
+/* 输入框 */
 .app-container >>> .el-input__inner {
   border-radius: 10px;
   border: 1px solid #d2d2d7;
-  height: 36px;
-  transition: all 0.2s ease;
 }
-
 .app-container >>> .el-input__inner:focus {
   border-color: #0071e3;
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
 }
 
-/* ============================================
-   【核心修改】按钮样式优化 (高对比度 & 圆润风格)
-   ============================================ */
+/* 按钮通用样式 (Mac Style) */
 .mac-btn {
   border-radius: 20px;
   font-weight: 500;
@@ -498,185 +566,72 @@ export default {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* 1. 主操作按钮 (搜索、重新加载、打印)：深蓝色实心，白字 */
+/* 1. 主操作 (搜索/打印/新增/统计) - 深蓝实心 */
 .app-container >>> .el-button--primary:not(.is-plain) {
-  background-color: #0071e3;
-  border-color: #0071e3;
-  color: #ffffff !important; /* 强制白字 */
+  background-color: #0071e3; border-color: #0071e3; color: #fff !important;
   box-shadow: 0 2px 6px rgba(0, 113, 227, 0.3);
 }
 .app-container >>> .el-button--primary:not(.is-plain):hover {
-  background-color: #0077ed;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
+  background-color: #0077ed; transform: translateY(-1px);
 }
 
-/* 2. 危险操作按钮 (删除/清空)：红色实心，白字 */
-.app-container >>> .el-button--danger {
-  background-color: #ff3b30;
-  border-color: #ff3b30;
+/* 2. 危险操作 (删除/清空) - 红色实心 */
+.app-container >>> .el-button--danger:not(.is-plain) {
+  background-color: #ff3b30; border-color: #ff3b30; color: #fff !important;
   box-shadow: 0 2px 6px rgba(255, 59, 48, 0.3);
-  color: #ffffff !important; /* 强制白字 */
 }
-.app-container >>> .el-button--danger:hover {
-  background-color: #ff453a;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
+.app-container >>> .el-button--danger:not(.is-plain):hover {
+  background-color: #ff453a; transform: translateY(-1px);
 }
 
-/* 3. 警告操作按钮 (导出)：橙色实心，白字 */
-.app-container >>> .el-button--warning {
-  background-color: #ff9f0a;
-  border-color: #ff9f0a;
-  color: #ffffff !important; /* 强制白字 */
+/* 3. 警告操作 (导出) - 橙色实心 */
+.app-container >>> .el-button--warning:not(.is-plain) {
+  background-color: #ff9f0a; border-color: #ff9f0a; color: #fff !important;
   box-shadow: 0 2px 6px rgba(255, 159, 10, 0.3);
 }
-.app-container >>> .el-button--warning:hover {
-  background-color: #ffb340;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 159, 10, 0.4);
+.app-container >>> .el-button--warning:not(.is-plain):hover {
+  background-color: #ffb340; transform: translateY(-1px);
 }
 
-/* 4. 辅助操作按钮 (返回/重置/调试)：白底灰边，黑字 */
+/* 4. 辅助操作 (返回/重置) - 白底灰边 */
 .app-container >>> .el-button--default,
 .app-container >>> .el-button--info.is-plain {
-  background-color: #ffffff;
-  border: 1px solid #dcdfe6;
-  color: #606266 !important; /* 强制深灰字 */
+  background-color: #fff; border: 1px solid #dcdfe6; color: #606266 !important;
 }
 .app-container >>> .el-button--default:hover,
 .app-container >>> .el-button--info.is-plain:hover {
-  border-color: #c6e2ff;
-  color: #409eff !important;
-  background-color: #ecf5ff;
+  border-color: #c6e2ff; color: #409eff !important; background-color: #ecf5ff;
 }
 
-/* Table Styling */
-.app-container >>> .el-table {
-  border-radius: 8px;
-  overflow: hidden;
-  margin-top: 15px;
-}
+/* 表格 */
+.app-container >>> .el-table { border-radius: 8px; overflow: hidden; margin-top: 15px; }
+.app-container >>> .el-table th { background-color: #fbfbfd; color: #86868b; font-weight: 600; height: 50px; }
+.app-container >>> .el-tag { border-radius: 6px; border: none; font-weight: 500; }
 
-.app-container >>> .el-table th {
-  background-color: #fbfbfd;
-  color: #86868b;
-  font-weight: 600;
-  height: 50px;
+/* 统计样式 */
+.stats-subtitle {
+  font-size: 16px; font-weight: 600; color: #303133; margin: 15px 0 10px; text-align: center;
 }
-
-.app-container >>> .el-table td {
-  padding: 12px 0;
+.stat-box {
+  padding: 15px 25px; border-radius: 8px; text-align: center; min-width: 100px;
 }
+.stat-box.success { background-color: #f0f9eb; color: #67c23a; }
+.stat-box.danger { background-color: #fef0f0; color: #f56c6c; }
+.stat-name { font-size: 14px; margin-bottom: 5px; }
+.stat-num { font-size: 24px; font-weight: bold; }
 
-/* Tags */
-.app-container >>> .el-tag {
-  border-radius: 6px;
-  border: none;
-  font-weight: 500;
-}
-
-.empty-data {
-  text-align: center;
-  padding: 40px 0;
-}
-
-.empty-data p {
-  margin: 5px 0;
-  color: #86868b;
-}
-
-/* 操作信息样式 */
-.success-msg {
-  color: #34c759;
-  font-weight: 500;
-}
-
-.error-msg {
-  color: #ff3b30;
-  font-weight: 500;
-}
-
-.warning-msg {
-  color: #ff9500;
-  font-weight: 500;
-}
-
-/* 退出成功消息样式 */
-.logout-msg {
-  color: #ff9500;
-  font-weight: 500;
-  font-style: italic;
-}
-
-/* ==============================
-   【打印样式】
-   ============================== */
+/* 打印样式 */
 @media print {
-  .no-print,
-  .navbar,
-  .sidebar-container,
-  .tags-view-container,
-  .el-dialog__wrapper,
-  .v-modal,
-  .el-pagination {
-    display: none !important;
-  }
-
-  .no-print-col {
-    display: none !important;
-  }
-  .el-table__fixed-right {
-    display: none !important;
-  }
-
-  .print-title {
-    display: block !important;
-    text-align: center;
-    font-size: 24px;
-    margin-bottom: 20px;
-    font-weight: bold;
-  }
-
-  .app-container {
-    padding: 0;
-    margin: 0;
-    width: 100% !important;
-    background-color: white;
-  }
-
-  .app-container >>> .el-card {
-    box-shadow: none;
-    border: none;
-  }
-  .app-container >>> .el-card__body {
-    padding: 0;
-  }
-
-  .print-table {
-    border: 1px solid #000 !important;
-    font-size: 12px;
-    width: 100% !important;
-  }
-
-  .print-table td,
-  .print-table th {
-    border: 1px solid #000 !important;
-    color: #000 !important;
-    padding: 8px 5px !important;
-  }
-
-  tr {
-    page-break-inside: avoid;
-  }
-
-  /* 打印时移除el-tag的背景，只显示文字 */
-  .app-container >>> .el-tag {
-    border: 1px solid #000 !important;
-    background: none !important;
-    color: #000 !important;
-    padding: 0 5px;
-  }
+  .no-print, .navbar, .sidebar-container, .tags-view-container, .el-dialog__wrapper, .v-modal, .el-pagination { display: none !important; }
+  .no-print-col, .el-table__fixed-right { display: none !important; }
+  .print-title { display: block !important; text-align: center; font-size: 24px; margin-bottom: 20px; font-weight: bold; }
+  .app-container { padding: 0; margin: 0; width: 100% !important; background-color: white; }
+  .app-container >>> .el-card { box-shadow: none; border: none; }
+  .app-container >>> .el-card__body { padding: 0; }
+  .print-table { border: 1px solid #000 !important; font-size: 12px; width: 100% !important; }
+  .print-table td, .print-table th { border: 1px solid #000 !important; color: #000 !important; padding: 8px 5px !important; }
+  tr { page-break-inside: avoid; }
+  .app-container >>> .el-tag { border: 1px solid #000 !important; background: none !important; color: #000 !important; padding: 0 5px; }
 }
 </style>
 

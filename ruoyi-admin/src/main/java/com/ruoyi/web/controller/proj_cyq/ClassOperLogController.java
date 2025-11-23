@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-// 【修复】导入你自定义的 @Log 注解
 import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -36,7 +35,6 @@ public class ClassOperLogController extends BaseController {
     /**
      * 查询操作日志记录列表
      */
-    // 此注解现在会正确指向 ClassLogAspect
     @Log(title = "操作日志", businessType = BusinessType.OTHER)
     @GetMapping("/list")
     public TableDataInfo list(ClassOperLog classOperLog) {
@@ -46,11 +44,11 @@ public class ClassOperLogController extends BaseController {
     }
 
     /**
-     * 导出操作日志记录列表 - 支持 GET 和 POST 请求
+     * 导出操作日志记录列表
      */
     @Log(title = "操作日志", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    @PostMapping("/export") // 同时支持 GET 和 POST
+    @PostMapping("/export")
     public void export(HttpServletResponse response, ClassOperLog classOperLog) {
         List<ClassOperLog> list = classOperLogService.selectClassOperLogList(classOperLog);
         ExcelUtil<ClassOperLog> util = new ExcelUtil<ClassOperLog>(ClassOperLog.class);
@@ -83,5 +81,11 @@ public class ClassOperLogController extends BaseController {
     public AjaxResult clean() {
         classOperLogService.cleanClassOperLog();
         return success();
+    }
+
+    // ========== 【新增】统计接口 ==========
+    @GetMapping("/stats")
+    public AjaxResult getStats() {
+        return success(classOperLogService.getOperLogStats());
     }
 }

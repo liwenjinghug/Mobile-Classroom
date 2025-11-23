@@ -6,6 +6,16 @@
           <span class="notice-title">通告管理</span>
           <div class="header-btn-group">
             <el-button
+              type="primary"
+              icon="el-icon-s-data"
+              size="small"
+              @click="handleStats"
+              class="mac-btn"
+            >
+              统计
+            </el-button>
+
+            <el-button
               v-hasPermi="['proj_cyq:notice:add']"
               type="primary"
               icon="el-icon-plus"
@@ -126,6 +136,37 @@
       </el-col>
     </el-row>
 
+    <el-dialog title="通告管理统计" :visible.sync="statsOpen" width="800px" append-to-body class="no-print">
+      <div v-loading="statsLoading">
+        <el-row :gutter="20" class="stats-overview">
+          <el-col :span="24" style="text-align: center; margin-bottom: 20px;">
+            <div class="stat-value" style="font-size: 36px; color: #409EFF;">{{ stats.totalCount }}</div>
+            <div class="stat-label">总通告数</div>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <h4 class="stats-subtitle">发布人统计</h4>
+            <el-table :data="stats.creatorStats" border size="mini" height="250">
+              <el-table-column prop="name" label="发布人" align="center"/>
+              <el-table-column prop="value" label="发布数量" align="center" width="80"/>
+            </el-table>
+          </el-col>
+          <el-col :span="12">
+            <h4 class="stats-subtitle">近期发布趋势 (7天)</h4>
+            <el-table :data="stats.dateStats" border size="mini" height="250">
+              <el-table-column prop="name" label="日期" align="center"/>
+              <el-table-column prop="value" label="数量" align="center" width="80"/>
+            </el-table>
+          </el-col>
+        </el-row>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="statsOpen = false">关 闭</el-button>
+      </div>
+    </el-dialog>
+
     <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="公告标题" prop="title">
@@ -158,7 +199,7 @@
 </template>
 
 <script>
-import { listNotice, getNotice, delNotice, addNotice, updateNotice, exportNotice } from "@/api/proj_cyq/notice";
+import { listNotice, getNotice, delNotice, addNotice, updateNotice, exportNotice, getNoticeStats } from "@/api/proj_cyq/notice";
 
 export default {
   name: "ClassNotice",
@@ -204,6 +245,15 @@ export default {
         content: [
           { required: true, message: "公告内容不能为空", trigger: "blur" }
         ]
+      },
+
+      // 【新增】统计相关
+      statsOpen: false,
+      statsLoading: false,
+      stats: {
+        totalCount: 0,
+        creatorStats: [],
+        dateStats: []
       }
     };
   },
@@ -316,6 +366,22 @@ export default {
     handlePrint() {
       window.print();
     },
+
+    /** 【新增】处理统计 */
+    handleStats() {
+      this.statsOpen = true;
+      this.statsLoading = true;
+      getNoticeStats().then(response => {
+        if (response.code === 200) {
+          this.stats = response.data;
+        }
+        this.statsLoading = false;
+      }).catch(() => {
+        this.statsLoading = false;
+        this.$modal.msgError("获取统计数据失败");
+      });
+    },
+
     /** 处理导出响应 */
     handleExportResponse(response) {
       try {
@@ -404,7 +470,7 @@ export default {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* 1. 主操作按钮 (新增、搜索、确定)：深蓝色实心，白字 */
+/* 1. 主操作按钮 (新增、搜索、确定、打印、统计)：深蓝色实心，白字 */
 .app-container >>> .el-button--primary:not(.is-plain) {
   background-color: #0071e3;
   border-color: #0071e3;
@@ -497,6 +563,11 @@ export default {
   min-height: 120px;
   color: #303133;
   line-height: 1.6;
+}
+
+/* 统计样式 */
+.stats-subtitle {
+  font-size: 16px; font-weight: 600; color: #303133; margin: 15px 0 10px; text-align: center;
 }
 
 /* ==============================
