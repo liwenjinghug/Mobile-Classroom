@@ -13,4 +13,5 @@ public interface IClassExamService {
     int deleteExamByIds(Long[] ids);
     int refreshQuestionCount(Long examId);
     List<ClassExam> selectAvailableByStudentNo(String studentNo);
+    int updateExamStatus(Long id, Integer status, String updateBy);
 }

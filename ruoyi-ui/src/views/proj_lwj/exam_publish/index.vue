@@ -83,7 +83,9 @@
       <el-alert
         title="发布流程：1) 题目配置 → 2) 列表中点击“发布考试” → 3) 开始考试"
         type="info" show-icon style="margin-bottom:12px"/>
-      <el-table :data="list" v-loading="listLoading" style="width:100%" :row-key="rowKey" :row-class-name="rowClassName">
+      <!-- 在考试列表上方增加当前所选考试的得分汇总提示 -->
+      <el-alert v-if="scoreSummary" :title="scoreSummaryTitle" type="warning" show-icon style="margin-bottom:12px" />
+      <el-table :data="list" v-loading="listLoading" style="width:100%" :row-key="rowKeyField" :row-class-name="rowClassName">
         <el-table-column prop="examName" label="名称" />
         <el-table-column label="时间">
           <template slot-scope="scope">{{ fmt(scope.row.startTime) }} ~ {{ fmt(scope.row.endTime) }}</template>
@@ -265,6 +267,7 @@
 <script>
 import { listExam, addExam, updateExam, publishExam, delExam, startExam, endExam, batchAddExam } from '@/api/proj_lwj/exam'
 import { listCourse } from '@/api/proj_lw/course'
+import request from '@/utils/request'
 
 export default {
   name: 'ExamPublish',
@@ -311,13 +314,14 @@ export default {
         }
       },
       _pendingRestoreSessionId: null,
-      rowKey: 'id',
+      rowKeyField: 'id',
       examEditVisible: false,
       examEditLoading: false,
       examEditForm: { id:null, examName:'', examType:3, examDuration:60, totalScore:100, passScore:60, examMode:1, questionOrder:0, showAnswer:0, lateTime:0, courseId:null, sessionId:null, questionCount:0, status:0, startTime:null, endTime:null },
       examEditTimeRange: [],
       examEditBool: { antiCheat:false, autoSubmit:true, lateSubmit:false },
-      highlightedExamId: null // 最近更新的考试行ID
+      highlightedExamId: null, // 最近更新的考试行ID
+      scoreSummary: null,
     }
   },
   watch: {
@@ -562,45 +566,35 @@ export default {
       this.bool = { antiCheat: false, autoSubmit:false, lateSubmit:false }
       this.timeRange = []
     },
-    validate() {
-      if (!this.form.courseId) { this.$message.error('请选择课程'); return false }
-      if (!this.form.sessionId) { this.$message.error('请选择课堂'); return false }
-      if (!this.form.examName) { this.$message.error('请输入考试名称'); return false }
-      if (!this.timeRange || this.timeRange.length !== 2) { this.$message.error('请选择时间范围'); return false }
-      return true
-    },
-    buildPayload(publishNow) {
-      const [start, end] = this.timeRange
-      return Object.assign({}, this.form, {
-        startTime: this.formatDateTimeSimple(start),
-        endTime: this.formatDateTimeSimple(end),
-        status: publishNow ? 1 : 0,
-        antiCheat: this.bool.antiCheat ? 1 : 0,
-        autoSubmit: this.bool.autoSubmit ? 1 : 0,
-        lateSubmit: this.bool.lateSubmit ? 1 : 0
-      })
-    },
-    formatDateTimeSimple(d) {
-      if (!d) return ''
-      const date = new Date(d)
-      const pad = n => n < 10 ? '0' + n : n
-      return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + ' ' +
-        pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds())
-    },
-    fmt(s) { return s || '-' },
-    statusText(s) { const map = {0:'草稿',1:'已发布',2:'进行中',3:'已结束'}; return map[Number(s)||0]||'未知' },
-    statusTagType(s) { const n = Number(s)||0; if (n===0) return 'info'; if (n===1) return ''; if (n===2) return 'success'; if (n===3) return 'danger'; return 'info' },
-    rowKey(row) { return row.id },
-    handleEdit(row) {
-      this.examEditForm = Object.assign({}, row)
-      this.examEditTimeRange = [row.startTime? new Date(row.startTime): null, row.endTime? new Date(row.endTime): null].filter(Boolean)
-      this.examEditBool = {
-        antiCheat: (row.antiCheat|0) === 1,
-        autoSubmit: (row.autoSubmit|0) === 1,
-        lateSubmit: (row.lateSubmit|0) === 1
-      }
-      this.examEditVisible = true
-    },
+    // 删除重复: validate/buildPayload/formatDateTimeSimple/fmt/statusTagType 已在前方定义，这里移除重复实现
+    // validate() {
+    //   if (!this.form.courseId) { this.$message.error('请选择课程'); return false }
+    //   if (!this.form.sessionId) { this.$message.error('请选择课堂'); return false }
+    //   if (!this.form.examName) { this.$message.error('请输入考试名称'); return false }
+    //   if (!this.timeRange || this.timeRange.length !== 2) { this.$message.error('请选择时间范围'); return false }
+    //   return true
+    // },
+    // buildPayload(publishNow) {
+    //   const [start, end] = this.timeRange
+    //   return Object.assign({}, this.form, {
+    //     startTime: this.formatDateTimeSimple(start),
+    //     endTime: this.formatDateTimeSimple(end),
+    //     status: publishNow ? 1 : 0,
+    //     antiCheat: this.bool.antiCheat ? 1 : 0,
+    //     autoSubmit: this.bool.autoSubmit ? 1 : 0,
+    //     lateSubmit: this.bool.lateSubmit ? 1 : 0
+    //   })
+    // },
+    // formatDateTimeSimple(d) {
+    //   if (!d) return ''
+    //   const date = new Date(d)
+    //   const pad = n => n < 10 ? '0' + n : n
+    //   return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + ' ' +
+    //     pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds())
+    // },
+    // fmt(s) { return s || '-' },
+    // statusText(s) { const map = {0:'草稿',1:'已发布',2:'进行中',3:'已结束'}; return map[Number(s)||0]||'未知' },
+    // statusTagType(s) { const n = Number(s)||0; if (n===0) return 'info'; if (n===1) return ''; if (n===2) return 'success'; if (n===3) return 'danger'; return 'info' },
     rowClassName({ row }) {
       if (this.highlightedExamId && Number(row.id) === Number(this.highlightedExamId)) {
         return 'row-updated'
@@ -665,7 +659,185 @@ export default {
     },
     editStatusTagType(s) {
       const n = Number(s)||0; if (n===0) return 'info'; if (n===1) return ''; if (n===2) return 'success'; if (n===3) return 'danger'; return 'info'
-    }
+    },
+    // ================= 新增缺失方法，解决模板引用 undefined 警告 =================
+    // 加载当前课堂的考试列表
+    loadList() {
+      if (!this.form.sessionId) { this.list = []; return }
+      this.listLoading = true
+      const params = {
+        courseId: this.form.courseId,
+        sessionId: this.form.sessionId,
+        examName: this.query.examName || undefined,
+        pageNum: 1,
+        pageSize: 200
+      }
+      listExam(params).then(res => {
+        this.listLoading = false
+        const rows = res && (res.rows || res.data) ? (res.rows || res.data) : []
+        // 规范字段：确保有 id / questionCount
+        this.list = rows.map(r => ({
+          id: r.id || r.examId,
+          examName: r.examName,
+          examType: r.examType,
+            startTime: r.startTime,
+            endTime: r.endTime,
+            examDuration: r.examDuration,
+            totalScore: r.totalScore,
+            passScore: r.passScore,
+            examMode: r.examMode,
+            questionOrder: r.questionOrder,
+            showAnswer: r.showAnswer,
+            lateTime: r.lateTime,
+            antiCheat: r.antiCheat,
+            autoSubmit: r.autoSubmit,
+            lateSubmit: r.lateSubmit,
+            status: r.status,
+            courseId: r.courseId,
+            sessionId: r.sessionId,
+            questionCount: r.questionCount || r.questionsCount || 0
+        }))
+        if (this.form.id){ this.fetchScoreSummary(this.form.id) }
+      }).catch(err => { this.listLoading = false; console.error('loadList error', err) })
+    },
+    // 进入题目配置（表格行内）
+    gotoQuestions(row) {
+      if (!row || !row.id) return
+      this.$router.push({ path: `/proj_lwj_exam/exam_questions/${row.id}` }).catch(()=>{})
+      this.fetchScoreSummary(row.id)
+    },
+    // 编辑配置（表格行内）
+    openExamEdit(row) { this.handleEdit(row) },
+    // 发布考试
+    publish(row) {
+      if (!row || !row.id) return
+      // 先做前端校验：需要至少1道题且总分>0
+      if (!row.questionCount || row.questionCount <= 0) { return this.$message.error('请先配置题目后再发布') }
+      publishExam(row.id).then(res => {
+        if (res && (res.code === 200 || res.code === 0)) {
+          this.$message.success('已发布')
+          this.loadList()
+        } else {
+          this.$message.error((res && (res.msg || res.message)) || '发布失败')
+        }
+      }).catch(e => { console.error(e); this.$message.error('发布失败') })
+    },
+    // 是否可以开始考试（时间与状态）
+    canStart(row) {
+      if (!row) return false
+      const now = Date.now()
+      const start = row.startTime ? new Date(row.startTime).getTime() : null
+      const end = row.endTime ? new Date(row.endTime).getTime() : null
+      if (start && now < start) return false
+      if (end && now > end) return false
+      return true
+    },
+    // 开始考试
+    start(row) {
+      if (!row || !row.id) return
+      if (!this.canStart(row)) { return this.$message.error('当前不在考试时间范围内，无法开始') }
+      startExam(row.id).then(res => {
+        if (res && (res.code===200 || res.code===0)) {
+          this.$message.success('考试已开始')
+          this.loadList()
+        } else { this.$message.error((res && (res.msg||res.message)) || '开始失败') }
+      }).catch(e => { console.error(e); this.$message.error('开始失败') })
+    },
+    // 结束考试
+    end(row) {
+      if (!row || !row.id) return
+      endExam(row.id).then(res => {
+        if (res && (res.code===200 || res.code===0)) {
+          this.$message.success('考试已结束')
+          this.loadList()
+        } else { this.$message.error((res && (res.msg||res.message)) || '结束失败') }
+      }).catch(e => { console.error(e); this.$message.error('结束失败') })
+    },
+    // 删除考试（草稿或已发布但未开始）
+    remove(row) {
+      if (!row || !row.id) return
+      this.$confirm('确定删除该考试？删除后不可恢复', '提示', { type:'warning' }).then(()=>{
+        delExam(row.id).then(res => {
+          if (res && (res.code===200 || res.code===0)) { this.$message.success('已删除'); this.loadList() } else { this.$message.error((res && (res.msg||res.message)) || '删除失败') }
+        }).catch(e => { console.error(e); this.$message.error('删除失败') })
+      }).catch(()=>{})
+    },
+    // 发布按��禁用原因
+    publishDisabledReason(row) {
+      if (!row) return '数据异常'
+      if (Number(row.status) === 1 || Number(row.status) === 2 || Number(row.status) === 3) return '已发布'
+      if (!row.questionCount || row.questionCount <= 0) return '未配置题目'
+      if (!row.totalScore || Number(row.totalScore) <= 0) return '总分未设置'
+      return ''
+    },
+    // 删除禁用原因
+    removeDisabled(row) {
+      if (!row) return '数据异常'
+      const status = Number(row.status)
+      if (status === 2) return '进行中不可删除'
+      if (status === 3) return '已结束不可删除'
+      return ''
+    },
+    // 打开批量创建对话框
+    openBatch() {
+      if (!this.form.courseId) { return this.$message.error('请先选择课程') }
+      if (!this.sessions.length) { return this.$message.error('当前课程暂无课堂') }
+      // 初始化批量参数
+      this.batch.sessionIds = []
+      this.batch.exam.courseId = this.form.courseId
+      this.batch.exam.examName = this.form.examName || ''
+      this.batch.exam.examType = this.form.examType
+      this.batch.exam.examDuration = this.form.examDuration
+      this.batch.exam.totalScore = this.form.totalScore
+      this.batch.exam.passScore = this.form.passScore
+      this.batch.exam.examMode = this.form.examMode
+      this.batch.exam.status = 0
+      this.batch.timeRange = this.timeRange.slice()
+      this.batchVisible = true
+    },
+    // 提交批量创建
+    submitBatch() {
+      if (!this.batch.sessionIds || !this.batch.sessionIds.length) { return this.$message.error('请选择至少一个课堂') }
+      if (!this.batch.exam.examName) { return this.$message.error('请输入考试名称') }
+      if (!this.batch.timeRange || this.batch.timeRange.length !== 2) { return this.$message.error('请选择时间范围') }
+      const [start, end] = this.batch.timeRange
+      const payload = {
+        sessionIds: this.batch.sessionIds,
+        exam: Object.assign({}, this.batch.exam, {
+          startTime: this.formatDateTimeSimple(start),
+          endTime: this.formatDateTimeSimple(end)
+        })
+      }
+      this.batchLoading = true
+      batchAddExam(payload).then(res => {
+        this.batchLoading = false
+        if (res && (res.code===200 || res.code===0)) {
+          this.$message.success('批量创建成功')
+          this.batchVisible = false
+          this.loadList()
+        } else {
+          this.$message.error((res && (res.msg||res.message)) || '批量创建失败')
+        }
+      }).catch(e => { this.batchLoading=false; console.error(e); this.$message.error('批量创建失败') })
+    },
+    fetchScoreSummary(examId){
+      if (!examId) { this.scoreSummary = null; return }
+      request({ url: `/proj_lwj/exam/question/${examId}/score-summary`, method: 'get'}).then(res => {
+        if (res && res.code === 200) this.scoreSummary = res.data
+        else this.scoreSummary = null
+      }).catch(()=>{ this.scoreSummary=null })
+    },
+    scoreSummaryTitle(){
+      if (!this.scoreSummary) return ''
+      const { actualTotalScore, configuredTotalScore, remainingToPublish, canPublish, questionCount } = this.scoreSummary
+      if (!configuredTotalScore || configuredTotalScore === 0){
+        return `当前题目总分 ${actualTotalScore}，尚未设置考试总分，不能发布`
+      }
+      if (canPublish){
+        return `题目总分 ${actualTotalScore} / 设置总分 ${configuredTotalScore}，已满足发布条件（题目数：${questionCount || 0}）`
+      }
+      return `题目总分 ${actualTotalScore} / 设置总分 ${configuredTotalScore}，距离可发布还差 ${remainingToPublish} 分（题目数：${questionCount || 0}）`
+    },
   }
 }
 </script>

@@ -1,36 +1,35 @@
-<!-- src/views/proj_cyq/notice/index.vue -->
 <template>
   <div class="app-container">
     <el-row :gutter="20">
       <el-col :span="24">
-        <div class="notice-header">
+        <div class="notice-header no-print">
           <span class="notice-title">通告管理</span>
-          <el-button
-            v-hasPermi="['proj_cyq:notice:add']"
-            type="primary"
-            plain
-            icon="el-icon-plus"
-            size="mini"
-            @click="handleAdd"
-            style="float: right; margin-left: 10px;"
-          >
-            新增
-          </el-button>
-          <el-button
-            type="info"
-            plain
-            icon="el-icon-arrow-left"
-            size="mini"
-            @click="handleBack"
-            style="float: right;"
-          >
-            返回
-          </el-button>
+          <div class="header-btn-group">
+            <el-button
+              v-hasPermi="['proj_cyq:notice:add']"
+              type="primary"
+              icon="el-icon-plus"
+              size="small"
+              @click="handleAdd"
+              class="mac-btn"
+            >
+              新增
+            </el-button>
+            <el-button
+              type="info"
+              plain
+              icon="el-icon-arrow-left"
+              size="small"
+              @click="handleBack"
+              class="mac-btn"
+            >
+              返回
+            </el-button>
+          </div>
         </div>
 
         <el-card class="box-card">
-          <!-- 搜索区域 -->
-          <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="68px">
+          <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="68px" class="no-print">
             <el-form-item label="公告标题" prop="title">
               <el-input
                 v-model="queryParams.title"
@@ -42,30 +41,45 @@
               />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-              <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+              <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery" class="mac-btn">搜索</el-button>
+              <el-button icon="el-icon-refresh" size="mini" @click="resetQuery" class="mac-btn">重置</el-button>
             </el-form-item>
           </el-form>
 
-          <!-- 操作按钮 -->
-          <el-row :gutter="10" class="mb8">
+          <el-row :gutter="10" class="mb8 no-print">
             <el-col :span="1.5">
               <el-button
                 type="warning"
-                plain
                 icon="el-icon-download"
                 size="mini"
                 @click="handleExport"
                 v-hasPermi="['proj_cyq:notice:export']"
                 :loading="exportLoading"
+                class="mac-btn"
               >导出</el-button>
+            </el-col>
+            <el-col :span="1.5">
+              <el-button
+                type="primary"
+                plain
+                icon="el-icon-printer"
+                size="mini"
+                @click="handlePrint"
+                class="mac-btn"
+              >打印</el-button>
             </el-col>
             <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
           </el-row>
 
-          <!-- 公告表格 -->
-          <el-table v-loading="loading" :data="noticeList" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="55" align="center" />
+          <h2 class="print-title" style="display: none;">通告列表</h2>
+
+          <el-table
+            v-loading="loading"
+            :data="noticeList"
+            @selection-change="handleSelectionChange"
+            class="print-table"
+          >
+            <el-table-column type="selection" width="55" align="center" class-name="no-print-col" />
             <el-table-column label="公告标题" align="center" prop="title" :show-overflow-tooltip="true" />
             <el-table-column label="创建人" align="center" prop="createBy" width="120" />
             <el-table-column label="创建时间" align="center" prop="createTime" width="180">
@@ -73,7 +87,7 @@
                 <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}') }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+            <el-table-column label="操作" align="center" class-name="small-padding fixed-width no-print-col">
               <template slot-scope="scope">
                 <el-button
                   size="mini"
@@ -106,12 +120,12 @@
             :page.sync="queryParams.pageNum"
             :limit.sync="queryParams.pageSize"
             @pagination="getList"
+            class="no-print"
           />
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 添加或修改公告对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="公告标题" prop="title">
@@ -122,12 +136,11 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm" class="mac-btn">确 定</el-button>
+        <el-button @click="cancel" class="mac-btn">取 消</el-button>
       </div>
     </el-dialog>
 
-    <!-- 公告详情对话框 -->
     <el-dialog title="公告详情" :visible.sync="viewOpen" width="800px" append-to-body>
       <el-form ref="viewForm" :model="viewForm" label-width="80px">
         <el-form-item label="公告标题">{{ viewForm.title }}</el-form-item>
@@ -138,7 +151,7 @@
         <el-form-item label="创建人">{{ viewForm.createBy }}</el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="viewOpen = false">关 闭</el-button>
+        <el-button @click="viewOpen = false" class="mac-btn">关 闭</el-button>
       </div>
     </el-dialog>
   </div>
@@ -286,14 +299,12 @@ export default {
         this.$modal.msgSuccess("删除成功");
       }).catch(() => {});
     },
-    /** 导出按钮操作 - 参考操作日志的方式 */
+    /** 导出按钮操作 */
     handleExport() {
       this.$modal.confirm('是否确认导出所有公告数据项？').then(() => {
         this.exportLoading = true;
-        // 不传递任何参数，使用 GET 请求
         return exportNotice();
       }).then(response => {
-        // 直接使用响应数据创建下载
         this.handleExportResponse(response);
       }).catch((error) => {
         console.error('导出失败:', error);
@@ -301,27 +312,24 @@ export default {
         this.$modal.msgError("导出失败：" + (error.message || '未知错误'));
       });
     },
+    /** 【新增】打印功能 */
+    handlePrint() {
+      window.print();
+    },
     /** 处理导出响应 */
     handleExportResponse(response) {
       try {
-        // 创建 blob 对象
         const blob = new Blob([response], {
           type: 'application/vnd.ms-excel;charset=utf-8'
         });
-
-        // 创建下载链接
         const downloadElement = document.createElement('a');
         const href = window.URL.createObjectURL(blob);
-
         downloadElement.href = href;
         downloadElement.download = '通知公告数据.xlsx';
         document.body.appendChild(downloadElement);
         downloadElement.click();
-
-        // 清理
         document.body.removeChild(downloadElement);
         window.URL.revokeObjectURL(href);
-
         this.exportLoading = false;
         this.$modal.msgSuccess("导出成功");
       } catch (error) {
@@ -338,44 +346,47 @@ export default {
     },
     /** 返回按钮操作 */
     handleBack() {
-      this.$router.push('/index');
+      this.$router.push('/proj_cyq');
     }
   }
 };
 </script>
 
 <style scoped>
-/* Mac Style for Notice Page */
+/* 整体容器：浅灰背景，舒适间距 */
 .app-container {
-  padding: 40px 20px;
-  max-width: 1200px;
+  padding: 30px;
+  max-width: 1400px;
   margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #1d1d1f;
-  background-color: #f5f5f7;
+  background-color: #f5f7fa;
   min-height: 100vh;
 }
 
+/* 头部布局 */
 .notice-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 0;
-  border-bottom: none;
+  margin-bottom: 20px;
 }
 
 .notice-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  color: #1d1d1f;
+  color: #303133;
 }
 
-/* Card Styling */
+.header-btn-group {
+  display: flex;
+  gap: 10px;
+}
+
+/* 卡片容器 */
 .app-container >>> .el-card {
-  border-radius: 18px;
-  border: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  border-radius: 12px;
+  border: 1px solid #e4e7ed;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05);
   background-color: #ffffff;
 }
 
@@ -383,112 +394,170 @@ export default {
   padding: 24px;
 }
 
-/* Form Styling */
-.app-container >>> .el-form-item__label {
+/* ============================================
+   【核心修改】按钮样式优化 (高对比度，防止文字隐身)
+   ============================================ */
+.mac-btn {
+  border-radius: 20px;
   font-weight: 500;
-  color: #1d1d1f;
+  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.app-container >>> .el-input__inner {
-  border-radius: 10px;
-  border: 1px solid #d2d2d7;
-  height: 36px;
-  transition: all 0.2s ease;
-}
-
-.app-container >>> .el-input__inner:focus {
-  border-color: #0071e3;
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
-}
-
-/* Button Styling */
-.app-container >>> .el-button {
-  border-radius: 980px;
-  font-weight: 500;
-  border: none;
-  padding: 9px 20px;
-  transition: all 0.2s ease;
-}
-
-.app-container >>> .el-button--primary {
+/* 1. 主操作按钮 (新增、搜索、确定)：深蓝色实心，白字 */
+.app-container >>> .el-button--primary:not(.is-plain) {
   background-color: #0071e3;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+  border-color: #0071e3;
+  color: #ffffff !important; /* 强制白字 */
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.3);
 }
-.app-container >>> .el-button--primary:hover {
+.app-container >>> .el-button--primary:not(.is-plain):hover {
   background-color: #0077ed;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
+}
+
+/* 2. 警告操作按钮 (导出)：橙色实心，白字 */
+.app-container >>> .el-button--warning {
+  background-color: #ff9f0a;
+  border-color: #ff9f0a;
+  color: #ffffff !important; /* 强制白字 */
+  box-shadow: 0 2px 6px rgba(255, 159, 10, 0.3);
+}
+.app-container >>> .el-button--warning:hover {
+  background-color: #ffb340;
   transform: translateY(-1px);
 }
 
-.app-container >>> .el-button--success {
-  background-color: #34c759;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+/* 3. 辅助操作按钮 (打印)：浅蓝背景，深蓝字 */
+/* 【修复】移除了 border-color (变透明)，保留了悬停上浮 */
+.app-container >>> .el-button--primary.is-plain {
+  background-color: #f0f7ff !important; /* 浅蓝背景 */
+  border-color: transparent !important;  /* 【关键】去掉边框 */
+  color: #0071e3 !important;            /* 深蓝文字 */
+}
+.app-container >>> .el-button--primary.is-plain:hover {
+  background-color: #0071e3 !important;
+  border-color: #0071e3 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px); /* 悬停上浮 */
+  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2); /* 悬停阴影 */
 }
 
-.app-container >>> .el-button--warning {
-  background-color: #ff9500;
-  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
+/* 4. 通用按钮 (返回、取消、重置)：白底灰边，黑字 */
+.app-container >>> .el-button--default,
+.app-container >>> .el-button--info.is-plain {
+  background-color: #ffffff;
+  border: 1px solid #dcdfe6;
+  color: #606266 !important; /* 强制深灰字 */
+}
+.app-container >>> .el-button--default:hover,
+.app-container >>> .el-button--info.is-plain:hover {
+  border-color: #c6e2ff;
+  color: #409eff !important;
+  background-color: #ecf5ff;
 }
 
-.app-container >>> .el-button--danger {
-  background-color: #ff3b30;
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
-}
-
-.app-container >>> .el-button--info {
-  background-color: #8e8e93;
-}
-
-/* Table Styling */
+/* 表格样式优化 */
 .app-container >>> .el-table {
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
+  margin-top: 15px;
 }
 
 .app-container >>> .el-table th {
-  background-color: #fbfbfd;
-  color: #86868b;
+  background-color: #f5f7fa;
+  color: #606266;
   font-weight: 600;
-  border-bottom: 1px solid #f5f5f7;
-  padding: 12px 0;
+  height: 50px;
 }
 
 .app-container >>> .el-table td {
   padding: 12px 0;
-  border-bottom: 1px solid #f5f5f7;
 }
 
-/* Dialog Styling */
+/* 弹窗优化 */
 .app-container >>> .el-dialog {
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  border-radius: 12px;
 }
-
 .app-container >>> .el-dialog__header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #f5f5f7;
+  border-bottom: 1px solid #eee;
+  padding: 20px;
 }
-
-.app-container >>> .el-dialog__title {
-  font-weight: 600;
-  font-size: 18px;
-  color: #1d1d1f;
-}
-
-.app-container >>> .el-dialog__body {
-  padding: 24px;
-}
-
 .app-container >>> .el-dialog__footer {
-  padding: 16px 24px;
-  border-top: 1px solid #f5f5f7;
+  border-top: 1px solid #eee;
+  padding: 15px 20px;
 }
 
 .notice-content {
-  border: 1px solid #d2d2d7;
-  padding: 16px;
-  border-radius: 12px;
-  background-color: #fbfbfd;
-  min-height: 100px;
-  color: #1d1d1f;
+  border: 1px solid #dcdfe6;
+  padding: 20px;
+  border-radius: 4px;
+  background-color: #fafafa;
+  min-height: 120px;
+  color: #303133;
+  line-height: 1.6;
+}
+
+/* ==============================
+   【打印样式】保持不变
+   ============================== */
+@media print {
+  .no-print,
+  .navbar,
+  .sidebar-container,
+  .tags-view-container,
+  .el-dialog__wrapper,
+  .v-modal,
+  .el-pagination {
+    display: none !important;
+  }
+
+  .no-print-col {
+    display: none !important;
+  }
+  .el-table__fixed-right {
+    display: none !important;
+  }
+
+  .print-title {
+    display: block !important;
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+
+  .app-container {
+    padding: 0;
+    margin: 0;
+    width: 100% !important;
+    background-color: white;
+  }
+
+  .app-container >>> .el-card {
+    box-shadow: none;
+    border: none;
+  }
+  .app-container >>> .el-card__body {
+    padding: 0;
+  }
+
+  .print-table {
+    border: 1px solid #000 !important;
+    font-size: 12px;
+    width: 100% !important;
+  }
+
+  .print-table td,
+  .print-table th {
+    border: 1px solid #000 !important;
+    color: #000 !important;
+    padding: 8px 5px !important;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
 }
 </style>

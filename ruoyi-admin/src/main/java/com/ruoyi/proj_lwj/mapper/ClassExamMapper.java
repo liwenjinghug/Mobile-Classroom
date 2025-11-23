@@ -88,7 +88,12 @@ public interface ClassExamMapper {
             "JOIN class_student s ON s.student_id = ss.student_id " +
             "LEFT JOIN class_course cc ON e.course_id = cc.course_id " +
             "LEFT JOIN class_session cs ON e.session_id = cs.session_id " +
-            "WHERE s.student_no = #{studentNo} AND e.status IN (1,2,3) ORDER BY e.start_time DESC")
+            "LEFT JOIN class_exam_participant p ON p.exam_id = e.id AND p.student_id = s.student_id " +
+            "WHERE s.student_no = #{studentNo} " +
+            "AND e.status IN (1,2) " +               // 仅显示已发布或进行中
+            "AND (e.end_time IS NULL OR e.end_time > NOW()) " + // 未结束
+            "AND (p.id IS NULL OR p.participant_status <> 2) " + // 未完成提交
+            "ORDER BY e.start_time DESC")
     @Results({
             @Result(property = "id", column = "id"),
             @Result(property = "examName", column = "exam_name"),

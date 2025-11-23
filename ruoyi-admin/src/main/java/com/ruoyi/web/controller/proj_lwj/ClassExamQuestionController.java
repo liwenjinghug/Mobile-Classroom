@@ -1,129 +1,136 @@
 package com.ruoyi.web.controller.proj_lwj;
 
-import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.proj_lwj.domain.ClassExamQuestion;
 import com.ruoyi.proj_lwj.service.IClassExamQuestionService;
+import com.ruoyi.proj_lwj.service.IClassExamService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.*;
 
-// JSON parsing for options validation
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
-
+/**
+ * 考试题目控制器：题库 API 导入 + 列表 + 发布校验辅助
+ */
 @RestController
-@RequestMapping("/proj_lwj/exam-question")
+@RequestMapping("/proj_lwj/exam/question")
 public class ClassExamQuestionController extends BaseController {
 
     @Autowired
-    private IClassExamQuestionService service;
+    private IClassExamQuestionService questionService;
+    @Autowired
+    private IClassExamService examService;
 
-    private static final ObjectMapper OM = new ObjectMapper();
-
-    @PreAuthorize("@ss.hasPermi('projlwj:examq:list')")
+    /** 题目列表 */
     @GetMapping("/list")
-    public TableDataInfo list(ClassExamQuestion q) {
-        startPage();
-        return getDataTable(service.list(q));
+    public AjaxResult list(ClassExamQuestion q){
+        List<ClassExamQuestion> list = questionService.selectQuestionList(q);
+        return AjaxResult.success(list);
     }
 
-    @PreAuthorize("@ss.hasPermi('projlwj:examq:query')")
+    /** 单题详情 */
     @GetMapping("/{id}")
-    public AjaxResult get(@PathVariable Long id) {
-        return AjaxResult.success(service.get(id));
+    public AjaxResult info(@PathVariable Long id){
+        ClassExamQuestion q = questionService.selectById(id);
+        if (q == null) return AjaxResult.error("题目不存在");
+        return AjaxResult.success(q);
     }
 
-    @PreAuthorize("@ss.hasPermi('projlwj:examq:add')")
-    @Log(title = "考试题目", businessType = BusinessType.INSERT)
+    /** 新增题目 */
+    @Log(title="考试题目", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody ClassExamQuestion q) {
-        String err = validate(q, true);
-        if (err != null) return AjaxResult.error(err);
-        q.setCreateBy(getUsername());
-        return toAjax(service.insert(q));
+    public AjaxResult add(@RequestBody ClassExamQuestion q){
+        if (q.getExamId()==null) return AjaxResult.error("examId不能为空");
+        if (q.getQuestionContent()==null || q.getQuestionContent().trim().isEmpty()) return AjaxResult.error("题目内容不能为空");
+        int rows = questionService.insertQuestion(q);
+        examService.refreshQuestionCount(q.getExamId());
+        return toAjax(rows);
     }
 
-    @PreAuthorize("@ss.hasPermi('projlwj:examq:edit')")
-    @Log(title = "考试题目", businessType = BusinessType.UPDATE)
+    /** 编辑题目 */
+    @Log(title="考试题目", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody ClassExamQuestion q) {
-        String err = validate(q, false);
-        if (err != null) return AjaxResult.error(err);
-        q.setUpdateBy(getUsername());
-        return toAjax(service.update(q));
+    public AjaxResult edit(@RequestBody ClassExamQuestion q){
+        if (q.getId()==null) return AjaxResult.error("缺少题目ID");
+        int rows = questionService.updateQuestion(q);
+        if (q.getExamId()!=null) examService.refreshQuestionCount(q.getExamId());
+        return toAjax(rows);
     }
 
-    @PreAuthorize("@ss.hasPermi('projlwj:examq:remove')")
-    @Log(title = "考试题目", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{id}")
-    public AjaxResult remove(@PathVariable Long id) {
-        return toAjax(service.delete(id));
+    /** 删除题目 */
+    @Log(title="考试题目", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{ids}")
+    public AjaxResult remove(@PathVariable Long[] ids){
+        int rows = questionService.deleteQuestionByIds(ids);
+        return toAjax(rows);
     }
 
-    @PreAuthorize("@ss.hasPermi('projlwj:examq:remove')")
-    @Log(title = "考试题目", businessType = BusinessType.DELETE)
+    /** 批量删除题目 */
+    @Log(title="考试题目", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")
-    public AjaxResult removeBatch(@RequestBody Long[] ids) {
-        return toAjax(service.deleteBatch(ids));
+    public AjaxResult removeBatch(@RequestBody Long[] ids){
+        int rows = questionService.deleteQuestionByIds(ids);
+        return toAjax(rows);
     }
 
-    @PreAuthorize("@ss.hasPermi('projlwj:examq:edit')")
-    @Log(title = "考试题目排序", businessType = BusinessType.UPDATE)
-    @PutMapping("/reorder")
-    public AjaxResult reorder(@RequestBody List<ClassExamQuestion> items) {
-        if (items == null || items.isEmpty()) return AjaxResult.error("排序项不能为空");
-        for (ClassExamQuestion e : items) {
-            if (e.getId() == null || e.getSortOrder() == null) return AjaxResult.error("排序项缺少 id 或 sortOrder");
-            e.setUpdateBy(getUsername());
-        }
-        return toAjax(service.batchReorder(items));
+    /** 计算考试题目总分 */
+    @GetMapping("/{examId}/totalScore")
+    public AjaxResult total(@PathVariable Long examId){
+        return AjaxResult.success(questionService.calculateTotalScore(examId));
     }
 
-    private String validate(ClassExamQuestion q, boolean isCreate) {
-        if (q == null) return "参数不能为空";
-        if (isCreate && (q.getExamId() == null)) return "缺少考试ID";
-        if (q.getQuestionType() == null) return "请选择题型";
-        int t = q.getQuestionType();
-        // 仅支持：1单选、3判断、5简答
-        if (t != 1 && t != 3 && t != 5) return "题型仅支持：单选、判断、简答";
-        if (q.getQuestionContent() == null || q.getQuestionContent().trim().isEmpty()) return "请输入题目内容";
-        if (q.getScore() == null || q.getScore().compareTo(new BigDecimal("0")) <= 0) return "分值需大于0";
-
-        // 单选题：需要 options 至少2项、正确答案必须在 options 中
-        if (t == 1) {
-            if (isBlank(q.getQuestionOptions())) return "单选题需提供选项（JSON数组）";
-            if (isBlank(q.getCorrectAnswer())) return "单选题需设置正确答案";
-            try {
-                List<String> opts = OM.readValue(q.getQuestionOptions().trim(), new TypeReference<List<String>>(){});
-                if (opts == null || opts.size() < 2) return "单选题选项至少2个";
-                String ans = q.getCorrectAnswer().trim();
-                boolean in = false;
-                for (String s : opts) { if (s != null && s.equals(ans)) { in = true; break; } }
-                if (!in) return "正确答案必须在选项中";
-            } catch (Exception e) {
-                return "选项需为JSON数组，如：[\"A\",\"B\"]";
-            }
-        }
-        // 判断题：答案需为 true/false 或 1/0
-        if (t == 3) {
-            if (isBlank(q.getCorrectAnswer())) return "判断题需设置正确答案";
-            String v = q.getCorrectAnswer().trim().toLowerCase();
-            if (!("true".equals(v) || "false".equals(v) || "1".equals(v) || "0".equals(v))) {
-                return "判断题答案仅支持 true/false 或 1/0";
-            }
-        }
-        // 简答题：允许无参考答案（通常走人工批改）
-        // 学科分类可选：长度限制
-        if (q.getSubject() != null && q.getSubject().length() > 100) return "学科分类过长";
-        return null;
+    /** 批量重排序号 */
+    @Log(title="题目重排", businessType = BusinessType.UPDATE)
+    @PostMapping("/reorder")
+    public AjaxResult reorder(@RequestBody List<ClassExamQuestion> list){
+        int rows = questionService.batchReorder(list);
+        return AjaxResult.success("已更新排序数量:" + rows);
     }
 
-    private boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
+    /** 考试题目得分汇总（当前已选题总分、设置总分、是否满足发布条件、还差多少） */
+    @GetMapping("/{examId}/score-summary")
+    public AjaxResult scoreSummary(@PathVariable Long examId){
+        if (examId == null) return AjaxResult.error("examId不能为空");
+        BigDecimal actual = questionService.calculateTotalScore(examId);
+        com.ruoyi.proj_lwj.domain.ClassExam exam = examService.selectExamById(examId);
+        if (exam == null) return AjaxResult.error("考试不存在");
+        BigDecimal configured = exam.getTotalScore() == null ? BigDecimal.ZERO : exam.getTotalScore();
+        BigDecimal remaining = configured.subtract(actual);
+        Map<String,Object> data = new LinkedHashMap<>();
+        data.put("examId", examId);
+        data.put("actualTotalScore", actual);
+        data.put("configuredTotalScore", configured);
+        data.put("remainingToPublish", remaining.compareTo(BigDecimal.ZERO) > 0 ? remaining : BigDecimal.ZERO);
+        data.put("canPublish", remaining.compareTo(BigDecimal.ZERO) <= 0);
+        data.put("questionCount", exam.getQuestionCount());
+        return AjaxResult.success(data);
+    }
+
+    /** 从本地题库导入题目 */
+    @Log(title="题库导入", businessType = BusinessType.IMPORT)
+    @PostMapping("/import-local")
+    public AjaxResult importLocal(@RequestBody Map<String,Object> payload){
+        Object examIdObj = payload.get("examId");
+        Object idsObj = payload.get("bankIds");
+        if (examIdObj == null) return AjaxResult.error("examId不能为空");
+        Long examId;
+        try { examId = Long.valueOf(String.valueOf(examIdObj)); } catch (Exception e){ return AjaxResult.error("examId格式不正确"); }
+        if (!(idsObj instanceof Collection)) return AjaxResult.error("bankIds必须为数组");
+        List<Long> bankIds = new ArrayList<>();
+        for (Object o : (Collection<?>) idsObj){
+            if (o == null) continue;
+            try { bankIds.add(Long.valueOf(String.valueOf(o))); } catch (Exception ignore) {}
+        }
+        IClassExamQuestionService.ImportResult result = questionService.importFromLocalBank(examId, bankIds, getUsername());
+        Map<String,Object> data = new LinkedHashMap<>();
+        data.put("requested", result.requested);
+        data.put("imported", result.imported);
+        data.put("skippedDuplicate", result.skippedDuplicate);
+        data.put("totalScoreAfter", result.totalScoreAfter);
+        return AjaxResult.success(data);
+    }
 }

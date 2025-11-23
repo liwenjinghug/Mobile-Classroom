@@ -1,77 +1,82 @@
 <template>
   <div class="app-container">
-    <!-- 搜索区域 -->
-    <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="68px">
-      <el-form-item label="待办标题" prop="title">
-        <el-input
-          v-model="queryParams.title"
-          placeholder="请输入待办标题"
-          clearable
-          style="width: 240px"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="待办类型" prop="todoType">
-        <el-select v-model="queryParams.todoType" placeholder="待办类型" clearable style="width: 240px">
-          <el-option label="学习" value="study" />
-          <el-option label="工作" value="work" />
-          <el-option label="生活" value="life" />
-          <el-option label="其他" value="other" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="状态" clearable style="width: 240px">
-          <el-option label="未完成" value="0" />
-          <el-option label="完成" value="1" />
-          <el-option label="过期" value="2" />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
-        <el-button v-if="hasInvalidData" type="warning" icon="el-icon-warning" @click="showDataDiagnosis">
-          数据诊断 ({{ invalidDataCount }})
-        </el-button>
-      </el-form-item>
-    </el-form>
+    <div class="no-print">
+      <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="68px">
+        <el-form-item label="待办标题" prop="title">
+          <el-input
+            v-model="queryParams.title"
+            placeholder="请输入待办标题"
+            clearable
+            style="width: 240px"
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="待办类型" prop="todoType">
+          <el-select v-model="queryParams.todoType" placeholder="待办类型" clearable style="width: 240px">
+            <el-option label="学习" value="study" />
+            <el-option label="工作" value="work" />
+            <el-option label="生活" value="life" />
+            <el-option label="其他" value="other" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态" prop="status">
+          <el-select v-model="queryParams.status" placeholder="状态" clearable style="width: 240px">
+            <el-option label="未完成" value="0" />
+            <el-option label="完成" value="1" />
+            <el-option label="过期" value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+          <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
+          <el-button v-if="hasInvalidData" type="warning" icon="el-icon-warning" @click="showDataDiagnosis">
+            数据诊断 ({{ invalidDataCount }})
+          </el-button>
+        </el-form-item>
+      </el-form>
 
-    <!-- 操作按钮 -->
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button type="primary" icon="el-icon-plus" @click="handleAdd">新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="success" icon="el-icon-edit" :disabled="single" @click="handleUpdate">修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="danger" icon="el-icon-delete" :disabled="multiple" @click="handleDelete">删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="warning" icon="el-icon-download" @click="handleExport">导出</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="info" icon="el-icon-s-data" @click="handleStats">统计</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button icon="el-icon-back" @click="handleBack">返回</el-button>
-      </el-col>
-    </el-row>
+      <el-row :gutter="10" class="mb8">
+        <el-col :span="1.5">
+          <el-button type="primary" icon="el-icon-plus" @click="handleAdd">新增</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="success" icon="el-icon-edit" :disabled="single" @click="handleUpdate">修改</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="danger" icon="el-icon-delete" :disabled="multiple" @click="handleDelete">删除</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="warning" icon="el-icon-download" @click="handleExport">导出</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="primary" plain icon="el-icon-printer" @click="handlePrint">打印</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button type="info" icon="el-icon-s-data" @click="handleStats">统计</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button icon="el-icon-back" @click="handleBack">返回</el-button>
+        </el-col>
+      </el-row>
+    </div>
 
-    <!-- 表格数据 -->
+    <h2 class="print-title" style="display: none;">待办事项列表</h2>
+
     <el-table
       v-loading="loading"
       :data="todoList"
       @selection-change="handleSelectionChange"
       row-key="todoId"
+      class="print-table"
     >
-      <el-table-column type="selection" width="55" align="center" />
+      <el-table-column type="selection" width="55" align="center" class-name="no-print-col" />
       <el-table-column label="待办ID" align="center" prop="todoId" width="100">
         <template slot-scope="scope">
           <div class="todo-id-cell">
             <span :class="{ 'invalid-id': !scope.row.todoId }">
               {{ scope.row.todoId || '无ID' }}
             </span>
-            <el-tag v-if="!scope.row.todoId" size="mini" type="danger">ID异常</el-tag>
+            <el-tag v-if="!scope.row.todoId" size="mini" type="danger" class="no-print">ID异常</el-tag>
           </div>
         </template>
       </el-table-column>
@@ -89,7 +94,7 @@
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status" :formatter="statusFormat" width="100" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width no-print-col" width="200">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -115,9 +120,9 @@
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
+      class="no-print"
     />
 
-    <!-- 添加或修改对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="待办标题" prop="title">
@@ -174,7 +179,6 @@
       </div>
     </el-dialog>
 
-    <!-- 数据诊断对话框 -->
     <el-dialog title="数据诊断" :visible.sync="diagnosisOpen" width="800px" append-to-body>
       <el-alert
         title="数据异常诊断报告"
@@ -218,7 +222,6 @@
       </div>
     </el-dialog>
 
-    <!-- 原始数据查看对话框 -->
     <el-dialog title="原始数据详情" :visible.sync="rawDataOpen" width="600px" append-to-body>
       <pre style="background: #f5f5f5; padding: 15px; border-radius: 4px; max-height: 400px; overflow: auto; font-size: 12px;">{{ JSON.stringify(currentRawData, null, 2) }}</pre>
       <div slot="footer" class="dialog-footer">
@@ -226,7 +229,6 @@
       </div>
     </el-dialog>
 
-    <!-- 统计对话框 -->
     <el-dialog title="待办事项统计" :visible.sync="statsOpen" width="700px" append-to-body>
       <el-form :model="statsQueryParams" ref="statsQueryForm" :inline="true" label-width="80px">
         <el-form-item label="开始时间">
@@ -251,7 +253,6 @@
         </el-form-item>
       </el-form>
 
-      <!-- 使用Element UI的统计卡片代替图表 -->
       <div class="stats-cards">
         <el-row :gutter="20">
           <el-col :span="8" v-for="(stat, index) in statsData" :key="index">
@@ -263,7 +264,6 @@
         </el-row>
       </div>
 
-      <!-- 统计表格 -->
       <el-table :data="statsTableData" v-loading="statsLoading" border style="margin-top: 20px;">
         <el-table-column label="分类" align="center" prop="category" />
         <el-table-column label="项目" align="center" prop="name" />
@@ -588,6 +588,10 @@ export default {
         this.exportLoading = false;
       });
     },
+    /** 【新增】打印预览功能 */
+    handlePrint() {
+      window.print();
+    },
     /** 统计按钮操作 */
     handleStats() {
       this.statsOpen = true;
@@ -776,5 +780,89 @@ export default {
 .invalid-id {
   color: #f56c6c;
   font-style: italic;
+}
+
+/* ==============================
+   【新增】打印样式专用设置
+   ============================== */
+@media print {
+  /* 1. 隐藏所有不需要打印的元素 */
+  .no-print,
+  .navbar,
+  .sidebar-container,
+  .tags-view-container,
+  .el-dialog__wrapper,
+  .v-modal,
+  .el-pagination {
+    display: none !important;
+  }
+
+  /* 隐藏表格中的操作列和选择列 */
+  .no-print-col {
+    display: none !important;
+  }
+  .el-table__fixed-right {
+    display: none !important;
+  }
+
+  /* 2. 显示打印标题 */
+  .print-title {
+    display: block !important;
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+
+  /* 3. 调整容器宽度，利用整个纸张 */
+  .app-container {
+    padding: 0;
+    margin: 0;
+    width: 100% !important;
+  }
+
+  /* 移除Element UI表格的固定高度和滚动条 */
+  .el-table {
+    height: auto !important;
+    width: 100% !important;
+  }
+  .el-table__body-wrapper,
+  .el-table__header-wrapper {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* 4. 表格样式优化：黑白、边框 */
+  .print-table {
+    border: 1px solid #000 !important;
+    font-size: 12px; /* 调整字号以容纳更多内容 */
+  }
+
+  /* 强制显示边框 */
+  .print-table td,
+  .print-table th {
+    border: 1px solid #000 !important;
+    color: #000 !important; /* 纯黑文字 */
+    padding: 8px 5px !important; /* 减少内边距 */
+  }
+
+  /* 隐藏Element默认的浅色边框 */
+  .el-table::before,
+  .el-table::after {
+    display: none;
+  }
+
+  /* 5. 避免分页截断表格行 */
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* 隐藏标签的背景色，只打印文字 */
+  .el-tag {
+    border: none !important;
+    background: none !important;
+    padding: 0 !important;
+    color: #000 !important;
+  }
 }
 </style>
