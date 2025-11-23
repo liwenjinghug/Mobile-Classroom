@@ -76,9 +76,27 @@ public class SysRegisterService
         }
         else
         {
-            sysUser.setNickName(username);
+//            sysUser.setNickName(username);
+            // ========== 【新增】使用前端传来的昵称 ==========
+            if (StringUtils.isEmpty(registerBody.getNickName())) {
+                sysUser.setNickName(username); // 如果没传，才默认用账号名
+            } else {
+                sysUser.setNickName(registerBody.getNickName());
+            }
+            // ========== 【新增】结束 ==========
             sysUser.setPwdUpdateDate(DateUtils.getNowDate());
             sysUser.setPassword(SecurityUtils.encryptPassword(password));
+
+            // ========== 【新增】开始 ==========
+            // 获取前端传来的 roleId，如果没有传则默认为 101 (学生)
+            Long roleId = registerBody.getRoleId();
+            if (roleId == null) {
+                roleId = 101L;
+            }
+            // 将角色ID放入 user 对象中，以便下一步使用
+            sysUser.setRoleIds(new Long[]{roleId});
+            // ========== 【新增】结束 ==========
+
             boolean regFlag = userService.registerUser(sysUser);
             if (!regFlag)
             {

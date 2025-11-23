@@ -277,9 +277,18 @@ public class SysUserServiceImpl implements ISysUserService
      * @return 结果
      */
     @Override
+    @Transactional  // <--- 【建议添加】保证数据一致性,确保“人”和“角色”同时保存成功，否则回滚
     public boolean registerUser(SysUser user)
     {
-        return userMapper.insertUser(user) > 0;
+        // 1. 插入用户基本信息 (sys_user 表)
+        int rows = userMapper.insertUser(user);
+
+        // 2. 【关键修改】插入用户与角色关联 (sys_user_role 表)
+        // insertUserRole 方法在当前文件中已经存在，直接调用即可
+        // 它会读取 user.getRoleIds() 并保存到数据库
+        this.insertUserRole(user);
+
+        return rows > 0;
     }
 
     /**

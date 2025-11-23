@@ -2,11 +2,19 @@
   <div class="register">
     <el-form ref="registerForm" :model="registerForm" :rules="registerRules" class="register-form">
       <h3 class="title">{{title}}</h3>
+
       <el-form-item prop="username">
         <el-input v-model="registerForm.username" type="text" auto-complete="off" placeholder="账号">
           <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
+
+      <el-form-item prop="nickName">
+        <el-input v-model="registerForm.nickName" type="text" auto-complete="off" placeholder="用户昵称">
+          <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
+        </el-input>
+      </el-form-item>
+
       <el-form-item prop="password">
         <el-input
           v-model="registerForm.password"
@@ -29,6 +37,14 @@
           <svg-icon slot="prefix" icon-class="password" class="el-input__icon input-icon" />
         </el-input>
       </el-form-item>
+
+      <el-form-item prop="roleId">
+        <div style="display: flex; justify-content: center; padding: 0 10px;">
+          <el-radio v-model="registerForm.roleId" :label="101" style="color: #fff; margin-right: 30px;">我是学生</el-radio>
+          <el-radio v-model="registerForm.roleId" :label="100" style="color: #fff;">我是老师</el-radio>
+        </div>
+      </el-form-item>
+
       <el-form-item prop="code" v-if="captchaEnabled">
         <el-input
           v-model="registerForm.code"
@@ -82,26 +98,32 @@ export default {
       codeUrl: "",
       registerForm: {
         username: "",
+        nickName: "", // 【新增】昵称字段
         password: "",
         confirmPassword: "",
         code: "",
-        uuid: ""
+        uuid: "",
+        roleId: 101 // 默认选择学生
       },
       registerRules: {
         username: [
-          { required: true, trigger: "blur", message: "请输入您的账号" },
-          { min: 2, max: 20, message: '用户账号长度必须介于 2 和 20 之间', trigger: 'blur' }
+          {required: true, trigger: "blur", message: "请输入您的账号"},
+          {min: 2, max: 20, message: '用户账号长度必须介于 2 和 20 之间', trigger: 'blur'}
+        ],
+        // 【新增】昵称校验规则
+        nickName: [
+          {required: true, trigger: "blur", message: "请输入您的昵称"}
         ],
         password: [
-          { required: true, trigger: "blur", message: "请输入您的密码" },
-          { min: 5, max: 20, message: "用户密码长度必须介于 5 和 20 之间", trigger: "blur" },
-          { pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符：< > \" ' \\\ |", trigger: "blur" }
+          {required: true, trigger: "blur", message: "请输入您的密码"},
+          {min: 5, max: 20, message: "用户密码长度必须介于 5 和 20 之间", trigger: "blur"},
+          {pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符：< > \" ' \\\ |", trigger: "blur"}
         ],
         confirmPassword: [
-          { required: true, trigger: "blur", message: "请再次输入您的密码" },
-          { required: true, validator: equalToPassword, trigger: "blur" }
+          {required: true, trigger: "blur", message: "请再次输入您的密码"},
+          {required: true, validator: equalToPassword, trigger: "blur"}
         ],
-        code: [{ required: true, trigger: "change", message: "请输入验证码" }]
+        code: [{required: true, trigger: "change", message: "请输入验证码"}]
       },
       loading: false,
       captchaEnabled: true
@@ -131,7 +153,8 @@ export default {
               type: 'success'
             }).then(() => {
               this.$router.push("/login")
-            }).catch(() => {})
+            }).catch(() => {
+            })
           }).catch(() => {
             this.loading = false
             if (this.captchaEnabled) {
@@ -154,12 +177,13 @@ export default {
   background-image: url("../assets/images/login-background.jpg");
   background-size: cover;
 }
+
 .title {
   margin: 0px auto 30px auto;
   text-align: center;
-  color: #F2F6FC;      /* 登录页的标题颜色 */
-  font-size: 30px;     /* 登录页的大小 */
-  font-weight: 600;    /* 登录页的粗细 */
+  color: #F2F6FC; /* 登录页的标题颜色 */
+  font-size: 30px; /* 登录页的大小 */
+  font-weight: 600; /* 登录页的粗细 */
   letter-spacing: 1px;
 }
 
@@ -174,6 +198,7 @@ export default {
 
   .el-input {
     height: 38px;
+
     input {
       height: 38px;
       /* 输入框样式修改 */
@@ -188,6 +213,7 @@ export default {
       }
     }
   }
+
   .input-icon {
     height: 39px;
     width: 14px;
@@ -211,6 +237,7 @@ export default {
   .link-type {
     color: #ffffff;
     text-decoration: none;
+
     &:hover {
       color: #c3d770;
     }
@@ -222,15 +249,18 @@ export default {
   text-align: center;
   color: #bfbfbf;
 }
+
 .register-code {
   width: 33%;
   height: 38px;
   float: right;
+
   img {
     cursor: pointer;
     vertical-align: middle;
   }
 }
+
 .el-register-footer {
   height: 40px;
   line-height: 40px;
@@ -243,6 +273,7 @@ export default {
   font-size: 12px;
   letter-spacing: 1px;
 }
+
 .register-code-img {
   height: 38px;
 }
