@@ -7,17 +7,9 @@
           <el-input v-model.trim="studentNo" placeholder="请输入学号" clearable style="width:240px" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="loadExams">查询可参加考试</el-button>
+          <el-button type="primary" @click="loadExams">查询我参加的考试</el-button>
           <el-button type="success" @click="loadMyList" :disabled="!studentNo" style="margin-left:8px">查询我的考试记录</el-button>
           <el-button v-if="studentNoStored" type="text" @click="clearStored" style="margin-left:4px">清除记住的学号</el-button>
-        </el-form-item>
-        <el-form-item label="筛选">
-          <el-radio-group v-model="statusFilter" size="small">
-            <el-radio-button label="ongoing">进行中</el-radio-button>
-            <el-radio-button label="notStarted">未开始</el-radio-button>
-            <el-radio-button label="ended">已结束</el-radio-button>
-            <el-radio-button label="all">全部</el-radio-button>
-          </el-radio-group>
         </el-form-item>
       </el-form>
       <el-alert v-if="!studentNo" type="info" :closable="false" title="请输入学号，查询您可参加的考试列表或您的历史记录" />
@@ -103,7 +95,7 @@ export default {
   name: 'ExamPortal',
   data() {
     return {
-      studentNo: '', exams: [], loading: false, statusFilter: 'ongoing', studentNoStored: false,
+      studentNo: '', exams: [], loading: false, studentNoStored: false,
       // 新增：是否已点击查询标记
       examsLoaded: false,
       myLoaded: false,
@@ -116,15 +108,22 @@ export default {
   computed: {
     displayedExams() {
       const now = Date.now()
-      const classify = (row) => {
+      // 过滤条件：能够参加、还未结束、未删除、未完成的考试
+      return (this.exams || []).filter(row => {
         const st = new Date(row.startTime).getTime()
         const ed = new Date(row.endTime).getTime()
-        if (now < st) return 'notStarted'
-        if (now > ed) return 'ended'
-        return 'ongoing'
-      }
-      if (this.statusFilter === 'all') return (this.exams || []).slice()
-      return (this.exams || []).filter(r => classify(r) === this.statusFilter)
+
+        // 检查时间范围：考试已开始且未结束
+        const timeValid = now >= st && now <= ed
+
+        // 检查考试状态：已发布(1)或进行中(2)
+        const statusValid = (row.status === 1 || row.status === 2)
+
+        // 检查是否已完成：未提交
+        const notSubmitted = !this.submittedLocal(row)
+
+        return timeValid && statusValid && notSubmitted
+      })
     },
     myDisplayed(){
       const kw = (this.myQuery.keyword||'').toLowerCase()
@@ -190,6 +189,22 @@ export default {
             let obj
             try { obj = JSON.parse(raw) } catch(e){ continue }
             if (!obj || !obj.id) continue
+            // 检查后端考试是否仍存在（避免显示已删除考试）
+            if (this.examCache[obj.id] === undefined) {
+              // 尝试同步获取一次
+              // 由于 mergeLocalFinished 在 loadExams 后调用，此时可以异步补充但不阻塞
+              this.$set(this.examCache, obj.id, null)
+              getExam(obj.id).then(res => {
+                if (res && res.data && !res.data.missing) {
+                  this.$set(this.examCache, obj.id, res.data)
+                } else {
+                  // 标记 missing，避免加入
+                  this.$set(this.examCache, obj.id, { missing: true })
+                }
+              }).catch(() => { this.$set(this.examCache, obj.id, { missing: true }) })
+            }
+            const ex = this.examCache[obj.id]
+            if (ex && ex.missing) continue
             if (this.exams.some(e => Number(e.id) === Number(obj.id))) continue
             added.push(obj)
           }

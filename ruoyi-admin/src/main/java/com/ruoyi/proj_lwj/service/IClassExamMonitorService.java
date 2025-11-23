@@ -8,5 +8,5 @@ public interface IClassExamMonitorService {
     int insert(ClassExamMonitor m);
     int updateHandled(ClassExamMonitor m);
     int deleteById(Long id);
+    int deleteByExamId(Long examId);
 }
-

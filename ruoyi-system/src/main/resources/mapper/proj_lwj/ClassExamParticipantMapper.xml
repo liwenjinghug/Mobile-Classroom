@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.proj_lwj.mapper.ClassExamParticipantMapper">
+
+    <resultMap type="ClassExamParticipant" id="ClassExamParticipantResult">
+        <result property="id"    column="id"    />
+        <result property="examId"    column="exam_id"    />
+        <result property="studentId"    column="student_id"    />
+        <result property="studentNo"    column="student_no"    />
+        <result property="studentName"    column="student_name"    />
+        <result property="participantStatus"    column="participant_status"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="submitTime"    column="submit_time"    />
+        <result property="ipAddress"    column="ip_address"    />
+        <result property="deviceInfo"    column="device_info"    />
+        <result property="totalScore"    column="total_score"    />
+        <result property="timeUsed"    column="time_used"    />
+        <result property="objectiveScore"    column="objective_score"    />
+        <result property="subjectiveScore"    column="subjective_score"    />
+        <result property="correctStatus"    column="correct_status"    />
+        <result property="passStatus"    column="pass_status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <!-- 关联字段 -->
+        <result property="examName"    column="exam_name"    />
+        <result property="courseName"    column="course_name"    />
+    </resultMap>
+
+    <sql id="selectClassExamParticipantVo">
+        select p.id, p.exam_id, p.student_id, p.student_no, p.student_name, p.participant_status,
+               p.start_time, p.submit_time, p.ip_address, p.device_info, p.total_score, p.time_used,
+               p.objective_score, p.subjective_score, p.correct_status, p.pass_status,
+               p.create_time, p.update_time,
+               e.exam_name, cc.course_name
+        from class_exam_participant p
+        left join class_exam e on p.exam_id = e.id
+        left join class_course cc on e.course_id = cc.course_id
+    </sql>
+
+    <select id="selectList" parameterType="ClassExamParticipant" resultMap="ClassExamParticipantResult">
+        <include refid="selectClassExamParticipantVo"/>
+        <where>
+            <if test="examId != null "> and p.exam_id = #{examId}</if>
+            <if test="studentId != null "> and p.student_id = #{studentId}</if>
+            <if test="studentNo != null  and studentNo != ''"> and p.student_no like concat('%', #{studentNo}, '%')</if>
+            <if test="participantStatus != null "> and p.participant_status = #{participantStatus}</if>
+        </where>
+        order by p.submit_time desc
+    </select>
+
+    <select id="selectById" parameterType="Long" resultMap="ClassExamParticipantResult">
+        <include refid="selectClassExamParticipantVo"/>
+        where p.id = #{id}
+    </select>
+
+    <select id="selectByExamStudent" resultMap="ClassExamParticipantResult">
+        <include refid="selectClassExamParticipantVo"/>
+        where p.exam_id = #{examId} and p.student_id = #{studentId}
+        limit 1
+    </select>
+
+    <select id="selectByStudentNo" parameterType="String" resultMap="ClassExamParticipantResult">
+        <include refid="selectClassExamParticipantVo"/>
+        where p.student_no = #{studentNo}
+        order by p.submit_time desc
+    </select>
+
+    <insert id="insert" parameterType="ClassExamParticipant" useGeneratedKeys="true" keyProperty="id">
+        insert into class_exam_participant
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="examId != null">exam_id,</if>
+            <if test="studentId != null">student_id,</if>
+            <if test="studentNo != null">student_no,</if>
+            <if test="studentName != null">student_name,</if>
+            <if test="participantStatus != null">participant_status,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="submitTime != null">submit_time,</if>
+            <if test="ipAddress != null">ip_address,</if>
+            <if test="deviceInfo != null">device_info,</if>
+            <if test="totalScore != null">total_score,</if>
+            <if test="timeUsed != null">time_used,</if>
+            <if test="objectiveScore != null">objective_score,</if>
+            <if test="subjectiveScore != null">subjective_score,</if>
+            <if test="correctStatus != null">correct_status,</if>
+            <if test="passStatus != null">pass_status,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="examId != null">#{examId},</if>
+            <if test="studentId != null">#{studentId},</if>
+            <if test="studentNo != null">#{studentNo},</if>
+            <if test="studentName != null">#{studentName},</if>
+            <if test="participantStatus != null">#{participantStatus},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="submitTime != null">#{submitTime},</if>
+            <if test="ipAddress != null">#{ipAddress},</if>
+            <if test="deviceInfo != null">#{deviceInfo},</if>
+            <if test="totalScore != null">#{totalScore},</if>
+            <if test="timeUsed != null">#{timeUsed},</if>
+            <if test="objectiveScore != null">#{objectiveScore},</if>
+            <if test="subjectiveScore != null">#{subjectiveScore},</if>
+            <if test="correctStatus != null">#{correctStatus},</if>
+            <if test="passStatus != null">#{passStatus},</if>
+            NOW()
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="ClassExamParticipant">
+        update class_exam_participant
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="participantStatus != null">participant_status = #{participantStatus},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
+            <if test="totalScore != null">total_score = #{totalScore},</if>
+            <if test="timeUsed != null">time_used = #{timeUsed},</if>
+            <if test="objectiveScore != null">objective_score = #{objectiveScore},</if>
+            <if test="subjectiveScore != null">subjective_score = #{subjectiveScore},</if>
+            <if test="correctStatus != null">correct_status = #{correctStatus},</if>
+            <if test="passStatus != null">pass_status = #{passStatus},</if>
+            update_time = NOW()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        delete from class_exam_participant where id = #{id}
+    </delete>
+
+    <delete id="deleteByExamId" parameterType="Long">
+        delete from class_exam_participant where exam_id = #{examId}
+    </delete>
+
+    <delete id="deleteByIds" parameterType="String">
+        delete from class_exam_participant where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>
