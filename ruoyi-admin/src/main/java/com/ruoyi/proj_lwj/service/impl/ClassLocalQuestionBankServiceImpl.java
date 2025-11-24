@@ -1,34 +1,34 @@
 package com.ruoyi.proj_lwj.service.impl;
 
-import com.ruoyi.proj_lwj.domain.LocalQuestionBank;
-import com.ruoyi.proj_lwj.mapper.LocalQuestionBankMapper;
-import com.ruoyi.proj_lwj.service.ILocalQuestionBankService;
+import com.ruoyi.proj_lwj.domain.ClassLocalQuestionBank;
+import com.ruoyi.proj_lwj.mapper.ClassLocalQuestionBankMapper;
+import com.ruoyi.proj_lwj.service.IClassLocalQuestionBankService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class LocalQuestionBankServiceImpl implements ILocalQuestionBankService {
+public class ClassLocalQuestionBankServiceImpl implements IClassLocalQuestionBankService {
 
     @Autowired
-    private LocalQuestionBankMapper mapper;
+    private ClassLocalQuestionBankMapper mapper;
 
     @Override
-    public List<LocalQuestionBank> search(String keyword, Integer questionType, Integer difficulty, String category, Integer status, int page, int size) {
+    public List<ClassLocalQuestionBank> search(String keyword, Integer questionType, Integer difficulty, String category, Integer status, int page, int size) {
         int offset = Math.max(0, page) * size;
         int limit = size;
         return mapper.search(keyword, questionType, difficulty, category, status, offset, limit);
     }
 
     @Override
-    public LocalQuestionBank get(Long id) { return mapper.selectById(id); }
+    public ClassLocalQuestionBank get(Long id) { return mapper.selectById(id); }
 
     @Override
-    public int add(LocalQuestionBank q) { return mapper.insert(q); }
+    public int add(ClassLocalQuestionBank q) { return mapper.insert(q); }
 
     @Override
-    public int edit(LocalQuestionBank q) { return mapper.update(q); }
+    public int edit(ClassLocalQuestionBank q) { return mapper.update(q); }
 
     @Override
     public int remove(Long id) { return mapper.delete(id); }

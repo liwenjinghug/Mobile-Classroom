@@ -73,4 +73,17 @@ public interface ClassExamAnswerMapper {
 
     @Delete("DELETE FROM class_exam_answer WHERE exam_id=#{examId}")
     int deleteByExamId(Long examId);
+
+    @Select("<script>SELECT a.* FROM class_exam_answer a JOIN class_exam_question q ON a.question_id = q.id WHERE a.exam_id = #{examId} AND q.question_type IN (5,6) AND (a.score IS NULL OR (a.score = 0 AND a.corrector_id IS NULL)) ORDER BY a.id ASC</script>")
+    List<ClassExamAnswer> selectUngradedSubjective(@Param("examId") Long examId);
+
+    @Update("UPDATE class_exam_answer SET score=#{score}, correct_comment=#{correctComment}, corrector_id=#{correctorId}, correct_time=NOW(), update_time=NOW() WHERE id=#{id}")
+    int gradeOne(ClassExamAnswer a);
+
+    @Update({"<script>",
+            "<foreach collection='list' item='it' separator=';'>",
+            "UPDATE class_exam_answer SET score=#{it.score}, correct_comment=#{it.correctComment}, corrector_id=#{it.correctorId}, correct_time=NOW(), update_time=NOW() WHERE id=#{it.id}",
+            "</foreach>",
+            "</script>"})
+    int gradeBatch(@Param("list") List<ClassExamAnswer> list);
 }

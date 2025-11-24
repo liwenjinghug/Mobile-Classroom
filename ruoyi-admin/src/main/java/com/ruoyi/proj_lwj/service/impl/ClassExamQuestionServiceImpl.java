@@ -16,7 +16,7 @@ public class ClassExamQuestionServiceImpl implements IClassExamQuestionService {
     @Autowired
     private ClassExamQuestionMapper mapper;
     @Autowired
-    private com.ruoyi.proj_lwj.mapper.LocalQuestionBankMapper localBankMapper;
+    private com.ruoyi.proj_lwj.mapper.ClassLocalQuestionBankMapper localBankMapper;
     @Autowired(required = false)
     private com.ruoyi.proj_lwj.service.IClassExamService examService;
 
@@ -131,7 +131,7 @@ public class ClassExamQuestionServiceImpl implements IClassExamQuestionService {
         if (bankIds == null || bankIds.isEmpty()) throw new ServiceException("未选择题目");
         // 查询题库题目
         List<Long> distinctIds = new ArrayList<>(new LinkedHashSet<>(bankIds));
-        List<com.ruoyi.proj_lwj.domain.LocalQuestionBank> bankQuestions = localBankMapper.selectByIds(distinctIds);
+        List<com.ruoyi.proj_lwj.domain.ClassLocalQuestionBank> bankQuestions = localBankMapper.selectByIds(distinctIds);
         if (bankQuestions == null || bankQuestions.isEmpty()) throw new ServiceException("题库中未找到对应题目");
 
         int imported = 0;
@@ -145,7 +145,7 @@ public class ClassExamQuestionServiceImpl implements IClassExamQuestionService {
             if (e.getSortOrder() != null && e.getSortOrder() > maxSort) maxSort = e.getSortOrder();
         }
 
-        for (com.ruoyi.proj_lwj.domain.LocalQuestionBank bq : bankQuestions) {
+        for (com.ruoyi.proj_lwj.domain.ClassLocalQuestionBank bq : bankQuestions) {
             if (bq == null) continue;
             String content = bq.getQuestionContent();
             if (content == null || content.trim().isEmpty()) continue;

@@ -271,6 +271,21 @@ export const constantRoutes = [
         meta: { title: '进行考试', icon: 'edit' },
         props: true,
         hidden: true
+      },
+      // === 新增 考试批改入口 ===
+      {
+        path: 'exam_grading',
+        component: () => import('@/views/proj_lwj/exam_grading/index.vue'),
+        name: 'ProjLwj_ExamGrading',
+        meta: { title: '考试批改', icon: 'edit', roles: ['teacher','admin'] }
+      },
+      {
+        path: 'exam_grading/:examId',
+        component: () => import('@/views/proj_lwj/exam_grading/index.vue'),
+        name: 'ProjLwj_ExamGradingDetail',
+        meta: { title: '考试批改详情', icon: 'edit', roles: ['teacher','admin'] },
+        props: true,
+        hidden: true
       }
     ]
   },

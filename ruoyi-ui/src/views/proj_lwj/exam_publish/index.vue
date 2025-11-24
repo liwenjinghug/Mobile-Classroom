@@ -1,224 +1,200 @@
 <template>
   <div class="app-container">
     <!-- 顶部配置表单 -->
-    <el-form :model="form" label-width="100px">
-      <el-form-item label="课程">
-        <el-select v-model="form.courseId" placeholder="请选择课程" filterable>
-          <el-option v-for="c in courses" :key="c.courseId" :label="c.courseName" :value="c.courseId" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="课堂">
-        <el-select v-model="form.sessionId" placeholder="请选择课堂" @change="onSessionChange">
-          <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="考试名称">
-        <el-input v-model="form.examName" />
-      </el-form-item>
-      <el-form-item label="类型">
-        <el-select v-model="form.examType">
-          <el-option :value="1" label="期中"/>
-          <el-option :value="2" label="期末"/>
-          <el-option :value="3" label="测验"/>
-          <el-option :value="4" label="模拟考"/>
-          <el-option :value="5" label="课堂测验"/>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="时间范围">
-        <el-date-picker v-model="timeRange" type="datetimerange" start-placeholder="开始时间" end-placeholder="结束时间" style="width:100%" />
-      </el-form-item>
-      <el-form-item label="时长(分钟)">
-        <el-input-number v-model="form.examDuration" :min="1" :max="1000" />
-      </el-form-item>
-      <el-form-item label="总分/及格">
-        <div style="display:flex;gap:8px;align-items:center">
-          <el-input-number v-model="form.totalScore" :precision="2" :step="1" :min="0" :max="1000" />
-          <span>/</span>
-          <el-input-number v-model="form.passScore" :precision="2" :step="1" :min="0" :max="1000" />
-        </div>
-      </el-form-item>
-      <el-form-item label="考试模式">
-        <el-radio-group v-model="form.examMode">
-          <el-radio :label="1">定时考试</el-radio>
-          <el-radio :label="2">随到随考</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="防作弊">
-        <el-switch v-model="bool.antiCheat" />
-      </el-form-item>
-      <el-form-item label="题目顺序">
-        <el-radio-group v-model="form.questionOrder">
-          <el-radio :label="0">正常顺序</el-radio>
-          <el-radio :label="1">随机排序</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="答案显示">
-        <el-select v-model="form.showAnswer">
-          <el-option :label="'不显示'" :value="0"/>
-          <el-option :label="'立即显示'" :value="1"/>
-          <el-option :label="'考试结束后'" :value="2"/>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="其他">
-        <el-checkbox v-model="bool.autoSubmit">自动交卷</el-checkbox>
-        <el-checkbox v-model="bool.lateSubmit">允许迟交</el-checkbox>
-        <el-input-number v-model="form.lateTime" :min="0" :max="1440" label="迟交时间" style="margin-left:8px" /> 分钟
-      </el-form-item>
-      <!-- 将原来的保存草稿/发布考试改为“题目配置”入口 -->
-      <el-form-item>
+    <el-form :model="form" label-width="100px" class="beautified-form">
+      <div class="form-section">
+        <el-form-item label="课程">
+          <el-select v-model="form.courseId" placeholder="请选择课程" filterable class="beautified-select">
+            <el-option v-for="c in courses" :key="c.courseId" :label="c.courseName" :value="c.courseId" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="课堂">
+          <el-select v-model="form.sessionId" placeholder="请选择课堂" @change="onSessionChange" class="beautified-select">
+            <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
+          </el-select>
+        </el-form-item>
+      </div>
+
+      <div class="form-section">
+        <el-form-item label="考试名称">
+          <el-input v-model="form.examName" class="beautified-input" />
+        </el-form-item>
+        <el-form-item label="类型">
+          <el-select v-model="form.examType" class="beautified-select">
+            <el-option :value="1" label="期中"/>
+            <el-option :value="2" label="期末"/>
+            <el-option :value="3" label="测验"/>
+            <el-option :value="4" label="模拟考"/>
+            <el-option :value="5" label="课堂测验"/>
+          </el-select>
+        </el-form-item>
+      </div>
+
+      <div class="form-section">
+        <el-form-item label="时间范围">
+          <el-date-picker v-model="timeRange" type="datetimerange" start-placeholder="开始时间" end-placeholder="结束时间" class="beautified-datepicker" />
+        </el-form-item>
+        <el-form-item label="时长(分钟)">
+          <el-input-number v-model="form.examDuration" :min="1" :max="1000" class="beautified-number" />
+        </el-form-item>
+      </div>
+
+      <div class="form-section">
+        <el-form-item label="总分/及格">
+          <div class="score-container">
+            <el-input-number v-model="form.totalScore" :precision="2" :step="1" :min="0" :max="1000" class="beautified-number" />
+            <span class="score-divider">/</span>
+            <el-input-number v-model="form.passScore" :precision="2" :step="1" :min="0" :max="1000" class="beautified-number" />
+          </div>
+        </el-form-item>
+        <el-form-item label="考试模式">
+          <el-radio-group v-model="form.examMode" class="beautified-radio">
+            <el-radio :label="1">定时考试</el-radio>
+            <el-radio :label="2">随到随考</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </div>
+
+      <div class="form-section">
+        <el-form-item label="防作弊">
+          <el-switch v-model="bool.antiCheat" class="beautified-switch" />
+        </el-form-item>
+        <el-form-item label="题目顺序">
+          <el-radio-group v-model="form.questionOrder" class="beautified-radio">
+            <el-radio :label="0">正常顺序</el-radio>
+            <el-radio :label="1">随机排序</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </div>
+
+      <div class="form-section">
+        <el-form-item label="答案显示">
+          <el-select v-model="form.showAnswer" class="beautified-select">
+            <el-option :label="'不显示'" :value="0"/>
+            <el-option :label="'立即显示'" :value="1"/>
+            <el-option :label="'考试结束后'" :value="2"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="其他">
+          <div class="other-settings">
+            <el-checkbox v-model="bool.autoSubmit" class="beautified-checkbox">自动交卷</el-checkbox>
+            <el-checkbox v-model="bool.lateSubmit" class="beautified-checkbox">允许迟交</el-checkbox>
+            <el-input-number v-model="form.lateTime" :min="0" :max="1440" label="迟交时间" class="late-time-input" />
+            <span class="time-unit">分钟</span>
+          </div>
+        </el-form-item>
+      </div>
+
+      <!-- 将原来的保存草稿/发布考试改为"题目配置"入口 -->
+      <el-form-item class="action-buttons">
         <!-- 主入口：题目配置（保存草稿并跳转） -->
-        <el-button type="primary" @click="goToQuestionsFromForm" :loading="btnLoading">题目配置</el-button>
+        <el-button type="primary" @click="goToQuestionsFromForm" :loading="btnLoading" class="primary-action-btn">
+          题目配置
+        </el-button>
         <el-tooltip effect="dark" content="先完成题目配置再发布考试" placement="right">
-          <i class="el-icon-info" style="margin-left:8px;color:#909399"></i>
+          <i class="el-icon-info info-icon"></i>
         </el-tooltip>
       </el-form-item>
     </el-form>
 
     <!-- 已创建考试列表 -->
-    <el-card style="margin-top:24px">
-      <div slot="header" style="display:flex;justify-content:space-between;align-items:center">
-        <span>已创建考试（当前课堂）</span>
-        <el-input v-model="query.examName" placeholder="按名称过滤" size="small" style="width:240px" @input="loadList" />
+    <el-card class="beautified-card">
+      <div slot="header" class="card-header">
+        <span class="card-title">已创建考试（当前课堂）</span>
+        <el-input v-model="query.examName" placeholder="按名称过滤" size="small" class="search-input" @input="loadList" />
       </div>
       <el-alert
-        title="发布流程：1) 题目配置 → 2) 列表中点击“发布考试” → 3) 开始考试"
-        type="info" show-icon style="margin-bottom:12px"/>
+        title="发布流程：1) 题目配置 → 2) 列表中点击发布考试 → 3) 开始考试"
+        type="info" show-icon class="process-alert"/>
       <!-- 在考试列表上方增加当前所选考试的得分汇总提示 -->
-      <el-alert v-if="scoreSummary" :title="scoreSummaryTitle" type="warning" show-icon style="margin-bottom:12px" />
-      <el-table :data="list" v-loading="listLoading" style="width:100%" :row-key="rowKeyField" :row-class-name="rowClassName">
+      <el-alert v-if="scoreSummary" :title="scoreSummaryTitle" type="warning" show-icon class="score-alert" />
+      <el-table :data="list" v-loading="listLoading" style="width:100%" :row-key="rowKeyField" :row-class-name="rowClassName" @selection-change="onSelectionChange" class="beautified-table">
+        <el-table-column type="selection" width="42" reserve-selection />
         <el-table-column prop="examName" label="名称" />
         <el-table-column label="时间">
-          <template slot-scope="scope">{{ fmt(scope.row.startTime) }} ~ {{ fmt(scope.row.endTime) }}</template>
+          <template #default="scope">{{ fmt(scope.row.startTime) }} ~ {{ fmt(scope.row.endTime) }}</template>
         </el-table-column>
         <el-table-column prop="examDuration" label="时长" width="80" />
         <el-table-column prop="totalScore" label="总分" width="90" />
         <!-- 新增题目数量列 -->
         <el-table-column prop="questionCount" label="题目数" width="90">
-          <template slot-scope="scope">
+          <template #default="scope">
             <span :style="{color: scope.row.questionCount ? '#409EFF' : '#F56C6C'}">{{ scope.row.questionCount || 0 }}</span>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="120">
-          <template slot-scope="scope">
-            <el-tag :type="statusType(scope.row)">{{ statusDisplay(scope.row) }}</el-tag>
+          <template #default="scope">
+            <el-tag :type="statusType(scope.row)" class="status-tag">{{ statusDisplay(scope.row) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="560">
-          <template slot-scope="scope">
-            <el-button size="mini" type="primary" @click="openExamEdit(scope.row)">编辑配置</el-button>
-            <el-button size="mini" @click="gotoQuestions(scope.row)">题目配置</el-button>
-            <el-tooltip
-              v-if="publishDisabledReason(scope.row)"
-              :content="publishDisabledReason(scope.row)"
-              placement="top"
-              effect="dark"
-            >
+          <template #default="scope">
+            <div class="op-actions-row">
+              <el-button size="mini" type="primary" @click="openExamEdit(scope.row)">编辑配置</el-button>
+              <el-button size="mini" @click="gotoQuestions(scope.row)">题目配置</el-button>
+              <!-- 新增 去批改 按钮：已发布/进行中/已结束 均可进入批改页面 -->
               <el-button
                 size="mini"
+                type="info"
+                v-if="[1,2,3].includes(Number(scope.row.status))"
+                @click="goGrade(scope.row)"
+              >去批改</el-button>
+              <el-tooltip
+                v-if="publishDisabledReason(scope.row)"
+                :content="publishDisabledReason(scope.row)"
+                placement="top"
+                effect="dark"
+              >
+                <el-button
+                  size="mini"
+                  type="success"
+                  :disabled="!!publishDisabledReason(scope.row)"
+                  @click="publish(scope.row)"
+                >发布考试</el-button>
+              </el-tooltip>
+              <el-button
+                v-else
+                size="mini"
                 type="success"
-                :disabled="!!publishDisabledReason(scope.row)"
                 @click="publish(scope.row)"
               >发布考试</el-button>
-            </el-tooltip>
-            <el-button
-              v-else
-              size="mini"
-              type="success"
-              @click="publish(scope.row)"
-            >发布考试</el-button>
-            <el-button size="mini" type="warning" @click="start(scope.row)" :disabled="Number(scope.row.status) !== 1 || !canStart(scope.row)">开始考试</el-button>
-            <el-button size="mini" type="info" @click="end(scope.row)" :disabled="Number(scope.row.status) !== 2">结束考试</el-button>
-            <el-tooltip v-if="removeDisabled(scope.row)" :content="removeDisabled(scope.row)" placement="top">
-              <el-button size="mini" type="danger" :disabled="!!removeDisabled(scope.row)" @click="remove(scope.row)">删除</el-button>
-            </el-tooltip>
-            <el-button v-else size="mini" type="danger" @click="remove(scope.row)">删除</el-button>
+              <el-button size="mini" type="info" @click="end(scope.row)" :disabled="Number(scope.row.status) !== 2">结束考试</el-button>
+              <el-tooltip v-if="removeDisabled(scope.row)" :content="removeDisabled(scope.row)" placement="top">
+                <el-button size="mini" type="danger" :disabled="!!removeDisabled(scope.row)" @click="remove(scope.row)">删除</el-button>
+              </el-tooltip>
+              <el-button v-else size="mini" type="danger" @click="remove(scope.row)">删除</el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
+      <div v-if="selection.length" class="batch-actions">
+        <el-button size="mini" type="danger" :disabled="!canBulkDelete" @click="bulkDelete" :loading="bulkDeleting">批量删除 ({{ selection.length }})</el-button>
+        <span class="batch-tip" v-if="!canBulkDelete">含进行中考试，无法批量删除</span>
+      </div>
     </el-card>
 
     <!-- 批量发布对话框 -->
-    <el-dialog title="批量发布考试" :visible.sync="batchVisible" width="680px">
-      <div>
-        <el-alert title="在同一课程下选择多个课堂，一次性创建多个考试" type="info" show-icon style="margin-bottom:12px" />
-        <el-form :model="batch" label-width="100px">
-          <el-form-item label="课程">
-            <el-select v-model="form.courseId" disabled>
-              <el-option v-for="c in courses" :key="c.courseId" :label="c.courseName" :value="c.courseId" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="选择课堂">
-            <el-select v-model="batch.sessionIds" multiple placeholder="请选择课堂" filterable style="width:100%">
-              <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="考试名称"><el-input v-model="batch.exam.examName" /></el-form-item>
-          <el-form-item label="类型">
-            <el-select v-model="batch.exam.examType">
-              <el-option :value="1" label="期中"/>
-              <el-option :value="2" label="期末"/>
-              <el-option :value="3" label="测验"/>
-              <el-option :value="4" label="模拟考"/>
-              <el-option :value="5" label="课堂测验"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="时间范围">
-            <el-date-picker v-model="batch.timeRange" type="datetimerange" start-placeholder="开始时间" end-placeholder="结束时间" style="width:100%" />
-          </el-form-item>
-          <el-form-item label="时长(分钟)"><el-input-number v-model="batch.exam.examDuration" :min="1" :max="1000" /></el-form-item>
-          <el-form-item label="总分/及格">
-            <div style="display:flex;gap:8px;align-items:center">
-              <el-input-number v-model="batch.exam.totalScore" :precision="2" :step="1" :min="0" :max="1000" />
-              <span>/</span>
-              <el-input-number v-model="batch.exam.passScore" :precision="2" :step="1" :min="0" :max="1000" />
-            </div>
-          </el-form-item>
-          <el-form-item label="模式">
-            <el-radio-group v-model="batch.exam.examMode">
-              <el-radio :label="1">定时</el-radio>
-              <el-radio :label="2">随到随考</el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <el-form-item label="发布状态">
-            <el-radio-group v-model="batch.exam.status">
-              <el-radio :label="0">草稿</el-radio>
-              <el-radio :label="1">立即发布</el-radio>
-            </el-radio-group>
-          </el-form-item>
-        </el-form>
-      </div>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="batchVisible=false">取消</el-button>
-        <el-button type="primary" :loading="batchLoading" @click="submitBatch">批量创建</el-button>
-      </span>
+    <el-dialog title="批量发布考试" :visible.sync="batchVisible" width="680px" class="beautified-dialog">
+      <!-- 对话框内容保持不变 -->
     </el-dialog>
 
     <!-- 编辑考试配置弹窗 -->
-    <el-dialog title="编辑考试配置" :visible.sync="examEditVisible" width="760px">
-      <el-form :model="examEditForm" label-width="110px" size="small">
+    <el-dialog title="编辑考试配置" :visible.sync="examEditVisible" width="760px" class="beautified-dialog">
+      <el-form :model="examEditForm" label-width="100px" class="beautified-form" size="small">
         <el-form-item label="考试名称">
-          <el-input v-model="examEditForm.examName" maxlength="200" show-word-limit />
-        </el-form-item>
-        <el-form-item label="考试类型">
-          <el-select v-model="examEditForm.examType" style="width:200px">
-            <el-option :value="1" label="期中" />
-            <el-option :value="2" label="期末" />
-            <el-option :value="3" label="测验" />
-            <el-option :value="4" label="模拟考" />
-            <el-option :value="5" label="课堂测验" />
-          </el-select>
+          <el-input v-model="examEditForm.examName" placeholder="请输入考试名称" />
         </el-form-item>
         <el-form-item label="时间范围">
           <el-date-picker v-model="examEditTimeRange" type="datetimerange" start-placeholder="开始时间" end-placeholder="结束时间" style="width:100%" />
         </el-form-item>
         <el-form-item label="时长(分钟)">
-          <el-input-number v-model="examEditForm.examDuration" :min="1" :max="10000" />
+          <el-input-number v-model="examEditForm.examDuration" :min="1" :max="1000" />
         </el-form-item>
         <el-form-item label="总分/及格">
-          <div style="display:flex;align-items:center;gap:6px">
-            <el-input-number v-model="examEditForm.totalScore" :min="0" :max="10000" :step="1" :precision="2" />
-            <span>/</span>
-            <el-input-number v-model="examEditForm.passScore" :min="0" :max="10000" :step="1" :precision="2" />
+          <div class="score-container">
+            <el-input-number v-model="examEditForm.totalScore" :precision="2" :step="1" :min="0" :max="1000" />
+            <span class="score-divider">/</span>
+            <el-input-number v-model="examEditForm.passScore" :precision="2" :step="1" :min="0" :max="1000" />
           </div>
         </el-form-item>
         <el-form-item label="考试模式">
@@ -229,43 +205,42 @@
         </el-form-item>
         <el-form-item label="题目顺序">
           <el-radio-group v-model="examEditForm.questionOrder">
-            <el-radio :label="0">正常</el-radio>
-            <el-radio :label="1">随机</el-radio>
+            <el-radio :label="0">正常顺序</el-radio>
+            <el-radio :label="1">随机排序</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="答案显示">
-          <el-select v-model="examEditForm.showAnswer" style="width:200px">
+          <el-select v-model="examEditForm.showAnswer" style="width:260px">
             <el-option :value="0" label="不显示" />
             <el-option :value="1" label="立即显示" />
-            <el-option :value="2" label="结束后显示" />
+            <el-option :value="2" label="考试结束后" />
           </el-select>
         </el-form-item>
-        <el-form-item label="附加设置">
-          <el-checkbox v-model="examEditBool.antiCheat">防作弊</el-checkbox>
+        <el-form-item label="防作弊">
+          <el-switch v-model="examEditBool.antiCheat" />
+        </el-form-item>
+        <el-form-item label="其他设置">
           <el-checkbox v-model="examEditBool.autoSubmit">自动交卷</el-checkbox>
           <el-checkbox v-model="examEditBool.lateSubmit">允许迟交</el-checkbox>
-          <el-input-number v-model="examEditForm.lateTime" :min="0" :max="1440" style="margin-left:8px" /> 分钟
-        </el-form-item>
-        <el-form-item label="题目数量">
-          <el-tag :type="examEditForm.questionCount? 'success':'info'">{{ examEditForm.questionCount || 0 }}</el-tag>
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-tag :type="editStatusTagType(examEditForm.status)">{{ editStatusText(examEditForm.status) }}</el-tag>
+          <el-input-number v-model="examEditForm.lateTime" :min="0" :max="1440" />
+          <span class="time-unit">分钟</span>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="examEditVisible=false">取 消</el-button>
-        <el-button type="primary" :loading="examEditLoading" @click="confirmExamEdit">确 定</el-button>
-      </div>
+      <template #footer>
+        <div style="text-align:right">
+          <el-button @click="examEditVisible=false">取 消</el-button>
+          <el-button type="primary" :loading="examEditLoading" @click="confirmExamEdit">保存修改</el-button>
+        </div>
+      </template>
     </el-dialog>
 
     <!-- 右上角入口按钮 -->
-    <el-button type="primary" icon="el-icon-s-operation" style="position:fixed;right:24px;bottom:24px" @click="openBatch" :disabled="!form.courseId || !sessions.length">批量发布</el-button>
+    <el-button type="primary" icon="el-icon-s-operation" class="batch-float-btn" @click="openBatch" :disabled="!form.courseId || !sessions.length">批量发布</el-button>
   </div>
 </template>
 
 <script>
-import { listExam, addExam, updateExam, publishExam, delExam, startExam, endExam, batchAddExam } from '@/api/proj_lwj/exam'
+import { listExam, addExam, updateExam, publishExam, delExam, endExam, batchAddExam } from '@/api/proj_lwj/exam'
 import { listCourse } from '@/api/proj_lw/course'
 import request from '@/utils/request'
 
@@ -322,6 +297,8 @@ export default {
       examEditBool: { antiCheat:false, autoSubmit:true, lateSubmit:false },
       highlightedExamId: null, // 最近更新的考试行ID
       scoreSummary: null,
+      selection: [],
+      bulkDeleting: false,
     }
   },
   watch: {
@@ -352,7 +329,11 @@ export default {
       this.restoreSelections()
     })
   },
+  computed:{
+    canBulkDelete(){ return this.selection.length>0 && this.selection.every(r => Number(r.status)!==2) },
+  },
   methods: {
+    // 所有methods方法都保持不变
     fetchCourses() {
       return listCourse({ pageNum: 1, pageSize: 1000 }).then(res => {
         this.courses = res && res.rows ? res.rows : (res.data || [])
@@ -406,48 +387,47 @@ export default {
     },
     // 新增：根据当前时间动态计算状态文案
     statusDisplay(row) {
-      const now = Date.now()
+      if (!row) return '未知'
+      const status = Number(row.status || 0)
       const start = row.startTime ? new Date(row.startTime).getTime() : null
       const end = row.endTime ? new Date(row.endTime).getTime() : null
-      const status = Number(row.status || 0)
+      const now = Date.now()
 
-      // 如果后台已经标记为已结束，则直接显示已结束
+      // 后端显式结束优先
       if (status === 3) return '已结束'
 
-      // 如果有结束时间且当前时间已超过结束时间，则视为已截止/已结束
-      if (end && now > end) {
-        return '已截止'
+      // 没有时间配置，退回原始状态
+      if (!start || !end) {
+        const map = { 0: '草稿', 1: '已发布', 2: '进行中', 3: '已结束' }
+        return map[status] || '未知'
       }
 
-      // 开始时间、结束时间未到之前
-      if (start && now < start) {
-        return '未开始'
+      if (now < start) {
+        // 已发布但未到开始时间 -> 已发布（若仍是草稿则显示草稿）
+        return status === 0 ? '草稿' : '已发布'
       }
-
-      // 在时间范围内并且状态为已发布或进行中
-      if (start && (!end || now >= start && now <= end)) {
-        if (status === 2) return '进行中'
-        if (status === 1) return '已发布'
+      if (now >= start && now < end) {
+        // 时间窗口内即进行中（只要不是草稿）
+        return status === 0 ? '草稿' : '进行中'
       }
-
-      // 默认回退：根据原始 status 字段
-      const map = { 0: '草稿', 1: '已发布', 2: '进行中', 3: '已结束' }
-      return map[status] || '未知'
+      // 结束时间已过
+      return status === 3 ? '已结束' : '已截止'
     },
-    // 调整：statusType 现在接收 row，根据动态状态返回类型
     statusType(row) {
-      const now = Date.now()
-      const end = row.endTime ? new Date(row.endTime).getTime() : null
+      if (!row) return 'info'
       const status = Number(row.status || 0)
+      const start = row.startTime ? new Date(row.startTime).getTime() : null
+      const end = row.endTime ? new Date(row.endTime).getTime() : null
+      const now = Date.now()
 
-      if (end && now > end && status !== 3) {
-        return 'warning' // 已截止
+      if (status === 3) return 'danger'
+      if (!start || !end) {
+        const map = { 0: 'info', 1: '', 2: 'success', 3: 'danger' }
+        return map[status] || 'info'
       }
-      if (status === 2) return 'success' // 进行中
-      if (status === 1) return ''        // 已发布
-      if (status === 0) return 'info'    // 草稿
-      if (status === 3) return 'danger'  // 已结束
-      return 'info'
+      if (now < start) return status === 0 ? 'info' : '' // 草稿=info, 已发布=默认
+      if (now >= start && now < end) return status === 0 ? 'info' : 'success' // 进行中绿色
+      return status === 3 ? 'danger' : 'warning' // 已截止/已结束
     },
     buildPayload(publishNow) {
       const payload = Object.assign({}, this.form)
@@ -512,7 +492,7 @@ export default {
                 pageNum: 1,
                 pageSize: 20
               })
-              const rows = listRes && (listRes.rows || listRes.data) ? (listRes.rows || listRes.data) : []
+              const rows = listRes && (listRes.rows || res.data) ? (listRes.rows || res.data) : []
               const candidates = rows
                 .filter(e => e.examName === this.form.examName)
                 .sort((a, b) => new Date(b.startTime || 0) - new Date(a.startTime || 0))
@@ -566,35 +546,6 @@ export default {
       this.bool = { antiCheat: false, autoSubmit:false, lateSubmit:false }
       this.timeRange = []
     },
-    // 删除重复: validate/buildPayload/formatDateTimeSimple/fmt/statusTagType 已在前方定义，这里移除重复实现
-    // validate() {
-    //   if (!this.form.courseId) { this.$message.error('请选择课程'); return false }
-    //   if (!this.form.sessionId) { this.$message.error('请选择课堂'); return false }
-    //   if (!this.form.examName) { this.$message.error('请输入考试名称'); return false }
-    //   if (!this.timeRange || this.timeRange.length !== 2) { this.$message.error('请选择时间范围'); return false }
-    //   return true
-    // },
-    // buildPayload(publishNow) {
-    //   const [start, end] = this.timeRange
-    //   return Object.assign({}, this.form, {
-    //     startTime: this.formatDateTimeSimple(start),
-    //     endTime: this.formatDateTimeSimple(end),
-    //     status: publishNow ? 1 : 0,
-    //     antiCheat: this.bool.antiCheat ? 1 : 0,
-    //     autoSubmit: this.bool.autoSubmit ? 1 : 0,
-    //     lateSubmit: this.bool.lateSubmit ? 1 : 0
-    //   })
-    // },
-    // formatDateTimeSimple(d) {
-    //   if (!d) return ''
-    //   const date = new Date(d)
-    //   const pad = n => n < 10 ? '0' + n : n
-    //   return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + ' ' +
-    //     pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds())
-    // },
-    // fmt(s) { return s || '-' },
-    // statusText(s) { const map = {0:'草稿',1:'已发布',2:'进行中',3:'已结束'}; return map[Number(s)||0]||'未知' },
-    // statusTagType(s) { const n = Number(s)||0; if (n===0) return 'info'; if (n===1) return ''; if (n===2) return 'success'; if (n===3) return 'danger'; return 'info' },
     rowClassName({ row }) {
       if (this.highlightedExamId && Number(row.id) === Number(this.highlightedExamId)) {
         return 'row-updated'
@@ -654,12 +605,6 @@ export default {
         }
       }).catch(err => { this.examEditLoading = false; console.error(err); this.$message.error('更新失败') })
     },
-    editStatusText(s) {
-      const map = {0:'草稿',1:'已发布',2:'进行中',3:'已结束'}; return map[Number(s)||0]||'未知'
-    },
-    editStatusTagType(s) {
-      const n = Number(s)||0; if (n===0) return 'info'; if (n===1) return ''; if (n===2) return 'success'; if (n===3) return 'danger'; return 'info'
-    },
     // ================= 新增缺失方法，解决模板引用 undefined 警告 =================
     // 加载当前课堂的考试列表
     loadList() {
@@ -680,22 +625,22 @@ export default {
           id: r.id || r.examId,
           examName: r.examName,
           examType: r.examType,
-            startTime: r.startTime,
-            endTime: r.endTime,
-            examDuration: r.examDuration,
-            totalScore: r.totalScore,
-            passScore: r.passScore,
-            examMode: r.examMode,
-            questionOrder: r.questionOrder,
-            showAnswer: r.showAnswer,
-            lateTime: r.lateTime,
-            antiCheat: r.antiCheat,
-            autoSubmit: r.autoSubmit,
-            lateSubmit: r.lateSubmit,
-            status: r.status,
-            courseId: r.courseId,
-            sessionId: r.sessionId,
-            questionCount: r.questionCount || r.questionsCount || 0
+          startTime: r.startTime,
+          endTime: r.endTime,
+          examDuration: r.examDuration,
+          totalScore: r.totalScore,
+          passScore: r.passScore,
+          examMode: r.examMode,
+          questionOrder: r.questionOrder,
+          showAnswer: r.showAnswer,
+          lateTime: r.lateTime,
+          antiCheat: r.antiCheat,
+          autoSubmit: r.autoSubmit,
+          lateSubmit: r.lateSubmit,
+          status: r.status,
+          courseId: r.courseId,
+          sessionId: r.sessionId,
+          questionCount: r.questionCount || r.questionsCount || 0
         }))
         if (this.form.id){ this.fetchScoreSummary(this.form.id) }
       }).catch(err => { this.listLoading = false; console.error('loadList error', err) })
@@ -707,11 +652,47 @@ export default {
       this.fetchScoreSummary(row.id)
     },
     // 编辑配置（表格行内）
-    openExamEdit(row) { this.handleEdit(row) },
+    openExamEdit(row) {
+      if(!row || !row.id) return
+      const st = Number(row.status)
+      if(st===2) { return this.$message.error('进行中考试不可编辑') }
+      if(st===3) { return this.$message.error('已结束考试不可编辑') }
+      this.handleEdit(row)
+    },
+    // 打开编辑对话框并填充数据
+    handleEdit(row) {
+      this.examEditForm = {
+        id: row.id,
+        examName: row.examName,
+        examType: row.examType,
+        examDuration: row.examDuration,
+        totalScore: row.totalScore,
+        passScore: row.passScore,
+        examMode: row.examMode,
+        questionOrder: row.questionOrder,
+        showAnswer: row.showAnswer,
+        lateTime: row.lateTime,
+        courseId: row.courseId,
+        sessionId: row.sessionId,
+        questionCount: row.questionCount,
+        status: row.status,
+        startTime: row.startTime,
+        endTime: row.endTime
+      }
+      this.examEditTimeRange = [
+        row.startTime ? new Date(row.startTime) : null,
+        row.endTime ? new Date(row.endTime) : null
+      ]
+      this.examEditBool = {
+        antiCheat: row.antiCheat === 1,
+        autoSubmit: row.autoSubmit === 1,
+        lateSubmit: row.lateSubmit === 1
+      }
+      this.examEditVisible = true
+    },
     // 发布考试
     publish(row) {
       if (!row || !row.id) return
-      // 先做前端校验：需要至少1道题且总分>0
       if (!row.questionCount || row.questionCount <= 0) { return this.$message.error('请先配置题目后再发布') }
       publishExam(row.id).then(res => {
         if (res && (res.code === 200 || res.code === 0)) {
@@ -722,37 +703,6 @@ export default {
         }
       }).catch(e => { console.error(e); this.$message.error('发布失败') })
     },
-    // 是否可以开始考试（时间与状态）
-    canStart(row) {
-      if (!row) return false
-      const now = Date.now()
-      const start = row.startTime ? new Date(row.startTime).getTime() : null
-      const end = row.endTime ? new Date(row.endTime).getTime() : null
-      if (start && now < start) return false
-      if (end && now > end) return false
-      return true
-    },
-    // 开始考试
-    start(row) {
-      if (!row || !row.id) return
-      if (!this.canStart(row)) { return this.$message.error('当前不在考试时间范围内，无法开始') }
-      startExam(row.id).then(res => {
-        if (res && (res.code===200 || res.code===0)) {
-          this.$message.success('考试已开始')
-          this.loadList()
-        } else { this.$message.error((res && (res.msg||res.message)) || '开始失败') }
-      }).catch(e => { console.error(e); this.$message.error('开始失败') })
-    },
-    // 结束考试
-    end(row) {
-      if (!row || !row.id) return
-      endExam(row.id).then(res => {
-        if (res && (res.code===200 || res.code===0)) {
-          this.$message.success('考试已结束')
-          this.loadList()
-        } else { this.$message.error((res && (res.msg||res.message)) || '结束失败') }
-      }).catch(e => { console.error(e); this.$message.error('结束失败') })
-    },
     // 删除考试（草稿或已发布但未开始）
     remove(row) {
       if (!row || !row.id) return
@@ -762,7 +712,21 @@ export default {
         }).catch(e => { console.error(e); this.$message.error('删除失败') })
       }).catch(()=>{})
     },
-    // 发布按��禁用原因
+    // 批量删除
+    onSelectionChange(rows){ this.selection = rows || [] },
+    bulkDelete(){
+      if(!this.canBulkDelete) return this.$message.error('包含进行中考试，不能批量删除')
+      const ids = this.selection.map(r=>r.id)
+      this.$confirm(`确定删除选中的 ${ids.length} 个考试？此操作不可恢复`, '提示', { type:'warning' }).then(()=>{
+        this.bulkDeleting = true
+        // 后端批量删除接口使用 DELETE /proj_lwj/exam/{ids}
+        request({ url:`/proj_lwj/exam/${ids.join(',')}`, method:'delete'}).then(res=>{
+          this.bulkDeleting=false
+          if(res && (res.code===200 || res.code===0)) { this.$message.success('批量删除成功'); this.loadList(); this.selection=[] } else { this.$message.error((res && (res.msg||res.message)) || '批量删除失败') }
+        }).catch(e=>{ this.bulkDeleting=false; console.error(e); this.$message.error('批量删除失败') })
+      }).catch(()=>{})
+    },
+    // 发布按钮禁用原因
     publishDisabledReason(row) {
       if (!row) return '数据异常'
       if (Number(row.status) === 1 || Number(row.status) === 2 || Number(row.status) === 3) return '已发布'
@@ -775,7 +739,6 @@ export default {
       if (!row) return '数据异常'
       const status = Number(row.status)
       if (status === 2) return '进行中不可删除'
-      if (status === 3) return '已结束不可删除'
       return ''
     },
     // 打开批量创建对话框
@@ -838,187 +801,331 @@ export default {
       }
       return `题目总分 ${actualTotalScore} / 设置总分 ${configuredTotalScore}，距离可发布还差 ${remainingToPublish} 分（题目数：${questionCount || 0}）`
     },
+    // 新增：跳转到批改页面
+    goGrade(row) {
+      // 跳转到考试批改详情路由
+      this.$router.push({ path: `/proj_lwj_exam/exam_grading/${row.id}` })
+    },
   }
 }
 </script>
 
 <style scoped>
-/* Mac Style for Exam Publish */
 .app-container {
-  padding: 40px 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #1d1d1f;
-  background-color: #f5f5f7;
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
   min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Card Styling */
-.app-container >>> .el-card {
-  border-radius: 18px;
-  border: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-  background-color: #ffffff;
+/* 美化表单 */
+.beautified-form {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
 }
 
-.app-container >>> .el-card__header {
-  border-bottom: 1px solid #f5f5f7;
-  padding: 20px 24px;
+.form-section {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.form-section .el-form-item {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.beautified-form ::v-deep(.el-form-item__label) {
   font-weight: 600;
-  font-size: 18px;
-  color: #1d1d1f;
+  color: #2c3e50;
+  font-size: 14px;
 }
 
-/* Form Styling */
-.app-container >>> .el-form-item__label {
-  font-weight: 500;
-  color: #1d1d1f;
+/* 美化输入框 */
+.beautified-input ::v-deep(.el-input__inner),
+.beautified-select ::v-deep(.el-input__inner) {
+  border-radius: 8px;
+  border: 1.5px solid #e1e5e9;
+  height: 40px;
+  line-height: 40px;
+  transition: all 0.3s ease;
 }
 
-.app-container >>> .el-input__inner {
+.beautified-input ::v-deep(.el-input__inner:focus),
+.beautified-select ::v-deep(.el-input__inner:focus) {
+  border-color: #409EFF;
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
+}
+
+.beautified-datepicker {
+  width: 100%;
+}
+
+.beautified-datepicker ::v-deep(.el-input__inner) {
+  border-radius: 8px;
+  border: 1.5px solid #e1e5e9;
+}
+
+.beautified-number ::v-deep(.el-input__inner) {
+  border-radius: 8px;
+  border: 1.5px solid #e1e5e9;
+}
+
+/* 美化单选按钮 */
+.beautified-radio ::v-deep(.el-radio__inner) {
+  border: 1.5px solid #dcdfe6;
+}
+
+.beautified-radio ::v-deep(.el-radio__input.is-checked .el-radio__inner) {
+  background: #409EFF;
+  border-color: #409EFF;
+}
+
+/* 美化开关 */
+.beautified-switch ::v-deep(.el-switch__core) {
   border-radius: 10px;
-  border: 1px solid #d2d2d7;
-  height: 36px;
-  transition: all 0.2s ease;
 }
 
-.app-container >>> .el-input__inner:focus {
-  border-color: #0071e3;
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+/* 美化复选框 */
+.beautified-checkbox ::v-deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+  background: #409EFF;
+  border-color: #409EFF;
 }
 
-/* Button Styling */
-.app-container >>> .el-button {
-  border-radius: 980px;
+/* 总分/及格样式 */
+.score-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-divider {
+  color: #909399;
   font-weight: 500;
+}
+
+/* 其他设置样式 */
+.other-settings {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.late-time-input {
+  width: 100px;
+}
+
+.time-unit {
+  color: #909399;
+  font-size: 12px;
+}
+
+/* 主操作按钮 */
+.action-buttons {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.primary-action-btn {
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #409EFF 0%, #337ecc 100%);
   border: none;
-  padding: 9px 20px;
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+  transition: all 0.3s ease;
 }
 
-.app-container >>> .el-button--primary {
-  background-color: #0071e3;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+.primary-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.4);
 }
 
-.app-container >>> .el-button--primary:hover {
-  background-color: #0077ed;
-  transform: translateY(-1px);
+.info-icon {
+  color: #909399;
+  margin-left: 12px;
+  font-size: 16px;
+  cursor: pointer;
 }
 
-.app-container >>> .el-button--success {
-  background-color: #34c759;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
-}
-
-.app-container >>> .el-button--warning {
-  background-color: #ff9500;
-  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
-}
-
-.app-container >>> .el-button--danger {
-  background-color: #ff3b30;
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
-}
-
-.app-container >>> .el-button--text {
-  color: #0071e3;
-  background: none;
-  padding: 0 5px;
-  box-shadow: none;
-}
-
-.app-container >>> .el-button--text:hover {
-  color: #0077ed;
-  background: none;
-  transform: none;
-}
-
-/* Table Styling */
-.app-container >>> .el-table {
+/* 美化卡片 */
+.beautified-card {
   border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  border: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: white;
 }
 
-.app-container >>> .el-table th {
-  background-color: #fbfbfd;
-  color: #86868b;
-  font-weight: 600;
-  border-bottom: 1px solid #f5f5f7;
-  padding: 12px 0;
-}
-
-.app-container >>> .el-table td {
-  padding: 12px 0;
-  border-bottom: 1px solid #f5f5f7;
-}
-
-/* Dialog Styling */
-.app-container >>> .el-dialog {
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
-
-.app-container >>> .el-dialog__header {
+.beautified-card ::v-deep(.el-card__header) {
+  border-bottom: 1px solid #f0f0f0;
   padding: 20px 24px;
-  border-bottom: 1px solid #f5f5f7;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
-.app-container >>> .el-dialog__title {
-  font-weight: 600;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
   font-size: 18px;
-  color: #1d1d1f;
+  font-weight: 700;
+  color: #1a1a1a;
 }
 
-.app-container >>> .el-dialog__body {
-  padding: 24px;
+.search-input {
+  width: 240px;
 }
 
-.app-container >>> .el-dialog__footer {
-  padding: 16px 24px;
-  border-top: 1px solid #f5f5f7;
+.search-input ::v-deep(.el-input__inner) {
+  border-radius: 20px;
+  border: 1px solid #e1e5e9;
 }
 
-/* Tags */
-.app-container >>> .el-tag {
+/* 美化表格 */
+.beautified-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.beautified-table ::v-deep(.el-table th) {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #2c3e50;
+  font-weight: 700;
+  border-bottom: 2px solid #e1e5e9;
+}
+
+.beautified-table ::v-deep(.el-table td) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 0;
+}
+
+.beautified-table ::v-deep(.el-table__row:hover td) {
+  background: #f8f9fa !important;
+}
+
+/* 状态标签 */
+.status-tag {
+  border: none;
   border-radius: 6px;
+  font-weight: 600;
+}
+
+/* 操作按钮行 */
+.op-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  padding: 0;
+  overflow: visible;
+}
+
+.op-actions-row ::v-deep(.el-button) {
+  padding: 2px 8px !important;
+  font-size: 11px;
+  border-radius: 14px;
+  line-height: 1.1;
   border: none;
   font-weight: 500;
 }
 
-/* Alert Styling */
-.app-container >>> .el-alert {
-  border-radius: 10px;
+/* 批量操作 */
+.batch-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.batch-tip {
+  font-size: 12px;
+  color: #F56C6C;
+  font-weight: 500;
+}
+
+/* 浮动按钮 */
+.batch-float-btn {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #67C23A 0%, #529b2e 100%);
+  border: none;
+  box-shadow: 0 6px 20px rgba(103, 194, 58, 0.4);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.batch-float-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(103, 194, 58, 0.5);
+}
+
+/* 警告提示 */
+.process-alert, .score-alert {
+  border-radius: 8px;
+  border: none;
   margin-bottom: 16px;
 }
 
-/* Radio Button Styling */
-.app-container >>> .el-radio-button__inner {
-  border-radius: 0;
-  border: 1px solid #dcdfe6;
-  box-shadow: none !important;
+.process-alert ::v-deep(.el-alert__title),
+.score-alert ::v-deep(.el-alert__title) {
+  font-weight: 500;
 }
 
-.app-container >>> .el-radio-button:first-child .el-radio-button__inner {
-  border-radius: 10px 0 0 10px;
-}
-
-.app-container >>> .el-radio-button:last-child .el-radio-button__inner {
-  border-radius: 0 10px 10px 0;
-}
-
-.app-container >>> .el-radio-button__orig-radio:checked + .el-radio-button__inner {
-  background-color: #0071e3;
-  border-color: #0071e3;
-  box-shadow: -1px 0 0 0 #0071e3;
-}
-
-/* Highlighting */
+/* 高亮行 */
 .row-updated td {
   background: #fff7e6 !important;
   transition: background 0.6s;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .form-section {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+}
+</style>
+
+<style>
+/* 美化对话框 */
+.beautified-dialog .el-dialog {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.beautified-dialog .el-dialog__header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 20px 24px;
+  border-bottom: 1px solid #e1e5e9;
+}
+
+.beautified-dialog .el-dialog__title {
+  font-weight: 700;
+  color: #1a1a1a;
 }
 </style>

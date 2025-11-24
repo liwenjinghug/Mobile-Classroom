@@ -4,7 +4,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
 import java.math.BigDecimal;
 
 /** 本地题库实体 */
-public class LocalQuestionBank extends BaseEntity {
+public class ClassLocalQuestionBank extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     private Long id;

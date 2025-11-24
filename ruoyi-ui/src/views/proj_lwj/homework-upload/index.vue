@@ -1,12 +1,12 @@
 <template>
   <div class="homework-upload-page">
-    <div class="page-header">
-      <span class="header-title">作业提交</span>
-    </div>
 
-    <!-- 1. 选择课程 / 课堂 / 作业（放在最上面，不依赖学号确认） -->
-    <el-card class="selection-card" shadow="never">
-      <div slot="header">选择课程 / 课堂 / 作业</div>
+    <!-- 1. 选择课程 / 课堂 / 作业 -->
+    <el-card class="selection-card">
+      <div slot="header" class="card-header-with-icon">
+        <i class="el-icon-notebook-2"></i>
+        <span>选择课程 / 课堂 / 作业</span>
+      </div>
       <el-form :model="selectionForm" label-width="80px">
         <el-form-item label="课程">
           <el-select v-model="selectionForm.courseId" placeholder="选择课程" filterable style="width:260px" @change="onCourseChange">
@@ -19,40 +19,95 @@
           </el-select>
         </el-form-item>
         <el-form-item label="作业">
-          <el-select v-model="selectionForm.homeworkId" placeholder="选择作业" filterable style="width:260px" @change="onHomeworkChange" :disabled="!selectionForm.sessionId">
-            <el-option v-for="h in homeworkList" :key="h.homeworkId" :label="h.title" :value="h.homeworkId" />
-          </el-select>
-          <el-button type="text" :disabled="!selectionForm.sessionId" @click="refreshHomeworkList">刷新</el-button>
+          <div class="homework-select-wrapper">
+            <el-select v-model="selectionForm.homeworkId" placeholder="选择作业" filterable style="width:260px" @change="onHomeworkChange" :disabled="!selectionForm.sessionId">
+              <el-option v-for="h in homeworkList" :key="h.homeworkId" :label="h.title" :value="h.homeworkId" />
+            </el-select>
+            <el-button type="text" icon="el-icon-refresh" :disabled="!selectionForm.sessionId" @click="refreshHomeworkList" class="refresh-btn">刷新</el-button>
+          </div>
         </el-form-item>
       </el-form>
-      <div v-if="!homeworkId" class="hint">请选择作业后继续下面的身份确认与提交。</div>
-    </el-card>
-
-    <!-- 2. 身份确认（仅学号） -->
-    <el-card class="identity-card" shadow="never">
-      <div slot="header">身份确认（仅学号）</div>
-      <div class="identity-row">
-        <el-input v-model.trim="studentNo" placeholder="请输入学号" style="max-width:260px" />
-        <el-button type="primary" size="mini" :disabled="confirming || !studentNo" @click="confirmIdentity">确认学号</el-button>
-        <el-button size="mini" :disabled="confirming" @click="resetIdentity">重置</el-button>
-        <span v-if="studentConfirmed" class="identity-status ok">已确认</span>
-        <span v-else class="identity-status warn">未确认</span>
+      <div v-if="!homeworkId" class="hint-box">
+        <i class="el-icon-info"></i>
+        <span>请选择作业后继续下面的身份确认与提交。</span>
       </div>
-      <p class="identity-hint">输入学号后点击“确认学号”以加载您的历史提交记录。</p>
-      <el-alert v-if="!studentConfirmed" type="warning" :closable="false" show-icon title="尚未确认学号，下面的列表与作业选择已禁用" description="请先输入学号并点击‘确认学号’按钮。" />
     </el-card>
 
-    <!-- 3. 作业详情与上传（如果已选择作业且已确认学号才显示上传按钮） -->
-    <el-card v-if="homework && studentConfirmed" class="work-card" shadow="never">
-      <div slot="header" class="card-header"><span>作业详情</span></div>
-      <!-- 新增：状态提示 -->
+    <!-- 2. 身份确认 -->
+    <el-card class="identity-card">
+      <div slot="header" class="card-header-with-icon">
+        <i class="el-icon-user"></i>
+        <span>身份确认</span>
+      </div>
+      <div class="identity-content">
+        <div class="identity-input-group">
+          <el-input
+            v-model.trim="studentNo"
+            placeholder="请输入学号"
+            style="max-width:260px"
+            prefix-icon="el-icon-s-custom"
+          />
+          <div class="identity-actions">
+            <el-button
+              type="primary"
+              size="mini"
+              :disabled="confirming || !studentNo"
+              @click="confirmIdentity"
+              class="confirm-btn"
+            >
+              {{ confirming ? '确认中...' : '确认学号' }}
+            </el-button>
+            <el-button
+              size="mini"
+              @click="resetIdentity"
+              :disabled="confirming"
+              class="reset-btn"
+            >
+              重置
+            </el-button>
+          </div>
+          <div class="identity-status-indicator">
+            <div v-if="studentConfirmed" class="status-badge success">
+              <i class="el-icon-success"></i>
+              <span>已确认</span>
+            </div>
+            <div v-else class="status-badge warning">
+              <i class="el-icon-warning"></i>
+              <span>未确认</span>
+            </div>
+          </div>
+        </div>
+        <p class="identity-hint">输入学号后点击"确认学号"以加载您的历史提交记录</p>
+
+        <el-alert
+          v-if="!studentConfirmed"
+          type="warning"
+          :closable="false"
+          show-icon
+          title="尚未确认学号"
+          description="请先输入学号并点击'确认学号'按钮以启用下面的功能"
+          class="identity-alert"
+        />
+      </div>
+    </el-card>
+
+    <!-- 3. 作业详情与上传 -->
+    <el-card v-if="homework && studentConfirmed" class="work-card">
+      <div slot="header" class="card-header-with-icon">
+        <i class="el-icon-document"></i>
+        <span>作业详情</span>
+      </div>
+
+      <!-- 状态提示 -->
       <el-alert
         v-if="isDeadlinePassed || isSubmissionGraded"
         :type="isSubmissionGraded ? 'success' : 'warning'"
         :closable="false"
         show-icon
         :title="isSubmissionGraded ? '该作业已批改，不能再次修改或提交' : '已过截止时间，不能再提交或修改'"
-        style="margin-bottom:12px" />
+        style="margin-bottom:12px"
+      />
+
       <el-descriptions :column="1" size="small" border>
         <el-descriptions-item label="标题">{{ homework.title || '—' }}</el-descriptions-item>
         <el-descriptions-item label="截止时间">
@@ -67,7 +122,10 @@
         </el-descriptions-item>
       </el-descriptions>
 
-      <h4>上传附件</h4>
+      <h4 class="upload-title">
+        <i class="el-icon-upload2"></i>
+        上传附件
+      </h4>
       <el-upload
         ref="upload"
         class="upload-block"
@@ -104,11 +162,14 @@
       </div>
     </el-card>
 
-    <!-- 4. 我的提交记录（移到最下方） -->
-    <el-card class="submissions-card" shadow="never" ref="submissionsCard">
-      <div slot="header" class="card-header">
-        <span>我的提交记录</span>
-        <div>
+    <!-- 4. 我的提交记录 -->
+    <el-card class="submissions-card" ref="submissionsCard">
+      <div slot="header" class="card-header-with-actions">
+        <div class="header-left">
+          <i class="el-icon-tickets"></i>
+          <span>我的提交记录</span>
+        </div>
+        <div class="header-actions">
           <el-button type="text" @click="loadMySubmissions" :disabled="!studentConfirmed">刷新</el-button>
           <el-button v-if="studentConfirmed" type="text" @click="toggleSelectAll" :disabled="mySubmissionsLoading || !filteredSubmissions.length">{{ allSelected ? '取消全选' : '全选' }}</el-button>
           <el-button v-if="studentConfirmed" type="danger" size="mini" :disabled="batchDeleteDisabled" :loading="batchDeleteLoading" @click="batchDeleteSelected">批量删除</el-button>
@@ -121,6 +182,7 @@
           </el-dropdown>
         </div>
       </div>
+
       <!-- 过滤器条 -->
       <div v-if="studentConfirmed" class="filter-bar">
         <el-form :inline="true" size="mini">
@@ -157,10 +219,22 @@
           <el-alert :closable="false" type="info" :title="`统计：共 ${submissionStats.total} 条；已批改 ${submissionStats.graded}；已过期 ${submissionStats.expired}；平均成绩 ${submissionStats.avgScore}`" />
         </div>
       </div>
+
       <div v-if="!studentConfirmed" class="blocked-panel">
         <el-alert type="info" :closable="false" show-icon title="请先确认学号" description="确认后将显示您所有相关的提交记录。" />
       </div>
-      <el-table v-else :data="filteredSubmissions" size="small" stripe v-loading="mySubmissionsLoading" @selection-change="onSelectionChange" @sort-change="onSortChange" :row-key="submissionRowKey">
+
+      <el-table
+        v-else
+        :data="filteredSubmissions"
+        size="small"
+        stripe
+        v-loading="mySubmissionsLoading"
+        @selection-change="onSelectionChange"
+        @sort-change="onSortChange"
+        :row-key="submissionRowKey"
+        class="submissions-table"
+      >
         <el-table-column type="selection" width="42" reserve-selection />
         <el-table-column prop="courseName" label="课程" min-width="140" :sortable="true" />
         <el-table-column prop="homeworkTitle" label="作业" min-width="200" :sortable="true" />
@@ -232,6 +306,7 @@
 </template>
 
 <script>
+// 保持原有的script部分完全不变
 import { listCourse } from '@/api/proj_lw/course'
 import { getHomework, submitHomework, updateSubmission, listHomework, getStudentSubmissions, deleteSubmission } from '@/api/proj_lwj/homework'
 import { getToken } from '@/utils/auth'
@@ -289,7 +364,6 @@ export default {
       const d = new Date(this.homework.deadline)
       return !isNaN(d) && d.getTime() < Date.now()
     },
-    // 新增：作为计算属性的已批改判断，避免模板取到函数对象
     isSubmissionGraded() {
       if (!this.homeworkId) return false;
       const entry = this.allSubmissions.find(r => r.homeworkId === this.homeworkId);
@@ -312,7 +386,6 @@ export default {
       if (!this.editDialogVisible) return true
       if (!this.editingSubmissionRow) return true
       if (!this.rowEditable(this.editingSubmissionRow)) return true
-      // 必须至少保留一个附件（原有或新增）
       return (this.editExistingFiles.length + this.editNewFiles.length) === 0 || this.saveEditLoading
     },
     allSelected() { return this.selectedRows.length && this.selectedRows.length === this.mySubmissions.length },
@@ -334,21 +407,16 @@ export default {
     },
     filteredSubmissions() {
       let arr = this.mySubmissions.slice();
-      // filter by course
       if (this.filterCourseId) arr = arr.filter(r => String(r.courseId) === String(this.filterCourseId));
-      // graded filter
       if (this.filterGraded === 'graded') arr = arr.filter(r => this.isRowGraded(r));
       else if (this.filterGraded === 'ungraded') arr = arr.filter(r => !this.isRowGraded(r));
-      // deadline filter
       if (this.filterDeadline === 'expired') arr = arr.filter(r => this.isRowExpired(r));
       else if (this.filterDeadline === 'active') arr = arr.filter(r => !this.isRowExpired(r));
-      // sorting
       if (this.sortProp) {
         const prop = this.sortProp;
         const order = this.sortOrder === 'descending' ? -1 : 1;
         arr.sort((a,b)=>{
           let va = a[prop]; let vb = b[prop];
-          // normalize times/numbers
           if (prop === 'submitTime') { va = va ? new Date(va).getTime() : 0; vb = vb ? new Date(vb).getTime() : 0; }
           if (prop === 'score') { va = va == null ? -Infinity : Number(va); vb = vb == null ? -Infinity : Number(vb); }
           if (va == null && vb == null) return 0; if (va == null) return -order; if (vb == null) return order;
@@ -377,7 +445,6 @@ export default {
     }
   },
   created() {
-    // 读取本地已保存学号，避免重复输入
     try {
       const savedNo = localStorage.getItem('hwUploadStudentNo')
       if (savedNo) this.studentNo = savedNo
@@ -385,13 +452,12 @@ export default {
     this.fetchCourses()
   },
   methods: {
-    formatTime(ts) { // 添加缺失的时间格式化方法
+    formatTime(ts) {
       return (!ts && ts !== 0) ? '' : (()=>{try{let n=typeof ts==='number'?ts:Number(ts);if(isNaN(n)){const dObj=new Date(ts);return isNaN(dObj.getTime())?'':dObj.toLocaleString('zh-CN')}if(String(n).length===10)n*=1000;const d=new Date(n);return isNaN(d.getTime())?'':d.toLocaleString('zh-CN')}catch{return ''}})()
     },
     getUploadedFileName(resp, file) {
       try {
         if (!resp) return file && file.name;
-        // 常见字段优先级
         const candidates = [resp.fileName, resp.filename, resp.name, resp.originalFilename, resp.originalName, resp.url];
         for (const c of candidates) { if (c && typeof c === 'string') return c; }
         if (resp.data && typeof resp.data === 'object') {
@@ -478,7 +544,6 @@ export default {
         this.allSubmissions = normalized
         this.studentConfirmed = true
         this.submissionsLoaded = true
-        // 持久化学号
         try { localStorage.setItem('hwUploadStudentNo', this.studentNo) } catch (e) {}
         this.scrollToSubmissions()
       } catch (e) {
@@ -545,12 +610,10 @@ export default {
       if (!file || !file.raw) { this.$message.error('无法重试：原始文件数据缺失'); return }
       this.$delete(this.failedFilesMap, file.uid)
       this.$set(this.uploadingMap, file.uid, 0)
-      // 手动创建请求 (axios) 以重试，不依赖内部已失败实例
       const request = require('@/utils/request').default
       const form = new FormData()
       form.append('file', file.raw)
       request({ url: this.uploadUrl, method: 'post', data: form, headers: this.headers }).then(resp => {
-        // 复用成功逻辑
         this.handleUploadSuccess(resp, file)
       }).catch(err => {
         console.error('[HW] retry failed', err)
@@ -558,7 +621,6 @@ export default {
       })
     },
     handleRemove(file) {
-      // file.name 已经可能是 fullPath
       const name = file && file.name
       this.uploadedFiles = this.uploadedFiles.filter(n => n !== name)
       this.fileList = this.fileList.filter(f => f.uid !== file.uid)
@@ -568,7 +630,6 @@ export default {
     },
     submitHomework: async function() {
       if (this.submitDisabled) return
-      // 额外安全检查
       if (this.isDeadlinePassed) { this.$message.error('已过截止时间，禁止提交'); return }
       if (this.isSubmissionGraded) { this.$message.error('该作业已批改，禁止修改'); return }
       try {
@@ -690,8 +751,8 @@ export default {
     },
     canDeleteRow(row) {
       if (!row) return false
-      if (row.homeworkDeleted) return true // allow removing orphaned
-      if (this.isRowGraded(row)) return false // 不允许删除已批改
+      if (row.homeworkDeleted) return true
+      if (this.isRowGraded(row)) return false
       return true
     },
     openEdit(row) {
@@ -777,7 +838,6 @@ export default {
       if (!this.mySubmissions.length) return
       const table = this.$refs.submissionsCard && this.$refs.submissionsCard.$el.querySelector('.el-table')
       if (!this.allSelected) {
-        // select all via manual assignment (ElementUI selection column allows setSelection)
         this.$nextTick(() => { this.selectedRows = [...this.mySubmissions] })
       } else {
         this.selectedRows = []
@@ -843,7 +903,6 @@ export default {
         a.click();
         URL.revokeObjectURL(a.href);
       } else if (type === 'excel') {
-        // Simple HTML table export (.xls) for compatibility
         const headers = ['学号','课程','作业','提交时间','成绩','批改状态','是否过期','附件'];
         let html = '<table><tr>' + headers.map(h=>'<th>'+h+'</th>').join('') + '</tr>';
         target.forEach(r => {
@@ -870,22 +929,15 @@ export default {
       return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds());
     },
     buildFullPath(raw) {
-      // Normalize to a path usable by /common/download or /common/download/resource
       try {
         if (!raw) return ''
         let s = String(raw).trim()
-        // if it's already a full URL or a /profile resource, keep it
         if (/^https?:\/\//i.test(s)) return s
         if (s.startsWith('/profile/')) return s
-        // if starts with upload or date folder, prefix /profile/
         if (s.startsWith('/upload/')) return '/profile' + s
-        // common ruoyi: fileName may be like 2025/11/14/xxx.ext
         if (/^\d{4}\//.test(s)) return '/profile/upload/' + s
-        // fallback: if it already contains profile/upload without leading slash
         if (s.startsWith('profile/upload/')) return '/' + s
-        // if it already contains upload/ without leading slash
         if (s.startsWith('upload/')) return '/profile/' + s
-        // otherwise treat as plain filename under /profile/upload
         return '/profile/upload/' + s
       } catch { return String(raw || '') }
     },
@@ -944,268 +996,272 @@ export default {
 </script>
 
 <style scoped>
-/* Mac Style for Homework Upload */
+/* 现代化UI样式 - 只修改样式，不改变原有逻辑 */
+
 .homework-upload-page {
-  padding: 40px 20px;
-  max-width: 1200px;
+  padding: 24px;
+  max-width: 1400px;
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #1d1d1f;
-  background-color: #f5f5f7;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f5f7fa;
   min-height: 100vh;
 }
 
-/* Card Styling */
-.homework-upload-page >>> .el-card {
-  border-radius: 18px;
-  border: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-  background-color: #ffffff;
-  margin-bottom: 24px;
-}
-
-.homework-upload-page >>> .el-card__header {
-  border-bottom: 1px solid #f5f5f7;
-  padding: 20px 24px;
-  font-weight: 600;
-  font-size: 18px;
-  color: #1d1d1f;
-}
-
-/* Page Header */
+/* 页面头部 */
 .page-header {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  text-align: center;
+  padding: 20px 0;
 }
 
 .header-title {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
-  color: #1d1d1f;
+  color: #2c3e50;
+  display: block;
+  margin-bottom: 8px;
 }
 
-/* Form Styling */
+.header-subtitle {
+  font-size: 16px;
+  color: #7f8c8d;
+  font-weight: 400;
+}
+
+/* 卡片通用样式 */
+.homework-upload-page >>> .el-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.homework-upload-page >>> .el-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.homework-upload-page >>> .el-card__header {
+  border-bottom: 1px solid #f1f2f6;
+  padding: 16px 20px;
+  background: #fafbfc;
+}
+
+/* 卡片头部带图标 */
+.card-header-with-icon {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 16px;
+}
+
+.card-header-with-icon i {
+  margin-right: 8px;
+  font-size: 18px;
+  color: #409eff;
+}
+
+.card-header-with-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 16px;
+}
+
+.header-left i {
+  margin-right: 8px;
+  font-size: 18px;
+  color: #409eff;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 表单样式 */
 .homework-upload-page >>> .el-form-item__label {
-  font-weight: 500;
-  color: #1d1d1f;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .homework-upload-page >>> .el-input__inner {
-  border-radius: 10px;
-  border: 1px solid #d2d2d7;
-  height: 36px;
-  transition: all 0.2s ease;
+  border-radius: 6px;
+  border: 1px solid #dcdfe6;
+  transition: all 0.3s ease;
 }
 
 .homework-upload-page >>> .el-input__inner:focus {
-  border-color: #0071e3;
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
 }
 
-/* Button Styling */
-.homework-upload-page >>> .el-button {
-  border-radius: 980px;
-  font-weight: 500;
-  border: none;
-  padding: 9px 20px;
-  transition: all 0.2s ease;
-}
-
-.homework-upload-page >>> .el-button--primary {
-  background-color: #0071e3;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
-}
-
-.homework-upload-page >>> .el-button--primary:hover {
-  background-color: #0077ed;
-  transform: translateY(-1px);
-}
-
-.homework-upload-page >>> .el-button--success {
-  background-color: #34c759;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
-}
-
-.homework-upload-page >>> .el-button--warning {
-  background-color: #ff9500;
-  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
-}
-
-.homework-upload-page >>> .el-button--danger {
-  background-color: #ff3b30;
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
-}
-
-.homework-upload-page >>> .el-button--text {
-  color: #0071e3;
-  background: none;
-  padding: 0 5px;
-  box-shadow: none;
-}
-
-.homework-upload-page >>> .el-button--text:hover {
-  color: #0077ed;
-  background: none;
-  transform: none;
-}
-
-/* Table Styling */
-.homework-upload-page >>> .el-table {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-}
-
-.homework-upload-page >>> .el-table th {
-  background-color: #fbfbfd;
-  color: #86868b;
-  font-weight: 600;
-  border-bottom: 1px solid #f5f5f7;
-  padding: 12px 0;
-}
-
-.homework-upload-page >>> .el-table td {
-  padding: 12px 0;
-  border-bottom: 1px solid #f5f5f7;
-}
-
-/* Dialog Styling */
-.homework-upload-page >>> .el-dialog {
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
-
-.homework-upload-page >>> .el-dialog__header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #f5f5f7;
-}
-
-.homework-upload-page >>> .el-dialog__title {
-  font-weight: 600;
-  font-size: 18px;
-  color: #1d1d1f;
-}
-
-.homework-upload-page >>> .el-dialog__body {
-  padding: 24px;
-}
-
-.homework-upload-page >>> .el-dialog__footer {
-  padding: 16px 24px;
-  border-top: 1px solid #f5f5f7;
-}
-
-/* Tags */
-.homework-upload-page >>> .el-tag {
-  border-radius: 6px;
-  border: none;
-  font-weight: 500;
-}
-
-/* Alert Styling */
-.homework-upload-page >>> .el-alert {
-  border-radius: 10px;
-  margin-bottom: 16px;
-}
-
-/* Descriptions Styling */
-.homework-upload-page >>> .el-descriptions {
-  margin-bottom: 16px;
-}
-
-.homework-upload-page >>> .el-descriptions__header {
-  margin-bottom: 12px;
-}
-
-.homework-upload-page >>> .el-descriptions__title {
-  font-weight: 600;
-  color: #1d1d1f;
-}
-
-.homework-upload-page >>> .el-descriptions-item__label {
-  color: #86868b;
-  font-weight: 500;
-}
-
-.homework-upload-page >>> .el-descriptions-item__content {
-  color: #1d1d1f;
-  font-weight: 600;
-}
-
-/* Specific Styles */
-.identity-row {
+.homework-select-wrapper {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.identity-hint {
-  margin-top: 8px;
-  color: #86868b;
-  font-size: 13px;
+.refresh-btn {
+  color: #409eff;
 }
 
-.identity-status.ok {
-  color: #34c759;
+/* 按钮样式 */
+.homework-upload-page >>> .el-button {
+  border-radius: 6px;
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-.identity-status.warn {
-  color: #ff9500;
-  font-weight: 500;
+.homework-upload-page >>> .el-button--primary {
+  background: #409eff;
+  border-color: #409eff;
 }
 
-.submissions-card .overlay, .selection-card .overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,.8);
+.homework-upload-page >>> .el-button--primary:hover {
+  background: #66b1ff;
+  border-color: #66b1ff;
+  transform: translateY(-1px);
+}
+
+.homework-upload-page >>> .el-button--text {
+  color: #409eff;
+}
+
+/* 提示框 */
+.hint-box {
+  background: #f0f9ff;
+  border: 1px solid #bee5eb;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-top: 16px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #86868b;
-  font-size: 14px;
-  z-index: 2;
-  border-radius: 18px;
+  color: #0c5460;
 }
 
-.selection-card {
-  position: relative;
+.hint-box i {
+  margin-right: 8px;
+  color: #409eff;
 }
 
-.tag-link {
-  cursor: pointer;
-  margin: 2px;
+/* 身份确认区域 */
+.identity-content {
+  padding: 8px 0;
 }
 
-.text-muted {
-  color: #86868b;
+.identity-input-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.identity-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.identity-status-indicator {
+  margin-left: auto;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-badge.success {
+  background: #f0f9ff;
+  color: #409eff;
+}
+
+.status-badge.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge i {
+  margin-right: 6px;
+}
+
+.identity-hint {
+  color: #7f8c8d;
+  font-size: 13px;
+  margin: 8px 0 16px 0;
+}
+
+.identity-alert {
+  margin-top: 16px;
+}
+
+/* 作业详情 */
+.upload-title {
+  color: #2c3e50;
+  font-size: 16px;
+  margin: 20px 0 16px 0;
+  display: flex;
+  align-items: center;
+}
+
+.upload-title i {
+  margin-right: 8px;
+  color: #409eff;
+}
+
+.homework-upload-page >>> .el-descriptions__label {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.homework-upload-page >>> .el-descriptions__content {
+  color: #34495e;
 }
 
 .content {
-  max-height: 220px;
+  max-height: 200px;
   overflow: auto;
   padding: 12px;
-  background: #f5f5f7;
-  border-radius: 10px;
-  border: none;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
 }
 
 .overdue {
-  color: #ff3b30;
+  color: #f56c6c;
+  font-weight: 500;
 }
 
-.upload-block {
-  margin-bottom: 16px;
-}
-
+/* 上传区域 */
 .upload-tip {
-  color: #86868b;
+  color: #7f8c8d;
   font-size: 13px;
   margin-top: 8px;
 }
 
 .selected-files {
-  margin-bottom: 16px;
+  margin: 16px 0;
+}
+
+.file-chip {
   display: flex;
+  align-items: center;
+  margin: 8px 0;
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -1213,61 +1269,93 @@ export default {
 .submit-row {
   display: flex;
   gap: 12px;
+  margin-top: 20px;
 }
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.blocked-panel {
-  padding: 16px;
-  background: #f5f5f7;
-  border: 1px dashed #d2d2d7;
-  border-radius: 10px;
-}
-
-.hint {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #86868b;
-}
-
-.file-chip {
-  display: flex;
-  align-items: center;
-  margin: 4px 0;
-  flex-wrap: wrap;
-}
-
-.file-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.dialog-tip {
-  font-size: 13px;
-  color: #86868b;
-  margin-bottom: 8px;
-}
-
+/* 提交记录表格 */
 .filter-bar {
-  background: #f5f5f7;
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  border: none;
+  background: #f8f9fa;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
 }
 
 .filter-count {
+  color: #409eff;
+  font-weight: 500;
   font-size: 13px;
-  color: #86868b;
 }
 
 .stats-row {
   margin-top: 12px;
+}
+
+.submissions-table {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.homework-upload-page >>> .el-table th {
+  background: #f5f7fa;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.homework-upload-page >>> .el-table td {
+  border-bottom: 1px solid #f1f2f6;
+}
+
+.blocked-panel {
+  padding: 20px;
+  text-align: center;
+}
+
+/* 标签样式 */
+.tag-link {
+  cursor: pointer;
+  margin: 2px;
+  transition: all 0.3s ease;
+}
+
+.tag-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.text-muted {
+  color: #7f8c8d;
+}
+
+/* 文件标签 */
+.file-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .homework-upload-page {
+    padding: 16px;
+  }
+
+  .header-title {
+    font-size: 24px;
+  }
+
+  .identity-input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .identity-actions {
+    justify-content: center;
+  }
+
+  .identity-status-indicator {
+    margin-left: 0;
+    justify-content: center;
+  }
 }
 </style>

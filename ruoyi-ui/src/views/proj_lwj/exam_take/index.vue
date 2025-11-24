@@ -222,8 +222,14 @@ export default {
       }
       return this.objectiveTotal
     },
-    finalScoreDisplay(){ return this.formatScore(this.finalScoreNumeric) },
-    scoreLabel(){ return this.canJudgePass ? '我的得分' : '客观题得分' },
+    finalScoreDisplay(){ return this.hideTotalScore? '待批改' : this.formatScore(this.finalScoreNumeric) },
+    scoreLabel(){ return this.hideTotalScore ? '我的得分' : (this.canJudgePass ? '我的得分' : '客观题得分') },
+    hideTotalScore(){
+      // 如果考试包含主观题且尚未全部批改，隐藏总分（显示待批改），只展示客观题得分在其他位置
+      const hasSub = this.exam && this.exam.hasSubjective
+      const correctDone = this.participant && this.participant.correctStatus === 1
+      return hasSub && !correctDone
+    },
     usedDurationDisplay(){ if (!this.participant||!this.participant.start_time||!this.participant.submit_time) return '—'; try{ const st=new Date(this.participant.start_time).getTime(); const et=new Date(this.participant.submit_time).getTime(); if (isNaN(st)||isNaN(et)) return '—'; const sec=Math.max(0,Math.floor((et-st)/1000)); const m=Math.floor(sec/60),s=sec%60; return `${m}分${s}秒` }catch(e){return '—'} },
     showAnswerPolicyLabel(){ if(!this.exam) return '—'; return this.exam.showAnswer===0?'不显示':this.exam.showAnswer===1?'立即显示':'考试结束后' },
     allowShowCorrect(){ return this.exam && (this.exam.showAnswer===1 || (this.exam.showAnswer===2 && this.submitted)) },
@@ -239,7 +245,21 @@ export default {
     this.init()
   },
   watch: {
-    '$route.query.autoStart': { handler(val){ if (String(val)==='1' && !this.started && this.canStart) { this.start() } }, immediate:true }
+    '$route.query.autoStart': { handler(val){ if (String(val)==='1' && !this.started && this.canStart) { this.start() } }, immediate:true },
+    // 自动开始考试：当考试数据加载完成且满足开始条件时自动开始
+    canStart: {
+      handler(val) {
+        if (val && !this.started && !this.submitted && this.exam) {
+          // 延迟500ms后自动开始，避免数据未完全加载
+          setTimeout(() => {
+            if (this.canStart && !this.started && !this.submitted) {
+              this.start()
+            }
+          }, 500)
+        }
+      },
+      immediate: false
+    }
   },
   beforeDestroy(){ if (this.timer) clearInterval(this.timer); if (this.autoSaveTimer) clearInterval(this.autoSaveTimer); if (this.answerSaveTimer) clearTimeout(this.answerSaveTimer) },
   methods: {
