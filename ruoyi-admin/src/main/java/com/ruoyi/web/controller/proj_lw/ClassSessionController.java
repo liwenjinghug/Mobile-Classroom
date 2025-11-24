@@ -91,4 +91,14 @@ public class ClassSessionController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] sessionIds) {
         return toAjax(sessionService.deleteSessionByIds(sessionIds));
     }
+
+    /**
+     * 进入课堂权限检查
+     */
+    @PreAuthorize("@ss.hasPermi('projlw:session:enter')")
+    @GetMapping("/enter/{sessionId}")
+    public AjaxResult checkEnterPermission(@PathVariable Long sessionId) {
+        // 这里可以添加额外的进入课堂权限检查逻辑
+        return AjaxResult.success("允许进入课堂");
+    }
 }
