@@ -55,3 +55,11 @@ export function delSession(sessionId) {
     method: 'delete'
   })
 }
+
+// 检查进入课堂权限
+export function checkEnterPermission(sessionId) {
+  return request({
+    url: '/proj_lw/session/enter/' + sessionId,
+    method: 'get'
+  })
+}
