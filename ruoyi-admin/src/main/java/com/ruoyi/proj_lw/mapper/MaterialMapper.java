@@ -27,6 +27,10 @@ public interface MaterialMapper
             "<if test='materialName != null and materialName != \"\"'> and material_name like concat('%', #{materialName}, '%')</if>",
             "<if test='fileType != null and fileType != \"\"'> and file_type = #{fileType}</if>",
             "<if test='pushStatus != null and pushStatus != \"\"'> and push_status = #{pushStatus}</if>",
+            // 如果是学生，即使没有设置pushStatus，也强制只查询已推送的资料
+            "<if test='pushStatus == null'>",
+            "   and 1=1", // 这个条件只是为了语法正确，实际逻辑在Service层控制
+            "</if>",
             "</where>",
             "order by create_time desc",
             "</script>"
