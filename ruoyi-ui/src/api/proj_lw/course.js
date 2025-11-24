@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function listCourse(query) {
   return request({
-    url: '/proj_lw/course/list',  // 保持下划线
+    url: '/proj_lw/course/list',
     method: 'get',
     params: query
   })
@@ -35,5 +35,14 @@ export function delCourse(courseIds) {
   return request({
     url: '/proj_lw/course/' + courseIds,
     method: 'delete'
+  })
+}
+
+// 新增导出函数
+export function exportCourse(query) {
+  return request({
+    url: '/proj_lw/course/export',
+    method: 'get',
+    params: query
   })
 }
