@@ -33,5 +33,9 @@ public class ClassExamMonitorServiceImpl implements IClassExamMonitorService {
     public int deleteById(Long id) {
         return mapper.deleteById(id);
     }
-}
 
+    @Override
+    public int deleteByExamId(Long examId) {
+        return mapper.deleteByExamId(examId);
+    }
+}

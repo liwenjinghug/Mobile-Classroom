@@ -1,7 +1,7 @@
 <template>
   <div class="app-container dashboard-container">
     <!-- 顶部天气信息 -->
-    <el-row :gutter="20" class="weather-section">
+    <el-row :gutter="15" class="weather-section">
       <el-col :span="24">
         <el-card class="weather-card" shadow="hover">
           <div class="weather-content">
@@ -58,8 +58,8 @@
     </el-row>
 
     <!-- 核心指标卡片区 -->
-    <el-row :gutter="20" class="metrics-section">
-      <el-col :xs="24" :sm="12" :md="8" :lg="6" class="metric-col" v-for="metric in coreMetricsList" :key="metric.key">
+    <el-row :gutter="15" class="metrics-section">
+      <el-col :xs="24" :sm="12" :md="8" :lg="4" class="metric-col" v-for="metric in coreMetricsList" :key="metric.key">
         <el-card class="metric-card core-metric" @click.native="navigateTo(metric.route)" shadow="hover">
           <div class="metric-content">
             <div class="metric-icon-wrapper" :style="{ background: metric.color }">
@@ -79,10 +79,11 @@
       </el-col>
     </el-row>
 
-    <!-- 可视化图表区 -->
-    <el-row :gutter="20" class="chart-section">
-      <!-- 左侧大图表区域 -->
+    <!-- 主要图表区域 -->
+    <el-row :gutter="15" class="main-chart-section">
+      <!-- 左侧图表区域 -->
       <el-col :xs="24" :lg="16" class="chart-col">
+        <!-- 作业提交趋势 -->
         <el-card class="chart-card main-chart" shadow="hover">
           <template #header>
             <div class="chart-header">
@@ -109,7 +110,8 @@
           <div ref="trendChart" class="chart-container"></div>
         </el-card>
 
-        <el-row :gutter="20" class="sub-charts-row">
+        <!-- 底部两个小图表 -->
+        <el-row :gutter="15" class="sub-charts-row">
           <el-col :xs="24" :sm="12" class="sub-chart-col">
             <el-card class="chart-card sub-chart" shadow="hover">
               <template #header>
@@ -139,8 +141,9 @@
         </el-row>
       </el-col>
 
-      <!-- 右侧小图表区域 -->
+      <!-- 右侧图表区域 -->
       <el-col :xs="24" :lg="8" class="chart-col">
+        <!-- 提交状态分布 -->
         <el-card class="chart-card side-chart" shadow="hover">
           <template #header>
             <div class="chart-header">
@@ -166,7 +169,8 @@
           </div>
         </el-card>
 
-        <el-card class="chart-card side-chart" shadow="hover" style="margin-top: 20px;">
+        <!-- 成绩分布 -->
+        <el-card class="chart-card side-chart" shadow="hover" style="margin-top: 15px;">
           <template #header>
             <div class="chart-header">
               <span class="chart-title">成绩分布</span>
@@ -191,11 +195,18 @@
             </div>
           </div>
         </el-card>
+      </el-col>
+    </el-row>
 
-        <el-card class="chart-card side-chart" shadow="hover" style="margin-top: 20px;">
+    <!-- 功能与数据区域 -->
+    <el-row :gutter="15" class="function-section">
+      <!-- 左侧消息与热力图区域 -->
+      <el-col :xs="24" :lg="8" class="function-col">
+        <!-- 学生参与热力图 -->
+        <el-card class="function-card" shadow="hover">
           <template #header>
-            <div class="chart-header">
-              <span class="chart-title">学生参与热力</span>
+            <div class="function-header">
+              <span class="function-title">学生参与热力</span>
               <el-button size="small" icon="el-icon-download" @click="downloadChart('heatChart')">
                 下载
               </el-button>
@@ -203,13 +214,40 @@
           </template>
           <div ref="heatChart" class="chart-container"></div>
         </el-card>
-      </el-col>
-    </el-row>
 
-    <!-- 核心功能分区 -->
-    <el-row :gutter="20" class="function-section">
-      <!-- 左侧消息与待办区 -->
-      <el-col :xs="24" :lg="8" class="function-col">
+        <!-- 最新消息 -->
+        <el-card class="function-card" shadow="hover" style="margin-top: 15px;">
+          <template #header>
+            <div class="function-header">
+              <span class="function-title">最新消息</span>
+              <el-button type="text" @click="navigateTo('message')">更多</el-button>
+            </div>
+          </template>
+          <div class="message-list">
+            <div v-for="message in messages" :key="message.id" class="message-item" :class="{ unread: message.status === '未读' }">
+              <div class="message-avatar">
+                <i class="el-icon-message"></i>
+              </div>
+              <div class="message-content">
+                <div class="message-text">{{ message.content }}</div>
+                <div class="message-time">{{ formatTime(message.createTime) }}</div>
+              </div>
+              <div class="message-actions">
+                <el-tag v-if="message.status === '未读'" type="primary" size="small">未读</el-tag>
+                <el-button type="text" icon="el-icon-delete" size="mini" @click="deleteMessage(message.id)"></el-button>
+              </div>
+            </div>
+            <div v-if="messages.length === 0" class="empty-state">
+              <i class="el-icon-chat-dot-round"></i>
+              <p>暂无新消息</p>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+
+      <!-- 右侧数据明细区域 -->
+      <el-col :xs="24" :lg="16" class="function-col">
+        <!-- 待办事项 -->
         <el-card class="function-card" shadow="hover">
           <template #header>
             <div class="function-header">
@@ -245,39 +283,8 @@
           </div>
         </el-card>
 
-        <el-card class="function-card" shadow="hover" style="margin-top: 20px;">
-          <template #header>
-            <div class="function-header">
-              <span class="function-title">最新消息</span>
-              <el-button type="text" @click="navigateTo('message')">更多</el-button>
-            </div>
-          </template>
-          <div class="message-list">
-            <div v-for="message in messages" :key="message.id" class="message-item" :class="{ unread: message.status === '未读' }">
-              <div class="message-avatar">
-                <i class="el-icon-message"></i>
-              </div>
-              <div class="message-content">
-                <div class="message-text">{{ message.content }}</div>
-                <div class="message-time">{{ formatTime(message.createTime) }}</div>
-              </div>
-              <div class="message-actions">
-                <el-tag v-if="message.status === '未读'" type="primary" size="small">未读</el-tag>
-                <el-button type="text" icon="el-icon-delete" size="mini" @click="deleteMessage(message.id)"></el-button>
-              </div>
-            </div>
-            <div v-if="messages.length === 0" class="empty-state">
-              <i class="el-icon-chat-dot-round"></i>
-              <p>暂无新消息</p>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-
-      <!-- 右侧数据明细与公告区 -->
-      <el-col :xs="24" :lg="16" class="function-col">
         <!-- 作业明细 -->
-        <el-card class="function-card" shadow="hover">
+        <el-card class="function-card" shadow="hover" style="margin-top: 15px;">
           <template #header>
             <div class="function-header">
               <span class="function-title">作业明细</span>
@@ -345,6 +352,7 @@
               @sort-change="handleHomeworkSort"
               :default-sort="{prop: 'deadline', order: 'ascending'}"
               v-loading="homeworkLoading"
+              height="300"
             >
               <el-table-column prop="title" label="作业名称" min-width="150" sortable="custom"></el-table-column>
               <el-table-column prop="course" label="课程" width="120" sortable="custom"></el-table-column>
@@ -385,9 +393,14 @@
             </el-table>
           </div>
         </el-card>
+      </el-col>
+    </el-row>
 
-        <!-- 最新公告 -->
-        <el-card class="function-card" shadow="hover" style="margin-top: 20px;">
+    <!-- 公告与日志区域 -->
+    <el-row :gutter="15" class="bottom-section">
+      <!-- 最新公告 -->
+      <el-col :xs="24" :lg="12" class="bottom-col">
+        <el-card class="function-card" shadow="hover">
           <template #header>
             <div class="function-header">
               <span class="function-title">最新公告</span>
@@ -424,7 +437,7 @@
             </el-form-item>
           </el-form>
 
-          <div class="notice-list">
+          <div class="notice-list" style="height: 300px; overflow-y: auto;">
             <div v-for="notice in notices" :key="notice.id" class="notice-item" @click="showNoticeDetail(notice)">
               <div class="notice-badge" v-if="isNewNotice(notice.createTime)">NEW</div>
               <div class="notice-content">
@@ -446,11 +459,9 @@
           </div>
         </el-card>
       </el-col>
-    </el-row>
 
-    <!-- 日志查阅区 -->
-    <el-row class="log-section">
-      <el-col :span="24">
+      <!-- 操作日志 -->
+      <el-col :xs="24" :lg="12" class="bottom-col">
         <el-card class="log-card" shadow="hover">
           <template #header>
             <div class="log-header">
@@ -493,7 +504,7 @@
             </el-form-item>
           </el-form>
 
-          <div class="log-container">
+          <div class="log-container" style="height: 300px; overflow-y: auto;">
             <el-table :data="operationLogs" style="width: 100%" v-loading="logLoading">
               <el-table-column prop="title" label="操作内容" min-width="200"></el-table-column>
               <el-table-column prop="operator" label="操作人" width="120"></el-table-column>
@@ -1778,45 +1789,24 @@ export default {
 </script>
 
 <style scoped>
-/* Mac Style for Dashboard */
-.app-container {
-  padding: 40px 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #1d1d1f;
-  background-color: #f5f5f7;
-  min-height: 100vh;
+/* 基础样式 */
+.dashboard-container {
+  padding: 15px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: calc(100vh - 84px);
 }
 
-/* Card Styling */
-.app-container >>> .el-card {
-  border-radius: 18px;
-  border: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-  background-color: #ffffff;
-  transition: all 0.3s ease;
-}
-
-.app-container >>> .el-card:hover {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-  transform: translateY(-2px);
-}
-
-.app-container >>> .el-card__header {
-  border-bottom: 1px solid #f5f5f7;
-  padding: 20px 24px;
-}
-
-/* Weather Section */
+/* 天气区域样式 */
 .weather-section {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .weather-card {
-  background: linear-gradient(135deg, #0071e3 0%, #40a9ff 100%) !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .weather-content {
@@ -1827,7 +1817,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px;
+  padding: 15px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -1838,8 +1828,8 @@ export default {
 
 .weather-icon {
   font-size: 48px;
-  margin-right: 24px;
-  opacity: 0.95;
+  margin-right: 20px;
+  opacity: 0.9;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
@@ -1848,43 +1838,30 @@ export default {
 }
 
 .temperature {
-  font-size: 42px;
-  font-weight: 600;
-  margin-bottom: 4px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .city {
-  font-size: 20px;
-  opacity: 0.95;
-  margin-bottom: 4px;
-  font-weight: 500;
+  font-size: 18px;
+  opacity: 0.9;
+  margin-bottom: 5px;
 }
 
 .current-weather {
   font-size: 16px;
-  opacity: 0.9;
+  opacity: 0.8;
 }
 
 .weather-actions {
   display: flex;
-  gap: 12px;
-}
-
-.weather-actions .el-button {
-  color: white;
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  padding: 8px 16px;
-  border-radius: 980px;
-}
-
-.weather-actions .el-button:hover {
-  background: rgba(255, 255, 255, 0.3);
+  gap: 10px;
 }
 
 .weather-detail {
-  padding: 24px;
+  padding: 15px;
   background: rgba(255, 255, 255, 0.1);
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -1892,27 +1869,26 @@ export default {
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
+  gap: 15px;
+  margin-bottom: 15px;
 }
 
 .detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
 }
 
 .detail-item .label {
-  opacity: 0.9;
+  opacity: 0.8;
   font-size: 14px;
 }
 
 .detail-item .value {
-  font-weight: 600;
+  font-weight: bold;
   font-size: 16px;
 }
 
@@ -1922,97 +1898,112 @@ export default {
 
 .forecast-title {
   font-size: 16px;
-  opacity: 0.9;
-  margin-bottom: 20px;
-  font-weight: 600;
+  opacity: 0.8;
+  margin-bottom: 15px;
+  font-weight: bold;
 }
 
 .forecast-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 20px;
+  gap: 15px;
 }
 
 .forecast-item {
-  background: rgba(255, 255, 255, 0.15);
-  padding: 20px;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 8px;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
 }
 
 .forecast-item:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
 }
 
 .forecast-date {
   font-size: 14px;
-  opacity: 0.9;
-  margin-bottom: 10px;
+  opacity: 0.8;
+  margin-bottom: 8px;
 }
 
 .forecast-icon {
-  font-size: 28px;
-  margin-bottom: 10px;
+  font-size: 24px;
+  margin-bottom: 8px;
   display: block;
 }
 
 .forecast-temp {
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 4px;
 }
 
 .forecast-weather {
-  font-size: 13px;
-  opacity: 0.9;
+  font-size: 12px;
+  opacity: 0.8;
 }
 
-/* Metrics Section */
+/* 核心指标卡片样式 */
 .metrics-section {
-  margin-bottom: 24px;
+  margin-bottom: 15px;
 }
 
 .metric-col {
-  margin-bottom: 24px;
+  margin-bottom: 15px;
 }
 
 .core-metric {
-  height: 140px;
+  height: 120px;
   cursor: pointer;
   transition: all 0.3s ease;
   border: none;
-  border-radius: 18px;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
 }
 
+.core-metric::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
 .core-metric:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.core-metric:hover::before {
+  opacity: 1;
 }
 
 .metric-content {
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 24px;
+  padding: 15px;
 }
 
 .metric-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 20px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  margin-right: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .metric-icon {
-  font-size: 28px;
+  font-size: 24px;
   color: white;
 }
 
@@ -2021,139 +2012,141 @@ export default {
 }
 
 .metric-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #1d1d1f;
-  margin-bottom: 4px;
-  line-height: 1.1;
-  letter-spacing: -0.5px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #303133;
+  margin-bottom: 5px;
+  line-height: 1;
 }
 
 .metric-title {
-  font-size: 15px;
-  color: #86868b;
-  margin-bottom: 6px;
-  font-weight: 500;
+  font-size: 14px;
+  color: #909399;
+  margin-bottom: 5px;
 }
 
 .metric-subtitle {
-  font-size: 13px;
-  color: #86868b;
+  font-size: 12px;
+  color: #C0C4CC;
   margin-bottom: 8px;
 }
 
 .metric-trend {
   display: inline-flex;
   align-items: center;
-  font-size: 13px;
-  padding: 4px 10px;
-  border-radius: 980px;
-  font-weight: 600;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: bold;
   transition: all 0.3s ease;
 }
 
 .metric-trend.positive {
-  background-color: rgba(52, 199, 89, 0.1);
-  color: #34c759;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+  color: #409EFF;
+  border: 1px solid #d9ecff;
 }
 
 .metric-trend.negative {
-  background-color: rgba(255, 59, 48, 0.1);
-  color: #ff3b30;
+  background: linear-gradient(135deg, #fef0f0 0%, #fde2e2 100%);
+  color: #F56C6C;
+  border: 1px solid #fcd3d3;
 }
 
 .metric-trend.neutral {
-  background-color: rgba(142, 142, 147, 0.1);
-  color: #8e8e93;
+  background: linear-gradient(135deg, #f4f4f5 0%, #f0f0f1 100%);
+  color: #909399;
+  border: 1px solid #e4e7ed;
 }
 
 .metric-trend i {
-  margin-right: 4px;
-  font-size: 11px;
+  margin-right: 2px;
+  font-size: 10px;
 }
 
-/* Chart Section */
-.chart-section {
-  margin-bottom: 24px;
+/* 主要图表区域样式 */
+.main-chart-section {
+  margin-bottom: 15px;
 }
 
 .chart-col {
-  margin-bottom: 24px;
+  margin-bottom: 15px;
 }
 
 .chart-card {
   border: none;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 
 .chart-card:hover {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .main-chart {
-  min-height: 420px;
+  min-height: 350px;
 }
 
 .sub-chart {
-  min-height: 320px;
+  min-height: 280px;
 }
 
 .side-chart {
-  min-height: 300px;
+  min-height: 250px;
 }
 
 .chart-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0; /* Reset padding as it's inside el-card__header */
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .chart-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d1d1f;
+  font-size: 16px;
+  font-weight: bold;
+  color: #303133;
 }
 
 .chart-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .chart-container {
-  height: 320px;
+  height: 280px;
   width: 100%;
   padding: 10px;
 }
 
 .main-chart .chart-container {
-  height: 340px;
+  height: 300px;
 }
 
 .sub-chart .chart-container {
-  height: 260px;
-}
-
-.side-chart .chart-container {
   height: 220px;
 }
 
+.side-chart .chart-container {
+  height: 180px;
+}
+
 .chart-summary {
-  margin-top: 20px;
-  padding: 20px;
-  background-color: #f5f5f7;
-  border-radius: 12px;
-  border-left: 4px solid #0071e3;
+  margin-top: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 8px;
+  border-left: 4px solid #409EFF;
 }
 
 .summary-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   padding: 4px 0;
 }
 
@@ -2163,68 +2156,370 @@ export default {
 
 .summary-label {
   font-size: 14px;
-  color: #86868b;
-  font-weight: 500;
+  color: #606266;
 }
 
 .summary-value {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1d1d1f;
+  font-size: 14px;
+  font-weight: bold;
+  color: #303133;
 }
 
 .sub-charts-row {
-  margin-top: 24px;
+  margin-top: 15px;
 }
 
 .sub-chart-col {
-  margin-bottom: 24px;
+  margin-bottom: 15px;
 }
 
-/* Function Section */
+/* 功能区域样式 */
 .function-section {
-  margin-bottom: 24px;
+  margin-bottom: 15px;
 }
 
 .function-col {
-  margin-bottom: 24px;
+  margin-bottom: 15px;
 }
 
 .function-card {
   border: none;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 
 .function-card:hover {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .function-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0;
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .function-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d1d1f;
+  font-size: 16px;
+  font-weight: bold;
+  color: #303133;
 }
 
 .function-actions {
   display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 待办事项样式 */
+.todo-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  border-left: 4px solid #e4e7ed;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.todo-item:hover {
+  background: #f0f2f5;
+  transform: translateX(4px);
+}
+
+.todo-item.urgent {
+  background: linear-gradient(135deg, #fef0f0 0%, #fde2e2 100%);
+  border-left-color: #F56C6C;
+}
+
+.todo-item.urgent:hover {
+  background: linear-gradient(135deg, #fde2e2 0%, #fcd3d3 100%);
+}
+
+.todo-item.completed {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+  border-left-color: #409EFF;
+  opacity: 0.7;
+}
+
+.todo-content {
+  flex: 1;
+}
+
+.todo-title {
+  font-size: 14px;
+  color: #303133;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.todo-desc {
+  font-size: 12px;
+  color: #909399;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.todo-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.todo-time {
+  font-size: 12px;
+  color: #C0C4CC;
+}
+
+.todo-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 消息列表样式 */
+.message-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.message-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  background: #fafafa;
+  transition: all 0.3s ease;
+  border-left: 4px solid #e4e7ed;
+}
+
+.message-item:hover {
+  background: #f0f2f5;
+  transform: translateX(4px);
+}
+
+.message-item.unread {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+  border-left-color: #409EFF;
+}
+
+.message-item.unread:hover {
+  background: linear-gradient(135deg, #e6f7ff 0%, #d9ecff 100%);
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #409EFF 0%, #67C23A 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.message-avatar i {
+  color: white;
+  font-size: 16px;
+}
+
+.message-content {
+  flex: 1;
+}
+
+.message-text {
+  font-size: 14px;
+  color: #303133;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.message-time {
+  font-size: 12px;
+  color: #909399;
+}
+
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* 公告列表样式 */
+.notice-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.notice-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  background: #fafafa;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.notice-item:hover {
+  background: #f0f2f5;
+  border-color: #409EFF;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.1);
+}
+
+.notice-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #F56C6C;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.notice-content {
+  flex: 1;
+}
+
+.notice-title {
+  font-size: 14px;
+  color: #303133;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.notice-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 4px;
+}
+
+.notice-author {
+  font-size: 12px;
+  color: #409EFF;
+}
+
+.notice-time {
+  font-size: 12px;
+  color: #909399;
+}
+
+.notice-preview {
+  font-size: 12px;
+  color: #606266;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notice-arrow {
+  color: #C0C4CC;
+  transition: all 0.3s ease;
+}
+
+.notice-item:hover .notice-arrow {
+  color: #409EFF;
+  transform: translateX(4px);
+}
+
+/* 底部区域样式 */
+.bottom-section {
+  margin-bottom: 15px;
+}
+
+.bottom-col {
+  margin-bottom: 15px;
+}
+
+/* 日志区域样式 */
+.log-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.log-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #303133;
+}
+
+.log-actions {
+  display: flex;
+  align-items: center;
   gap: 10px;
 }
 
-/* Empty State */
+.log-container {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+/* 筛选表单样式 */
+.filter-form {
+  margin-bottom: 15px;
+  padding: 0 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.filter-form .el-form-item {
+  margin-bottom: 12px;
+  margin-right: 12px;
+}
+
+/* 表格容器样式 */
+.table-container {
+  padding: 0 15px 15px;
+}
+
+.submission-text {
+  font-size: 12px;
+  color: #909399;
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* 空状态样式 */
 .empty-state {
   text-align: center;
-  color: #86868b;
-  padding: 60px 20px;
-  font-size: 15px;
+  color: #909399;
+  padding: 40px 15px;
+  font-size: 14px;
 }
 
 .empty-state i {
@@ -2235,82 +2530,191 @@ export default {
 
 .empty-state p {
   margin: 0;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 14px;
 }
 
-/* Dialog Content */
-.notice-detail-content, .log-detail-content {
+/* 对话框内容样式 */
+.notice-detail-content {
   max-height: 60vh;
   overflow-y: auto;
-  padding: 10px;
 }
 
 .notice-content {
-  line-height: 1.6;
-  font-size: 15px;
-  color: #1d1d1f;
+  line-height: 1.8;
+  font-size: 14px;
+  color: #606266;
 }
 
 .notice-content >>> img {
   max-width: 100%;
   height: auto;
-  border-radius: 12px;
-  margin: 16px 0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.log-detail-content {
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 .weather-management {
   padding: 20px 0;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #d2d2d7;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #86868b;
-}
-
-/* Responsive */
+/* 响应式设计 */
 @media (max-width: 1200px) {
   .dashboard-container {
-    padding: 20px;
+    padding: 12px;
   }
+
   .metric-value {
-    font-size: 28px;
+    font-size: 24px;
+  }
+
+  .metric-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    margin-right: 12px;
+  }
+
+  .metric-icon {
+    font-size: 20px;
   }
 }
 
 @media (max-width: 768px) {
   .dashboard-container {
-    padding: 16px;
+    padding: 10px;
   }
-  .weather-content, .weather-main, .metric-content {
+
+  .weather-content {
     flex-direction: column;
     text-align: center;
   }
+
+  .weather-main {
+    flex-direction: column;
+    text-align: center;
+    padding: 12px;
+  }
+
   .weather-icon {
     margin-right: 0;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
+    font-size: 36px;
   }
+
+  .weather-actions {
+    margin-top: 10px;
+    justify-content: center;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .forecast-list {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+
+  .metric-content {
+    flex-direction: column;
+    text-align: center;
+    padding: 12px;
+  }
+
   .metric-icon-wrapper {
     margin-right: 0;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
   }
+
   .chart-container {
     height: 250px;
   }
+
+  .main-chart .chart-container {
+    height: 280px;
+  }
+
+  .function-actions {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .filter-form .el-form-item {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  .filter-form .el-form-item :deep(.el-input),
+  .filter-form .el-form-item :deep(.el-select) {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .temperature {
+    font-size: 28px;
+  }
+
+  .city {
+    font-size: 16px;
+  }
+
+  .metric-value {
+    font-size: 20px;
+  }
+
+  .chart-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .chart-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .filter-form {
+    padding: 12px;
+  }
+
+  .filter-form .el-form-item {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+/* 滚动条样式 */
+.todo-list::-webkit-scrollbar,
+.message-list::-webkit-scrollbar,
+.notice-list::-webkit-scrollbar,
+.log-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.todo-list::-webkit-scrollbar-track,
+.message-list::-webkit-scrollbar-track,
+.notice-list::-webkit-scrollbar-track,
+.log-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.todo-list::-webkit-scrollbar-thumb,
+.message-list::-webkit-scrollbar-thumb,
+.notice-list::-webkit-scrollbar-thumb,
+.log-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.todo-list::-webkit-scrollbar-thumb:hover,
+.message-list::-webkit-scrollbar-thumb:hover,
+.notice-list::-webkit-scrollbar-thumb:hover,
+.log-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 </style>

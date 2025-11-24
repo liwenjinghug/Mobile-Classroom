@@ -15,17 +15,17 @@ public interface HomeworkStatisticsMapper {
             "    cs.class_name as className, " +
             "    ch.total_score as totalScore, " +
             "    ch.deadline as deadline, " +
-            "    ch.create_time as createTime, " +  // 新增这一行
-            "    (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) as totalStudents, " +
+            "    ch.create_time as createTime, " +
+            "    (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) as totalStudents, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) as submittedCount, " +
-            "    ((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) - " +
+            "    ((SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) - " +
             "     (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2'))) as notSubmittedCount, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2') AND submit_time > ch.deadline) as overdueCount, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status = '2') as gradedCount, " +
             "    CASE " +
-            "        WHEN (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) > 0 " +
+            "        WHEN (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) > 0 " +
             "        THEN ROUND((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) * 100.0 / " +
-            "                  (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1), 2) " +
+            "                  (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id), 2) " +
             "        ELSE 0 " +
             "    END as submissionRate, " +
             "    (SELECT ROUND(AVG(grade), 2) FROM class_student_homework WHERE homework_id = ch.homework_id AND grade IS NOT NULL AND status = '2') as averageScore, " +
@@ -41,7 +41,7 @@ public interface HomeworkStatisticsMapper {
             @Result(property = "className", column = "className"),
             @Result(property = "totalScore", column = "totalScore"),
             @Result(property = "deadline", column = "deadline"),
-            @Result(property = "createTime", column = "createTime"),  // 新增这一行
+            @Result(property = "createTime", column = "createTime"),
             @Result(property = "totalStudents", column = "totalStudents"),
             @Result(property = "submittedCount", column = "submittedCount"),
             @Result(property = "notSubmittedCount", column = "notSubmittedCount"),
@@ -50,7 +50,6 @@ public interface HomeworkStatisticsMapper {
             @Result(property = "submissionRate", column = "submissionRate"),
             @Result(property = "averageScore", column = "averageScore"),
             @Result(property = "createBy", column = "createBy")
-
     })
     List<HomeworkStatisticsDTO> selectHomeworkStatisticsList();
 
@@ -62,16 +61,17 @@ public interface HomeworkStatisticsMapper {
             "    cs.class_name as className, " +
             "    ch.total_score as totalScore, " +
             "    ch.deadline as deadline, " +
-            "    (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) as totalStudents, " +
+            "    ch.create_time as createTime, " +
+            "    (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) as totalStudents, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) as submittedCount, " +
-            "    ((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) - " +
+            "    ((SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) - " +
             "     (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2'))) as notSubmittedCount, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2') AND submit_time > ch.deadline) as overdueCount, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status = '2') as gradedCount, " +
             "    CASE " +
-            "        WHEN (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) > 0 " +
+            "        WHEN (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) > 0 " +
             "        THEN ROUND((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) * 100.0 / " +
-            "                  (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1), 2) " +
+            "                  (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id), 2) " +
             "        ELSE 0 " +
             "    END as submissionRate, " +
             "    (SELECT ROUND(AVG(grade), 2) FROM class_student_homework WHERE homework_id = ch.homework_id AND grade IS NOT NULL AND status = '2') as averageScore, " +
@@ -95,6 +95,7 @@ public interface HomeworkStatisticsMapper {
             @Result(property = "className", column = "className"),
             @Result(property = "totalScore", column = "totalScore"),
             @Result(property = "deadline", column = "deadline"),
+            @Result(property = "createTime", column = "createTime"),
             @Result(property = "totalStudents", column = "totalStudents"),
             @Result(property = "submittedCount", column = "submittedCount"),
             @Result(property = "notSubmittedCount", column = "notSubmittedCount"),
@@ -114,16 +115,16 @@ public interface HomeworkStatisticsMapper {
             "    ch.total_score as totalScore, " +
             "    ch.deadline as deadline, " +
             "    ch.create_time as createTime, " +
-            "    (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) as totalStudents, " +
+            "    (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) as totalStudents, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) as submittedCount, " +
-            "    ((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) - " +
+            "    ((SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) - " +
             "     (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2'))) as notSubmittedCount, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2') AND submit_time > ch.deadline) as overdueCount, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status = '2') as gradedCount, " +
             "    CASE " +
-            "        WHEN (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) > 0 " +
+            "        WHEN (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) > 0 " +
             "        THEN ROUND((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) * 100.0 / " +
-            "                  (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1), 2) " +
+            "                  (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id), 2) " +
             "        ELSE 0 " +
             "    END as submissionRate, " +
             "    (SELECT ROUND(AVG(grade), 2) FROM class_student_homework WHERE homework_id = ch.homework_id AND grade IS NOT NULL AND status = '2') as averageScore, " +
@@ -141,7 +142,7 @@ public interface HomeworkStatisticsMapper {
             @Result(property = "className", column = "className"),
             @Result(property = "totalScore", column = "totalScore"),
             @Result(property = "deadline", column = "deadline"),
-            @Result(property = "createTime", column = "createTime"),  // 新增这一行
+            @Result(property = "createTime", column = "createTime"),
             @Result(property = "totalStudents", column = "totalStudents"),
             @Result(property = "submittedCount", column = "submittedCount"),
             @Result(property = "notSubmittedCount", column = "notSubmittedCount"),
@@ -192,9 +193,9 @@ public interface HomeworkStatisticsMapper {
             "    COUNT(DISTINCT ch.homework_id) as homeworkCount, " +
             "    SUM((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2'))) as totalSubmissions, " +
             "    CASE " +
-            "        WHEN SUM((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1)) > 0 " +
+            "        WHEN SUM((SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id)) > 0 " +
             "        THEN ROUND(AVG((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) * 100.0 / " +
-            "                      (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1)), 2) " +
+            "                      (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id)), 2) " +
             "        ELSE 0 " +
             "    END as avgSubmissionRate " +
             "FROM class_homework ch " +
@@ -209,9 +210,9 @@ public interface HomeworkStatisticsMapper {
             "    COUNT(DISTINCT ch.homework_id) as homeworkCount, " +
             "    SUM((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2'))) as totalSubmissions, " +
             "    CASE " +
-            "        WHEN SUM((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1)) > 0 " +
+            "        WHEN SUM((SELECT COUNT(*) FROM class_session_student WHERE session_id = cs.session_id)) > 0 " +
             "        THEN ROUND(AVG((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) * 100.0 / " +
-            "                      (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1)), 2) " +
+            "                      (SELECT COUNT(*) FROM class_session_student WHERE session_id = cs.session_id)), 2) " +
             "        ELSE 0 " +
             "    END as avgSubmissionRate " +
             "FROM class_session cs " +
@@ -273,16 +274,16 @@ public interface HomeworkStatisticsMapper {
             "    ch.total_score as totalScore, " +
             "    ch.deadline as deadline, " +
             "    ch.create_time as createTime, " +
-            "    (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) as totalStudents, " +
+            "    (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) as totalStudents, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) as submittedCount, " +
-            "    ((SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) - " +
+            "    ((SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) - " +
             "     (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2'))) as notSubmittedCount, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2') AND submit_time > ch.deadline) as overdueCount, " +
             "    (SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status = '2') as gradedCount, " +
             "    CASE " +
-            "        WHEN (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1) > 0 " +
+            "        WHEN (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id) > 0 " +
             "        THEN ROUND((SELECT COUNT(DISTINCT student_id) FROM class_student_homework WHERE homework_id = ch.homework_id AND status IN ('1','2')) * 100.0 / " +
-            "                  (SELECT COUNT(*) FROM class_student WHERE session_id = ch.session_id AND status = 1), 2) " +
+            "                  (SELECT COUNT(*) FROM class_session_student WHERE session_id = ch.session_id), 2) " +
             "        ELSE 0 " +
             "    END as submissionRate, " +
             "    (SELECT ROUND(AVG(grade), 2) FROM class_student_homework WHERE homework_id = ch.homework_id AND grade IS NOT NULL AND status = '2') as averageScore, " +

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -135,5 +136,33 @@ public class AttendanceReportController extends BaseController {
 
         ExcelUtil<AttendanceStatisticsDTO> util = new ExcelUtil<>(AttendanceStatisticsDTO.class);
         util.exportExcel(response, list, sheetName);
+    }
+
+    /**
+     * 导出考勤数据 - 新增导出接口
+     */
+    @Log(title = "考勤数据", businessType = BusinessType.EXPORT)
+    @PreAuthorize("@ss.hasPermi('proj_fz:attendanceReport:export')")
+    @GetMapping("/exportData")
+    public void exportAttendanceData(@RequestParam(required = false) Long sessionId,
+                                     @RequestParam(required = false) String startDate,
+                                     @RequestParam(required = false) String endDate,
+                                     @RequestParam String exportType,
+                                     @RequestParam(required = false) Integer attendanceStatus,
+                                     HttpServletResponse response) {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            if (sessionId != null) params.put("sessionId", sessionId);
+            if (startDate != null && !startDate.isEmpty()) params.put("startDate", startDate);
+            if (endDate != null && !endDate.isEmpty()) params.put("endDate", endDate);
+            if (exportType != null && !exportType.isEmpty()) params.put("exportType", exportType);
+            if (attendanceStatus != null) params.put("attendanceStatus", attendanceStatus);
+
+            logger.info("导出考勤数据参数: {}", params);
+            attendanceStatisticsService.exportAttendanceData(params, response);
+        } catch (Exception e) {
+            logger.error("导出考勤数据失败", e);
+            throw new RuntimeException("导出失败: " + e.getMessage());
+        }
     }
 }

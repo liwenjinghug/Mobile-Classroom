@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class HomeworkStatisticsServiceImpl implements IHomeworkStatisticsService {
+public class
+HomeworkStatisticsServiceImpl implements IHomeworkStatisticsService {
 
     @Autowired
     private HomeworkStatisticsMapper statisticsMapper;

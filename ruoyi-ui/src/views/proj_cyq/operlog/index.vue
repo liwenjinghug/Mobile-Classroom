@@ -2,120 +2,79 @@
   <div class="app-container">
     <el-row>
       <el-col :span="24">
-        <el-card>
-          <div slot="header" class="clearfix">
+        <el-card class="box-card">
+          <div slot="header" class="clearfix notice-header no-print">
             <span class="header-title">操作日志</span>
-            <el-button style="float: right;" type="primary" icon="el-icon-arrow-left" @click="handleBack">
-              返回
-            </el-button>
+            <div class="header-btn-group">
+              <el-button
+                type="primary"
+                icon="el-icon-s-data"
+                size="mini"
+                @click="handleStats"
+                class="mac-btn"
+              >
+                统计
+              </el-button>
+              <el-button
+                style="float: right;"
+                type="info"
+                plain
+                icon="el-icon-arrow-left"
+                size="mini"
+                @click="handleBack"
+                class="mac-btn"
+              >
+                返回
+              </el-button>
+            </div>
           </div>
 
-          <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+          <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px" class="no-print">
             <el-form-item label="系统模块" prop="title">
-              <el-input
-                v-model="queryParams.title"
-                placeholder="请输入系统模块"
-                clearable
-                size="small"
-                style="width: 240px"
-                @keyup.enter.native="handleQuery"
-              />
+              <el-input v-model="queryParams.title" placeholder="请输入系统模块" clearable size="small" style="width: 240px" @keyup.enter.native="handleQuery"/>
             </el-form-item>
             <el-form-item label="操作人员" prop="operName">
-              <el-input
-                v-model="queryParams.operName"
-                placeholder="请输入操作人员"
-                clearable
-                size="small"
-                style="width: 240px"
-                @keyup.enter.native="handleQuery"
-              />
+              <el-input v-model="queryParams.operName" placeholder="请输入操作人员" clearable size="small" style="width: 240px" @keyup.enter.native="handleQuery"/>
             </el-form-item>
             <el-form-item label="类型" prop="businessType">
-              <el-select
-                v-model="queryParams.businessType"
-                placeholder="操作类型"
-                clearable
-                size="small"
-                style="width: 240px"
-              >
-                <el-option
-                  v-for="dict in businessTypeOptions"
-                  :key="dict.value"
-                  :label="dict.label"
-                  :value="dict.value"
-                />
+              <el-select v-model="queryParams.businessType" placeholder="操作类型" clearable size="small" style="width: 240px">
+                <el-option v-for="dict in businessTypeOptions" :key="dict.value" :label="dict.label" :value="dict.value"/>
               </el-select>
             </el-form-item>
             <el-form-item label="状态" prop="status">
-              <el-select
-                v-model="queryParams.status"
-                placeholder="操作状态"
-                clearable
-                size="small"
-                style="width: 240px"
-              >
-                <el-option
-                  v-for="dict in statusOptions"
-                  :key="dict.value"
-                  :label="dict.label"
-                  :value="dict.value"
-                />
+              <el-select v-model="queryParams.status" placeholder="操作状态" clearable size="small" style="width: 240px">
+                <el-option v-for="dict in statusOptions" :key="dict.value" :label="dict.label" :value="dict.value"/>
               </el-select>
             </el-form-item>
             <el-form-item label="操作时间">
-              <el-date-picker
-                v-model="dateRange"
-                size="small"
-                style="width: 240px"
-                value-format="yyyy-MM-dd"
-                type="daterange"
-                range-separator="-"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-              ></el-date-picker>
+              <el-date-picker v-model="dateRange" size="small" style="width: 240px" value-format="yyyy-MM-dd" type="daterange" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery">搜索</el-button>
-              <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
+              <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery" class="mac-btn">搜索</el-button>
+              <el-button icon="el-icon-refresh" size="mini" @click="resetQuery" class="mac-btn">重置</el-button>
             </el-form-item>
           </el-form>
 
-          <el-row :gutter="10" class="mb8">
+          <el-row :gutter="10" class="mb8 no-print">
             <el-col :span="1.5">
-              <el-button
-                type="danger"
-                plain
-                icon="el-icon-delete"
-                size="small"
-                :disabled="multiple"
-                @click="handleDelete"
-              >删除</el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete" class="mac-btn">删除</el-button>
             </el-col>
             <el-col :span="1.5">
-              <el-button
-                type="danger"
-                plain
-                icon="el-icon-delete"
-                size="small"
-                @click="handleClean"
-              >清空</el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleClean" class="mac-btn">清空</el-button>
             </el-col>
             <el-col :span="1.5">
-              <el-button
-                type="warning"
-                plain
-                icon="el-icon-download"
-                size="small"
-                @click="handleExport"
-                :loading="exportLoading"
-              >导出</el-button>
+              <el-button type="warning" icon="el-icon-download" size="mini" @click="handleExport" :loading="exportLoading" class="mac-btn">导出</el-button>
+            </el-col>
+            <el-col :span="1.5">
+              <el-button type="primary" icon="el-icon-printer" size="mini" @click="handlePrint" class="mac-btn">打印</el-button>
             </el-col>
             <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
           </el-row>
 
-          <el-table v-loading="loading" :data="operlogList" @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="55" align="center" />
+          <h2 class="print-title" style="display: none;">操作日志列表</h2>
+
+          <el-table v-loading="loading" :data="operlogList" @selection-change="handleSelectionChange" class="print-table">
+            <el-table-column type="selection" width="55" align="center" class-name="no-print-col" />
             <el-table-column label="日志编号" align="center" prop="operId" />
             <el-table-column label="系统模块" align="center" prop="title" />
             <el-table-column label="操作类型" align="center" prop="businessType" :formatter="businessTypeFormat" />
@@ -123,36 +82,73 @@
             <el-table-column label="操作人员" align="center" prop="operName" />
             <el-table-column label="操作地址" align="center" prop="operIp" width="130" :show-overflow-tooltip="true" />
             <el-table-column label="操作地点" align="center" prop="operLocation" :show-overflow-tooltip="true" />
-            <el-table-column label="操作状态" align="center" prop="status" :formatter="statusFormat" />
+            <el-table-column label="操作状态" align="center" prop="status" :formatter="statusFormat">
+              <template slot-scope="scope">
+                <el-tag :type="scope.row.status === 0 ? 'success' : 'danger'">
+                  {{ statusFormat(scope.row) }}
+                </el-tag>
+              </template>
+            </el-table-column>
             <el-table-column label="操作日期" align="center" prop="operTime" width="180">
               <template slot-scope="scope">
                 <span>{{ parseTime(scope.row.operTime) }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+            <el-table-column label="操作" align="center" class-name="small-padding fixed-width no-print-col">
               <template slot-scope="scope">
-                <el-button
-                  size="mini"
-                  type="text"
-                  icon="el-icon-view"
-                  @click="handleView(scope.row)"
-                >详细</el-button>
+                <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详细</el-button>
               </template>
             </el-table-column>
           </el-table>
 
-          <pagination
-            v-show="total>0"
-            :total="total"
-            :page.sync="queryParams.pageNum"
-            :limit.sync="queryParams.pageSize"
-            @pagination="getList"
-          />
+          <pagination v-show="total>0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" class="no-print"/>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 操作日志详细 -->
+    <el-dialog title="操作日志统计" :visible.sync="statsOpen" width="800px" append-to-body class="no-print">
+      <div v-loading="statsLoading">
+        <el-row :gutter="20" class="stats-overview">
+          <el-col :span="24" style="text-align: center; margin-bottom: 20px;">
+            <div class="stat-value" style="font-size: 36px; color: #409EFF;">{{ stats.totalCount }}</div>
+            <div class="stat-label">总操作次数</div>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <h4 class="stats-subtitle">按模块统计</h4>
+            <el-table :data="stats.moduleStats" border size="mini" height="250">
+              <el-table-column prop="name" label="模块名称" align="center"/>
+              <el-table-column prop="value" label="次数" align="center" width="80"/>
+            </el-table>
+          </el-col>
+          <el-col :span="12">
+            <h4 class="stats-subtitle">按类型统计</h4>
+            <el-table :data="stats.typeStats" border size="mini" height="250">
+              <el-table-column prop="name" label="操作类型" align="center"/>
+              <el-table-column prop="value" label="次数" align="center" width="80"/>
+            </el-table>
+          </el-col>
+        </el-row>
+
+        <el-row style="margin-top: 20px;">
+          <el-col :span="24">
+            <h4 class="stats-subtitle">状态分布</h4>
+            <div style="display: flex; justify-content: center; gap: 40px;">
+              <div v-for="item in stats.statusStats" :key="item.name" class="stat-box" :class="item.name === '成功' ? 'success' : 'danger'">
+                <div class="stat-name">{{ item.name }}</div>
+                <div class="stat-num">{{ item.value }}</div>
+              </div>
+            </div>
+          </el-col>
+        </el-row>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="statsOpen = false">关 闭</el-button>
+      </div>
+    </el-dialog>
+
     <el-dialog title="操作日志详细" :visible.sync="open" width="700px" append-to-body>
       <el-form ref="form" :model="form" label-width="100px" size="mini">
         <el-row>
@@ -176,56 +172,38 @@
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="open = false">关 闭</el-button>
+        <el-button @click="open = false" class="mac-btn">关 闭</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import {listOperlog, delOperlog, cleanOperlog, exportOperlog} from "@/api/proj_cyq/operlog";
+// 请确保在 operlog.js 中添加了 getOperLogStats 方法
+import {listOperlog, delOperlog, cleanOperlog, exportOperlog, getOperLogStats} from "@/api/proj_cyq/operlog";
 
 export default {
   name: "Operlog",
   data() {
     return {
-      // 遮罩层
       loading: true,
-      // 选中数组
       ids: [],
-      // 非多个禁用
       multiple: true,
-      // 显示搜索条件
       showSearch: true,
-      // 总条数
       total: 0,
-      // 表格数据
       operlogList: [],
-      // 是否显示弹出层
       open: false,
-      // 类型数据字典 - 使用硬编码
       businessTypeOptions: [
-        {value: '0', label: '其它'},
-        {value: '1', label: '新增'},
-        {value: '2', label: '修改'},
-        {value: '3', label: '删除'},
-        {value: '4', label: '授权'},
-        {value: '5', label: '导出'},
-        {value: '6', label: '导入'},
-        {value: '7', label: '强退'},
-        {value: '8', label: '生成代码'},
+        {value: '0', label: '其它'}, {value: '1', label: '新增'}, {value: '2', label: '修改'},
+        {value: '3', label: '删除'}, {value: '4', label: '授权'}, {value: '5', label: '导出'},
+        {value: '6', label: '导入'}, {value: '7', label: '强退'}, {value: '8', label: '生成代码'},
         {value: '9', label: '清空数据'}
       ],
-      // 状态数据字典 - 使用硬编码
       statusOptions: [
-        {value: '0', label: '成功'},
-        {value: '1', label: '失败'}
+        {value: '0', label: '成功'}, {value: '1', label: '失败'}
       ],
-      // 日期范围
       dateRange: [],
-      // 表单参数
       form: {},
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -234,15 +212,23 @@ export default {
         businessType: undefined,
         status: undefined
       },
-      // 导出加载状态
-      exportLoading: false
+      exportLoading: false,
+
+      // 统计相关
+      statsOpen: false,
+      statsLoading: false,
+      stats: {
+        totalCount: 0,
+        moduleStats: [],
+        typeStats: [],
+        statusStats: []
+      }
     };
   },
   created() {
     this.getList();
   },
   methods: {
-    /** 查询操作日志记录列表 */
     getList() {
       this.loading = true;
       listOperlog(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
@@ -250,58 +236,40 @@ export default {
         this.total = response.total;
         this.loading = false;
       }).catch(error => {
-        console.error('获取列表失败:', error);
         this.loading = false;
-        this.$modal.msgError('获取数据失败');
       });
     },
-
-    // 操作日志状态字典翻译
     statusFormat(row, column) {
       const status = row.status;
       const dict = this.statusOptions.find(item => item.value == status);
       return dict ? dict.label : '未知';
     },
-
-    // 操作日志类型字典翻译
     businessTypeFormat(row, column) {
       const businessType = row.businessType;
       const dict = this.businessTypeOptions.find(item => item.value == businessType);
       return dict ? dict.label : '未知';
     },
-
-    // 业务类型过滤器（用于对话框显示）
     businessTypeFilter(businessType) {
       const dict = this.businessTypeOptions.find(item => item.value == businessType);
       return dict ? dict.label : '未知';
     },
-
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
       this.getList();
     },
-
-    /** 重置按钮操作 */
     resetQuery() {
       this.dateRange = [];
       this.resetForm("queryForm");
       this.handleQuery();
     },
-
-    // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.operId)
       this.multiple = !selection.length
     },
-
-    /** 详细按钮操作 */
     handleView(row) {
       this.open = true;
       this.form = row;
     },
-
-    /** 删除按钮操作 */
     handleDelete(row) {
       const operIds = row.operId || this.ids;
       this.$modal.confirm('是否确认删除操作日志编号为"' + operIds + '"的数据项？').then(() => {
@@ -309,68 +277,63 @@ export default {
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {
-      });
+      }).catch(() => {});
     },
-
-    /** 清空按钮操作 */
     handleClean() {
       this.$modal.confirm('是否确认清空所有操作日志数据项？').then(() => {
         return cleanOperlog();
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("清空成功");
-      }).catch(() => {
-      });
+      }).catch(() => {});
     },
-
-    /** 导出按钮操作 - 修复版本 */
     handleExport() {
       this.$modal.confirm('是否确认导出所有操作日志数据项？').then(() => {
         this.exportLoading = true;
-        // 不传递任何参数，使用 GET 请求
         return exportOperlog();
       }).then(response => {
-        // 直接使用响应数据创建下载
         this.handleExportResponse(response);
       }).catch((error) => {
-        console.error('导出失败:', error);
         this.exportLoading = false;
-        this.$modal.msgError("导出失败：" + (error.message || '未知错误'));
+      });
+    },
+    handlePrint() {
+      window.print();
+    },
+
+    // 【新增】处理统计
+    handleStats() {
+      this.statsOpen = true;
+      this.statsLoading = true;
+      getOperLogStats().then(response => {
+        if (response.code === 200) {
+          this.stats = response.data;
+        }
+        this.statsLoading = false;
+      }).catch(() => {
+        this.statsLoading = false;
+        this.$modal.msgError("获取统计数据失败");
       });
     },
 
-    /** 处理导出响应 */
     handleExportResponse(response) {
       try {
-        // 创建 blob 对象
-        const blob = new Blob([response], {
-          type: 'application/vnd.ms-excel;charset=utf-8'
-        });
-
-        // 创建下载链接
+        const blob = new Blob([response], { type: 'application/vnd.ms-excel;charset=utf-8' });
         const downloadElement = document.createElement('a');
         const href = window.URL.createObjectURL(blob);
-
         downloadElement.href = href;
         downloadElement.download = '操作日志记录数据.xlsx';
         document.body.appendChild(downloadElement);
         downloadElement.click();
-
-        // 清理
         document.body.removeChild(downloadElement);
         window.URL.revokeObjectURL(href);
-
         this.exportLoading = false;
         this.$modal.msgSuccess("导出成功");
       } catch (error) {
-        console.error('处理导出文件失败:', error);
         this.exportLoading = false;
         this.$modal.msgError("处理导出文件失败");
       }
     },
-
-    /** 返回按钮操作 */
     handleBack() {
       this.$router.push('/proj_cyq/index');
     }
@@ -379,10 +342,10 @@ export default {
 </script>
 
 <style scoped>
-/* Mac Style for Operlog Page */
+/* 统一的 Mac 风格样式 */
 .app-container {
-  padding: 40px 20px;
-  max-width: 1200px;
+  padding: 30px;
+  max-width: 1400px;
   margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1d1d1f;
@@ -390,17 +353,10 @@ export default {
   min-height: 100vh;
 }
 
-/* Card Styling */
-.app-container >>> .el-card {
-  border-radius: 18px;
-  border: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-  background-color: #ffffff;
-}
-
-.app-container >>> .el-card__header {
-  border-bottom: 1px solid #f5f5f7;
-  padding: 20px 24px;
+.notice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .header-title {
@@ -409,110 +365,105 @@ export default {
   color: #1d1d1f;
 }
 
-/* Form Styling */
-.app-container >>> .el-form-item__label {
-  font-weight: 500;
-  color: #1d1d1f;
+.header-btn-group {
+  display: flex;
+  gap: 10px;
 }
 
+/* 卡片 */
+.app-container >>> .el-card {
+  border-radius: 18px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  background-color: #ffffff;
+}
+.app-container >>> .el-card__header {
+  border-bottom: 1px solid #f5f5f7;
+  padding: 20px 24px;
+}
+
+/* 输入框 */
 .app-container >>> .el-input__inner {
   border-radius: 10px;
   border: 1px solid #d2d2d7;
-  height: 36px;
-  transition: all 0.2s ease;
 }
-
 .app-container >>> .el-input__inner:focus {
   border-color: #0071e3;
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
 }
 
-/* Button Styling */
-.app-container >>> .el-button {
-  border-radius: 980px;
+/* 按钮通用样式 (Mac Style) */
+.mac-btn {
+  border-radius: 20px;
   font-weight: 500;
-  border: none;
-  padding: 9px 20px;
-  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.app-container >>> .el-button--primary {
-  background-color: #0071e3;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+/* 1. 主操作 (搜索/打印/新增/统计) - 深蓝实心 */
+.app-container >>> .el-button--primary:not(.is-plain) {
+  background-color: #0071e3; border-color: #0071e3; color: #fff !important;
+  box-shadow: 0 2px 6px rgba(0, 113, 227, 0.3);
 }
-.app-container >>> .el-button--primary:hover {
-  background-color: #0077ed;
-  transform: translateY(-1px);
-}
-
-.app-container >>> .el-button--success {
-  background-color: #34c759;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
+.app-container >>> .el-button--primary:not(.is-plain):hover {
+  background-color: #0077ed; transform: translateY(-1px);
 }
 
-.app-container >>> .el-button--warning {
-  background-color: #ff9500;
-  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
+/* 2. 危险操作 (删除/清空) - 红色实心 */
+.app-container >>> .el-button--danger:not(.is-plain) {
+  background-color: #ff3b30; border-color: #ff3b30; color: #fff !important;
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.3);
+}
+.app-container >>> .el-button--danger:not(.is-plain):hover {
+  background-color: #ff453a; transform: translateY(-1px);
 }
 
-.app-container >>> .el-button--danger {
-  background-color: #ff3b30;
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
+/* 3. 警告操作 (导出) - 橙色实心 */
+.app-container >>> .el-button--warning:not(.is-plain) {
+  background-color: #ff9f0a; border-color: #ff9f0a; color: #fff !important;
+  box-shadow: 0 2px 6px rgba(255, 159, 10, 0.3);
+}
+.app-container >>> .el-button--warning:not(.is-plain):hover {
+  background-color: #ffb340; transform: translateY(-1px);
 }
 
-.app-container >>> .el-button--info {
-  background-color: #8e8e93;
+/* 4. 辅助操作 (返回/重置) - 白底灰边 */
+.app-container >>> .el-button--default,
+.app-container >>> .el-button--info.is-plain {
+  background-color: #fff; border: 1px solid #dcdfe6; color: #606266 !important;
+}
+.app-container >>> .el-button--default:hover,
+.app-container >>> .el-button--info.is-plain:hover {
+  border-color: #c6e2ff; color: #409eff !important; background-color: #ecf5ff;
 }
 
-/* Table Styling */
-.app-container >>> .el-table {
-  border-radius: 12px;
-  overflow: hidden;
-}
+/* 表格 */
+.app-container >>> .el-table { border-radius: 8px; overflow: hidden; margin-top: 15px; }
+.app-container >>> .el-table th { background-color: #fbfbfd; color: #86868b; font-weight: 600; height: 50px; }
+.app-container >>> .el-tag { border-radius: 6px; border: none; font-weight: 500; }
 
-.app-container >>> .el-table th {
-  background-color: #fbfbfd;
-  color: #86868b;
-  font-weight: 600;
-  border-bottom: 1px solid #f5f5f7;
-  padding: 12px 0;
+/* 统计样式 */
+.stats-subtitle {
+  font-size: 16px; font-weight: 600; color: #303133; margin: 15px 0 10px; text-align: center;
 }
-
-.app-container >>> .el-table td {
-  padding: 12px 0;
-  border-bottom: 1px solid #f5f5f7;
+.stat-box {
+  padding: 15px 25px; border-radius: 8px; text-align: center; min-width: 100px;
 }
+.stat-box.success { background-color: #f0f9eb; color: #67c23a; }
+.stat-box.danger { background-color: #fef0f0; color: #f56c6c; }
+.stat-name { font-size: 14px; margin-bottom: 5px; }
+.stat-num { font-size: 24px; font-weight: bold; }
 
-/* Dialog Styling */
-.app-container >>> .el-dialog {
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
-
-.app-container >>> .el-dialog__header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #f5f5f7;
-}
-
-.app-container >>> .el-dialog__title {
-  font-weight: 600;
-  font-size: 18px;
-  color: #1d1d1f;
-}
-
-.app-container >>> .el-dialog__body {
-  padding: 24px;
-}
-
-.app-container >>> .el-dialog__footer {
-  padding: 16px 24px;
-  border-top: 1px solid #f5f5f7;
-}
-
-/* Tags */
-.app-container >>> .el-tag {
-  border-radius: 6px;
-  border: none;
-  font-weight: 500;
+/* 打印样式 */
+@media print {
+  .no-print, .navbar, .sidebar-container, .tags-view-container, .el-dialog__wrapper, .v-modal, .el-pagination { display: none !important; }
+  .no-print-col, .el-table__fixed-right { display: none !important; }
+  .print-title { display: block !important; text-align: center; font-size: 24px; margin-bottom: 20px; font-weight: bold; }
+  .app-container { padding: 0; margin: 0; width: 100% !important; background-color: white; }
+  .app-container >>> .el-card { box-shadow: none; border: none; }
+  .app-container >>> .el-card__body { padding: 0; }
+  .print-table { border: 1px solid #000 !important; font-size: 12px; width: 100% !important; }
+  .print-table td, .print-table th { border: 1px solid #000 !important; color: #000 !important; padding: 8px 5px !important; }
+  tr { page-break-inside: avoid; }
+  .app-container >>> .el-tag { border: 1px solid #000 !important; background: none !important; color: #000 !important; padding: 0 5px; }
 }
 </style>

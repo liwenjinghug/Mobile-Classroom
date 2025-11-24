@@ -33,11 +33,20 @@ export function cleanOperlog() {
   })
 }
 
-// 导出操作日志记录 - 直接使用 GET 请求避免参数问题
-export function exportOperlog() {
+// 导出操作日志记录
+export function exportOperlog(query) {
   return request({
     url: '/proj_cyq/operlog/export',
-    method: 'get', // 改为 GET 请求，不传递任何参数
+    method: 'get',
+    params: query, // 添加参数支持，以便按条件导出
     responseType: 'blob'
+  })
+}
+
+// 【新增】获取操作日志统计信息
+export function getOperLogStats() {
+  return request({
+    url: '/proj_cyq/operlog/stats',
+    method: 'get'
   })
 }

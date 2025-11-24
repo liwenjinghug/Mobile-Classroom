@@ -9,10 +9,12 @@
       </el-select>
       <el-button @click="reload">查询</el-button>
       <el-button type="primary" @click="openEditor()">新增题目</el-button>
+      <el-button type="info" @click="openApiImport">从题库导入</el-button>
       <el-button type="danger" @click="removeSelected" :disabled="!selection.length">批量删除</el-button>
       <el-button @click="reload">刷新</el-button>
       <el-button type="success" @click="saveDraft" :disabled="!realExamId || savingMeta">保存草稿</el-button>
       <el-button type="warning" @click="doPublish" :disabled="!canPublish" :loading="publishing">发布考试</el-button>
+      <el-button type="info" @click="goBackPublish">返回发布页面</el-button>
       <span style="color:#909399" v-if="!canPublish">（需至少1题且考试ID有效才能发布）</span>
       <span style="color:#909399" v-if="filter.type">（已按题型筛选，已临时禁用拖拽排序）</span>
     </div>
@@ -106,6 +108,59 @@
         <el-button type="primary" @click="submitForm" :loading="saving">保 存</el-button>
       </div>
     </el-dialog>
+
+    <!-- API题库导入对话框 -->
+    <el-dialog title="从题库导入题目" :visible.sync="apiImportVisible" width="900px">
+      <div style="margin-bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <el-select v-model="apiFilter.type" placeholder="题型" clearable style="width: 120px">
+          <el-option :value="1" label="单选题"/>
+          <el-option :value="3" label="判断题"/>
+          <el-option :value="5" label="简答题"/>
+        </el-select>
+        <el-select v-model="apiFilter.difficulty" placeholder="难度" clearable style="width: 120px">
+          <el-option :value="1" label="简单"/>
+          <el-option :value="2" label="一般"/>
+          <el-option :value="3" label="困难"/>
+        </el-select>
+        <el-input v-model="apiFilter.keyword" placeholder="关键词搜索" style="width: 200px" clearable />
+        <el-button @click="searchApiQuestions" :loading="apiLoading">搜索题目</el-button>
+        <div style="margin-left: auto; color: #666;">
+          已选择：{{ selectedApiQuestions.length }} 题，
+          总分值：{{ selectedTotalScore }}分，
+          当前考试总分：{{ currentExamTotalScore }}分
+        </div>
+      </div>
+
+      <el-table :data="apiQuestions" style="width: 100%" @selection-change="onApiSelectionChange" v-loading="apiLoading" max-height="400">
+        <el-table-column type="selection" width="45" />
+        <el-table-column prop="type" label="题型" width="90">
+          <template slot-scope="scope">{{ typeText(scope.row.type) }}</template>
+        </el-table-column>
+        <el-table-column prop="question" label="题目内容" min-width="300" />
+        <el-table-column prop="difficulty" label="难度" width="80">
+          <template slot-scope="scope">{{ difficultyText(scope.row.difficulty) }}</template>
+        </el-table-column>
+        <el-table-column label="分值" width="100">
+          <template slot-scope="scope">
+            <el-input-number
+              v-model="scope.row.score"
+              :min="0.5"
+              :step="0.5"
+              :max="100"
+              size="mini"
+              style="width: 80px"
+            />
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="apiImportVisible = false">取 消</el-button>
+        <el-button type="primary" @click="importSelectedQuestions" :loading="importing" :disabled="selectedApiQuestions.length === 0">
+          导入选中题目 ({{ selectedApiQuestions.length }})
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -113,6 +168,7 @@
 import { listExamQuestion, addExamQuestion, updateExamQuestion, delExamQuestion, delExamQuestionBatch, reorderExamQuestions } from '@/api/proj_lwj/examQuestion'
 import { updateExam, publishExam, getExam } from '@/api/proj_lwj/exam'
 import { getCourse } from '@/api/proj_lw/course'
+import request from '@/utils/request'
 import Sortable from 'sortablejs'
 
 export default {
@@ -139,7 +195,18 @@ export default {
       // 课程信息（来自考试 -> 课程）
       courseId: null,
       courseName: '',
-      courseType: ''
+      courseType: '',
+      // API题库导入相关
+      apiImportVisible: false,
+      apiLoading: false,
+      importing: false,
+      apiQuestions: [],
+      selectedApiQuestions: [],
+      apiFilter: {
+        type: null,
+        difficulty: null,
+        keyword: ''
+      }
     }
   },
   computed: {
@@ -187,6 +254,12 @@ export default {
     },
     canPublish() {
       return this.realExamId > 0 && Array.isArray(this.list) && this.list.length > 0
+    },
+    selectedTotalScore() {
+      return this.selectedApiQuestions.reduce((sum, q) => sum + (q.score || 0), 0)
+    },
+    currentExamTotalScore() {
+      return this.list.reduce((sum, q) => sum + (q.score || 0), 0)
     }
   },
   mounted() {
@@ -206,6 +279,12 @@ export default {
         const ex = await getExam(id)
         const exData = ex && (ex.data || ex)
         const examObj = exData && (exData.data || exData)
+
+        // 保存考试信息
+        if (examObj) {
+          this.examInfo = examObj
+        }
+
         const courseId = examObj && (examObj.courseId || examObj.course_id)
         if (courseId) {
           const c = await getCourse(courseId)
@@ -401,8 +480,259 @@ export default {
         this.$message.error('保存草稿失败')
       } finally { this.savingMeta = false }
     },
+    // 题库相关方法
+    async openTriviaDialog() {
+      this.triviaDialogVisible = true
+      if (this.triviaCategories.length === 0) {
+        try {
+          const res = await getTriviaCategories()
+          this.triviaCategories = res.data || []
+        } catch (error) {
+          this.$message.error('获取题库分类失败: ' + error.message)
+        }
+      }
+    },
+
+    async fetchTriviaQuestions() {
+      if (this.triviaParams.amount < 1 || this.triviaParams.amount > 50) {
+        this.$message.error('题目数量必须在1-50之间')
+        return
+      }
+
+      this.loadingTrivia = true
+      try {
+        const res = await getTriviaQuestions(this.triviaParams)
+        this.triviaQuestions = res.data || []
+        this.selectedTrivia = []
+        if (this.triviaQuestions.length === 0) {
+          this.$message.warning('未获取到题目，请尝试调整筛选条件')
+        } else {
+          this.$message.success(`成功获取${this.triviaQuestions.length}道题目`)
+        }
+      } catch (error) {
+        this.$message.error('获取题目失败: ' + error.message)
+        this.triviaQuestions = []
+      } finally {
+        this.loadingTrivia = false
+      }
+    },
+
+    onTriviaSelectionChange(selection) {
+      this.selectedTrivia = selection
+    },
+
+    updateTriviaScore() {
+      // 更新选中题目的总分值显示
+      this.$forceUpdate()
+    },
+
+    async addSelectedTriviaQuestions() {
+      if (this.selectedTrivia.length === 0) {
+        this.$message.warning('请先选择要添加的题目')
+        return
+      }
+
+      const duplicateCount = this.selectedTrivia.filter(question =>
+        checkQuestionDuplicate(this.list, question)
+      ).length
+
+      if (duplicateCount > 0) {
+        const confirm = await this.$confirm(
+          `检测到${duplicateCount}道重复题目，是否仍要添加？`,
+          '重复题目提醒',
+          { type: 'warning' }
+        ).catch(() => false)
+        if (!confirm) return
+      }
+
+      // 添加题目到列表
+      const newQuestions = []
+      for (const question of this.selectedTrivia) {
+        // 跳过重复题目
+        if (checkQuestionDuplicate(this.list, question)) continue
+
+        const newQuestion = {
+          ...question,
+          examId: this.realExamId,
+          sortOrder: this.list.length + newQuestions.length + 1,
+          id: null // 新题目ID为空
+        }
+        newQuestions.push(newQuestion)
+      }
+
+      if (newQuestions.length === 0) {
+        this.$message.warning('所选题目均为重复题目，未添加')
+        return
+      }
+
+      try {
+        // 逐个保存题目
+        for (const question of newQuestions) {
+          await addExamQuestion(question)
+        }
+
+        this.$message.success(`成功添加${newQuestions.length}道题目`)
+        this.triviaDialogVisible = false
+        this.reload()
+      } catch (error) {
+        console.error('添加题目失败:', error)
+        this.$message.error('添加题目失败: ' + (error.message || '未知错误'))
+      }
+    },
+
+    getQuestionTypeText(type) {
+      const types = { 1: '单选题', 2: '多选题', 3: '判断题', 4: '填空题', 5: '简答题' }
+      return types[type] || '未知'
+    },
+
+    getDifficultyText(difficulty) {
+      const difficulties = { 1: '简单', 2: '中等', 3: '困难' }
+      return difficulties[difficulty] || '未知'
+    },
+
+    // API题库导入相关方法（切换为本地题库）
+    openApiImport() {
+      this.apiImportVisible = true
+      this.apiQuestions = []
+      this.selectedApiQuestions = []
+      this.apiFilter = { type: null, difficulty: null, keyword: '' }
+      // 自动加载本地题库列表，避免首次打开显示“暂无数据”需要手动点击搜索
+      this.$nextTick(() => {
+        this.searchApiQuestions()
+      })
+    },
+
+    // 将考试题型(1单选/3判断/5简答)映射为本地题库题型(1单选/2判断/3简答)
+    examTypeToLocalType(examType) {
+      const t = Number(examType)
+      if (t === 1) return 1
+      if (t === 3) return 2
+      if (t === 5) return 3
+      return undefined
+    },
+    // 将本地题库题型映射为考试题型
+    localTypeToExamType(localType) {
+      const t = Number(localType)
+      if (t === 1) return 1
+      if (t === 2) return 3
+      if (t === 3) return 5
+      return 5
+    },
+
+    async searchApiQuestions() {
+      this.apiLoading = true
+      try {
+        const params = {
+          keyword: this.apiFilter.keyword || undefined,
+          questionType: this.apiFilter.type ? this.examTypeToLocalType(this.apiFilter.type) : undefined,
+          difficulty: this.apiFilter.difficulty || undefined,
+          pageNum: 1,
+          pageSize: 50
+        }
+        const response = await request({ url: '/proj_lwj/local-question/list', method: 'get', params })
+        const raw = (response && (response.rows || response.data)) ? (response.rows || response.data) : []
+        this.apiQuestions = raw.map(q => {
+          // optionsJson 可能为 JSON 字符串或 null
+          let options = []
+          try {
+            if (q.optionsJson) {
+              const parsed = typeof q.optionsJson === 'string' ? JSON.parse(q.optionsJson) : q.optionsJson
+              if (Array.isArray(parsed)) options = parsed
+            }
+          } catch (e) { /* ignore parse error */ }
+          return {
+            id: q.id,
+            type: this.localTypeToExamType(q.questionType),
+            question: q.questionContent,
+            options,
+            correctAnswer: q.correctAnswer,
+            difficulty: Number(q.difficulty) || 1,
+            score: Number(q.score || 1)
+          }
+        })
+
+        if (this.apiQuestions.length === 0) {
+          this.$message.warning('未找到符合条件的题目')
+        } else {
+          this.$message.success(`找到 ${this.apiQuestions.length} 道题目`)
+        }
+      } catch (error) {
+        this.$message.error('搜索题目失败: ' + (error.message || '网络错误'))
+        this.apiQuestions = []
+      } finally {
+        this.apiLoading = false
+      }
+    },
+
+    onApiSelectionChange(selection) {
+      this.selectedApiQuestions = selection
+    },
+
+    difficultyText(difficulty) {
+      const map = { 1: '简单', 2: '一般', 3: '困难' }
+      return map[difficulty] || '未知'
+    },
+
+    async importSelectedQuestions() {
+      if (this.selectedApiQuestions.length === 0) {
+        this.$message.warning('请选择要导入的题目')
+        return
+      }
+
+      // 检查重复题目（按题干完全一致）
+      const duplicates = this.selectedApiQuestions.filter(apiQ =>
+        this.list.some(localQ =>
+          localQ.questionContent && apiQ.question &&
+          localQ.questionContent.trim() === apiQ.question.trim()
+        )
+      )
+
+      if (duplicates.length > 0) {
+        try {
+          await this.$confirm(
+            `检测到 ${duplicates.length} 道重复题目，是否继续导入？`,
+            '重复题目提醒',
+            { type: 'warning' }
+          )
+        } catch {
+          return
+        }
+      }
+
+      this.importing = true
+      try {
+        const maxOrder = Math.max(...this.list.map(q => q.sortOrder || 0), 0)
+
+        for (let i = 0; i < this.selectedApiQuestions.length; i++) {
+          const apiQ = this.selectedApiQuestions[i]
+          const payload = {
+            examId: this.realExamId,
+            questionType: apiQ.type,
+            questionContent: apiQ.question,
+            questionOptions: Array.isArray(apiQ.options) ? JSON.stringify(apiQ.options) : (apiQ.options || ''),
+            correctAnswer: apiQ.correctAnswer,
+            score: apiQ.score || 1,
+            difficulty: apiQ.difficulty || 1,
+            sortOrder: maxOrder + i + 1,
+            analysis: '',
+            subject: this.courseName || this.courseType || ''
+          }
+
+          await addExamQuestion(payload)
+        }
+
+        this.$message.success(`成功导入 ${this.selectedApiQuestions.length} 道题目`)
+        this.apiImportVisible = false
+        this.reload()
+      } catch (error) {
+        this.$message.error('导入失败: ' + (error.message || '未知错误'))
+      } finally {
+        this.importing = false
+      }
+    },
+
     async doPublish() {
-      if (!this.canPublish) { this.$message.error('至少添加1个题目后才能发布'); return }
+      if (!this.canPublish) { this.$message.error(this.publishReason || '发布条件不满足'); return }
       this.publishing = true
       try {
         // 先更新题目数量再发布
@@ -438,6 +768,9 @@ export default {
         console.error('publish error', e)
         this.$message.error('发布失败')
       } finally { this.publishing = false }
+    },
+    goBackPublish(){
+      this.$router.push({ path:'/proj_lwj_exam/exam_publish' }).catch(()=>{})
     }
   }
 }

@@ -12,4 +12,7 @@ public interface IClassExamAnswerService {
     int deleteById(Long id);
     int deleteByIds(Long[] ids);
     int deleteByExamId(Long examId);
+    List<ClassExamAnswer> selectUngradedSubjective(Long examId);
+    int gradeOne(ClassExamAnswer a);
+    int gradeBatch(List<ClassExamAnswer> list);
 }

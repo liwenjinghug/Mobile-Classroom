@@ -271,6 +271,21 @@ export const constantRoutes = [
         meta: { title: '进行考试', icon: 'edit' },
         props: true,
         hidden: true
+      },
+      // === 新增 考试批改入口 ===
+      {
+        path: 'exam_grading',
+        component: () => import('@/views/proj_lwj/exam_grading/index.vue'),
+        name: 'ProjLwj_ExamGrading',
+        meta: { title: '考试批改', icon: 'edit', roles: ['teacher','admin'] }
+      },
+      {
+        path: 'exam_grading/:examId',
+        component: () => import('@/views/proj_lwj/exam_grading/index.vue'),
+        name: 'ProjLwj_ExamGradingDetail',
+        meta: { title: '考试批改详情', icon: 'edit', roles: ['teacher','admin'] },
+        props: true,
+        hidden: true
       }
     ]
   },
@@ -313,7 +328,7 @@ export const constantRoutes = [
   {
     path: '/proj_qhy',
     component: Layout,
-    redirect: '/forum/article',
+    redirect: 'noRedirect',
     name: 'proj_qhy',
     meta: { title: '学习社区', icon: 'peoples' },
     alwaysShow: true,
@@ -350,6 +365,25 @@ export const constantRoutes = [
         component: () => import('@/views/proj_qhy/group/chat.vue'),
         name: 'GroupChat',
         meta: { title: '聊天' },
+        hidden: true
+      },
+      {
+        path: 'debate',
+        // 注意路径：对应你实际存放 index.vue 的位置
+        component: () => import('@/views/proj_qhy/debate/index.vue'),
+        name: 'Debate',
+        meta: { title: '辩论管理', icon: 'education' }
+      },
+      {
+        path: 'debate/room/:id',
+        // 注意路径：对应你实际存放 room.vue 的位置
+        component: () => import('@/views/proj_qhy/debate/room.vue'),
+        name: 'DebateRoom',
+        meta: {
+          title: '辩论室',
+          // 【关键配置】: 此时左侧菜单依然高亮 '辩论管理'
+          activeMenu: '/proj_qhy/debate'
+        },
         hidden: true
       }
     ]

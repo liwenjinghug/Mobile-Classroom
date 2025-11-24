@@ -110,4 +110,34 @@ public class ClassExamServiceImpl implements IClassExamService {
     public List<ClassExam> selectAvailableByStudentNo(String studentNo) {
         return examMapper.selectAvailableByStudentNo(studentNo);
     }
+
+    @Override
+    public int updateExamStatus(Long id, Integer status, String updateBy) {
+        ClassExam exam = examMapper.selectExamById(id);
+        if (exam == null) return 0;
+        // 发布校验：题目总分必须 >= 设置的总分
+        if (status != null && status == 1) {
+            int cnt = questionMapper.countByExamId(id);
+            java.math.BigDecimal actualTotal = java.math.BigDecimal.ZERO;
+            // 计算实际总分
+            com.ruoyi.proj_lwj.domain.ClassExamQuestion qFilter = new com.ruoyi.proj_lwj.domain.ClassExamQuestion();
+            qFilter.setExamId(id);
+            java.util.List<com.ruoyi.proj_lwj.domain.ClassExamQuestion> qList = questionMapper.selectQuestionList(qFilter);
+            for (com.ruoyi.proj_lwj.domain.ClassExamQuestion q : qList) {
+                if (q.getScore() != null) actualTotal = actualTotal.add(q.getScore());
+            }
+            if (exam.getTotalScore() != null && actualTotal.compareTo(exam.getTotalScore()) < 0) {
+                throw new com.ruoyi.common.exception.ServiceException("题目总分不足，当前总分 " + actualTotal + " < 设置总分 " + exam.getTotalScore());
+            }
+            // 如果考试设置总分为空，则自动写入实际总分
+            if (exam.getTotalScore() == null) {
+                exam.setTotalScore(actualTotal);
+            }
+            // 更新题目数量
+            exam.setQuestionCount(cnt);
+        }
+        exam.setStatus(status);
+        exam.setUpdateBy(updateBy);
+        return examMapper.updateExam(exam);
+    }
 }

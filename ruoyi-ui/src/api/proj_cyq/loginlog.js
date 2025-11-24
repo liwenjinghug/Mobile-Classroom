@@ -33,12 +33,20 @@ export function cleanLoginlog() {
   })
 }
 
-// 导出系统登录日志 - 修改为GET请求，参考操作日志的方式
+// 导出系统登录日志
 export function exportLoginlog(query) {
   return request({
     url: '/proj_cyq/loginlog/export',
-    method: 'get', // 改为GET请求
-    params: query, // 使用params传递查询参数
+    method: 'get',
+    params: query,
     responseType: 'blob'
+  })
+}
+
+// 【新增】获取登录日志统计数据
+export function getLoginLogStats() {
+  return request({
+    url: '/proj_cyq/loginlog/stats',
+    method: 'get'
   })
 }

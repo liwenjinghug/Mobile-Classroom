@@ -44,33 +44,14 @@ public class ClassLoginLogController extends BaseController {
     }
 
     /**
-     * 导出系统登录日志列表 - 修改为GET请求，参考操作日志的方式
+     * 导出系统登录日志列表
      */
     @Log(title = "登录日志", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public void export(HttpServletResponse response, ClassLoginLog classLoginLog) {
-        System.out.println("开始导出登录日志，查询条件: " + classLoginLog);
-
         List<ClassLoginLog> list = classLoginLogService.selectClassLoginLogList(classLoginLog);
-
-        // 详细的调试信息
-        System.out.println("导出登录日志数据条数: " + (list != null ? list.size() : 0));
-        if (list != null && !list.isEmpty()) {
-            for (int i = 0; i < Math.min(list.size(), 3); i++) {
-                System.out.println("第" + (i+1) + "条数据: " + list.get(i));
-            }
-        } else {
-            System.out.println("导出的登录日志数据为空");
-        }
-
-        try {
-            ExcelUtil<ClassLoginLog> util = new ExcelUtil<ClassLoginLog>(ClassLoginLog.class);
-            util.exportExcel(response, list, "系统登录日志数据");
-            System.out.println("Excel导出完成");
-        } catch (Exception e) {
-            System.out.println("Excel导出异常: " + e.getMessage());
-            e.printStackTrace();
-        }
+        ExcelUtil<ClassLoginLog> util = new ExcelUtil<ClassLoginLog>(ClassLoginLog.class);
+        util.exportExcel(response, list, "系统登录日志数据");
     }
 
     /**
@@ -99,5 +80,11 @@ public class ClassLoginLogController extends BaseController {
     public AjaxResult clean() {
         classLoginLogService.cleanClassLoginLog();
         return success();
+    }
+
+    // ========== 【新增】获取统计数据 ==========
+    @GetMapping("/stats")
+    public AjaxResult getStats() {
+        return success(classLoginLogService.getLoginLogStats());
     }
 }

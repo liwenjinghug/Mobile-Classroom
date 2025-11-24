@@ -37,5 +37,10 @@ public class ClassExamSessionServiceImpl implements IClassExamSessionService {
         }
         return count;
     }
-}
 
+    @Override
+    public int deleteByExamId(Long examId) {
+        if (examId == null) return 0;
+        return mapper.deleteByExamId(examId);
+    }
+}

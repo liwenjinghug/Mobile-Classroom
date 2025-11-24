@@ -51,4 +51,13 @@ public class ClassExamAnswerServiceImpl implements IClassExamAnswerService {
 
     @Override
     public int deleteByExamId(Long examId) { return mapper.deleteByExamId(examId); }
+
+    @Override
+    public List<ClassExamAnswer> selectUngradedSubjective(Long examId) { return mapper.selectUngradedSubjective(examId); }
+
+    @Override
+    public int gradeOne(ClassExamAnswer a) { return mapper.gradeOne(a); }
+
+    @Override
+    public int gradeBatch(List<ClassExamAnswer> list) { return mapper.gradeBatch(list); }
 }

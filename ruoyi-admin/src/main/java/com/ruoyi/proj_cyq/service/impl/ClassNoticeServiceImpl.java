@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map; // 【新增】
+import java.util.HashMap; // 【新增】
 
 @Service
 public class ClassNoticeServiceImpl implements IClassNoticeService {
@@ -49,5 +51,27 @@ public class ClassNoticeServiceImpl implements IClassNoticeService {
     @Override
     public int deleteClassNoticeByIds(Long[] noticeIds) {
         return classNoticeMapper.deleteClassNoticeByIds(noticeIds, SecurityUtils.getUsername());
+    }
+
+    // ========== 【新增】统计逻辑实现 ==========
+    @Override
+    public Map<String, Object> getNoticeStats() {
+        Map<String, Object> result = new HashMap<>();
+
+        // 1. 获取统计数据
+        List<Map<String, Object>> creatorStats = classNoticeMapper.selectNoticeStatsByCreator();
+        List<Map<String, Object>> dateStats = classNoticeMapper.selectNoticeStatsByDate();
+
+        // 2. 计算总数
+        int totalCount = 0;
+        for (Map<String, Object> item : creatorStats) {
+            totalCount += Integer.parseInt(item.get("value").toString());
+        }
+
+        result.put("totalCount", totalCount);
+        result.put("creatorStats", creatorStats);
+        result.put("dateStats", dateStats);
+
+        return result;
     }
 }

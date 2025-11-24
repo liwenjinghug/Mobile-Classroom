@@ -1,9 +1,8 @@
 <template>
   <div class="app-container homework-dashboard">
-    <!-- 顶部概览卡片和图表部分保持不变 -->
-    <el-row :gutter="20">
-      <!-- 顶部概览卡片 -->
-      <el-col :span="6" v-for="(card, index) in overviewCards" :key="index">
+    <!-- 顶部概览卡片 - 一行占满显示 -->
+    <el-row :gutter="20" class="top-overview-row">
+      <el-col :span="4.8" v-for="(card, index) in overviewCards" :key="index">
         <el-card shadow="hover" class="dashboard-card">
           <div class="card-content">
             <div class="card-icon" :style="{ backgroundColor: card.color }">
@@ -113,10 +112,9 @@
         </div>
       </template>
 
-      <!-- 筛选条件 - 优化布局 -->
+      <!-- 筛选条件 -->
       <div class="filter-container">
         <div class="filter-row">
-          <!-- 第一行筛选条件 -->
           <div class="filter-group">
             <div class="filter-item">
               <span class="filter-label">作业名称：</span>
@@ -167,7 +165,6 @@
         </div>
 
         <div class="filter-row">
-          <!-- 第二行筛选条件 -->
           <div class="filter-group">
             <div class="filter-item">
               <span class="filter-label">发布时间：</span>
@@ -214,7 +211,6 @@
         </div>
 
         <div class="filter-row">
-          <!-- 第三行筛选条件 -->
           <div class="filter-group">
             <div class="filter-item">
               <span class="filter-label">过期状态：</span>
@@ -384,7 +380,6 @@ import {
   getCourseList,
   getSessionList,
   exportHomeworkData,
-  getHomeworkStatisticsListByFilter,
   getSessionOverview,
   getTodayDeadlineCount,
   getHomeworkStatisticsListByAdvancedFilter
@@ -406,7 +401,6 @@ export default {
       scoreChart: null,
       trendChart: null,
 
-      // 整合所有筛选条件到一个表单中
       filterForm: {
         homeworkTitle: '',
         courseId: null,
@@ -495,12 +489,9 @@ export default {
       try {
         let response
 
-        // 判断是否有任何筛选条件
         if (this.hasAnyFilter()) {
-          // 使用高级筛选，支持所有条件
           response = await getHomeworkStatisticsListByAdvancedFilter(this.filterForm)
         } else {
-          // 没有筛选条件，获取全部数据
           response = await getHomeworkStatisticsList()
         }
 
@@ -516,7 +507,6 @@ export default {
       }
     },
 
-    // 检查是否有任何筛选条件
     hasAnyFilter() {
       const form = this.filterForm
       return form.homeworkTitle || form.courseId || form.sessionId ||
@@ -526,7 +516,6 @@ export default {
         form.completionStatus
     },
 
-    // 其他方法保持不变...
     async loadData() {
       this.loading = true
       try {
@@ -788,14 +777,9 @@ export default {
     async handleExport() {
       try {
         this.loading = true
-
-        // 构建导出参数 - 使用当前筛选条件
         const exportParams = { ...this.filterForm }
-
-        console.log('导出参数:', exportParams)
         const response = await exportHomeworkData(exportParams)
 
-        // 创建下载链接
         const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
@@ -815,13 +799,11 @@ export default {
       }
     },
 
-    // 打印功能
     handlePrint() {
       this.$nextTick(() => {
         const printContent = document.getElementById('printTable').outerHTML
         const charts = []
 
-        // 获取图表数据
         if (this.submissionChart) {
           charts.push({
             title: '提交状态分布',
@@ -895,7 +877,6 @@ export default {
     },
 
     handleFilterChange() {
-      // 防抖处理，避免频繁请求
       clearTimeout(this.filterTimer)
       this.filterTimer = setTimeout(() => {
         this.loadHomeworkList()
@@ -932,7 +913,6 @@ export default {
       return '#F56C6C'
     },
 
-    // 格式化日期显示
     formatDate(dateString) {
       if (!dateString) return '-'
       try {
@@ -955,7 +935,6 @@ export default {
 </script>
 
 <style scoped>
-/* Mac Style for Homework Dashboard */
 .app-container {
   padding: 40px 20px;
   max-width: 1200px;
@@ -964,6 +943,13 @@ export default {
   color: #1d1d1f;
   background-color: #f5f5f7;
   min-height: 100vh;
+}
+
+/* 顶部概览卡片 - 一行占满 */
+.top-overview-row {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
 }
 
 /* Card Styling */
@@ -990,6 +976,16 @@ export default {
   height: 120px;
   display: flex;
   align-items: center;
+  flex: 1;
+  margin: 0 10px;
+}
+
+.dashboard-card:first-child {
+  margin-left: 0;
+}
+
+.dashboard-card:last-child {
+  margin-right: 0;
 }
 
 .card-content {
@@ -1096,7 +1092,7 @@ export default {
   color: #1d1d1f;
 }
 
-/* 筛选条件样式优化 */
+/* 筛选条件样式 */
 .filter-container {
   margin-bottom: 24px;
   padding: 24px;
