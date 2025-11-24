@@ -2,6 +2,8 @@ package com.ruoyi.proj_lw.service.impl;
 
 import java.util.Date;
 import java.util.List;
+
+import com.ruoyi.common.core.domain.model.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.proj_lw.mapper.MaterialMapper;
@@ -26,6 +28,15 @@ public class MaterialServiceImpl implements IMaterialService
 
     @Override
     public List<Material> selectMaterialList(Material material) {
+        // 判断是否是学生角色
+        boolean isStudent = SecurityUtils.getLoginUser().getUser().getRoles().stream()
+                .anyMatch(role -> "student".equals(role.getRoleKey()));
+
+        // 如果是学生，确保只能查看已推送的资料
+        if (isStudent) {
+            material.setPushStatus("1");
+        }
+
         return materialMapper.selectMaterialList(material);
     }
 
@@ -76,4 +87,5 @@ public class MaterialServiceImpl implements IMaterialService
             return AjaxResult.error("资料推送失败");
         }
     }
+
 }
