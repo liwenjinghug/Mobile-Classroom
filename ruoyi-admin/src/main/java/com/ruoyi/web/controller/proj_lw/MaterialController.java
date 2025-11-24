@@ -9,8 +9,10 @@ import java.util.Date;
 import java.util.Random;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ruoyi.common.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.annotation.Log;
@@ -36,10 +38,21 @@ public class MaterialController extends BaseController
     /**
      * 查询资料列表
      */
+    @PreAuthorize("@ss.hasPermi('projlw:material:list')")
     @GetMapping("/list")
     public TableDataInfo list(Material material)
     {
         startPage();
+
+        // 判断是否是学生角色
+        boolean isStudent = SecurityUtils.getLoginUser().getUser().getRoles().stream()
+                .anyMatch(role -> "student".equals(role.getRoleKey()));
+
+        // 如果是学生，只能查看已推送的资料
+        if (isStudent) {
+            material.setPushStatus("1"); // 只查询已推送的资料
+        }
+
         List<Material> list = materialService.selectMaterialList(material);
         return getDataTable(list);
     }
@@ -47,6 +60,7 @@ public class MaterialController extends BaseController
     /**
      * 获取资料详细信息
      */
+    @PreAuthorize("@ss.hasPermi('projlw:material:query')")
     @GetMapping(value = "/{materialId}")
     public AjaxResult getInfo(@PathVariable("materialId") Long materialId)
     {
@@ -56,6 +70,7 @@ public class MaterialController extends BaseController
     /**
      * 新增资料
      */
+    @PreAuthorize("@ss.hasPermi('projlw:material:add')")
     @Log(title = "资料", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody Material material)
@@ -66,6 +81,7 @@ public class MaterialController extends BaseController
     /**
      * 修改资料
      */
+    @PreAuthorize("@ss.hasPermi('projlw:material:edit')")
     @Log(title = "资料", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody Material material)
@@ -76,6 +92,7 @@ public class MaterialController extends BaseController
     /**
      * 删除资料
      */
+    @PreAuthorize("@ss.hasPermi('projlw:material:remove')")
     @Log(title = "资料", businessType = BusinessType.DELETE)
     @DeleteMapping("/{materialId}")
     public AjaxResult remove(@PathVariable Long materialId)
@@ -86,6 +103,7 @@ public class MaterialController extends BaseController
     /**
      * 推送资料
      */
+    @PreAuthorize("@ss.hasPermi('projlw:material:push')")
     @Log(title = "资料推送", businessType = BusinessType.UPDATE)
     @PostMapping("/push/{materialId}")
     public AjaxResult pushMaterial(@PathVariable Long materialId)
@@ -96,6 +114,7 @@ public class MaterialController extends BaseController
     /**
      * 上传资料文件 - 修复重复路径版本
      */
+    @PreAuthorize("@ss.hasPermi('projlw:material:upload')")
     @Log(title = "资料上传", businessType = BusinessType.INSERT)
     @PostMapping("/upload")
     public AjaxResult uploadFile(@RequestParam("file") MultipartFile file) {
@@ -155,7 +174,7 @@ public class MaterialController extends BaseController
     }
 
     /**
-     * 下载资料文件 - 修复版本
+     * 下载资料文件 - 修复版本（不需要权限控制）
      */
     @GetMapping("/download/{materialId}")
     public void downloadFile(@PathVariable("materialId") Long materialId, HttpServletResponse response) {
