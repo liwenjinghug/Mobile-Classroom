@@ -149,7 +149,7 @@ export const constantRoutes = [
         path: 'course',
         component: () => import('@/views/proj_lw/course/index.vue'),
         name: 'ProjLw_Course',
-        meta: { title: '课程管理', icon: 'list', roles: ['teacher', 'admin']}
+        meta: { title: '课程管理', icon: 'list', roles: ['teacher', 'admin'],permissions: ['projlw:course:list']}
       },
       {
         path: 'material',
