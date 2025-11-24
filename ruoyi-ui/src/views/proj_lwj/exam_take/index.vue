@@ -113,7 +113,7 @@
             <template slot-scope="scope">{{ scope.row.scoreDisplay }}</template>
           </el-table-column>
           <el-table-column prop="maxScore" label="满分" width="80" />
-          <el-table-column prop="correct" label="结果" width="80">
+          <el-table-column v-if="showResultColumn" prop="correct" label="结果" width="80">
             <template slot-scope="scope">
               <el-tag v-if="scope.row.correct === true" type="success" size="mini">正确</el-tag>
               <el-tag v-else-if="scope.row.correct === false" type="danger" size="mini">错误</el-tag>
@@ -192,52 +192,88 @@ export default {
       })
       return total
     },
-    // 能否判断及格（需要所有主观题已批改）
+    // 新增：更严格的未批改主观题判定（结合后端 correctStatus 与前端本地缺分情况）
+    hasUngradedSubjective(){
+      // 存在主观题，并且：
+      // 1) 后端标记未完成批改 (participant.correctStatus !== 1)
+      // 或 2) 前端检测到至少一个主观题分数缺失
+      const hasSub = this.hasSubjectiveQuestions
+      if (!hasSub) return false
+      const backendUnfinished = this.participant && this.participant.correctStatus !== 1
+      return backendUnfinished || this.hasUnscoredSubjective
+    },
+    // 总分隐藏标志：存在未批改主观题时隐藏
+    hideTotalScore(){
+      return this.hasUngradedSubjective
+    },
+    // 能否判断及格：未批改主观题直接 false
     canJudgePass(){
-      // 优先使用后端返回的批改状态
+      if (this.hasUngradedSubjective) return false
+      // 后端 correctStatus=1 时即可；否则再以本地检测兜底
       if (this.participant && this.participant.correctStatus !== undefined) {
         return this.participant.correctStatus === 1
       }
-      return !!(this.exam && !this.hasUnscoredSubjective)
+      return !this.hasUnscoredSubjective
     },
     passStatus(){
-      // 优先使用后端返回的及格状态
+      if (!this.canJudgePass) return false
       if (this.participant && this.participant.passStatus !== undefined) {
         return this.participant.passStatus === 1
       }
-      if (!this.canJudgePass) return false
       const t=this.finalScoreNumeric
       return this.exam ? Number(t) >= Number(this.exam.passScore) : false
     },
-    // 最终用于展示的分值：若主观题未批改，仅展示客观题总分
+    // 最终用于展示的分值：未批改主观题时仅展示客观题得分
     finalScoreNumeric(){
-      if (this.canJudgePass) {
-        // 后端已汇总则优先使用 totalScore
-        if (this.participant && this.participant.totalScore!=null) return Number(this.participant.totalScore)
-        return this.displayedTotal
+      if (this.hideTotalScore) {
+        // 优先用后端 objectiveScore，其次前端计算的 objectiveTotal
+        if (this.participant && this.participant.objectiveScore != null) return Number(this.participant.objectiveScore)
+        return this.objectiveTotal
       }
-      // 未完成批改：优先使用后端的 objectiveScore
-      if (this.participant && this.participant.objectiveScore != null) {
-        return Number(this.participant.objectiveScore)
-      }
-      return this.objectiveTotal
+      // 已完成批改：优先后端 totalScore
+      if (this.participant && this.participant.totalScore != null) return Number(this.participant.totalScore)
+      return this.displayedTotal
     },
-    finalScoreDisplay(){ return this.hideTotalScore? '待批改' : this.formatScore(this.finalScoreNumeric) },
-    scoreLabel(){ return this.hideTotalScore ? '我的得分' : (this.canJudgePass ? '我的得分' : '客观题得分') },
-    hideTotalScore(){
-      // 如果考试包含主观题且尚未全部批改，隐藏总分（显示待批改），只展示客观题得分在其他位置
-      const hasSub = this.exam && this.exam.hasSubjective
-      const correctDone = this.participant && this.participant.correctStatus === 1
-      return hasSub && !correctDone
+    finalScoreDisplay(){ return this.hideTotalScore ? '待批改' : this.formatScore(this.finalScoreNumeric) },
+    scoreLabel(){ return this.hideTotalScore ? '客观题得分' : (this.canJudgePass ? '我的得分' : '客观题得分') },
+    summaryRows(){ return this.questions.map((q,i)=>{ const res=this.answerResultMap[q.id]||{}; const sc=res.score; const subj=this.isSubjective(q.questionType); let correct=res.correct; if(subj && (sc===undefined || sc===null)) { correct=undefined } return { index:i+1, type:this.typeLabel(q.questionType), score:sc, maxScore:q.score, correct, answer:this.answerMap[q.id]||'', correctAnswer:this.allowShowCorrect?(q.correctAnswer||''):'', scoreDisplay: sc===undefined? (subj? '待批改':(res.correct===undefined?'—':(res.correct? this.formatScore(q.score):'0'))): this.formatScore(sc) } }) },
+    // 新增：结果列是否显示（提交后且允许显示答案才展示）
+    showResultColumn(){
+      if(!this.exam) return true
+      if(!this.submitted) return false
+      // showAnswer: 0=不显示答案,1=即时显示,2=仅提交后显示
+      const mode = this.exam.showAnswer
+      if(mode === 0) return false
+      return true
     },
-    usedDurationDisplay(){ if (!this.participant||!this.participant.start_time||!this.participant.submit_time) return '—'; try{ const st=new Date(this.participant.start_time).getTime(); const et=new Date(this.participant.submit_time).getTime(); if (isNaN(st)||isNaN(et)) return '—'; const sec=Math.max(0,Math.floor((et-st)/1000)); const m=Math.floor(sec/60),s=sec%60; return `${m}分${s}秒` }catch(e){return '—'} },
-    showAnswerPolicyLabel(){ if(!this.exam) return '—'; return this.exam.showAnswer===0?'不显示':this.exam.showAnswer===1?'立即显示':'考试结束后' },
-    allowShowCorrect(){ return this.exam && (this.exam.showAnswer===1 || (this.exam.showAnswer===2 && this.submitted)) },
-    summaryRows(){ return this.questions.map((q,i)=>{ const res=this.answerResultMap[q.id]||{}; const sc=res.score; return { index:i+1, type:this.typeLabel(q.questionType), score:sc, maxScore:q.score, correct:res.correct, answer:this.answerMap[q.id]||'', correctAnswer:this.allowShowCorrect?(q.correctAnswer||''):'', scoreDisplay: sc===undefined? (res.correct===undefined?'待批改':(res.correct? this.formatScore(q.score):'0')): this.formatScore(sc) } }) },
     canShowAnalysis() { if (!this.exam) return false; return (this.exam.showAnswer === 1) || (this.exam.showAnswer === 2 && this.submitted) },
     showAnalysisInQuestion() { if (!this.submitted) return this.exam && this.exam.showAnswer === 1; return this.canShowAnalysis && this.analysisMode },
     // 新增：仅在交卷或解析模式下显示每题得分/待批改
-    canShowPerQuestionScore(){ return this.submitted || this.analysisMode }
+    canShowPerQuestionScore(){ return this.submitted || this.analysisMode },
+    usedDurationDisplay(){
+      // 显示考试用时：如果已提交，用提交时间 - 开始时间；否则实时 now - 开始时间
+      if(!this.participant || !this.participant.startTime) return '—'
+      const startMs = new Date(this.participant.startTime).getTime()
+      if(isNaN(startMs)) return '—'
+      const endMs = this.participant.submitTime ? new Date(this.participant.submitTime).getTime() : Date.now()
+      if(isNaN(endMs) || endMs < startMs) return '—'
+      const diffSec = Math.floor((endMs - startMs)/1000)
+      const h = Math.floor(diffSec/3600), m = Math.floor((diffSec%3600)/60), s = diffSec%60
+      const pad = n=>String(n).padStart(2,'0')
+      return (h>0? pad(h)+':':'') + pad(m)+':'+pad(s)
+    },
+    showAnswerPolicyLabel(){
+      if(!this.exam) return '—'
+      const map = {0:'不显示',1:'立即显示',2:'考试结束后'}
+      return map[this.exam.showAnswer] || '—'
+    },
+    allowShowCorrect(){
+      if(!this.exam) return false
+      const mode = this.exam.showAnswer
+      if(mode === 1) return true
+      if(mode === 2) return this.submitted
+      return false
+    }
   },
   created() {
     this.studentNo = (this.$route.query && this.$route.query.studentNo) ? String(this.$route.query.studentNo) : ''
@@ -259,6 +295,12 @@ export default {
         }
       },
       immediate: false
+    },
+    summaryVisible(val){
+      if(val){
+        // 打开弹窗时移除可能残留在题目选项上的焦点，避免 aria-hidden 焦点警告
+        this.$nextTick(()=>{ try { const ae=document.activeElement; if(ae && typeof ae.blur==='function') ae.blur() } catch(e){} })
+      }
     }
   },
   beforeDestroy(){ if (this.timer) clearInterval(this.timer); if (this.autoSaveTimer) clearInterval(this.autoSaveTimer); if (this.answerSaveTimer) clearTimeout(this.answerSaveTimer) },
@@ -277,7 +319,8 @@ export default {
     },
     // 题型判断
     isObjective(t){ return [1,2,3].includes(Number(t)) },
-    isSubjective(t){ return [5,6].includes(Number(t)) },
+    isSubjective(t){ return [4,5,6].includes(Number(t)) },
+    hasSubjectiveQuestions(){ return this.questions.some(q => this.isSubjective(q.questionType)) },
     // 简单兜底判分：仅支持单选(1)/判断(3)
     quickJudge(t, ans, correct){
       const tp=Number(t)
@@ -325,7 +368,7 @@ export default {
     selectIndex(i){ if(!this.started){ this.$message.info('请先点击“开始考试”'); return } this.currentIndex=i; this.workingAnswer=this.answerMap[this.currentQuestion.id]||'' },
     prev(){ if(this.currentIndex>0) this.selectIndex(this.currentIndex-1) },
     next(){ if(this.currentIndex < this.questions.length-1) this.selectIndex(this.currentIndex+1) },
-    typeLabel(t){ return t===1?'单选':t===3?'判断':t===5?'简答':'其它' },
+    typeLabel(t){ return t===1?'单选':t===3?'判断':t===5?'简答':t===4?'填空':'其它' },
     async start(){ if(!this.canStart) return this.$message.error('尚未到可开始时间或考试未发布'); try { const res=await startExamParticipant({ examId:Number(this.examId), studentNo:this.studentNo }); this.participant=res.data; this.started=true; this.computeRemaining(); this.$message.success('考试已开始') } catch(e){ console.error(e); this.$message.error('开始考试失败') } },
     formatScore(s){ return (s===undefined||s===null)?'—': (Number(s)%1===0?Number(s):Number(s).toFixed(2)) },
     recalculateTotal(){ if(!this.participant) this.participant={}; if(this.participant.totalScore==null) { this.participant.totalScore=this.displayedTotal } },
@@ -344,10 +387,12 @@ export default {
       if(!this.started) { this.$message.error('请先开始考试'); return }
       const saved = this.answerMap[qid]
       if (value === saved) return
-      // 查找题目信息
       const q = this.questions.find(x => String(x.id) === String(qid)) || this.currentQuestion
       if(!q) return
-      const payload={ examId:Number(this.examId), questionId:qid, studentNo:this.studentNo, studentAnswer:value, correctAnswer:q.correctAnswer, score:q.score }
+      const subj = this.isSubjective(q.questionType)
+      const basePayload = { examId:Number(this.examId), questionId:qid, studentNo:this.studentNo, studentAnswer:value, correctAnswer:q.correctAnswer }
+      // 客观题附带分值，主观题不发送分值避免后端误记 0 分
+      const payload = subj ? basePayload : { ...basePayload, score:q.score }
       const res=await saveAnswer(payload)
       this.answerMap[qid]=value
       if(!this.answerResultMap[qid]) this.answerResultMap[qid]={}
@@ -434,7 +479,16 @@ export default {
     autoSubmitIfNeeded(){ if(this.exam && this.exam.autoSubmit===1 && this.started && !this.submitted){ this.$message.warning('时间到，自动交卷'); this.submitPaper() } },
     autoSaveTick(){ if(!this.started || !this.currentQuestion) return; const qid=this.currentQuestion.id; const current=this.workingAnswer; const saved=this.answerMap[qid]; if(current && current!==saved){ this.saveCurrent().catch(()=>{}) } },
     formatDuration(sec){ if(sec==null) return '--:--'; if(sec<0) return '00:00'; const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60; return (h>0?String(h).padStart(2,'0')+':':'')+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0') },
-    goBackPortal(){ this.$router.push({ name:'ExamPortal', path:'/proj_lwj/exam_portal'}).catch(()=>{}) }
+    goBackPortal(){
+      // 先关闭弹窗，避免 Element UI 遮罩在路由切换后短暂残留
+      this.summaryVisible = false
+      // 确保任何 loading 状态关闭
+      this.loading = false
+      // 使用 replace 避免产生历史记录并提升跳转体验
+      this.$nextTick(()=>{
+        this.$router.replace({ name:'ExamPortal', path:'/proj_lwj_exam/exam_portal'}).catch(()=>{})
+      })
+    }
   }
 }
 </script>

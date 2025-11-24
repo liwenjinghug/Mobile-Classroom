@@ -14,6 +14,7 @@
       <el-button @click="reload">刷新</el-button>
       <el-button type="success" @click="saveDraft" :disabled="!realExamId || savingMeta">保存草稿</el-button>
       <el-button type="warning" @click="doPublish" :disabled="!canPublish" :loading="publishing">发布考试</el-button>
+      <el-button type="info" @click="goBackPublish">返回发布页面</el-button>
       <span style="color:#909399" v-if="!canPublish">（需至少1题且考试ID有效才能发布）</span>
       <span style="color:#909399" v-if="filter.type">（已按题型筛选，已临时禁用拖拽排序）</span>
     </div>
@@ -767,6 +768,9 @@ export default {
         console.error('publish error', e)
         this.$message.error('发布失败')
       } finally { this.publishing = false }
+    },
+    goBackPublish(){
+      this.$router.push({ path:'/proj_lwj_exam/exam_publish' }).catch(()=>{})
     }
   }
 }

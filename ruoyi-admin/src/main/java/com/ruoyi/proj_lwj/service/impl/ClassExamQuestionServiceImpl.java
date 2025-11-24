@@ -125,6 +125,21 @@ public class ClassExamQuestionServiceImpl implements IClassExamQuestionService {
         return total;
     }
 
+    /**
+     * 本地题库题型到考试题型的统一映射（类级方法）
+     * 本地: 1=选择(单选) 2=判断 3=简答
+     * 考试: 1=单选 3=判断 5=简答
+     */
+    private int mapLocalToExamType(Integer srcType) {
+        if (srcType == null) return 1;
+        switch (srcType) {
+            case 1: return 1; // 选择->单选
+            case 2: return 3; // 判断->判断
+            case 3: return 5; // 简答->简答
+            default: return 1; // 兜底单选
+        }
+    }
+
     @Override
     public ImportResult importFromLocalBank(Long examId, List<Long> bankIds, String operator) {
         if (examId == null) throw new ServiceException("examId不能为空");
@@ -155,31 +170,18 @@ public class ClassExamQuestionServiceImpl implements IClassExamQuestionService {
             }
             ClassExamQuestion newQ = new ClassExamQuestion();
             newQ.setExamId(examId);
-            // 题型映射：本地题库 1-单选 2-判断 3-简答; 假设考试题型: 1单选 3判断 5简答（根据注释）
-            Integer srcType = bq.getQuestionType();
-            int examType;
-            if (srcType != null) {
-                switch (srcType) {
-                    case 1: examType = 1; break; // 单选
-                    case 2: examType = 3; break; // 判断
-                    case 3: examType = 5; break; // 简答
-                    default: examType = 1; // 默认单选
-                }
-            } else { examType = 1; }
-            newQ.setQuestionType(examType);
+            // 使用统一映射方法
+            newQ.setQuestionType(mapLocalToExamType(bq.getQuestionType()));
             newQ.setQuestionContent(content);
-            // 选项字段
             newQ.setQuestionOptions(bq.getOptionsJson());
             newQ.setCorrectAnswer(bq.getCorrectAnswer());
             newQ.setAnalysis(bq.getAnalysis());
-            // 分值
             BigDecimal score = bq.getScore();
             if (score == null) score = BigDecimal.valueOf(2);
             newQ.setScore(score);
             newQ.setDifficulty(bq.getDifficulty());
             newQ.setSortOrder(++maxSort);
             newQ.setCreateBy(operator == null ? "system" : operator);
-            // 插入
             assertNoDuplicateQuestion(newQ, false);
             mapper.insertQuestion(newQ);
             imported++;

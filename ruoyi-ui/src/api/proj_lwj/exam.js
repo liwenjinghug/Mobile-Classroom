@@ -67,11 +67,57 @@ export function endExam(id) {
 
 // 批量创建考试到多个课堂
 export function batchAddExam(payload) {
-  // 这里假设你已有后端批量接口，如需调整路径可在此修改
-  return request({
-    url: '/proj_lwj/exam/batch',
-    method: 'post',
-    data: payload
+  const { sessionIds = [], exam = {} } = payload || {}
+  if (!Array.isArray(sessionIds) || sessionIds.length === 0) {
+    return Promise.reject(new Error('缺少课堂列表'))
+  }
+  const normalizedExam = normalizeExamPayload(exam)
+  const batchPayload = { sessionIds, exam: normalizedExam }
+  // 若后端已支持 /proj_lwj/exam/batch 则尝试；失败后自动降级
+  return request({ url: '/proj_lwj/exam/batch', method: 'post', data: batchPayload })
+    .then(res => {
+      if (res && (res.code === 200 || res.code === 0)) {
+        return res
+      }
+      // 不是成功码，降级
+      return clientSideBatchCreate(sessionIds, normalizedExam)
+    })
+    .catch(() => clientSideBatchCreate(sessionIds, normalizedExam))
+}
+
+function normalizeExamPayload(examTemplate){
+  const copy = { ...examTemplate }
+  // 后端期望整数型 0/1，而前端表单使用 boolean
+  if (typeof copy.antiCheat === 'boolean') copy.antiCheat = copy.antiCheat ? 1 : 0
+  if (typeof copy.autoSubmit === 'boolean') copy.autoSubmit = copy.autoSubmit ? 1 : 0
+  if (typeof copy.lateSubmit === 'boolean') copy.lateSubmit = copy.lateSubmit ? 1 : 0
+  // 容错：如果 showAnswer 未设置默认 0
+  if (copy.showAnswer == null) copy.showAnswer = 0
+  // 数值字段确保为数字
+  ;['examType','examDuration','totalScore','passScore','examMode','questionOrder','showAnswer','status'].forEach(k=>{
+    if (copy[k] != null) copy[k] = Number(copy[k])
+  })
+  return copy
+}
+
+function clientSideBatchCreate(sessionIds, examTemplate) {
+  const base = normalizeExamPayload(examTemplate)
+  const tasks = sessionIds.map(sid => {
+    const one = { ...base, sessionId: sid, status: 0 }
+    return addExam(one)
+      .then(r => ({ sid, ok: r && (r.code === 200 || r.code === 0), res: r }))
+      .catch(e => ({ sid, ok: false, error: e }))
+  })
+  return Promise.all(tasks).then(results => {
+    const success = results.filter(r => r.ok).map(r => r.sid)
+    const failed = results.filter(r => !r.ok).map(r => r.sid)
+    return {
+      code: success.length ? 200 : 500,
+      msg: failed.length ? `部分创建失败: 成功 ${success.length} / 失败 ${failed.length}` : '批量创建成功',
+      success,
+      failed,
+      details: results
+    }
   })
 }
 
@@ -158,4 +204,23 @@ export function listMyParticipants(arg) {
   })
 }
 
-
+// 获取我的考试（含未批改主观题隐藏总分）
+export function listMyExams(studentNo){
+  return request({ url:'/proj_lwj/exam/my', method:'get', params:{ studentNo } })
+}
+// 获取题目统计与批改概览
+export function getQuestionCorrectSummary(examId){
+  return request({ url:`/proj_lwj/exam/${examId}/questionCorrectSummary`, method:'get' })
+}
+// 获取主观题未批改答案列表
+export function listUngraded(examId){
+  return request({ url:`/proj_lwj/exam/${examId}/ungraded`, method:'get' })
+}
+// 主观题单条批改
+export function gradeAnswer(data){
+  return request({ url:'/proj_lwj/exam/answer/grade', method:'post', data })
+}
+// 主观题批量批改
+export function gradeAnswerBatch(list){
+  return request({ url:'/proj_lwj/exam/answer/gradeBatch', method:'post', data:list })
+}

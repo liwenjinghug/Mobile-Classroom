@@ -554,9 +554,8 @@ public class ClassExamController extends BaseController {
             if (qType != null && (qType == 1 || qType == 2 || qType == 3)) {
                 objectiveScore = objectiveScore.add(ansScore);
             } else if (qType != null && (qType == 5 || qType == 6)) {
-                // 主观题：如果未批改(score为null或0且无批改人)，标记为待批改
-                if (ans.getScore() == null || (ans.getScore().compareTo(BigDecimal.ZERO) == 0 && ans.getCorrectorId() == null)) {
-                    hasUnscoredSubjective = true;
+                if (ans.getCorrectorId() == null) {
+                    hasUnscoredSubjective = true; // 未批改，无论分数是否被误写
                 } else {
                     subjectiveScore = subjectiveScore.add(ansScore);
                 }
@@ -611,10 +610,11 @@ public class ClassExamController extends BaseController {
                     if (q != null) { qType = q.getQuestionType(); qScore = q.getScore(); }
                 }
             } catch (Exception ignore) {}
-            String canonCorrect = canonicalAnswerForCompare(qType, a.getCorrectAnswer());
-            String canonStudent = canonicalAnswerForCompare(qType, a.getStudentAnswer());
-            boolean correct = canonCorrect != null && canonCorrect.equalsIgnoreCase(canonStudent);
-            if (qType != null && (qType == 1 || qType == 2 || qType == 3)) { // objective
+            // 仅客观题自动判分与设置得分；主观题(4,5,6)不做自动判定，保持 score / isCorrect 为空或默认
+            if (qType != null && (qType == 1 || qType == 2 || qType == 3)) {
+                String canonCorrect = canonicalAnswerForCompare(qType, a.getCorrectAnswer());
+                String canonStudent = canonicalAnswerForCompare(qType, a.getStudentAnswer());
+                boolean correct = canonCorrect != null && canonCorrect.equalsIgnoreCase(canonStudent);
                 if (correct) {
                     a.setIsCorrect(1);
                     a.setScore(qScore != null ? qScore : BigDecimal.ONE);
@@ -622,9 +622,6 @@ public class ClassExamController extends BaseController {
                     a.setIsCorrect(0);
                     a.setScore(BigDecimal.ZERO);
                 }
-            } else { // subjective or unknown
-                if (correct) a.setIsCorrect(1); else a.setIsCorrect(0);
-                // score for subjective left as-is (teacher grading later)
             }
         }
     }
@@ -703,7 +700,7 @@ public class ClassExamController extends BaseController {
         for (ClassExamQuestion q : qList) {
             qMap.put(q.getId(), q);
             Integer t = q.getQuestionType();
-            if (t != null && (t == 5 || t == 6)) hasSubjectiveQuestions = true;
+            if (t != null && (t == 5 || t == 6)) hasSubjectiveQuestions = true; // 仅 5/6 为主观题
         }
         java.math.BigDecimal obj = java.math.BigDecimal.ZERO;
         java.math.BigDecimal subj = java.math.BigDecimal.ZERO;
@@ -716,8 +713,8 @@ public class ClassExamController extends BaseController {
                 if (t != null && (t == 1 || t == 2 || t == 3)) {
                     obj = obj.add(s);
                 } else if (t != null && (t == 5 || t == 6)) {
-                    // 主观题是否已批改：score 为 null 或 (score=0 且 correctorId 为 null) 视为未批改
-                    if (ans.getScore() == null || (ans.getScore().compareTo(java.math.BigDecimal.ZERO) == 0 && ans.getCorrectorId() == null)) {
+                    // 主观题：correctorId 为空即视为未批改（不论分数是否被误写）
+                    if (ans.getCorrectorId() == null) {
                         hasUnscoredSubjective = true;
                     } else {
                         subj = subj.add(s);
@@ -771,10 +768,10 @@ public class ClassExamController extends BaseController {
                 if (payload.getQuestionContent() == null) payload.setQuestionContent(q.getQuestionContent());
                 if (payload.getQuestionOptions() == null) payload.setQuestionOptions(q.getQuestionOptions());
                 if (payload.getCorrectAnswer() == null) payload.setCorrectAnswer(q.getCorrectAnswer());
-                // 如果是客观题且未设置分数，按题目分值赋分（正确时）
-                if (payload.getScore() == null && payload.getStudentAnswer() != null && payload.getCorrectAnswer() != null) {
-                    Integer t = q.getQuestionType();
-                    if (t != null && (t == 1 || t == 2 || t == 3)) {
+                Integer t = q.getQuestionType();
+                // 仅客观题自动判分；主观题强制不保存分数，避免误判满分
+                if (t != null && (t == 1 || t == 2 || t == 3)) {
+                    if (payload.getScore() == null && payload.getStudentAnswer() != null && payload.getCorrectAnswer() != null) {
                         String canonStd = canonicalAnswerForCompare(t, payload.getCorrectAnswer());
                         String canonStu = canonicalAnswerForCompare(t, payload.getStudentAnswer());
                         if (canonStd != null && canonStd.equalsIgnoreCase(canonStu)) {
@@ -785,8 +782,24 @@ public class ClassExamController extends BaseController {
                             payload.setIsCorrect(0);
                         }
                     }
+                } else if (t != null && (t == 5 || t == 6)) {
+                    // 主观题：如果前端误传了分数，清除，等待教师批改
+                    payload.setScore(null);
+                    payload.setIsCorrect(null);
                 }
             }
+        } else {
+            // 如果快照完整但题型为主观题仍需确保不提前赋分
+            try {
+                ClassExamQuestion qTypeCheck = questionService.selectById(payload.getQuestionId());
+                if (qTypeCheck != null) {
+                    Integer t2 = qTypeCheck.getQuestionType();
+                    if (t2 != null && (t2 == 5 || t2 == 6) && payload.getCorrectorId() == null) {
+                        payload.setScore(null);
+                        payload.setIsCorrect(null);
+                    }
+                }
+            } catch (Exception ignore) {}
         }
         ClassExamAnswer existing = answerService.selectByExamStudentQuestion(payload.getExamId(), studentId, payload.getQuestionId());
         autoJudgeObjective(payload); // ensures objective score normalized even if score existed
@@ -990,23 +1003,30 @@ public class ClassExamController extends BaseController {
             List<ClassExamAnswer> list = answerGroup.getOrDefault(q.getId(), Collections.emptyList());
             List<Map<String, Object>> correctStudents = new ArrayList<>();
             List<Map<String, Object>> incorrectStudents = new ArrayList<>();
+            List<Map<String, Object>> ungradedStudents = new ArrayList<>();
             Set<Long> answeredStudentIds = new HashSet<>();
             for (ClassExamAnswer a : list) {
                 if (a.getStudentId() == null) continue;
                 answeredStudentIds.add(a.getStudentId());
-                boolean isCorrect;
-                if (qt != null && (qt == 1 || qt == 2 || qt == 3)) {
-                    isCorrect = a.getIsCorrect() != null && a.getIsCorrect() == 1;
-                } else { // 主观题满分视为正确
-                    isCorrect = q.getScore() != null && a.getScore() != null && a.getScore().compareTo(q.getScore()) == 0;
-                }
                 Map<String,Object> stuInfo = new LinkedHashMap<>();
                 Map<String,Object> baseInfo = studentBaseMap.get(a.getStudentId());
                 ClassExamParticipant part = participantMap.get(a.getStudentId());
                 stuInfo.put("studentId", a.getStudentId());
                 stuInfo.put("studentNo", a.getStudentNo() != null ? a.getStudentNo() : (baseInfo != null ? baseInfo.get("studentNo") : null));
                 stuInfo.put("studentName", part != null ? part.getStudentName() : (baseInfo != null ? baseInfo.get("studentName") : null));
-                if (isCorrect) correctStudents.add(stuInfo); else incorrectStudents.add(stuInfo);
+                if (subjective) {
+                    // correctorId 为空即待批改
+                    if (a.getCorrectorId() == null) {
+                        ungradedStudents.add(stuInfo);
+                    } else if (q.getScore() != null && a.getScore() != null && a.getScore().compareTo(q.getScore()) == 0) {
+                        correctStudents.add(stuInfo);
+                    } else {
+                        incorrectStudents.add(stuInfo);
+                    }
+                } else {
+                    boolean isCorrect = a.getIsCorrect() != null && a.getIsCorrect() == 1;
+                    if (isCorrect) correctStudents.add(stuInfo); else incorrectStudents.add(stuInfo);
+                }
             }
             // 未答：课堂基准学生中不在 answeredStudentIds 的集合
             List<Map<String,Object>> unansweredStudents = new ArrayList<>();
@@ -1018,16 +1038,18 @@ public class ClassExamController extends BaseController {
             }
             int correctCount = correctStudents.size();
             int incorrectCount = incorrectStudents.size();
+            int ungradedCount = ungradedStudents.size();
             int unansweredCount = unansweredStudents.size();
-            // 正确率基于课堂全部学生数量（baseStudentCount），若无学生则为0
             double correctRate = baseStudentCount == 0 ? 0.0 : (correctCount * 100.0 / baseStudentCount);
             row.put("participantsCount", baseStudentCount);
             row.put("correctCount", correctCount);
             row.put("incorrectCount", incorrectCount);
+            row.put("ungradedCount", ungradedCount);
             row.put("unansweredCount", unansweredCount);
             row.put("correctRate", correctRate);
             row.put("correctStudents", correctStudents);
             row.put("incorrectStudents", incorrectStudents);
+            row.put("ungradedStudents", ungradedStudents);
             row.put("unansweredStudents", unansweredStudents);
             result.add(row);
         }

@@ -17,7 +17,16 @@
 
     <!-- 考试列表，仅在点击查询后显示 -->
     <el-card v-if="examsLoaded && displayedExams.length" shadow="never" class="list-pane">
-      <div slot="header">考试列表 ({{ displayedExams.length }})</div>
+      <div slot="header" class="clearfix">
+        <span>考试列表 ({{ displayedExams.length }})</span>
+        <el-button
+          size="mini"
+          type="primary"
+          :loading="loading"
+          @click="loadExams"
+          style="float:right; margin-left:8px"
+        >刷新</el-button>
+      </div>
       <el-table :data="displayedExams" size="small" style="width:100%">
         <el-table-column prop="examName" label="考试名称" min-width="200" />
         <el-table-column prop="courseName" label="课程" width="160" />
@@ -49,8 +58,9 @@
     <el-card v-if="myLoaded" shadow="never" class="my-pane" style="margin-top:16px">
       <div slot="header" class="clearfix">
         <span>我的考试记录</span>
-        <div style="float:right">
+        <div style="float:right; display:flex; align-items:center; gap:8px">
           <el-input v-model.trim="myQuery.keyword" placeholder="搜索考试/课程" size="mini" clearable style="width:220px;margin-right:8px" />
+          <el-button size="mini" type="primary" :loading="myLoading" @click="loadMyList">刷新</el-button>
           <el-button size="mini" @click="exportMyCSV" :disabled="!myDisplayed.length">导出</el-button>
           <el-button size="mini" @click="printMy" :disabled="!myDisplayed.length">打印</el-button>
         </div>
@@ -83,13 +93,24 @@
         <el-table-column prop="startTime" label="开始时间" width="180" />
         <el-table-column prop="submitTime" label="提交时间" width="180" />
       </el-table>
-      <div v-if="!myDisplayed.length" style="padding:12px 0"><el-empty description="暂无记录" /></div>
+      <div v-if="!myDisplayed.length" style="padding:12px 0">
+        <el-empty description="暂无记录">
+          <template #description>
+            <div>
+              暂无考试记录。
+              <div v-if="studentNo">如果刚刚提交了含主观题的考试，成绩可能暂未显示，请稍后刷新或点击下方“诊断”。</div>
+            </div>
+          </template>
+          <el-button type="primary" size="mini" @click="loadMyList">刷新</el-button>
+          <el-button size="mini" @click="diagnoseMy" :loading="diagnosing">诊断</el-button>
+        </el-empty>
+      </div>
     </el-card>
   </div>
 </template>
 
 <script>
-import { listAvailableExams, startExamParticipant, listMyParticipants, getExam } from '@/api/proj_lwj/exam'
+import { listAvailableExams, startExamParticipant, listMyParticipants, getExam, listMyExams, getQuestionCorrectSummary } from '@/api/proj_lwj/exam'
 
 export default {
   name: 'ExamPortal',
@@ -102,7 +123,8 @@ export default {
       myList: [], myLoading: false,
       myQuery: { keyword: '' },
       examCache: {},
-      myStats: { total: 0, finished: 0, avgScore: '—', passRate: 0 }
+      myStats: { total: 0, finished: 0, avgScore: '—', passRate: 0 },
+      diagnosing:false
     }
   },
   computed: {
@@ -252,8 +274,9 @@ export default {
       } catch(e){ return '——' }
     },
     displayScoreRow(row){
-      // 成绩展示：优先 totalScore，若无则回退 objectiveScore，再无显示 双横线
-      if (!row) return '——'
+      if(!row) return '——'
+      // 当存在主观题且 correctStatus!=1 时显示 待批改
+      if (row.hasSubjective && row.correctStatus !== 1) return '待批改'
       const t = row.totalScore
       if (t !== undefined && t !== null && !isNaN(Number(t))) {
         const n = Number(t); return (n%1===0)? n : n.toFixed(2)
@@ -265,12 +288,17 @@ export default {
       return '——'
     },
     passStatusText(row){
+      if(!row) return '——'
+      // 未批改主观题不显示及格/不及格
+      if (row.hasSubjective && row.correctStatus !== 1) return '待批改'
       const v = Number(row && row.passStatus)
       if (v === 1) return '及格'
       if (v === 0) return '不及格'
       return '——'
     },
     passTagType(row){
+      if(!row) return 'info'
+      if (row.hasSubjective && row.correctStatus !== 1) return 'info'
       const v = Number(row && row.passStatus)
       if (v === 1) return 'success'
       if (v === 0) return 'danger'
@@ -284,15 +312,52 @@ export default {
       this.myLoading = true
       this.myLoaded = true
       try {
-        const res = await listMyParticipants(this.studentNo)
-        const list = res && (res.data || res.rows || res.list || res)
-        let arr = Array.isArray(list) ? list : []
-        await this.enrichExamInfo(arr)
-        // 过滤掉已删除的考试（后端 getExam 不存在或返回失败时不会写入 examCache）
-        arr = arr.filter(r => !!this.examCache[r.examId])
-        arr.sort((a,b)=> new Date(b.submitTime||0)-new Date(a.submitTime||0) || new Date(b.startTime||0)-new Date(a.startTime||0))
-        this.myList = arr
+        // 同时获取新版与旧版数据，合并去重，避免任一接口结构变化导致列表空白
+        const [newRes, oldRes] = await Promise.all([
+          listMyExams(this.studentNo).catch(()=>({})),
+          listMyParticipants(this.studentNo).catch(()=>({}))
+        ])
+        const newListRaw = newRes && (newRes.data || newRes.rows || newRes.list)
+        const oldListRaw = oldRes && (oldRes.data || oldRes.rows || oldRes.list)
+        let newList = Array.isArray(newListRaw) ? newListRaw.slice() : []
+        let oldList = Array.isArray(oldListRaw) ? oldListRaw.slice() : []
+        // 标准化字段: examId 兼容 id
+        const normalize = (arr) => arr.map(r => ({
+          ...r,
+          examId: r.examId != null ? r.examId : (r.id != null ? r.id : r.exam_id),
+          totalScore: r.totalScore != null ? r.totalScore : r.total_score,
+          objectiveScore: r.objectiveScore != null ? r.objectiveScore : r.objective_score,
+          passStatus: r.passStatus != null ? r.passStatus : r.pass_status,
+          correctStatus: r.correctStatus != null ? r.correctStatus : r.correct_status,
+          hasSubjective: r.hasSubjective != null ? r.hasSubjective : r.has_subjective
+        }))
+        newList = normalize(newList)
+        oldList = normalize(oldList)
+        // 合并：以 examId+studentNo 为主键，新接口优先
+        const map = new Map()
+        for (const item of oldList) {
+          if (!item.examId) continue
+          const key = item.examId + ':' + (item.studentNo || item.student_no || '')
+          map.set(key, item)
+        }
+        for (const item of newList) {
+          if (!item.examId) continue
+          const key = item.examId + ':' + (item.studentNo || item.student_no || '')
+          map.set(key, { ...map.get(key), ...item })
+        }
+        let merged = Array.from(map.values())
+        // 推断主观题及 correctStatus 缺失的记录（仅缺失时）
+        const needInfer = merged.filter(r => r.examId && (r.hasSubjective === undefined || r.correctStatus === undefined))
+        if (needInfer.length) await this.inferSubjectiveFlags(needInfer)
+        // 填充考试基本信息
+        await this.enrichExamInfo(merged)
+        // 排序：提交时间优先，其次开始时间
+        merged.sort((a,b)=> new Date(b.submitTime||0)-new Date(a.submitTime||0) || new Date(b.startTime||0)-new Date(a.startTime||0))
+        this.myList = merged
         this.calcStats()
+        if (!merged.length) {
+          this.$message.info('未获取到考试记录：可能尚无参与记录或接口数据为空')
+        }
       } catch(e){
         console.error(e); this.$message.error('加载考试记录失败'); this.myList=[]; this.calcStats()
       } finally { this.myLoading=false }
@@ -317,21 +382,63 @@ export default {
         if (!r.endTime && ex.endTime) r.endTime = ex.endTime
       })
     },
+    async inferSubjectiveFlags(list){
+      // 为没有 hasSubjective 或 correctStatus 字段的记录进行推断
+      const needSummaryIds = []
+      list.forEach(r=>{
+        if (r.hasSubjective === undefined) needSummaryIds.push(r.examId)
+      })
+      const uniq = Array.from(new Set(needSummaryIds.filter(Boolean)))
+      for(const id of uniq){
+        try {
+          const summary = await getQuestionCorrectSummary(id)
+          const payload = summary && (summary.data || summary)
+          const hasSubj = !!(payload && payload.hasSubjective)
+          list.forEach(r=>{ if(r.examId===id && r.hasSubjective===undefined) r.hasSubjective = hasSubj })
+          if (payload && payload.questions){
+            const ungradedAny = payload.questions.some(q=> q.ungradedCount && q.ungradedCount>0)
+            list.forEach(r=>{ if(r.examId===id && r.correctStatus===undefined && hasSubj) r.correctStatus = ungradedAny?0:1 })
+          }
+        } catch(e){ /* ignore single exam */ }
+      }
+    },
+    async diagnoseMy(){
+      if(!this.studentNo){ return this.$message.info('请先输入学号') }
+      this.diagnosing=true
+      try {
+        await this.loadMyList()
+        const hidden = this.myList.filter(r=> r.hasSubjective && r.correctStatus!==1 && (r.totalScore==null))
+        if(hidden.length){
+          this.$message.info(`诊断：发现 ${hidden.length} 场含主观题未批改考试，成绩已隐藏为“待批改”`)
+        } else if(this.myList.length){
+          this.$message.success('诊断：当前考试记录正常')
+        } else {
+          this.$message.warning('诊断：仍未获取到考试记录，可能学号无考试或接口限制')
+        }
+      } finally { this.diagnosing=false }
+    },
+    // 重新加入统计方法
     calcStats(){
       const total = this.myList.length
-      let finished = 0, pass = 0, sum = 0, cnt = 0
+      let finished = 0, pass = 0, sum = 0, cnt = 0, gradedTotal = 0
       this.myList.forEach(r=>{
         if (r.participantStatus === 2) finished++
-        if (r.passStatus === 1) pass++
-        if (r.totalScore != null && !isNaN(r.totalScore)) { sum += Number(r.totalScore); cnt++ }
+        const ungradedSubjective = r.hasSubjective && r.correctStatus !== 1
+        // 只有已批改或无主观题的记录才计入 passRate 统计
+        if (!ungradedSubjective) {
+          gradedTotal++
+          if (r.passStatus === 1) pass++
+        }
+        // 平均分只统计可见的分数
+        const visibleTotal = ungradedSubjective ? null : r.totalScore
+        if (visibleTotal != null && !isNaN(visibleTotal)) { sum += Number(visibleTotal); cnt++ }
       })
       const avg = cnt>0 ? (Math.round((sum/cnt)*100)/100) : '—'
-      const rate = total>0 ? Math.round((pass*10000/total))/100 : 0
+      const rate = gradedTotal>0 ? Math.round((pass*10000/gradedTotal))/100 : 0
       this.myStats = { total, finished, avgScore: avg, passRate: rate }
     },
     exportMyCSV(){
-      if (!this.myDisplayed.length) return
-      // 去掉课堂列，新增评定
+      if (!this.myDisplayed.length) return this.$message.info('暂无记录可导出')
       const headers = ['考试名称','课程','学号','成绩','评定','状态','开始时间','提交时间']
       const rows = this.myDisplayed.map(r=>[
         (r.examName||''),(r.courseName||''),(r.studentNo||''),
@@ -339,25 +446,26 @@ export default {
         (r.startTime||''),(r.submitTime||'')
       ])
       const csv = [headers].concat(rows).map(line => line.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\r\n')
-      const blob = new Blob(["\uFEFF"+csv], { type: 'text/csv;charset=utf-8;' })
-      const a = document.createElement('a')
-      a.href = URL.createObjectURL(blob)
-      a.download = `我的考试记录_${this.studentNo||''}.csv`
-      document.body.appendChild(a); a.click(); document.body.removeChild(a)
+      try {
+        const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' })
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = `我的考试记录_${this.studentNo||''}.csv`
+        document.body.appendChild(a); a.click(); document.body.removeChild(a)
+      } catch(e){ console.error(e); this.$message.error('导出失败') }
     },
     printMy(){
-      if (!this.myDisplayed.length) return
-      // 去掉课堂列，新增评定
-      const html = `<!DOCTYPE html><html><head><meta charset='utf-8'><title>我的考试记录</title>
-        <style>table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid #ccc;padding:6px;text-align:left}</style>
-        </head><body>
+      if (!this.myDisplayed.length) return this.$message.info('暂无记录可打印')
+      const html = `<!DOCTYPE html><html><head><meta charset='utf-8'><title>我的考试记录</title><style>table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid #ccc;padding:6px;text-align:left}</style></head><body>
         <h3>我的考试记录（学号：${this.studentNo}）</h3>
         <p>总记录：${this.myStats.total}；已完成：${this.myStats.finished}；平均分：${this.myStats.avgScore}；及格率：${this.myStats.passRate}%</p>
         <table><thead><tr><th>#</th><th>考试名称</th><th>课程</th><th>学号</th><th>成绩</th><th>评定</th><th>状态</th><th>开始时间</th><th>提交时间</th></tr></thead><tbody>
         ${this.myDisplayed.map((r,i)=>`<tr><td>${i+1}</td><td>${r.examName||''}</td><td>${r.courseName||''}</td><td>${r.studentNo||''}</td><td>${this.displayScoreRow(r)}</td><td>${this.passStatusText(r)}</td><td>${r.participantStatus===2?'已提交':'进行中'}</td><td>${r.startTime||''}</td><td>${r.submitTime||''}</td></tr>`).join('')}
         </tbody></table></body></html>`
-      const w = window.open('', '_blank')
-      if (w) { w.document.write(html); w.document.close(); w.focus(); w.print(); setTimeout(()=>w.close(), 500) }
+      try {
+        const w = window.open('', '_blank')
+        if (w) { w.document.write(html); w.document.close(); w.focus(); w.print(); setTimeout(()=>w.close(), 500) }
+      } catch(e){ console.error(e); this.$message.error('打印失败') }
     }
   }
 }
