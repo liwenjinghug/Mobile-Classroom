@@ -6,7 +6,13 @@
         <span class="page-title">资料推送管理</span>
       </div>
       <div class="header-right">
-        <el-button type="primary" icon="el-icon-upload" @click="handleUpload" :disabled="!currentSession">
+        <el-button
+          type="primary"
+          icon="el-icon-upload"
+          @click="handleUpload"
+          :disabled="!currentSession"
+          v-hasPermi="['projlw:material:upload']"
+        >
           上传资料
         </el-button>
       </div>
@@ -23,6 +29,7 @@
             size="small"
             @change="handleCourseChange"
             style="width: 200px"
+            v-hasPermi="['projlw:material:list']"
           >
             <el-option
               v-for="course in courseList"
@@ -42,6 +49,7 @@
             @change="handleSessionChange"
             style="width: 200px"
             :disabled="!queryParams.courseId"
+            v-hasPermi="['projlw:material:list']"
           >
             <el-option
               v-for="session in sessionList"
@@ -53,8 +61,20 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery" :disabled="!queryParams.sessionId">查询</el-button>
-          <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
+          <el-button
+            type="primary"
+            icon="el-icon-search"
+            size="small"
+            @click="handleQuery"
+            :disabled="!queryParams.sessionId"
+            v-hasPermi="['projlw:material:list']"
+          >查询</el-button>
+          <el-button
+            icon="el-icon-refresh"
+            size="small"
+            @click="resetQuery"
+            v-hasPermi="['projlw:material:list']"
+          >重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -114,12 +134,14 @@
               icon="el-icon-s-promotion"
               @click="handlePush(scope.row)"
               :disabled="scope.row.pushStatus === '1'"
+              v-hasPermi="['projlw:material:push']"
             >推送</el-button>
             <el-button
               size="mini"
               type="text"
               icon="el-icon-delete"
               @click="handleDelete(scope.row)"
+              v-hasPermi="['projlw:material:remove']"
             >删除</el-button>
           </template>
         </el-table-column>
@@ -346,13 +368,35 @@ export default {
           this.$modal.msgError("保存资料信息失败");
         });
       } else {
-        this.$modal.msgError(response.msg || "上传失败");
+        // 如果上传接口返回权限错误
+        if (response.code === 401 || response.msg?.includes('权限') || response.msg?.includes('认证')) {
+          this.$modal.msgError("上传失败：权限不足，请重新登录");
+          this.upload.open = false;
+        } else {
+          this.$modal.msgError(response.msg || "上传失败");
+        }
       }
     },
     // 文件上传失败处理
     handleFileError(error, file, fileList) {
       this.upload.isUploading = false;
-      this.$modal.msgError("上传失败：" + (error.message || "未知错误"));
+      let errorMsg = "上传失败：";
+
+      // 从error对象中提取更详细的错误信息
+      if (error.status === 401) {
+        errorMsg += "认证失败，请重新登录";
+      } else if (error.status === 403) {
+        errorMsg += "权限不足，无法上传文件";
+      } else if (error.message) {
+        errorMsg += error.message;
+      } else if (error.statusText) {
+        errorMsg += error.statusText;
+      } else {
+        errorMsg += "未知错误";
+      }
+
+      console.error('上传错误详情:', error); // 调试用
+      this.$modal.msgError(errorMsg);
     },
     // 提交上传文件
     submitFileForm() {
@@ -360,9 +404,13 @@ export default {
         this.$modal.msgWarning("请选择要上传的文件");
         return;
       }
+
+      // 确保headers中的token是最新的
+      this.upload.headers.Authorization = "Bearer " + getToken();
+      console.log('上传Token:', this.upload.headers.Authorization); // 调试用
+
       this.$refs.upload.submit();
     },
-
     /** 下载按钮操作 */
     handleDownload(row) {
       console.log('开始下载文件:', row.materialName);
