@@ -6,16 +6,6 @@
           <span class="notice-title">通告管理</span>
           <div class="header-btn-group">
             <el-button
-              type="primary"
-              icon="el-icon-s-data"
-              size="small"
-              @click="handleStats"
-              class="mac-btn"
-            >
-              统计
-            </el-button>
-
-            <el-button
               v-hasPermi="['proj_cyq:notice:add']"
               type="primary"
               icon="el-icon-plus"
@@ -77,6 +67,15 @@
                 @click="handlePrint"
                 class="mac-btn"
               >打印</el-button>
+            </el-col>
+            <el-col :span="1.5">
+              <el-button
+                type="primary"
+                icon="el-icon-s-data"
+                size="mini"
+                @click="handleStats"
+                class="mac-btn"
+              >统计</el-button>
             </el-col>
             <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
           </el-row>
@@ -247,7 +246,7 @@ export default {
         ]
       },
 
-      // 【新增】统计相关
+      // 统计相关
       statsOpen: false,
       statsLoading: false,
       stats: {
@@ -362,12 +361,11 @@ export default {
         this.$modal.msgError("导出失败：" + (error.message || '未知错误'));
       });
     },
-    /** 【新增】打印功能 */
+    /** 打印功能 */
     handlePrint() {
       window.print();
     },
-
-    /** 【新增】处理统计 */
+    /** 处理统计 */
     handleStats() {
       this.statsOpen = true;
       this.statsLoading = true;
@@ -470,7 +468,7 @@ export default {
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* 1. 主操作按钮 (新增、搜索、确定、打印、统计)：深蓝色实心，白字 */
+/* 1. 主操作按钮 (新增、搜索、确定、统计)：深蓝色实心，白字 */
 .app-container >>> .el-button--primary:not(.is-plain) {
   background-color: #0071e3;
   border-color: #0071e3;
@@ -496,7 +494,6 @@ export default {
 }
 
 /* 3. 辅助操作按钮 (打印)：浅蓝背景，深蓝字 */
-/* 【修复】移除了 border-color (变透明)，保留了悬停上浮 */
 .app-container >>> .el-button--primary.is-plain {
   background-color: #f0f7ff !important; /* 浅蓝背景 */
   border-color: transparent !important;  /* 【关键】去掉边框 */
@@ -563,6 +560,15 @@ export default {
   min-height: 120px;
   color: #303133;
   line-height: 1.6;
+}
+
+/* 【核心修复】 深度选择器修复图片溢出问题 */
+.notice-content >>> img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+  margin: 10px auto;
+  border-radius: 4px;
 }
 
 /* 统计样式 */
