@@ -126,7 +126,7 @@ export default {
         }
         // ========== ↓↓↓ 添加这一行 ↓↓↓ ==========
         // 读取后端返回的注册开关状态
-        this.register = res.register === undefined ? false : res.register
+        this.register = res.register === undefined ? true : res.register
         // ========== ↑↑↑ 添加结束 ↑↑↑ ==========
       })
     },
