@@ -1,62 +1,33 @@
-// src/api/proj_cyq/notice.js
 import request from '@/utils/request'
 
-// 查询公告列表
+// ... (保留 listNotice, getNotice, addNotice, updateNotice, delNotice, exportNotice, getNoticeStats) ...
 export function listNotice(query) {
-  return request({
-    url: '/proj_cyq/notice/list',
-    method: 'get',
-    params: query
-  })
+  return request({ url: '/proj_cyq/notice/list', method: 'get', params: query })
 }
-
-// 查询公告详细
 export function getNotice(noticeId) {
-  return request({
-    url: '/proj_cyq/notice/' + noticeId,
-    method: 'get'
-  })
+  return request({ url: '/proj_cyq/notice/' + noticeId, method: 'get' })
 }
-
-// 新增公告
 export function addNotice(data) {
-  return request({
-    url: '/proj_cyq/notice',
-    method: 'post',
-    data: data
-  })
+  return request({ url: '/proj_cyq/notice', method: 'post', data: data })
 }
-
-// 修改公告
 export function updateNotice(data) {
-  return request({
-    url: '/proj_cyq/notice',
-    method: 'put',
-    data: data
-  })
+  return request({ url: '/proj_cyq/notice', method: 'put', data: data })
 }
-
-// 删除公告
 export function delNotice(noticeIds) {
-  return request({
-    url: '/proj_cyq/notice/' + noticeIds,
-    method: 'delete'
-  })
+  return request({ url: '/proj_cyq/notice/' + noticeIds, method: 'delete' })
 }
-
-// 导出公告
 export function exportNotice() {
-  return request({
-    url: '/proj_cyq/notice/export',
-    method: 'get',
-    responseType: 'blob'
-  })
+  return request({ url: '/proj_cyq/notice/export', method: 'get', responseType: 'blob' })
+}
+export function getNoticeStats() {
+  return request({ url: '/proj_cyq/notice/stats', method: 'get' })
 }
 
-// 【新增】获取通告统计数据
-export function getNoticeStats() {
+// 【修改】导出通告 Word
+export function exportNoticeWord(noticeId) {
   return request({
-    url: '/proj_cyq/notice/stats',
-    method: 'get'
+    url: '/proj_cyq/notice/exportWord/' + noticeId,
+    method: 'get',
+    responseType: 'blob' // 必须保留，Word文件也是二进制流
   })
 }

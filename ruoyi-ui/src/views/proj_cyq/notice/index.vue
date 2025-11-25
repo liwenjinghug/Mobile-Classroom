@@ -6,6 +6,15 @@
           <span class="notice-title">通告管理</span>
           <div class="header-btn-group">
             <el-button
+              type="primary"
+              icon="el-icon-s-data"
+              size="small"
+              @click="handleStats"
+              class="mac-btn"
+            >
+              统计
+            </el-button>
+            <el-button
               v-hasPermi="['proj_cyq:notice:add']"
               type="primary"
               icon="el-icon-plus"
@@ -68,15 +77,6 @@
                 class="mac-btn"
               >打印</el-button>
             </el-col>
-            <el-col :span="1.5">
-              <el-button
-                type="primary"
-                icon="el-icon-s-data"
-                size="mini"
-                @click="handleStats"
-                class="mac-btn"
-              >统计</el-button>
-            </el-col>
             <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
           </el-row>
 
@@ -96,7 +96,7 @@
                 <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}') }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" align="center" class-name="small-padding fixed-width no-print-col">
+            <el-table-column label="操作" align="center" class-name="small-padding fixed-width no-print-col" width="250">
               <template slot-scope="scope">
                 <el-button
                   size="mini"
@@ -105,6 +105,15 @@
                   @click="handleView(scope.row)"
                   v-hasPermi="['proj_cyq:notice:query']"
                 >查看</el-button>
+
+                <el-button
+                  size="mini"
+                  type="text"
+                  icon="el-icon-document"
+                  @click="handleExportWord(scope.row)"
+                  v-hasPermi="['proj_cyq:notice:export']"
+                >Word</el-button>
+
                 <el-button
                   size="mini"
                   type="text"
@@ -198,7 +207,10 @@
 </template>
 
 <script>
-import { listNotice, getNotice, delNotice, addNotice, updateNotice, exportNotice, getNoticeStats } from "@/api/proj_cyq/notice";
+import {
+  listNotice, getNotice, delNotice, addNotice, updateNotice, exportNotice, getNoticeStats,
+  exportNoticeWord // 引入 Word 导出 API
+} from "@/api/proj_cyq/notice";
 
 export default {
   name: "ClassNotice",
@@ -365,6 +377,7 @@ export default {
     handlePrint() {
       window.print();
     },
+
     /** 处理统计 */
     handleStats() {
       this.statsOpen = true;
@@ -380,7 +393,27 @@ export default {
       });
     },
 
-    /** 处理导出响应 */
+    /** Word 导出按钮操作 */
+    handleExportWord(row) {
+      const noticeId = row.noticeId;
+      this.$modal.confirm('是否确认导出编号为"' + noticeId + '"的通告为Word？').then(() => {
+        this.exportLoading = true;
+        return exportNoticeWord(noticeId);
+      }).then(response => {
+        const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `通告详情_${noticeId}.docx`;
+        link.click();
+        this.exportLoading = false;
+        this.$modal.msgSuccess("Word导出成功");
+      }).catch(() => {
+        this.exportLoading = false;
+        this.$modal.msgError("导出失败");
+      });
+    },
+
+    /** 处理Excel导出响应 */
     handleExportResponse(response) {
       try {
         const blob = new Blob([response], {
@@ -494,6 +527,7 @@ export default {
 }
 
 /* 3. 辅助操作按钮 (打印)：浅蓝背景，深蓝字 */
+/* 【修复】移除了 border-color (变透明)，保留了悬停上浮 */
 .app-container >>> .el-button--primary.is-plain {
   background-color: #f0f7ff !important; /* 浅蓝背景 */
   border-color: transparent !important;  /* 【关键】去掉边框 */

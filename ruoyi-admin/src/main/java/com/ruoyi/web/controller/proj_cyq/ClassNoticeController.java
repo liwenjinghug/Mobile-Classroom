@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.io.IOException;
+import java.net.URLEncoder;
 
 @RestController
 @RequestMapping("/proj_cyq/notice")
@@ -22,9 +24,7 @@ public class ClassNoticeController extends BaseController {
     @Autowired
     private IClassNoticeService classNoticeService;
 
-    /**
-     * 查询公告列表
-     */
+    // ... (保留 list, export, getInfo, add, edit, remove 等方法) ...
     @PreAuthorize("@ss.hasPermi('proj_cyq:notice:list')")
     @GetMapping("/list")
     public TableDataInfo list(ClassNotice notice) {
@@ -33,9 +33,6 @@ public class ClassNoticeController extends BaseController {
         return getDataTable(list);
     }
 
-    /**
-     * 导出公告列表
-     */
     @PreAuthorize("@ss.hasPermi('proj_cyq:notice:export')")
     @Log(title = "通告管理", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
@@ -45,18 +42,12 @@ public class ClassNoticeController extends BaseController {
         util.exportExcel(response, list, "通告管理数据");
     }
 
-    /**
-     * 获取公告详细信息
-     */
     @PreAuthorize("@ss.hasPermi('proj_cyq:notice:query')")
     @GetMapping(value = "/{noticeId}")
     public AjaxResult getInfo(@PathVariable("noticeId") Long noticeId) {
         return AjaxResult.success(classNoticeService.selectClassNoticeById(noticeId));
     }
 
-    /**
-     * 新增公告
-     */
     @PreAuthorize("@ss.hasPermi('proj_cyq:notice:add')")
     @Log(title = "通告管理", businessType = BusinessType.INSERT)
     @PostMapping
@@ -64,9 +55,6 @@ public class ClassNoticeController extends BaseController {
         return toAjax(classNoticeService.insertClassNotice(notice));
     }
 
-    /**
-     * 修改公告
-     */
     @PreAuthorize("@ss.hasPermi('proj_cyq:notice:edit')")
     @Log(title = "通告管理", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -74,9 +62,6 @@ public class ClassNoticeController extends BaseController {
         return toAjax(classNoticeService.updateClassNotice(notice));
     }
 
-    /**
-     * 删除公告
-     */
     @PreAuthorize("@ss.hasPermi('proj_cyq:notice:remove')")
     @Log(title = "通告管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{noticeIds}")
@@ -84,9 +69,23 @@ public class ClassNoticeController extends BaseController {
         return toAjax(classNoticeService.deleteClassNoticeByIds(noticeIds));
     }
 
-    // ========== 【新增】统计接口 ==========
     @GetMapping("/stats")
     public AjaxResult getStats() {
         return success(classNoticeService.getNoticeStats());
+    }
+
+    // ========== 【修改】导出为 Word ==========
+    @PreAuthorize("@ss.hasPermi('proj_cyq:notice:export')")
+    @Log(title = "通告管理", businessType = BusinessType.EXPORT)
+    @GetMapping("/exportWord/{noticeId}")
+    public void exportWord(@PathVariable Long noticeId, HttpServletResponse response) throws IOException {
+        // 1. 设置响应头为 Word (docx)
+        response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        response.setCharacterEncoding("utf-8");
+        String filename = "通告详情_" + noticeId + ".docx";
+        response.setHeader("Content-disposition", "attachment;filename=" + URLEncoder.encode(filename, "UTF-8"));
+
+        // 2. 调用 Service 生成 Word
+        classNoticeService.exportNoticeWord(noticeId, response.getOutputStream());
     }
 }
