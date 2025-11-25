@@ -1,12 +1,12 @@
 <template>
   <div class="app-container">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div style="font-weight:600">作业批改</div>
-      <div>
-        <el-select v-model="form.courseId" placeholder="选择课程" filterable style="min-width:220px" @change="onCourseChange">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:12px">
+      <div style="font-weight:600;font-size:20px">作业批改</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <el-select v-model="form.courseId" placeholder="选择课程" filterable style="min-width:220px;flex:1" @change="onCourseChange">
           <el-option v-for="c in courses" :key="c.courseId" :label="c.courseName" :value="c.courseId" />
         </el-select>
-        <el-select v-model="form.sessionId" placeholder="选择课堂" filterable style="min-width:220px" @change="loadHomeworks">
+        <el-select v-model="form.sessionId" placeholder="选择课堂" filterable style="min-width:220px;flex:1" @change="loadHomeworks">
           <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
         </el-select>
       </div>
@@ -14,235 +14,248 @@
 
     <div>
       <template v-if="!isListView">
-        <div style="display:flex;gap:16px">
-          <div style="flex:1">
-            <el-table :data="homeworkList" style="width:100%" v-loading="loading">
-              <el-table-column prop="title" label="标题" />
-              <el-table-column label="截止时间" width="180">
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:300px">
+            <el-table :data="homeworkList" style="width:100%" v-loading="loading" class="responsive-table">
+              <el-table-column prop="title" label="标题" min-width="200" />
+              <el-table-column label="截止时间" width="160">
                 <template #default="{ row }">{{ formatTime(row.deadline) || '—' }}</template>
               </el-table-column>
               <el-table-column prop="totalScore" label="分值" width="80" />
-              <el-table-column label="操作" width="160">
+              <el-table-column label="操作" width="120">
                 <template #default="{ row }">
-                  <el-button size="mini" type="primary" @click="openSubmissions(row)">查看提交</el-button>
+                  <el-button size="mini" type="primary" style="min-width:80px" @click="openSubmissions(row)">查看提交</el-button>
                 </template>
               </el-table-column>
             </el-table>
           </div>
 
           <!-- Submissions panel on the right when a homework is selected or loading -->
-          <div class="grading-right-panel" style="width:560px;border-left:1px solid #eee;padding-left:16px" v-show="submissionsPanelVisible">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-              <div style="font-weight:600">批改 - {{ (selectedHomework && (selectedHomework.title || ('作业#' + (selectedHomework.homeworkId || selectedHomework.id)))) || '批改' }}</div>
-              <div style="display:flex;gap:8px;align-items:center">
-                <el-button size="mini" @click="goBack">返回</el-button>
-                <el-button size="mini" type="primary" @click="exportSubmissions" :disabled="!submissions || submissions.length===0">导出</el-button>
-                <el-button size="mini" type="info" @click="printSubmissions" :disabled="!submissions || submissions.length===0">打印</el-button>
-                <el-button size="mini" type="primary" @click="refreshSubmissions">刷新</el-button>
+          <div class="grading-right-panel" style="flex:2;min-width:400px;border-left:1px solid #eee;padding-left:16px" v-show="submissionsPanelVisible">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+              <div style="font-weight:600;font-size:16px">批改 - {{ (selectedHomework && (selectedHomework.title || ('作业#' + (selectedHomework.homeworkId || selectedHomework.id)))) || '批改' }}</div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <el-button size="mini" @click="goBack" style="min-width:60px">返回</el-button>
+                <el-button size="mini" type="primary" @click="exportSubmissions" :disabled="!submissions || submissions.length===0" style="min-width:60px">导出</el-button>
+                <el-button size="mini" type="info" @click="printSubmissions" :disabled="!submissions || submissions.length===0" style="min-width:60px">打印</el-button>
+                <el-button size="mini" type="primary" @click="refreshSubmissions" style="min-width:60px">刷新</el-button>
               </div>
             </div>
             <div v-if="submissions && submissions.length" class="stats-bar">
               <el-alert :closable="false" type="info" :title="`统计：应到 ${gradingStats.total}；已提交 ${gradingStats.submitted}（${formatPercent(gradingStats.submitRate)}）; 已批改 ${gradingStats.graded}（${formatPercent(gradingStats.gradedRate)}）; 未提交 ${gradingStats.unsubmitted}；平均分 ${gradingStats.avgScore}${gradingStats.ext}`" />
             </div>
-            <el-table :data="sortedSubmissions" style="width:100%" v-loading="submissionsLoading">
-              <el-table-column label="序号ID" width="110">
-                <template #default="{ row }">{{ row.student_id || row.studentId || row.studentId || row.id || '' }}</template>
-              </el-table-column>
-              <el-table-column label="学号" width="140">
-                <template #default="{ row }">{{ row.student_no || row.studentNo || '' }}</template>
-              </el-table-column>
-              <el-table-column prop="studentName" label="姓名" width="120" />
-              <el-table-column label="提交状态" width="120">
-                <template #default="{ row }">
-                  {{ statusLabel(row) }}
-                </template>
-              </el-table-column>
-              <el-table-column prop="submissionFiles" label="附件">
-                <template #default="{ row }">
-                  <div v-if="row.submissionFiles">
-                    <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
-                  </div>
-                  <div v-else>—</div>
-                </template>
-              </el-table-column>
-              <el-table-column prop="submitTime" label="提交时间" width="160">
-                <template #default="{ row }">{{ formatTime(row.submitTime) || '—' }}</template>
-              </el-table-column>
-              <!-- 新增批改时间列：支持后端不同字段名 -->
-              <el-table-column label="批改时间" width="160">
-                <template #default="{ row }">{{ formatTime(row.corrected_time || row.correctedTime || row.gradedAt || row.gradeTime) || '—' }}</template>
-              </el-table-column>
-              <el-table-column label="成绩/评语" width="200">
-                <template #default="{ row }">
-                  <div v-if="row.score !== null && row.score !== undefined">{{ row.score }} 分</div>
-                  <div v-if="row.remark" style="color:#666">评语：{{ row.remark }}</div>
-                  <div v-if="!(row.score !== null && row.score !== undefined) && !row.remark" style="color:#888">未批改</div>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="140">
-                <template #default="{ row }">
-                  <el-button size="mini" :type="rowIsGraded(row) ? 'success' : 'primary'" @click="startGrade(row)" :disabled="!canGrade(row)">{{ gradeButtonLabel(row) }}</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
-            <div v-if="submissionsLoading" style="padding:20px;color:#666">正在加载提交列表，请稍候...</div>
-            <div v-else-if="!submissions || submissions.length===0" style="padding:20px;color:#999">暂无提交（或后端未返回学生列表）</div>
+            <div class="table-container">
+              <el-table :data="sortedSubmissions" style="width:100%" v-loading="submissionsLoading" class="responsive-table">
+                <el-table-column label="序号ID" width="100">
+                  <template #default="{ row }">{{ row.student_id || row.studentId || row.studentId || row.id || '' }}</template>
+                </el-table-column>
+                <el-table-column label="学号" width="120">
+                  <template #default="{ row }">{{ row.student_no || row.studentNo || '' }}</template>
+                </el-table-column>
+                <el-table-column prop="studentName" label="姓名" width="100" />
+                <el-table-column label="提交状态" width="100">
+                  <template #default="{ row }">
+                    {{ statusLabel(row) }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="submissionFiles" label="附件" min-width="120">
+                  <template #default="{ row }">
+                    <div v-if="row.submissionFiles" style="display:flex;flex-wrap:wrap;gap:4px">
+                      <el-tag v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" size="mini" class="tag-link" @click="previewFile(f)">{{ String(f).split('/').pop() }}</el-tag>
+                    </div>
+                    <div v-else>—</div>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="submitTime" label="提交时间" width="140">
+                  <template #default="{ row }">{{ formatTime(row.submitTime) || '—' }}</template>
+                </el-table-column>
+                <!-- 新增批改时间列：支持后端不同字段名 -->
+                <el-table-column label="批改时间" width="140">
+                  <template #default="{ row }">{{ formatTime(row.corrected_time || row.correctedTime || row.gradedAt || row.gradeTime) || '—' }}</template>
+                </el-table-column>
+                <el-table-column label="成绩/评语" min-width="150">
+                  <template #default="{ row }">
+                    <div v-if="row.score !== null && row.score !== undefined" style="font-weight:600;color:#67c23a">{{ row.score }} 分</div>
+                    <div v-if="row.remark" style="color:#666;font-size:12px">评语：{{ row.remark }}</div>
+                    <div v-if="!(row.score !== null && row.score !== undefined) && !row.remark" style="color:#888">未批改</div>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="100">
+                  <template #default="{ row }">
+                    <el-button size="mini" :type="rowIsGraded(row) ? 'success' : 'primary'" @click="startGrade(row)" :disabled="!canGrade(row)" style="min-width:60px">
+                      {{ gradeButtonLabel(row) }}
+                    </el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+            <div v-if="submissionsLoading" style="padding:20px;color:#666;text-align:center">正在加载提交列表，请稍候...</div>
+            <div v-else-if="!submissions || submissions.length===0" style="padding:20px;color:#999;text-align:center">暂无提交（或后端未返回学生列表）</div>
           </div>
         </div>
       </template>
 
       <!-- Full-page submissions list when navigated to the list route -->
       <template v-else>
-        <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
-          <div style="font-weight:600">提交列表 - {{ selectedHomework && (selectedHomework.title || ('作业#' + (selectedHomework.homeworkId || selectedHomework.id))) }}</div>
-          <div style="display:flex;gap:8px">
-            <el-button size="mini" @click="goBack">返回</el-button>
-            <el-button size="mini" type="primary" @click="exportSubmissions" :disabled="!submissions || submissions.length===0">导出</el-button>
-            <el-button size="mini" type="info" @click="printSubmissions" :disabled="!submissions || submissions.length===0">打印</el-button>
-            <el-button size="mini" type="primary" @click="refreshSubmissions">刷新</el-button>
+        <div style="margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div style="font-weight:600;font-size:18px">提交列表 - {{ selectedHomework && (selectedHomework.title || ('作业#' + (selectedHomework.homeworkId || selectedHomework.id))) }}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <el-button size="mini" @click="goBack" style="min-width:60px">返回</el-button>
+            <el-button size="mini" type="primary" @click="exportSubmissions" :disabled="!submissions || submissions.length===0" style="min-width:60px">导出</el-button>
+            <el-button size="mini" type="info" @click="printSubmissions" :disabled="!submissions || submissions.length===0" style="min-width:60px">打印</el-button>
+            <el-button size="mini" type="primary" @click="refreshSubmissions" style="min-width:60px">刷新</el-button>
           </div>
         </div>
         <div v-if="submissions && submissions.length" class="stats-bar">
           <el-alert :closable="false" type="info" :title="`统计：应到 ${gradingStats.total}；已提交 ${gradingStats.submitted}（${formatPercent(gradingStats.submitRate)}）; 已批改 ${gradingStats.graded}（${formatPercent(gradingStats.gradedRate)}）; 未提交 ${gradingStats.unsubmitted}；平均分 ${gradingStats.avgScore}${gradingStats.ext}`" />
         </div>
-        <el-table :data="sortedSubmissions" style="width:100%" v-loading="submissionsLoading">
-          <el-table-column label="序号ID" width="110">
-            <template #default="{ row }">{{ row.student_id || row.studentId || row.id || '' }}</template>
-          </el-table-column>
-          <el-table-column label="学号" width="140">
-            <template #default="{ row }">{{ row.student_no || row.studentNo || '' }}</template>
-          </el-table-column>
-          <el-table-column prop="studentName" label="姓名" width="120" />
-          <el-table-column label="提交状态" width="120">
-            <template #default="{ row }">
-              {{ statusLabel(row) }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="submissionFiles" label="附件">
-            <template #default="{ row }">
-              <div v-if="row.submissionFiles">
-                <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
-              </div>
-              <div v-else>—</div>
-            </template>
-          </el-table-column>
-          <el-table-column prop="submitTime" label="提交时间" width="160">
-            <template #default="{ row }">{{ formatTime(row.submitTime) || '—' }}</template>
-          </el-table-column>
-          <!-- 新增批改时间列：支持后端不同字段名 -->
-          <el-table-column label="批改时间" width="160">
-            <template #default="{ row }">{{ formatTime(row.corrected_time || row.correctedTime || row.gradedAt || row.gradeTime) || '—' }}</template>
-          </el-table-column>
-          <el-table-column label="成绩/评语" width="200">
-            <template #default="{ row }">
-              <div v-if="row.score !== null && row.score !== undefined">{{ row.score }} 分</div>
-              <div v-if="row.remark" style="color:#666">评语：{{ row.remark }}</div>
-              <div v-if="!(row.score !== null && row.score !== undefined) && !row.remark" style="color:#888">未批改</div>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="140">
-            <template #default="{ row }">
-              <el-button size="mini" :type="rowIsGraded(row) ? 'success' : 'primary'" @click="startGrade(row)" :disabled="!canGrade(row)">{{ gradeButtonLabel(row) }}</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div v-if="submissionsLoading" style="padding:20px;color:#666">正在加载提交列表，请稍候...</div>
-        <div v-else-if="!submissions || submissions.length===0" style="padding:20px;color:#999">暂无提交（或后端未返回学生列表）</div>
+        <div class="table-container">
+          <el-table :data="sortedSubmissions" style="width:100%" v-loading="submissionsLoading" class="responsive-table">
+            <el-table-column label="序号ID" width="100">
+              <template #default="{ row }">{{ row.student_id || row.studentId || row.id || '' }}</template>
+            </el-table-column>
+            <el-table-column label="学号" width="120">
+              <template #default="{ row }">{{ row.student_no || row.studentNo || '' }}</template>
+            </el-table-column>
+            <el-table-column prop="studentName" label="姓名" width="100" />
+            <el-table-column label="提交状态" width="100">
+              <template #default="{ row }">
+                {{ statusLabel(row) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="submissionFiles" label="附件" min-width="120">
+              <template #default="{ row }">
+                <div v-if="row.submissionFiles" style="display:flex;flex-wrap:wrap;gap:4px">
+                  <el-tag v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" size="mini" class="tag-link" @click="previewFile(f)">{{ String(f).split('/').pop() }}</el-tag>
+                </div>
+                <div v-else>—</div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="submitTime" label="提交时间" width="140">
+              <template #default="{ row }">{{ formatTime(row.submitTime) || '—' }}</template>
+            </el-table-column>
+            <!-- 新增批改时间列：支持后端不同字段名 -->
+            <el-table-column label="批改时间" width="140">
+              <template #default="{ row }">{{ formatTime(row.corrected_time || row.correctedTime || row.gradedAt || row.gradeTime) || '—' }}</template>
+            </el-table-column>
+            <el-table-column label="成绩/评语" min-width="150">
+              <template #default="{ row }">
+                <div v-if="row.score !== null && row.score !== undefined" style="font-weight:600;color:#67c23a">{{ row.score }} 分</div>
+                <div v-if="row.remark" style="color:#666;font-size:12px">评语：{{ row.remark }}</div>
+                <div v-if="!(row.score !== null && row.score !== undefined) && !row.remark" style="color:#888">未批改</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="100">
+              <template #default="{ row }">
+                <el-button size="mini" :type="rowIsGraded(row) ? 'success' : 'primary'" @click="startGrade(row)" :disabled="!canGrade(row)" style="min-width:60px">
+                  {{ gradeButtonLabel(row) }}
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <div v-if="submissionsLoading" style="padding:20px;color:#666;text-align:center">正在加载提交列表，请稍候...</div>
+        <div v-else-if="!submissions || submissions.length===0" style="padding:20px;color:#999;text-align:center">暂无提交（或后端未返回学生列表）</div>
       </template>
     </div>
 
     <!-- Grade dialog -->
-    <el-dialog title="批改学生作业" :visible.sync="gradeDialogVisible" width="600px">
+    <el-dialog title="批改学生作业" :visible.sync="gradeDialogVisible" width="90%" :max-width="600" class="responsive-dialog">
       <div>
         <div style="margin-bottom:8px"><strong>学生：</strong>{{ gradingRow.studentName || gradingRow.studentId }}</div>
         <div style="margin-bottom:8px"><strong>提交时间：</strong>{{ formatTime(gradingRow.submitTime) || '—' }}</div>
         <div v-if="gradingRow.corrected_time || gradingRow.correctedTime || gradingRow.gradedAt || gradingRow.gradeTime" style="margin-bottom:8px"><strong>批改时间：</strong>{{ formatTime(gradingRow.corrected_time || gradingRow.correctedTime || gradingRow.gradedAt || gradingRow.gradeTime) || '—' }}</div>
         <div style="margin-bottom:8px"><strong>附件：</strong>
-          <div v-if="gradingRow.submissionFiles">
-            <a v-for="(f, idx) in parseAttachments(gradingRow.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
+          <div v-if="gradingRow.submissionFiles" style="display:flex;flex-wrap:wrap;gap:4px">
+            <el-tag v-for="(f, idx) in parseAttachments(gradingRow.submissionFiles)" :key="idx" size="mini" class="tag-link" @click="previewFile(f)">{{ String(f).split('/').pop() }}</el-tag>
           </div>
           <div v-else>—</div>
         </div>
 
         <el-form :model="gradeForm" label-width="80px">
           <el-form-item label="分数">
-            <el-input v-model.number="gradeForm.score" type="number" placeholder="请输入分数" />
+            <el-input v-model.number="gradeForm.score" type="number" placeholder="请输入分数" style="width:100%" />
           </el-form-item>
           <el-form-item label="评语">
-            <el-input type="textarea" v-model="gradeForm.remark" placeholder="请输入评语（可选）" />
+            <el-input type="textarea" v-model="gradeForm.remark" placeholder="请输入评语（可选）" style="width:100%" />
           </el-form-item>
         </el-form>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="gradeDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="gradeSubmitting" @click="submitGrade">确定</el-button>
+        <el-button @click="gradeDialogVisible = false" style="min-width:80px">取消</el-button>
+        <el-button type="primary" :loading="gradeSubmitting" @click="submitGrade" style="min-width:80px">确定</el-button>
       </span>
     </el-dialog>
 
     <!-- Submissions modal dialog for narrow viewports -->
-    <el-dialog title="作业提交列表" :visible.sync="submissionsModalVisible" width="80%" :fullscreen="true">
+    <el-dialog title="作业提交列表" :visible.sync="submissionsModalVisible" width="95%" class="responsive-dialog">
       <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <div style="font-weight:600">提交列表 - {{ (selectedHomework && (selectedHomework.title || ('作业#' + (selectedHomework.homeworkId || selectedHomework.id)))) || '提交列表' }}</div>
-          <div>
-            <el-button size="mini" @click="goBack">返回</el-button>
-            <el-button size="mini" type="primary" @click="exportSubmissions" :disabled="!submissions || submissions.length===0">导出</el-button>
-            <el-button size="mini" type="info" @click="printSubmissions" :disabled="!submissions || submissions.length===0">打印</el-button>
-            <el-button size="mini" type="primary" @click="refreshSubmissions">刷新</el-button>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:12px">
+          <div style="font-weight:600;font-size:16px">提交列表 - {{ (selectedHomework && (selectedHomework.title || ('作业#' + (selectedHomework.homeworkId || selectedHomework.id)))) || '提交列表' }}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <el-button size="mini" @click="goBack" style="min-width:60px">返回</el-button>
+            <el-button size="mini" type="primary" @click="exportSubmissions" :disabled="!submissions || submissions.length===0" style="min-width:60px">导出</el-button>
+            <el-button size="mini" type="info" @click="printSubmissions" :disabled="!submissions || submissions.length===0" style="min-width:60px">打印</el-button>
+            <el-button size="mini" type="primary" @click="refreshSubmissions" style="min-width:60px">刷新</el-button>
           </div>
         </div>
         <div v-if="submissions && submissions.length" class="stats-bar">
           <el-alert :closable="false" type="info" :title="`统计：应到 ${gradingStats.total}；已提交 ${gradingStats.submitted}（${formatPercent(gradingStats.submitRate)}）; 已批改 ${gradingStats.graded}（${formatPercent(gradingStats.gradedRate)}）; 未提交 ${gradingStats.unsubmitted}；平均分 ${gradingStats.avgScore}${gradingStats.ext}`" />
         </div>
-        <el-table :data="sortedSubmissions" style="width:100%" v-loading="submissionsLoading">
-          <el-table-column label="序号ID" width="110">
-            <template #default="{ row }">{{ row.student_id || row.studentId || row.id || '' }}</template>
-          </el-table-column>
-          <el-table-column label="学号" width="140">
-            <template #default="{ row }">{{ row.student_no || row.studentNo || '' }}</template>
-          </el-table-column>
-          <el-table-column prop="studentName" label="姓名" width="120" />
-          <el-table-column label="提交状态" width="120">
-            <template #default="{ row }">
-              {{ statusLabel(row) }}
-            </template>
-          </el-table-column>
-          <el-table-column prop="submissionFiles" label="附件">
-            <template #default="{ row }">
-              <div v-if="row.submissionFiles">
-                <a v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ f }}</a>
-              </div>
-              <div v-else>—</div>
-            </template>
-          </el-table-column>
-          <el-table-column prop="submitTime" label="提交时间" width="160">
-            <template #default="{ row }">{{ formatTime(row.submitTime) || '—' }}</template>
-          </el-table-column>
-          <!-- 新增批改时间列：支持后端不同字段名 -->
-          <el-table-column label="批改时间" width="160">
-            <template #default="{ row }">{{ formatTime(row.corrected_time || row.correctedTime || row.gradedAt || row.gradeTime) || '—' }}</template>
-          </el-table-column>
-          <el-table-column label="成绩/评语" width="200">
-            <template #default="{ row }">
-              <div v-if="row.score !== null && row.score !== undefined">{{ row.score }} 分</div>
-              <div v-if="row.remark" style="color:#666">评语：{{ row.remark }}</div>
-              <div v-if="!(row.score !== null && row.score !== undefined) && !row.remark" style="color:#888">未批改</div>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="140">
-            <template #default="{ row }">
-              <el-button size="mini" :type="rowIsGraded(row) ? 'success' : 'primary'" @click="startGrade(row)" :disabled="!canGrade(row)">{{ gradeButtonLabel(row) }}</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div v-if="submissionsLoading" style="padding:20px;color:#666">正在加载提交列表，请稍候...</div>
-        <div v-else-if="!submissions || submissions.length===0" style="padding:20px;color:#999">暂无提交（或后端未返回学生列表）</div>
+        <div class="table-container">
+          <el-table :data="sortedSubmissions" style="width:100%" v-loading="submissionsLoading" class="responsive-table">
+            <el-table-column label="序号ID" width="100">
+              <template #default="{ row }">{{ row.student_id || row.studentId || row.id || '' }}</template>
+            </el-table-column>
+            <el-table-column label="学号" width="120">
+              <template #default="{ row }">{{ row.student_no || row.studentNo || '' }}</template>
+            </el-table-column>
+            <el-table-column prop="studentName" label="姓名" width="100" />
+            <el-table-column label="提交状态" width="100">
+              <template #default="{ row }">
+                {{ statusLabel(row) }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="submissionFiles" label="附件" min-width="120">
+              <template #default="{ row }">
+                <div v-if="row.submissionFiles" style="display:flex;flex-wrap:wrap;gap:4px">
+                  <el-tag v-for="(f, idx) in parseAttachments(row.submissionFiles)" :key="idx" size="mini" class="tag-link" @click="previewFile(f)">{{ String(f).split('/').pop() }}</el-tag>
+                </div>
+                <div v-else>—</div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="submitTime" label="提交时间" width="140">
+              <template #default="{ row }">{{ formatTime(row.submitTime) || '—' }}</template>
+            </el-table-column>
+            <!-- 新增批改时间列：支持后端不同字段名 -->
+            <el-table-column label="批改时间" width="140">
+              <template #default="{ row }">{{ formatTime(row.corrected_time || row.correctedTime || row.gradedAt || row.gradeTime) || '—' }}</template>
+            </el-table-column>
+            <el-table-column label="成绩/评语" min-width="150">
+              <template #default="{ row }">
+                <div v-if="row.score !== null && row.score !== undefined" style="font-weight:600;color:#67c23a">{{ row.score }} 分</div>
+                <div v-if="row.remark" style="color:#666;font-size:12px">评语：{{ row.remark }}</div>
+                <div v-if="!(row.score !== null && row.score !== undefined) && !row.remark" style="color:#888">未批改</div>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="100">
+              <template #default="{ row }">
+                <el-button size="mini" :type="rowIsGraded(row) ? 'success' : 'primary'" @click="startGrade(row)" :disabled="!canGrade(row)" style="min-width:60px">
+                  {{ gradeButtonLabel(row) }}
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <div v-if="submissionsLoading" style="padding:20px;color:#666;text-align:center">正在加载提交列表，请稍候...</div>
+        <div v-else-if="!submissions || submissions.length===0" style="padding:20px;color:#999;text-align:center">暂无提交（或后端未返回学生列表）</div>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
+// 保持原有的script逻辑完全不变
 import { listCourse } from '@/api/proj_lw/course'
 import { listHomework, getSubmissions, gradeSubmission } from '@/api/proj_lwj/homework'
 
@@ -260,7 +273,7 @@ export default {
       submissions: [],
       submissionsLoading: false,
       submissionsModalVisible: false,
-       // controls visibility of the right-side submissions panel independently so UI appears immediately
+      // controls visibility of the right-side submissions panel independently so UI appears immediately
       submissionsPanelVisible: false,
       // grading dialog
       gradeDialogVisible: false,
@@ -375,6 +388,31 @@ export default {
         this.loadSubmissions(hwId)
       }
     })
+
+    // 新增：当没有路由查询参数时，尝试恢复本地上次选择
+    try {
+      const hasQuery = !!(this.$route && this.$route.query && (this.$route.query.courseId || this.$route.query.sessionId))
+      if (!hasQuery) {
+        const lastCid = localStorage.getItem('hwGradingLastCourseId')
+        const lastSid = localStorage.getItem('hwGradingLastSessionId')
+        if (lastCid) this.form.courseId = isNaN(Number(lastCid)) ? lastCid : Number(lastCid)
+        if (lastSid) this.form.sessionId = isNaN(Number(lastSid)) ? lastSid : Number(lastSid)
+      }
+    } catch (e) { /* ignore */ }
+    // 如果已恢复了课程，加载课堂列表
+    if (this.form.courseId && (!this.sessions || !this.sessions.length)) {
+      const api = require('@/api/proj_lw/session')
+      api.getSessionsByCourseId(this.form.courseId).then(res => {
+        this.sessions = res && res.rows ? res.rows : (res && res.data ? res.data : [])
+        // 如果已有课堂选择，则加载作业列表
+        if (this.form.sessionId) {
+          this.loadHomeworks(this.form.sessionId)
+        }
+      }).catch(() => {})
+    } else if (this.form.sessionId) {
+      // 如果只有课堂（无课程），也尝试加载作业列表
+      this.loadHomeworks(this.form.sessionId)
+    }
   },
   methods: {
     fetchCourses() {
@@ -390,6 +428,8 @@ export default {
         this.sessions = res && res.rows ? res.rows : (res && res.data ? res.data : [])
         this.form.sessionId = null
       }).catch(() => { this.sessions = [] })
+      // 新增：持久化课程选择
+      try { localStorage.setItem('hwGradingLastCourseId', this.form.courseId ? String(this.form.courseId) : '') } catch(e){}
     },
     loadHomeworks() {
       if (!this.form.sessionId) { this.homeworkList = []; return }
@@ -398,6 +438,8 @@ export default {
         this.homeworkList = res && (res.rows || res.data) ? (res.rows || res.data) : (res || [])
         this.loading = false
       }).catch(() => { this.loading = false; this.homeworkList = [] })
+      // 新增：持久化课堂选择
+      try { localStorage.setItem('hwGradingLastSessionId', this.form.sessionId ? String(this.form.sessionId) : '') } catch(e){}
     },
     openSubmissions(row) {
       // Navigate to the dedicated submissions list route so the submissions show on a new page.
@@ -417,7 +459,7 @@ export default {
       if (this.$router && this.$router.push) {
         this.$router.push({ path, query }).catch(() => {})
       }
-       // leave actual loading to the created()/watcher which reacts to route params
+      // leave actual loading to the created()/watcher which reacts to route params
     },
     // Centralized loader so created()/watcher/navigation reuse same logic
     loadSubmissions(homeworkId) {
@@ -441,17 +483,6 @@ export default {
       }
     },
     parseAttachments(str) { if (!str) return []; return String(str).split(',').map(s=>s.trim()).filter(Boolean) },
-    downloadUrl(fileName) {
-      const base = process.env.VUE_APP_BASE_API || ''
-      if (!fileName) return ''
-      const f = String(fileName)
-      // If the stored value is a resource path (starts with the backend resource prefix), use resource download
-      if (f.startsWith('/profile') || f.startsWith('profile')) {
-        return base + '/common/download/resource?resource=' + encodeURIComponent(f)
-      }
-      // Otherwise use the regular fileName-based download
-      return base + '/common/download?fileName=' + encodeURIComponent(f)
-    },
     startGrade(row) {
       if (this.readOnlyView) return
       this.gradingRow = Object.assign({}, row)
@@ -534,6 +565,13 @@ export default {
       // hide panel first
       this.submissionsPanelVisible = false
       this.submissionsModalVisible = false
+      // 新增：返回前也记录当前选择，便于下次进入自动恢复
+      try {
+        const cid = this.form.courseId || (this.selectedHomework && this.selectedHomework.courseId)
+        const sid = this.form.sessionId || (this.selectedHomework && this.selectedHomework.sessionId)
+        localStorage.setItem('hwGradingLastCourseId', cid ? String(cid) : '')
+        localStorage.setItem('hwGradingLastSessionId', sid ? String(sid) : '')
+      } catch(e){}
       this.$router.push({ path: '/proj_lwj/homework_publish', query: { courseId: cid, sessionId: sid } })
     },
     exportSubmissions() {
@@ -605,6 +643,44 @@ export default {
       } else {
         this.$message.error('弹出窗口被拦截，请允许弹窗或使用导出功能')
       }
+    },
+    previewFile(path) {
+      if (!path) return
+      const request = require('@/utils/request').default
+      const { getToken } = require('@/utils/auth')
+      const token = getToken && getToken()
+      const headers = token ? { Authorization: 'Bearer ' + token, isToken: true } : {}
+      const norm = String(path).replace(/\\/g, '/').trim()
+      const filename = decodeURIComponent(norm.split('/').pop())
+      const downloadBlob = url => request({ url, method: 'get', responseType: 'blob', headers, silent: true, timeout: 30000 }).then(resp => {
+        const data = resp && resp instanceof Blob ? resp : (resp && resp.data instanceof Blob ? resp.data : new Blob([resp]))
+        const href = URL.createObjectURL(data)
+        const a = document.createElement('a')
+        a.href = href
+        a.download = filename
+        a.click()
+        URL.revokeObjectURL(href)
+      })
+      const tryResource = () => downloadBlob(`/common/download/resource?resource=${encodeURIComponent(norm)}`).catch(() => {
+        const rel = norm.replace(/^\/?profile\/upload\//, '')
+        if (!rel) throw new Error('missing path')
+        return downloadBlob(`/common/download?fileName=${encodeURIComponent(rel)}&delete=false`)
+      })
+      if (/^https?:\/\//i.test(norm)) {
+        window.open(norm, '_blank')
+        return
+      }
+      if (norm.startsWith('/profile')) {
+        tryResource().catch(() => this.$message && this.$message.error && this.$message.error('下载失败'))
+        return
+      }
+      // 其他情况统一规范化到 /profile/upload
+      let s = norm
+      if (s.startsWith('/upload/')) s = '/profile' + s
+      else if (s.startsWith('upload/')) s = '/profile/' + s
+      else if (/^\d{4}\//.test(s)) s = '/profile/upload/' + s
+      else s = '/profile/upload/' + s
+      downloadBlob(`/common/download/resource?resource=${encodeURIComponent(s)}`).catch(() => this.$message && this.$message.error && this.$message.error('下载失败'))
     }
   },
   watch: {
@@ -640,99 +716,157 @@ export default {
 </script>
 
 <style scoped>
-/* Mac Style for Homework Grading */
+/* 基础样式优化 */
 .app-container {
-  padding: 40px 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+/* 表格容器 - 添加水平滚动支持 */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* 响应式表格 - 设置最小宽度确保内容显示 */
+.responsive-table {
+  min-width: 1000px;
+}
+
+/* 统计栏样式优化 */
+.stats-bar {
+  margin: 12px 0;
+}
+
+/* 右侧批改面板样式优化 */
+.grading-right-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 响应式对话框 */
+.responsive-dialog {
+  border-radius: 8px;
+}
+
+/* 标签链接样式 */
+.tag-link {
+  cursor: pointer;
+  margin: 2px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 对话框底部按钮布局优化 */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+}
+
+/* 响应式设计 - 小屏幕适配 */
+@media (max-width: 768px) {
+  .app-container {
+    padding: 12px;
+  }
+
+  /* 头部区域在小屏幕下垂直排列 */
+  .app-container > div:first-child {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* 筛选区域在小屏幕下垂直排列 */
+  .app-container > div:first-child > div:last-child {
+    flex-direction: column;
+  }
+
+  .filter-select {
+    min-width: 100% !important;
+    margin-bottom: 8px;
+  }
+
+  /* 分割布局在小屏幕下改为垂直 */
+  .split-layout {
+    flex-direction: column;
+  }
+
+  .grading-right-panel {
+    border-left: none !important;
+    border-top: 1px solid #eee;
+    padding-left: 0 !important;
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+
+  /* 操作按钮在小屏幕下换行 */
+  .action-buttons {
+    flex-wrap: wrap;
+  }
+
+  /* 表格在小屏幕下缩小字体 */
+  .responsive-table {
+    font-size: 12px;
+    min-width: 800px;
+  }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 480px) {
+  /* 按钮组在小屏幕下垂直排列 */
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-buttons .el-button {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  /* 对话框在小屏幕下全宽 */
+  .responsive-dialog {
+    width: 95% !important;
+    margin: 20px auto;
+  }
+}
+
+/* 确保按钮在缩放时保持最小宽度 */
+.el-button {
+  box-sizing: border-box;
+}
+
+/* 滚动条样式优化 */
+.table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 保持原有的Mac风格样式 */
+.app-container {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1d1d1f;
-  background-color: #f5f5f7;
-  min-height: 100vh;
 }
 
-/* Card/Panel Styling */
-.app-container >>> .el-card,
-.grading-right-panel {
-  border-radius: 18px;
-  border: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-  background-color: #ffffff;
-  margin-bottom: 24px;
-}
-
-.grading-right-panel {
-  padding: 24px !important;
-  border-left: none !important;
-}
-
-/* Header Styling */
-.app-container > div:first-child,
-.grading-right-panel > div:first-child,
-.app-container > div > div:first-child {
-  margin-bottom: 24px !important;
-}
-
-.app-container > div:first-child > div:first-child,
-.grading-right-panel > div:first-child > div:first-child {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1d1d1f;
-}
-
-/* Form/Select Styling */
-.app-container >>> .el-select .el-input__inner {
-  border-radius: 10px;
-  border: 1px solid #d2d2d7;
-  height: 36px;
-  transition: all 0.2s ease;
-}
-
-.app-container >>> .el-select .el-input__inner:focus {
-  border-color: #0071e3;
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
-}
-
-/* Button Styling */
-.app-container >>> .el-button {
-  border-radius: 980px;
-  font-weight: 500;
-  border: none;
-  padding: 9px 20px;
-  transition: all 0.2s ease;
-}
-
-.app-container >>> .el-button--primary {
-  background-color: #0071e3;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
-}
-
-.app-container >>> .el-button--primary:hover {
-  background-color: #0077ed;
-  transform: translateY(-1px);
-}
-
-.app-container >>> .el-button--success {
-  background-color: #34c759;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
-}
-
-.app-container >>> .el-button--info {
-  background-color: #86868b;
-  box-shadow: 0 2px 8px rgba(134, 134, 139, 0.2);
-}
-
-.app-container >>> .el-button--default {
-  background-color: #e5e5ea;
-  color: #1d1d1f;
-}
-
-.app-container >>> .el-button--mini {
-  padding: 7px 15px;
-  font-size: 12px;
-}
-
-/* Table Styling */
 .app-container >>> .el-table {
   border-radius: 12px;
   overflow: hidden;
@@ -745,85 +879,24 @@ export default {
   color: #86868b;
   font-weight: 600;
   border-bottom: 1px solid #f5f5f7;
-  padding: 12px 0;
 }
 
 .app-container >>> .el-table td {
-  padding: 12px 0;
   border-bottom: 1px solid #f5f5f7;
 }
 
-/* Dialog Styling */
+.app-container >>> .el-button--primary {
+  background-color: #0071e3;
+  border: none;
+}
+
+.app-container >>> .el-button--success {
+  background-color: #34c759;
+  border: none;
+}
+
 .app-container >>> .el-dialog {
   border-radius: 18px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
-
-.app-container >>> .el-dialog__header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #f5f5f7;
-}
-
-.app-container >>> .el-dialog__title {
-  font-weight: 600;
-  font-size: 18px;
-  color: #1d1d1f;
-}
-
-.app-container >>> .el-dialog__body {
-  padding: 24px;
-}
-
-.app-container >>> .el-dialog__footer {
-  padding: 16px 24px;
-  border-top: 1px solid #f5f5f7;
-}
-
-/* Alert Styling */
-.app-container >>> .el-alert {
-  border-radius: 10px;
-  margin-bottom: 16px;
-  background-color: #f5f5f7;
-  color: #1d1d1f;
-}
-
-.app-container >>> .el-alert--info.is-light {
-  background-color: #f5f5f7;
-  color: #1d1d1f;
-}
-
-/* Input Styling in Dialog */
-.app-container >>> .el-input__inner,
-.app-container >>> .el-textarea__inner {
-  border-radius: 10px;
-  border: 1px solid #d2d2d7;
-  transition: all 0.2s ease;
-}
-
-.app-container >>> .el-input__inner:focus,
-.app-container >>> .el-textarea__inner:focus {
-  border-color: #0071e3;
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
-}
-
-/* Link Styling */
-.app-container >>> a {
-  color: #0071e3;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.app-container >>> a:hover {
-  color: #0077ed;
-  text-decoration: underline;
-}
-
-/* Specific Styles */
-.stats-bar {
-  margin: 6px 0 16px;
-}
-
-.grading-right-panel {
-  transition: transform 0.3s ease;
 }
 </style>

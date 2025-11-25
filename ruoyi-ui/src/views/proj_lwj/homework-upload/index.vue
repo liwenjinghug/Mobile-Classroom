@@ -274,7 +274,7 @@
         <el-alert v-if="!rowEditable(editingSubmissionRow)" type="warning" :closable="false" show-icon title="该提交不可修改" style="margin-bottom:12px" />
         <h4>原始附件</h4>
         <div v-if="editExistingFiles.length" class="file-tags">
-          <el-tag v-for="(f,i) in editExistingFiles" :key="i" size="mini" closable @close="removeExistingFile(i)">{{ f.split('/').pop() }}</el-tag>
+          <el-tag v-for="(f,i) in editExistingFiles" :key="i" size="mini" closable @close="removeExistingFile(i)" class="tag-link" @click="previewFile(f)">{{ f.split('/').pop() }}</el-tag>
         </div>
         <div v-else class="text-muted" style="margin-bottom:8px">无</div>
         <h4 style="margin-top:12px">新增附件</h4>
@@ -294,7 +294,7 @@
           <div slot="tip" class="upload-tip">支持多文件，单个文件≤50MB</div>
         </el-upload>
         <div v-if="editNewFiles.length" class="file-tags">
-          <el-tag v-for="(f,i) in editNewFiles" :key="'new-'+i" size="mini" type="info" closable @close="removeNewFile(i)">{{ f.split('/').pop() }}</el-tag>
+          <el-tag v-for="(f,i) in editNewFiles" :key="'new-'+i" size="mini" type="info" closable @close="removeNewFile(i)" class="tag-link" @click="previewFile(f)">{{ f.split('/').pop() }}</el-tag>
         </div>
       </div>
       <template #footer>
@@ -449,7 +449,46 @@ export default {
       const savedNo = localStorage.getItem('hwUploadStudentNo')
       if (savedNo) this.studentNo = savedNo
     } catch (e) { /* ignore */ }
-    this.fetchCourses()
+    // 恢复上次选择（课程/课堂/作业）
+    try {
+      const lastCourseId = localStorage.getItem('hwUploadLastCourseId')
+      const lastSessionId = localStorage.getItem('hwUploadLastSessionId')
+      const lastHomeworkId = localStorage.getItem('hwUploadLastHomeworkId')
+      this.selectionForm = {
+        courseId: lastCourseId ? Number(lastCourseId) : null,
+        sessionId: lastSessionId ? Number(lastSessionId) : null,
+        homeworkId: lastHomeworkId ? Number(lastHomeworkId) : null
+      }
+    } catch (e) { /* ignore */ }
+    this.fetchCourses().then(async () => {
+      // 如果有课程，则加载课堂
+      if (this.selectionForm.courseId) {
+        try {
+          const api = require('@/api/proj_lw/session')
+          const res = await api.getSessionsByCourseId(this.selectionForm.courseId)
+          this.sessions = res && res.rows ? res.rows : (res && res.data ? res.data : [])
+        } catch (e) { this.sessions = [] }
+      }
+      // 如果有课堂，则加载作业列表
+      if (this.selectionForm.sessionId) {
+        await this.refreshHomeworkList()
+      }
+      // 如果有作业ID，则加载作业详情
+      if (this.selectionForm.homeworkId) {
+        try {
+          const res = await getHomework(this.selectionForm.homeworkId)
+          this.homework = (res && res.data) || res
+          this.homeworkId = this.selectionForm.homeworkId
+        } catch (e) { this.homework = null; this.homeworkId = null }
+      }
+      // 学号如已确认过（单次登录会话），自动加载我的提交
+      try {
+        const confirmedOnce = sessionStorage.getItem('hwUploadConfirmedOnce') === '1'
+        if (confirmedOnce && this.studentNo) {
+          await this.confirmIdentity()
+        }
+      } catch (e) { /* ignore */ }
+    })
   },
   methods: {
     formatTime(ts) {
@@ -478,6 +517,8 @@ export default {
     },
     async onCourseChange(courseId) {
       console.log('[HW] course change', courseId)
+      // 保存选择
+      try { localStorage.setItem('hwUploadLastCourseId', courseId ? String(courseId) : '') } catch (e) {}
       this.selectionForm.sessionId = null
       this.selectionForm.homeworkId = null
       this.homework = null
@@ -495,6 +536,8 @@ export default {
     },
     async onSessionChange(sessionId) {
       console.log('[HW] session change', sessionId)
+      // 保存选择
+      try { localStorage.setItem('hwUploadLastSessionId', sessionId ? String(sessionId) : '') } catch (e) {}
       this.selectionForm.homeworkId = null
       this.homework = null
       this.homeworkId = null
@@ -515,6 +558,8 @@ export default {
     },
     async onHomeworkChange(homeworkId) {
       console.log('[HW] homework change', homeworkId)
+      // 保存选择
+      try { localStorage.setItem('hwUploadLastHomeworkId', homeworkId ? String(homeworkId) : '') } catch (e) {}
       this.homeworkId = homeworkId
       this.homework = null
       this.uploadedFiles = []
@@ -544,7 +589,11 @@ export default {
         this.allSubmissions = normalized
         this.studentConfirmed = true
         this.submissionsLoaded = true
-        try { localStorage.setItem('hwUploadStudentNo', this.studentNo) } catch (e) {}
+        try {
+          localStorage.setItem('hwUploadStudentNo', this.studentNo)
+          // 标记本次会话已确认过一次
+          sessionStorage.setItem('hwUploadConfirmedOnce', '1')
+        } catch (e) {}
         this.scrollToSubmissions()
       } catch (e) {
         console.error('加载提交记录失败', e)
@@ -685,6 +734,9 @@ export default {
       this.selectionForm = { courseId: null, sessionId: null, homeworkId: null }
       this.homework = null
       this.homeworkId = null
+      try {
+        sessionStorage.removeItem('hwUploadConfirmedOnce')
+      } catch (e) { /* ignore */ }
     },
     parseAttachmentString(str) {
       if (!str) return []

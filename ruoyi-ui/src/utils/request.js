@@ -20,6 +20,17 @@ const service = axios.create({
   timeout: 10000
 })
 
+// Helper: check if a request opts out of global error tips
+function isSilent(config) {
+  try {
+    if (!config) return false
+    if (config.silent === true) return true
+    const h = config.headers || {}
+    if (h.noErrorTip === true) return true
+  } catch (e) {}
+  return false
+}
+
 // request拦截器
 service.interceptors.request.use(config => {
   // 是否需要设置 token
@@ -82,7 +93,7 @@ service.interceptors.response.use(res => {
       return res.data
     }
     if (code === 401) {
-      if (!isRelogin.show) {
+      if (!isRelogin.show && !isSilent(res.config)) {
         isRelogin.show = true
         MessageBox.confirm('登录状态已过期，您可以继续留在该页面，或者重新登录', '系统提示', { confirmButtonText: '重新登录', cancelButtonText: '取消', type: 'warning' }).then(() => {
           isRelogin.show = false
@@ -95,13 +106,13 @@ service.interceptors.response.use(res => {
     }
       return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
     } else if (code === 500) {
-      Message({ message: msg, type: 'error' })
+      if (!isSilent(res.config)) Message({ message: msg, type: 'error' })
       return Promise.reject(new Error(msg))
     } else if (code === 601) {
-      Message({ message: msg, type: 'warning' })
+      if (!isSilent(res.config)) Message({ message: msg, type: 'warning' })
       return Promise.reject('error')
     } else if (code !== 200) {
-      Notification.error({ title: msg })
+      if (!isSilent(res.config)) Notification.error({ title: msg })
       return Promise.reject('error')
     } else {
       return res.data
@@ -117,7 +128,9 @@ service.interceptors.response.use(res => {
     } else if (message.includes("Request failed with status code")) {
       message = "系统接口" + message.substr(message.length - 3) + "异常"
     }
-    Message({ message: message, type: 'error', duration: 5 * 1000 })
+    if (!isSilent(error.config)) {
+      Message({ message: message, type: 'error', duration: 5 * 1000 })
+    }
     return Promise.reject(error)
   }
 )

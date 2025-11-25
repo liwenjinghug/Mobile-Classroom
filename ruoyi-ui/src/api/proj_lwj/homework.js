@@ -4,14 +4,16 @@ export function listHomework(query) {
   return request({
     url: '/proj_lwj/homework/list',
     method: 'get',
-    params: query
+    params: query,
+    silent: true
   })
 }
 
 export function getHomework(id) {
   return request({
     url: '/proj_lwj/homework/' + id,
-    method: 'get'
+    method: 'get',
+    silent: true
   })
 }
 
@@ -44,7 +46,9 @@ export function submitHomework(data, params) {
     url: '/proj_lwj/homework/submit',
     method: 'post',
     data,
-    params: params || {}
+    params: params || {},
+    silent: true,
+    timeout: 20000
   })
 }
 
@@ -53,14 +57,17 @@ export function updateSubmission(data, params) {
     url: '/proj_lwj/homework/submit',
     method: 'put',
     data,
-    params: params || {}
+    params: params || {},
+    silent: true,
+    timeout: 20000
   })
 }
 
 export function getSubmissions(homeworkId) {
   return request({
     url: '/proj_lwj/homework/submissions/' + homeworkId,
-    method: 'get'
+    method: 'get',
+    silent: true
   })
 }
 
@@ -69,7 +76,8 @@ export function getStudentSubmissions(studentNo) {
     url: '/proj_lwj/homework/studentSubmissions/public',
     method: 'get',
     // send both common param names to be tolerant to backend naming
-    params: { studentNo, student_no: studentNo }
+    params: { studentNo, student_no: studentNo },
+    silent: true
   })
 }
 
@@ -78,13 +86,16 @@ export function gradeSubmission(data) {
   return request({
     url: '/proj_lwj/homework/grade',
     method: 'put',
-    data
+    data,
+    silent: true,
+    timeout: 20000
   })
 }
 
 export function deleteSubmission(id) {
   return request({
     url: '/proj_lwj/homework/submission/' + id,
-    method: 'delete'
+    method: 'delete',
+    silent: true
   })
 }
