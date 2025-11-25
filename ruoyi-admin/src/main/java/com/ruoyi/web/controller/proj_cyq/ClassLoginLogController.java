@@ -3,17 +3,10 @@ package com.ruoyi.web.controller.proj_cyq;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+// 导入你自定义的 @Log 注解，确保记录到 class_oper_log 表
 import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -82,7 +75,7 @@ public class ClassLoginLogController extends BaseController {
         return success();
     }
 
-    // ========== 【新增】获取统计数据 ==========
+    // ========== 统计接口 ==========
     @GetMapping("/stats")
     public AjaxResult getStats() {
         return success(classLoginLogService.getLoginLogStats());

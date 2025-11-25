@@ -1,9 +1,9 @@
 package com.ruoyi.proj_cyq.service.impl;
 
 import java.util.List;
-import java.util.Map; // 【新增】
-import java.util.HashMap; // 【新增】
-import java.util.ArrayList; // 【新增】
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.proj_cyq.mapper.ClassLoginLogMapper;
@@ -18,23 +18,42 @@ public class ClassLoginLogServiceImpl implements IClassLoginLogService {
     @Autowired
     private ClassLoginLogMapper classLoginLogMapper;
 
-    // ... (保留原有方法) ...
     @Override
-    public ClassLoginLog selectClassLoginLogById(Long loginId) { return classLoginLogMapper.selectClassLoginLogById(loginId); }
-    @Override
-    public List<ClassLoginLog> selectClassLoginLogList(ClassLoginLog classLoginLog) { return classLoginLogMapper.selectClassLoginLogList(classLoginLog); }
-    @Override
-    public int insertClassLoginLog(ClassLoginLog classLoginLog) { return classLoginLogMapper.insertClassLoginLog(classLoginLog); }
-    @Override
-    public int updateClassLoginLog(ClassLoginLog classLoginLog) { return classLoginLogMapper.updateClassLoginLog(classLoginLog); }
-    @Override
-    public int deleteClassLoginLogByIds(Long[] loginIds) { return classLoginLogMapper.deleteClassLoginLogByIds(loginIds); }
-    @Override
-    public int deleteClassLoginLogById(Long loginId) { return classLoginLogMapper.deleteClassLoginLogById(loginId); }
-    @Override
-    public void cleanClassLoginLog() { classLoginLogMapper.cleanClassLoginLog(); }
+    public ClassLoginLog selectClassLoginLogById(Long loginId) {
+        return classLoginLogMapper.selectClassLoginLogById(loginId);
+    }
 
-    // ========== 【新增】统计逻辑实现 ==========
+    @Override
+    public List<ClassLoginLog> selectClassLoginLogList(ClassLoginLog classLoginLog) {
+        return classLoginLogMapper.selectClassLoginLogList(classLoginLog);
+    }
+
+    @Override
+    public int insertClassLoginLog(ClassLoginLog classLoginLog) {
+        return classLoginLogMapper.insertClassLoginLog(classLoginLog);
+    }
+
+    @Override
+    public int updateClassLoginLog(ClassLoginLog classLoginLog) {
+        return classLoginLogMapper.updateClassLoginLog(classLoginLog);
+    }
+
+    @Override
+    public int deleteClassLoginLogByIds(Long[] loginIds) {
+        return classLoginLogMapper.deleteClassLoginLogByIds(loginIds);
+    }
+
+    @Override
+    public int deleteClassLoginLogById(Long loginId) {
+        return classLoginLogMapper.deleteClassLoginLogById(loginId);
+    }
+
+    @Override
+    public void cleanClassLoginLog() {
+        classLoginLogMapper.cleanClassLoginLog();
+    }
+
+    // ========== 统计逻辑实现 ==========
     @Override
     public Map<String, Object> getLoginLogStats() {
         Map<String, Object> result = new HashMap<>();
