@@ -1,7 +1,8 @@
-package com.ruoyi.proj_fz.controller;
+package com.ruoyi.web.controller.proj_fz;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.proj_fz.domain.DashboardDTO;
 import com.ruoyi.proj_fz.service.IDashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,27 +18,30 @@ public class DashboardController extends BaseController {
     private IDashboardService dashboardService;
 
     /**
-     * 获取驾驶舱数据
+     * 获取驾驶舱所有数据
      */
-    @GetMapping("/metrics")
-    public AjaxResult getDashboardMetrics() {
-        return success(dashboardService.getDashboardData());
+    @GetMapping("/data")
+    public AjaxResult getDashboardData() {
+        DashboardDTO dashboardData = dashboardService.getDashboardData();
+        return AjaxResult.success(dashboardData);
     }
 
     /**
-     * 获取天气数据
+     * 获取天气信息
      */
     @GetMapping("/weather")
-    public AjaxResult getWeatherData() {
-        return success(dashboardService.getWeatherInfo());
+    public AjaxResult getWeatherInfo() {
+        DashboardDTO.WeatherInfo weatherInfo = dashboardService.getWeatherInfo();
+        return AjaxResult.success(weatherInfo);
     }
 
     /**
-     * 获取核心指标数据
+     * 获取核心指标
      */
     @GetMapping("/core-metrics")
     public AjaxResult getCoreMetrics() {
-        return success(dashboardService.getCoreMetrics());
+        DashboardDTO.CoreMetrics coreMetrics = dashboardService.getCoreMetrics();
+        return AjaxResult.success(coreMetrics);
     }
 
     /**
@@ -45,7 +49,8 @@ public class DashboardController extends BaseController {
      */
     @GetMapping("/chart-data")
     public AjaxResult getChartData() {
-        return success(dashboardService.getChartData());
+        DashboardDTO.ChartData chartData = dashboardService.getChartData();
+        return AjaxResult.success(chartData);
     }
 
     /**
@@ -53,7 +58,8 @@ public class DashboardController extends BaseController {
      */
     @GetMapping("/todos")
     public AjaxResult getTodos() {
-        return success(dashboardService.getTodos());
+        List<Map<String, Object>> todos = dashboardService.getTodos();
+        return AjaxResult.success(todos);
     }
 
     /**
@@ -61,7 +67,8 @@ public class DashboardController extends BaseController {
      */
     @GetMapping("/messages")
     public AjaxResult getMessages() {
-        return success(dashboardService.getMessages());
+        List<Map<String, Object>> messages = dashboardService.getMessages();
+        return AjaxResult.success(messages);
     }
 
     /**
@@ -69,7 +76,8 @@ public class DashboardController extends BaseController {
      */
     @PostMapping("/homework-details")
     public AjaxResult getHomeworkDetails(@RequestBody Map<String, Object> params) {
-        return success(dashboardService.getHomeworkDetails(params));
+        List<Map<String, Object>> homeworkDetails = dashboardService.getHomeworkDetails(params);
+        return AjaxResult.success(homeworkDetails);
     }
 
     /**
@@ -77,7 +85,8 @@ public class DashboardController extends BaseController {
      */
     @PostMapping("/notices")
     public AjaxResult getNotices(@RequestBody Map<String, Object> params) {
-        return success(dashboardService.getNotices(params));
+        List<Map<String, Object>> notices = dashboardService.getNotices(params);
+        return AjaxResult.success(notices);
     }
 
     /**
@@ -85,7 +94,8 @@ public class DashboardController extends BaseController {
      */
     @PostMapping("/operation-logs")
     public AjaxResult getOperationLogs(@RequestBody Map<String, Object> params) {
-        return success(dashboardService.getOperationLogs(params));
+        List<Map<String, Object>> operationLogs = dashboardService.getOperationLogs(params);
+        return AjaxResult.success(operationLogs);
     }
 
     /**
@@ -93,7 +103,8 @@ public class DashboardController extends BaseController {
      */
     @GetMapping("/homework-by-status/{status}")
     public AjaxResult getHomeworkByStatus(@PathVariable String status) {
-        return success(dashboardService.getHomeworkByStatus(status));
+        List<Map<String, Object>> homeworkDetails = dashboardService.getHomeworkByStatus(status);
+        return AjaxResult.success(homeworkDetails);
     }
 
     /**
@@ -101,7 +112,8 @@ public class DashboardController extends BaseController {
      */
     @GetMapping("/exam-statistics")
     public AjaxResult getExamStatistics() {
-        return success(dashboardService.getExamStatistics());
+        Map<String, Object> examStatistics = dashboardService.getExamStatistics();
+        return AjaxResult.success(examStatistics);
     }
 
     /**
@@ -109,6 +121,7 @@ public class DashboardController extends BaseController {
      */
     @GetMapping("/student-activity")
     public AjaxResult getStudentActivity() {
-        return success(dashboardService.getStudentActivity());
+        Map<String, Object> studentActivity = dashboardService.getStudentActivity();
+        return AjaxResult.success(studentActivity);
     }
 }

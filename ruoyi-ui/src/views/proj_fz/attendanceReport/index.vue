@@ -107,9 +107,9 @@
           prop="className"
         />
         <el-table-column
-          label="总人数"
+          label="平均总人数"
           align="center"
-          width="90"
+          width="100"
           prop="totalStudents"
         />
         <el-table-column

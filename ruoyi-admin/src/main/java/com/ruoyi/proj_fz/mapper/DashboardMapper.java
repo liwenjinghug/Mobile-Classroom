@@ -176,4 +176,26 @@ public interface DashboardMapper {
     // 操作日志（带筛选）- 使用Provider方式
     @SelectProvider(type = DashboardSqlProvider.class, method = "getOperationLogsSql")
     List<Map<String, Object>> getOperationLogs(Map<String, Object> params);
+
+
+    // ==================== 新增：用于计算趋势的核心指标查询 ====================
+    @Select("SELECT count(*) FROM class_course WHERE status = '0' AND create_time BETWEEN DATE_SUB(NOW(), INTERVAL #{end} DAY) AND DATE_SUB(NOW(), INTERVAL #{start} DAY)")
+    int getCourseCountBetweenDays(@Param("start") int start, @Param("end") int end);
+
+    @Select("SELECT count(*) FROM class_session WHERE status = 1 AND create_time BETWEEN DATE_SUB(NOW(), INTERVAL #{end} DAY) AND DATE_SUB(NOW(), INTERVAL #{start} DAY)")
+    int getActiveClassCountBetweenDays(@Param("start") int start, @Param("end") int end);
+
+    @Select("SELECT count(*) FROM class_homework WHERE status = '0' AND create_time BETWEEN DATE_SUB(NOW(), INTERVAL #{end} DAY) AND DATE_SUB(NOW(), INTERVAL #{start} DAY)")
+    int getHomeworkCountBetweenDays(@Param("start") int start, @Param("end") int end);
+
+    @Select("SELECT count(*) FROM class_exam WHERE status = 1 AND create_time BETWEEN DATE_SUB(NOW(), INTERVAL #{end} DAY) AND DATE_SUB(NOW(), INTERVAL #{start} DAY)")
+    int getOngoingExamCountBetweenDays(@Param("start") int start, @Param("end") int end);
+
+    @Select("SELECT count(*) FROM class_todo WHERE status = '0' AND create_time BETWEEN DATE_SUB(NOW(), INTERVAL #{end} DAY) AND DATE_SUB(NOW(), INTERVAL #{start} DAY)")
+    int getPendingTodoCountBetweenDays(@Param("start") int start, @Param("end") int end);
+
+    // 假设 class_student_homework 的 update_time 在批改时更新
+    @Select("SELECT count(*) FROM class_student_homework WHERE is_graded = 1 AND update_time BETWEEN DATE_SUB(NOW(), INTERVAL #{end} DAY) AND DATE_SUB(NOW(), INTERVAL #{start} DAY)")
+    int getGradedCountBetweenDays(@Param("start") int start, @Param("end") int end);
+
 }

@@ -2,10 +2,13 @@ package com.ruoyi.proj_fz.service;
 
 import com.ruoyi.proj_fz.domain.DashboardDTO;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
 public interface IDashboardService {
+
+    // ... (原有方法保持不变)
 
     /**
      * 获取驾驶舱数据
@@ -66,4 +69,19 @@ public interface IDashboardService {
      * 获取学生活跃度统计
      */
     Map<String, Object> getStudentActivity();
+
+    /**
+     * 新增：导出作业明细数据
+     */
+    void exportHomeworkDetails(Map<String, Object> params, HttpServletResponse response);
+
+    /**
+     * 新增：导出公告列表数据
+     */
+    void exportNotices(Map<String, Object> params, HttpServletResponse response);
+
+    /**
+     * 新增：导出操作日志数据
+     */
+    void exportOperationLogs(Map<String, Object> params, HttpServletResponse response);
 }

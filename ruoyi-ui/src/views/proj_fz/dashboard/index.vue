@@ -5,53 +5,64 @@
       <el-col :span="24">
         <el-card class="weather-card" shadow="hover">
           <div class="weather-content">
-            <div class="weather-main" @click="toggleWeatherDetail">
-              <i :class="getWeatherIcon(weather.weather)" class="weather-icon"></i>
-              <div class="weather-info">
-                <div class="temperature">{{ weather.temperature }}</div>
-                <div class="city">{{ weather.city }}</div>
-                <div class="current-weather">{{ weather.weather }}</div>
-              </div>
-              <div class="weather-actions">
-                <el-button type="text" @click.stop="refreshWeather">
-                  <i class="el-icon-refresh"></i> 刷新
-                </el-button>
-                <el-button type="text" @click.stop="showWeatherManagement">
-                  <i class="el-icon-setting"></i> 管理
-                </el-button>
-              </div>
-            </div>
-
-            <el-collapse-transition>
-              <div v-show="weatherDetailVisible" class="weather-detail">
-                <div class="detail-grid">
-                  <div class="detail-item">
-                    <span class="label">湿度:</span>
-                    <span class="value">{{ weather.humidity }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">风力:</span>
-                    <span class="value">{{ weather.wind }}</span>
-                  </div>
-                  <div class="detail-item">
-                    <span class="label">更新时间:</span>
-                    <span class="value">{{ new Date().toLocaleTimeString() }}</span>
-                  </div>
+            <!-- 天气数据显示 -->
+            <div v-if="weather.city" key="weather-data">
+              <div class="weather-main" @click="toggleWeatherDetail">
+                <i :class="getWeatherIcon(weather.weather)" class="weather-icon"></i>
+                <div class="weather-info">
+                  <div class="temperature">{{ weather.temperature }}°C</div>
+                  <div class="city">{{ weather.city }}</div>
+                  <div class="current-weather">{{ weather.weather }}</div>
                 </div>
+                <div class="weather-actions">
+                  <el-button type="text" @click.stop="refreshWeather">
+                    <i class="el-icon-refresh"></i> 刷新
+                  </el-button>
+                  <el-button type="text" @click.stop="showWeatherManagement">
+                    <i class="el-icon-setting"></i> 管理
+                  </el-button>
+                </div>
+              </div>
 
-                <div class="weather-forecast">
-                  <div class="forecast-title">未来3天预报</div>
-                  <div class="forecast-list">
-                    <div v-for="(day, index) in weather.forecast" :key="index" class="forecast-item">
-                      <div class="forecast-date">{{ formatForecastDate(day.date) }}</div>
-                      <i :class="getWeatherIcon(day.weather)" class="forecast-icon"></i>
-                      <div class="forecast-temp">{{ day.tempMin }}°C / {{ day.tempMax }}°C</div>
-                      <div class="forecast-weather">{{ day.weather }}</div>
+              <el-collapse-transition>
+                <div v-show="weatherDetailVisible" class="weather-detail">
+                  <div class="detail-grid">
+                    <div class="detail-item">
+                      <span class="label">湿度:</span>
+                      <span class="value">{{ weather.humidity }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">风力:</span>
+                      <span class="value">{{ weather.wind }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="label">更新时间:</span>
+                      <span class="value">{{ new Date().toLocaleTimeString() }}</span>
+                    </div>
+                  </div>
+
+                  <div class="weather-forecast">
+                    <div class="forecast-title">未来3天预报</div>
+                    <div class="forecast-list">
+                      <div v-for="(day, index) in weather.forecast" :key="index" class="forecast-item">
+                        <div class="forecast-date">{{ formatForecastDate(day.date) }}</div>
+                        <i :class="getWeatherIcon(day.weather)" class="forecast-icon"></i>
+                        <div class="forecast-temp">{{ day.tempMin }}°C / {{ day.tempMax }}°C</div>
+                        <div class="forecast-weather">{{ day.weather }}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </el-collapse-transition>
+              </el-collapse-transition>
+            </div>
+            <!-- 天气加载失败提示 -->
+            <div v-else key="weather-error" class="weather-error-state">
+              <i class="el-icon-warning-outline"></i>
+              <span>天气信息加载失败</span>
+              <el-button type="text" @click.stop="refreshWeather" class="retry-button">
+                <i class="el-icon-refresh"></i> 重试
+              </el-button>
+            </div>
           </div>
         </el-card>
       </el-col>
@@ -582,7 +593,7 @@
             <el-input v-model="weatherConfig.city" placeholder="请输入城市名称"></el-input>
           </el-form-item>
           <el-form-item label="API密钥">
-            <el-input v-model="weatherConfig.apiKey" placeholder="请输入天气API密钥"></el-input>
+            <el-input v-model="weatherConfig.apiKey" placeholder="请输入天气API密钥" disabled></el-input>
           </el-form-item>
           <el-form-item label="自动刷新">
             <el-switch v-model="weatherConfig.autoRefresh"></el-switch>
@@ -609,7 +620,10 @@ import {
   getHomeworkDetails,
   getNotices,
   getOperationLogs,
-  getHomeworkByStatus
+  getHomeworkByStatus,
+  exportHomeworkDetails,
+  exportNotices,
+  exportOperationLogs
 } from '@/api/proj_fz/dashboard'
 
 export default {
@@ -701,7 +715,7 @@ export default {
       // 配置
       weatherConfig: {
         city: '成都',
-        apiKey: '3ae6faeef4eb83bb9c4881d9ec2d12cf',
+        apiKey: '3ae6faeef4eb83bb9c4881d9ec2d12cf', // 此处仅为显示，实际请求的Key在api文件中
         autoRefresh: true
       },
 
@@ -800,9 +814,9 @@ export default {
     this.loadAllData()
     this.initResizeHandler()
 
-    // 每5分钟自动刷新数据
+    // 每5分钟自动刷新核心数据
     this.refreshInterval = setInterval(() => {
-      this.loadAllData()
+      this.loadCoreData()
     }, 300000)
 
     // 天气自动刷新
@@ -823,23 +837,34 @@ export default {
     }
   },
   methods: {
+    /**
+     * @description 主加载函数，隔离了天气API，确保核心数据能正常显示
+     */
     async loadAllData() {
+      // 1. 先加载天气（非阻塞）
+      this.refreshWeather(); // 调用独立的刷新方法，内部处理UI和错误
+
+      // 2. 加载所有核心数据
+      this.loadCoreData();
+    },
+
+    /**
+     * @description 加载除天气外的所有核心数据
+     */
+    async loadCoreData() {
       try {
         const [
-          weatherRes,
           metricsRes,
           chartRes,
           todosRes,
           messagesRes
         ] = await Promise.all([
-          getWeatherData(),
           getCoreMetrics(),
           getChartData(),
           getTodos(),
           getMessages()
-        ])
+        ]);
 
-        this.weather = weatherRes.data
         this.coreMetrics = metricsRes.data
         this.chartData = chartRes.data
         this.todos = todosRes.data
@@ -854,8 +879,8 @@ export default {
           this.initCharts()
         })
       } catch (error) {
-        console.error('加载数据失败:', error)
-        this.$message.error('数据加载失败')
+        console.error('加载核心数据失败:', error)
+        this.$message.error('驾驶舱核心数据加载失败，请刷新页面或联系管理员');
       }
     },
 
@@ -1466,15 +1491,21 @@ export default {
 
     // 其他方法
     getWeatherIcon(weather) {
+      if (!weather) return 'el-icon-sunny';
       const iconMap = {
         '晴': 'el-icon-sunny',
         '多云': 'el-icon-cloudy',
-        '阴': 'el-icon-overcast',
-        '雨': 'el-icon-rain',
-        '雪': 'el-icon-snow',
-        '雷阵雨': 'el-icon-thunderstorm'
+        '阴': 'el-icon-cloudy', // 阴天也用多云图标
+        '雨': 'el-icon-heavy-rain',
+        '雪': 'el-icon-light-rain', // 没有雪的图标，用雨代替
+        '雷阵雨': 'el-icon-lightning'
       }
-      return iconMap[weather] || 'el-icon-sunny'
+      for (const key in iconMap) {
+        if (weather.includes(key)) {
+          return iconMap[key];
+        }
+      }
+      return 'el-icon-sunny';
     },
 
     getTrendClass(trend) {
@@ -1512,13 +1543,18 @@ export default {
       if (!date) return ''
       const today = new Date()
       const targetDate = new Date(date)
-      const diff = targetDate.getDate() - today.getDate()
 
-      if (diff === 0) return '今天'
-      if (diff === 1) return '明天'
-      if (diff === 2) return '后天'
+      today.setHours(0, 0, 0, 0);
+      targetDate.setHours(0, 0, 0, 0);
 
-      return date
+      const diffTime = targetDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) return '今天'
+      if (diffDays === 1) return '明天'
+      if (diffDays === 2) return '后天'
+
+      return date.substring(5); // 返回 MM-dd
     },
 
     isUrgent(endTime) {
@@ -1616,12 +1652,16 @@ export default {
 
     async refreshWeather() {
       try {
-        const res = await getWeatherData()
-        this.weather = res.data
-        this.$message.success('天气信息已刷新')
+        const res = await getWeatherData();
+        if (res.data && res.data.city) {
+          this.weather = res.data;
+          this.$message.success('天气信息已刷新');
+        }
       } catch (error) {
-        console.error('刷新天气失败:', error)
-        this.$message.error('刷新天气失败')
+        console.error('刷新天气失败:', error);
+        const errorMessage = error.message || '请检查API Key或网络。';
+        this.$message.error(`刷新天气失败: ${errorMessage}`);
+        this.weather = { city: '', temperature: '', weather: '', humidity: '', wind: '', forecast: [] };
       }
     },
 
@@ -1630,14 +1670,15 @@ export default {
     },
 
     saveWeatherConfig() {
-      localStorage.setItem('weatherConfig', JSON.stringify(this.weatherConfig))
+      // 仅保存前端配置，如自动刷新
+      localStorage.setItem('weatherConfig_autoRefresh', this.weatherConfig.autoRefresh);
+      localStorage.setItem('weatherConfig_city', this.weatherConfig.city);
       this.weatherManagementVisible = false
-      this.$message.success('天气配置已保存')
-      this.refreshWeather()
+      this.$message.success('天气配置已保存，刷新页面后生效')
     },
 
     handleTimeRangeChange() {
-      this.loadAllData()
+      this.loadCoreData();
     },
 
     downloadChart(chartName) {
@@ -1727,28 +1768,161 @@ export default {
       this.$message.info(`查看作业详情: ${item.title}`)
     },
 
+    // ===============================================
+    // =========== 打印/导出 方法 (已修复) ============
+    // ===============================================
+
+    // 辅助方法: 处理Blob下载
+    handleBlobDownload(blob, fileName) {
+      const link = document.createElement('a')
+      const blobUrl = window.URL.createObjectURL(blob)
+      link.href = blobUrl
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(blobUrl)
+    },
+
+    // 辅助方法: 打印数据 (前端实现)
+    printData(title, headers, data) {
+      if (!data || data.length === 0) {
+        return this.$message.warning('没有可打印的数据');
+      }
+      let printContent = `
+        <html>
+          <head>
+            <title>${title}</title>
+            <style>
+              body { font-family: sans-serif; }
+              table { width: 100%; border-collapse: collapse; table-layout: fixed;}
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; word-wrap: break-word; }
+              th { background-color: #f2f2f2; }
+              h2 { text-align: center; }
+            </style>
+          </head>
+          <body>
+            <h2>${title}</h2>
+            <table>
+              <thead>
+                <tr>
+      `;
+      headers.forEach(header => {
+        printContent += `<th>${header.label}</th>`;
+      });
+      printContent += `
+                </tr>
+              </thead>
+              <tbody>
+      `;
+      data.forEach(row => {
+        printContent += '<tr>';
+        headers.forEach(header => {
+          let value = row[header.prop] || '';
+          if (header.format && typeof header.format === 'function') {
+            value = header.format(row); // 传入整行数据以支持复杂格式化
+          }
+          printContent += `<td>${value}</td>`;
+        });
+        printContent += '</tr>';
+      });
+      printContent += `
+              </tbody>
+            </table>
+            <script>
+              window.onload = function() {
+                window.print();
+                setTimeout(function() { window.close(); }, 100);
+              }
+            <\/script>
+          </body>
+        </html>
+      `;
+
+      const printWindow = window.open('', '_blank', 'height=800,width=1000');
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+    },
+
+    // 作业明细导出
     exportHomework() {
-      this.$message.info('导出作业明细功能开发中')
+      this.$confirm('是否确认导出作业明细数据?', "警告", { type: "warning" }).then(() => {
+        this.$modal.loading("正在导出数据，请稍后...");
+        return exportHomeworkDetails(this.buildHomeworkParams());
+      }).then((response) => {
+        const fileName = `作业明细_${new Date().getTime()}.xlsx`;
+        this.handleBlobDownload(response, fileName);
+        this.$modal.closeLoading();
+        this.$modal.msgSuccess("导出成功");
+      }).catch(() => {
+        this.$modal.closeLoading();
+      });
     },
 
+    // 公告导出
     exportNotices() {
-      this.$message.info('导出公告功能开发中')
+      this.$confirm('是否确认导出最新公告数据?', "警告", { type: "warning" }).then(() => {
+        this.$modal.loading("正在导出数据，请稍后...");
+        return exportNotices(this.buildNoticeParams());
+      }).then((response) => {
+        const fileName = `最新公告_${new Date().getTime()}.xlsx`;
+        this.handleBlobDownload(response, fileName);
+        this.$modal.closeLoading();
+        this.$modal.msgSuccess("导出成功");
+      }).catch(() => {
+        this.$modal.closeLoading();
+      });
     },
 
+    // 日志导出
     exportLogs() {
-      this.$message.info('导出日志功能开发中')
+      this.$confirm('是否确认导出操作日志数据?', "警告", { type: "warning" }).then(() => {
+        this.$modal.loading("正在导出数据，请稍后...");
+        return exportOperationLogs(this.buildLogParams());
+      }).then((response) => {
+        const fileName = `操作日志_${new Date().getTime()}.xlsx`;
+        this.handleBlobDownload(response, fileName);
+        this.$modal.closeLoading();
+        this.$modal.msgSuccess("导出成功");
+      }).catch(() => {
+        this.$modal.closeLoading();
+      });
     },
 
+    // 作业明细打印
     printHomework() {
-      this.$message.info('打印作业明细功能开发中')
+      const headers = [
+        { prop: 'title', label: '作业名称' },
+        { prop: 'course', label: '课程' },
+        { prop: 'publishTime', label: '发布时间', format: (row) => this.formatTime(row.publishTime) },
+        { prop: 'deadline', label: '截止时间', format: (row) => this.formatTime(row.deadline) },
+        { prop: 'submittedCount', label: '已提交' },
+        { prop: 'status', label: '状态' }
+      ];
+      this.printData('作业明细', headers, this.homeworkDetails);
     },
 
+    // 公告打印
     printNotices() {
-      this.$message.info('打印公告功能开发中')
+      const headers = [
+        { prop: 'title', label: '标题' },
+        { prop: 'author', label: '发布人' },
+        { prop: 'createTime', label: '发布时间', format: (row) => this.formatTime(row.createTime) }
+      ];
+      this.printData('最新公告', headers, this.notices);
     },
 
+    // 日志打印
     printLogs() {
-      this.$message.info('打印日志功能开发中')
+      const headers = [
+        { prop: 'title', label: '操作内容' },
+        { prop: 'operator', label: '操作人' },
+        { prop: 'operateTime', label: '操作时间', format: (row) => this.formatTime(row.operateTime) },
+        { prop: 'ip', label: 'IP地址' },
+        { prop: 'businessType', label: '操作类型', format: (row) => this.getBusinessTypeText(row.businessType) }
+      ];
+      this.printData('操作日志', headers, this.operationLogs);
     },
 
     initResizeHandler() {
@@ -1789,6 +1963,29 @@ export default {
 </script>
 
 <style scoped>
+/* 天气加载失败状态样式 */
+.weather-error-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-size: 16px;
+  color: white;
+  opacity: 0.9;
+}
+.weather-error-state i {
+  font-size: 24px;
+  margin-right: 10px;
+}
+.weather-error-state .retry-button {
+  margin-left: 15px;
+  color: white;
+  font-size: 16px;
+}
+.weather-error-state .retry-button:hover {
+  text-decoration: underline;
+}
+
 /* 基础样式 */
 .dashboard-container {
   padding: 15px;
@@ -1807,6 +2004,7 @@ export default {
   border: none;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  min-height: 90px;
 }
 
 .weather-content {

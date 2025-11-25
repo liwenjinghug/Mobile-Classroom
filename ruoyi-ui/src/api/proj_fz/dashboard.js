@@ -1,14 +1,18 @@
 import request from '@/utils/request'
 
-// 获取驾驶舱指标数据
-export function getDashboardMetrics() {
+// 获取所有驾驶舱数据
+export function getDashboardData() {
   return request({
-    url: '/proj_fz/dashboard/metrics',
+    url: '/proj_fz/dashboard/data',
     method: 'get'
   })
 }
 
-// 获取天气数据
+/**
+ * 获取天气数据 (最终方案：恢复为请求后端API)
+ * @description 后端将负责调用高德API，前端只与后端交互。
+ * 请确保已将后端服务器的公网IP地址添加至高德Key的IP白名单中。
+ */
 export function getWeatherData() {
   return request({
     url: '/proj_fz/dashboard/weather',
@@ -16,7 +20,8 @@ export function getWeatherData() {
   })
 }
 
-// 获取核心指标数据
+
+// 获取核心指标
 export function getCoreMetrics() {
   return request({
     url: '/proj_fz/dashboard/core-metrics',
@@ -80,5 +85,38 @@ export function getHomeworkByStatus(status) {
   return request({
     url: `/proj_fz/dashboard/homework-by-status/${status}`,
     method: 'get'
+  })
+}
+
+// 导出作业明细
+export function exportHomeworkDetails(params) {
+  return request({
+    url: '/proj_fz/dashboard/export-homework',
+    method: 'post',
+    data: params,
+    responseType: 'blob',
+    headers: { 'Content-Type': 'application/json' }
+  })
+}
+
+// 导出最新公告
+export function exportNotices(params) {
+  return request({
+    url: '/proj_fz/dashboard/export-notices',
+    method: 'post',
+    data: params,
+    responseType: 'blob',
+    headers: { 'Content-Type': 'application/json' }
+  })
+}
+
+// 导出操作日志
+export function exportOperationLogs(params) {
+  return request({
+    url: '/proj_fz/dashboard/export-logs',
+    method: 'post',
+    data: params,
+    responseType: 'blob',
+    headers: { 'Content-Type': 'application/json' }
   })
 }
