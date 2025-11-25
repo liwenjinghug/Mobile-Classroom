@@ -294,10 +294,18 @@ export const constantRoutes = [
   {
     path: '/proj_fz',
     component: Layout,
-    redirect: '/proj_fz/homework_dashboard',
+    redirect: '/proj_fz/dashboard', // 修改默认跳转到驾驶舱
     name: 'proj_fz',
     meta: { title: '学情数据', icon: 'chart' },
     children: [
+      // 将驾驶舱放在首位
+      {
+        path: 'dashboard',
+        component: () => import('@/views/proj_fz/dashboard/index'),
+        name: 'ProjFz_Dashboard',
+        meta: { title: '驾驶舱', icon: 'dashboard' }
+      },
+      // 保留原有其他路由顺序，不动其实现
       {
         path: 'homework_dashboard',
         component: () => import('@/views/proj_fz/homeworkDashboard/index.vue'),
@@ -310,13 +318,6 @@ export const constantRoutes = [
         name: 'ProjFz_AttendanceReport',
         meta: { title: '考勤报表', icon: 'form' }
       },
-      {
-        path: 'dashboard',
-        component: () => import('@/views/proj_fz/dashboard/index'),
-        name: 'ProjFz_Dashboard',
-        meta: { title: '驾驶舱', icon: 'dashboard' }
-      },
-      // 在 proj_fz 路由配置中添加
       {
         path: 'participationHeat',
         component: () => import('@/views/proj_fz/participationHeat/index'),

@@ -20,6 +20,22 @@ export function getWeatherData() {
   })
 }
 
+// 获取天气配置
+export function getWeatherConfig() {
+  return request({
+    url: '/proj_fz/dashboard/weather/config',
+    method: 'get'
+  })
+}
+
+// 更新天气配置
+export function updateWeatherConfig(data) {
+  return request({
+    url: '/proj_fz/dashboard/weather/config',
+    method: 'post',
+    data
+  })
+}
 
 // 获取核心指标
 export function getCoreMetrics() {

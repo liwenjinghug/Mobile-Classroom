@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
@@ -33,6 +32,23 @@ public class DashboardServiceImpl implements IDashboardService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    // 天气配置（内存保存，避免修改外部配置文件）
+    private volatile String weatherApiKey = "3ae6faeef4eb83bb9c4881d9ec2d12cf";
+    private volatile String weatherCity = "成都";
+    private volatile String weatherAdcode = "510100"; // 默认成都
+
+    public DashboardServiceImpl() {
+        // 配置超时时间，避免天气接口网络阻塞影响整体加载
+        try {
+            org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+            factory.setConnectTimeout(3000);
+            factory.setReadTimeout(3000);
+            this.restTemplate.setRequestFactory(factory);
+        } catch (Exception e) {
+            log.warn("初始化 RestTemplate 超时配置失败: {}", e.getMessage());
+        }
+    }
+
     @Override
     public DashboardDTO getDashboardData() {
         DashboardDTO dashboard = new DashboardDTO();
@@ -43,118 +59,188 @@ public class DashboardServiceImpl implements IDashboardService {
     }
 
     @Override
+    public Object getWeatherConfig() {
+        Map<String, Object> cfg = new HashMap<>();
+        cfg.put("apiKey", weatherApiKey);
+        cfg.put("city", weatherCity);
+        cfg.put("adcode", weatherAdcode);
+        return cfg;
+    }
+
+    @Override
+    public void updateWeatherConfig(String apiKey, String city, String adcode) {
+        if (apiKey != null && !apiKey.isEmpty()) {
+            this.weatherApiKey = apiKey.trim();
+        }
+        if (city != null && !city.isEmpty()) {
+            this.weatherCity = city.trim();
+            // 清除手动传 adcode 时的城市编码优先级
+            if (adcode == null || adcode.isEmpty()) {
+                // 尝试解析新的城市编码
+                String resolved = resolveAdcode(this.weatherCity, this.weatherApiKey);
+                if (resolved != null && !resolved.isEmpty()) {
+                    this.weatherAdcode = resolved;
+                }
+            }
+        }
+        if (adcode != null && !adcode.isEmpty()) {
+            this.weatherAdcode = adcode.trim();
+        } else if (city != null && !city.isEmpty()) {
+            // 若只更新 city，则尝试自动更新 adcode
+            String resolved = resolveAdcode(this.weatherCity, this.weatherApiKey);
+            if (resolved != null && !resolved.isEmpty()) {
+                this.weatherAdcode = resolved;
+            }
+        }
+        log.info("天气配置已更新: apiKey={}, city={}, adcode={}", maskApiKey(this.weatherApiKey), this.weatherCity, this.weatherAdcode);
+    }
+
+    private String maskApiKey(String key) {
+        if (key == null) return "";
+        if (key.length() <= 6) return "***";
+        return key.substring(0, 3) + "***" + key.substring(key.length() - 3);
+    }
+
+    @Override
     public DashboardDTO.WeatherInfo getWeatherInfo() {
+        String apiKey = this.weatherApiKey; // 使用可更新的配置
+        String cityName = this.weatherCity;
+        String fixedAdcode = this.weatherAdcode;
+        DashboardDTO.WeatherInfo result = new DashboardDTO.WeatherInfo();
         try {
-            // 使用高德天气API的Web服务Key
-            String apiKey = "3ae6faeef4eb83bb9c4881d9ec2d12cf";
-            String city = "成都";
+            // 若有已缓存的 adcode 直接使用；否则解析一次
+            String adcode = (fixedAdcode != null && !fixedAdcode.isEmpty()) ? fixedAdcode : resolveAdcode(cityName, apiKey);
+            if (adcode == null || adcode.isEmpty()) {
+                log.warn("未能解析城市adcode, city={}, 使用默认成都", cityName);
+                adcode = "510100"; // 成都
+            } else {
+                this.weatherAdcode = adcode; // 缓存解析结果
+            }
 
-            // 获取城市编码（使用高德地理编码API）
-            String geoUrl = "https://restapi.amap.com/v3/geocode/geo?address=" +
-                    URLEncoder.encode(city, StandardCharsets.UTF_8.toString()) +
-                    "&key=" + apiKey;
+            // 2. 获取实时天气 (extensions=base)
+            JSONObject liveJson = callWeatherApi(adcode, apiKey, false);
+            if (liveJson != null) {
+                JSONArray lives = liveJson.getJSONArray("lives");
+                if (lives != null && !lives.isEmpty()) {
+                    JSONObject live = lives.getJSONObject(0);
+                    result.setCity(live.getString("city"));
+                    result.setTemperature(live.getString("temperature")); // 实时温度
+                    result.setWeather(live.getString("weather"));
+                    result.setHumidity(live.getString("humidity"));
+                    // winddirection 例如 "西北"， windpower 例如 "3级"
+                    String windDirection = live.getString("winddirection");
+                    String windPower = live.getString("windpower");
+                    result.setWind((windDirection != null ? windDirection : "") + "风 " + (windPower != null ? windPower : ""));
+                }
+            }
 
-            ResponseEntity<String> geoResponse = restTemplate.getForEntity(geoUrl, String.class);
-            String geoBody = geoResponse.getBody();
-            log.info("GaoDe Geo API Response: {}", geoBody);
-
-            if (geoBody != null) {
-                JSONObject geoJson = JSON.parseObject(geoBody);
-                if ("1".equals(geoJson.getString("status"))) {
-                    JSONArray geocodes = geoJson.getJSONArray("geocodes");
-                    if (geocodes != null && !geocodes.isEmpty()) {
-                        String adcode = geocodes.getJSONObject(0).getString("adcode");
-
-                        // 使用城市编码获取天气信息
-                        String weatherUrl = "https://restapi.amap.com/v3/weather/weatherInfo?city=" +
-                                adcode + "&key=" + apiKey + "&extensions=all";
-
-                        ResponseEntity<String> weatherResponse = restTemplate.getForEntity(weatherUrl, String.class);
-                        String weatherBody = weatherResponse.getBody();
-                        log.info("GaoDe Weather API Response: {}", weatherBody);
-
-                        if (weatherBody != null) {
-                            JSONObject jsonResponse = JSON.parseObject(weatherBody);
-                            if ("1".equals(jsonResponse.getString("status"))) {
-
-                                // 解析实时天气
-                                JSONArray lives = jsonResponse.getJSONArray("lives");
-                                if (lives != null && !lives.isEmpty()) {
-                                    JSONObject liveWeather = lives.getJSONObject(0);
-
-                                    // 解析天气预报
-                                    JSONArray forecastsJson = jsonResponse.getJSONArray("forecasts");
-                                    List<DashboardDTO.WeatherForecast> forecastList = new ArrayList<>();
-
-                                    if (forecastsJson != null && !forecastsJson.isEmpty()) {
-                                        JSONArray casts = forecastsJson.getJSONObject(0).getJSONArray("casts");
-                                        forecastList = casts.stream()
-                                                .map(item -> {
-                                                    JSONObject day = (JSONObject) item;
-                                                    DashboardDTO.WeatherForecast forecast = new DashboardDTO.WeatherForecast();
-                                                    forecast.setDate(day.getString("date"));
-                                                    forecast.setTempMin(day.getString("nighttemp"));
-                                                    forecast.setTempMax(day.getString("daytemp"));
-                                                    forecast.setWeather(day.getString("dayweather"));
-                                                    return forecast;
-                                                })
-                                                .limit(3)
-                                                .collect(Collectors.toList());
-                                    }
-
-                                    // 封装数据到DTO
-                                    DashboardDTO.WeatherInfo weatherInfo = new DashboardDTO.WeatherInfo();
-                                    weatherInfo.setCity(liveWeather.getString("city"));
-                                    weatherInfo.setTemperature(liveWeather.getString("temperature"));
-                                    weatherInfo.setWeather(liveWeather.getString("weather"));
-                                    weatherInfo.setHumidity(liveWeather.getString("humidity") + "%");
-                                    weatherInfo.setWind(liveWeather.getString("winddirection") + "风 " +
-                                            liveWeather.getString("windpower") + "级");
-                                    weatherInfo.setForecast(forecastList);
-
-                                    return weatherInfo;
-                                }
-                            } else {
-                                log.warn("高德天气API调用失败: {}", jsonResponse.getString("info"));
-                            }
+            // 3. 获取预报天气 (extensions=all)
+            JSONObject forecastJson = callWeatherApi(adcode, apiKey, true);
+            if (forecastJson != null) {
+                JSONArray forecasts = forecastJson.getJSONArray("forecasts");
+                if (forecasts != null && !forecasts.isEmpty()) {
+                    JSONObject forecastCity = forecasts.getJSONObject(0);
+                    JSONArray casts = forecastCity.getJSONArray("casts");
+                    if (casts != null && !casts.isEmpty()) {
+                        List<DashboardDTO.WeatherForecast> forecastList = casts.stream()
+                                .map(o -> {
+                                    JSONObject cast = (JSONObject) o;
+                                    DashboardDTO.WeatherForecast f = new DashboardDTO.WeatherForecast();
+                                    f.setDate(cast.getString("date"));
+                                    f.setTempMin(cast.getString("nighttemp"));
+                                    f.setTempMax(cast.getString("daytemp"));
+                                    f.setWeather(cast.getString("dayweather"));
+                                    return f;
+                                })
+                                .limit(3) // 未来3天
+                                .collect(Collectors.toList());
+                        result.setForecast(forecastList);
+                        // 如果实时接口失败导致城市为空，用预报城市补充
+                        if (result.getCity() == null) {
+                            result.setCity(forecastCity.getString("city"));
+                        }
+                        if (result.getWeather() == null && casts.size() > 0) {
+                            result.setWeather(casts.getJSONObject(0).getString("dayweather"));
                         }
                     }
                 }
             }
-        } catch (HttpClientErrorException e) {
-            log.error("调用高德天气API时发生HTTP客户端错误: {} - {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
-        } catch (Exception e) {
-            log.error("调用高德天气API时发生未知异常", e);
-        }
 
-        // 如果API调用失败，返回默认数据或空数据
-        return createDefaultWeatherInfo();
+            // 4. 校验最终结果，确保没有虚拟数据
+            if (result.getCity() == null || result.getTemperature() == null) {
+                log.warn("实时天气关键字段缺失，返回空对象供前端判定失败");
+                return new DashboardDTO.WeatherInfo();
+            }
+            log.info("天气信息获取成功: city={}, temp={}, weather={}, humidity={}, wind={}",
+                    result.getCity(), result.getTemperature(), result.getWeather(), result.getHumidity(), result.getWind());
+            return result;
+        } catch (Exception e) {
+            log.error("获取天气信息异常: {}", e.getMessage(), e);
+            return new DashboardDTO.WeatherInfo(); // 失败返回空，前端显示加载失败
+        }
     }
 
-    private DashboardDTO.WeatherInfo createDefaultWeatherInfo() {
-        DashboardDTO.WeatherInfo weatherInfo = new DashboardDTO.WeatherInfo();
-        weatherInfo.setCity("成都");
-        weatherInfo.setTemperature("25");
-        weatherInfo.setWeather("晴");
-        weatherInfo.setHumidity("60%");
-        weatherInfo.setWind("东南风 3级");
-
-        // 创建默认的天气预报
-        List<DashboardDTO.WeatherForecast> forecastList = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
-
-        for (int i = 0; i < 3; i++) {
-            DashboardDTO.WeatherForecast forecast = new DashboardDTO.WeatherForecast();
-            calendar.add(Calendar.DAY_OF_YEAR, 1);
-            forecast.setDate(DateUtils.parseDateToStr("yyyy-MM-dd", calendar.getTime()));
-            forecast.setTempMin("20");
-            forecast.setTempMax("28");
-            forecast.setWeather("多云");
-            forecastList.add(forecast);
+    /**
+     * 通过地理编码接口解析城市 adcode
+     */
+    private String resolveAdcode(String cityName, String apiKey) {
+        try {
+            String geoUrl = "https://restapi.amap.com/v3/geocode/geo?address=" +
+                    URLEncoder.encode(cityName, StandardCharsets.UTF_8.toString()) +
+                    "&key=" + apiKey;
+            ResponseEntity<String> resp = restTemplate.getForEntity(geoUrl, String.class);
+            String body = resp.getBody();
+            log.debug("Geocode response: {}", body);
+            if (body != null) {
+                JSONObject json = JSON.parseObject(body);
+                if ("1".equals(json.getString("status"))) {
+                    JSONArray geocodes = json.getJSONArray("geocodes");
+                    if (geocodes != null && !geocodes.isEmpty()) {
+                        return geocodes.getJSONObject(0).getString("adcode");
+                    }
+                } else {
+                    log.warn("地理编码接口调用失败: info={}", json.getString("info"));
+                }
+            }
+        } catch (Exception ex) {
+            log.warn("解析城市 adcode 失败: {}", ex.getMessage());
         }
+        return null;
+    }
 
-        weatherInfo.setForecast(forecastList);
-        return weatherInfo;
+    /**
+     * 调用天气接口
+     *
+     * @param adcode  城市编码
+     * @param apiKey  高德Key
+     * @param forecast 是否获取预报 (true=预报, false=实时)
+     */
+    private JSONObject callWeatherApi(String adcode, String apiKey, boolean forecast) {
+        String url = "https://restapi.amap.com/v3/weather/weatherInfo?city=" + adcode +
+                "&key=" + apiKey + (forecast ? "&extensions=all" : "&extensions=base");
+        int maxRetry = 2;
+        for (int i = 0; i <= maxRetry; i++) {
+            try {
+                ResponseEntity<String> resp = restTemplate.getForEntity(url, String.class);
+                String body = resp.getBody();
+                log.debug("Weather API ({} attempt {}) response: {}", forecast ? "forecast" : "live", i + 1, body);
+                if (body != null) {
+                    JSONObject json = JSON.parseObject(body);
+                    if ("1".equals(json.getString("status"))) {
+                        return json;
+                    } else {
+                        log.warn("天气接口返回错误: type={}, info={}", forecast ? "forecast" : "live", json.getString("info"));
+                        return null; // 不重试业务错误
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("调用天气接口失败 ({} attempt {}): {}", forecast ? "forecast" : "live", i + 1, ex.getMessage());
+                if (i == maxRetry) {
+                    log.error("天气接口重试失败终止");
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -412,3 +498,4 @@ public class DashboardServiceImpl implements IDashboardService {
         }
     }
 }
+

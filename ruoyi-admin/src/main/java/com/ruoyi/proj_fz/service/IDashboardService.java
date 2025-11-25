@@ -84,4 +84,14 @@ public interface IDashboardService {
      * 新增：导出操作日志数据
      */
     void exportOperationLogs(Map<String, Object> params, HttpServletResponse response);
+
+    /**
+     * 获取天气配置
+     */
+    Object getWeatherConfig();
+
+    /**
+     * 更新天气配置
+     */
+    void updateWeatherConfig(String apiKey, String city, String adcode);
 }

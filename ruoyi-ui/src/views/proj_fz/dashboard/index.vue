@@ -623,7 +623,9 @@ import {
   getHomeworkByStatus,
   exportHomeworkDetails,
   exportNotices,
-  exportOperationLogs
+  exportOperationLogs,
+  getWeatherConfig,
+  updateWeatherConfig
 } from '@/api/proj_fz/dashboard'
 
 export default {
@@ -811,6 +813,7 @@ export default {
     }
   },
   mounted() {
+    this.initWeatherConfig();
     this.loadAllData()
     this.initResizeHandler()
 
@@ -1650,31 +1653,46 @@ export default {
       this.weatherDetailVisible = !this.weatherDetailVisible
     },
 
+    async initWeatherConfig() {
+      try {
+        const res = await getWeatherConfig();
+        if (res.data) {
+          if (res.data.city) this.weatherConfig.city = res.data.city;
+          if (res.data.apiKey) this.weatherConfig.apiKey = res.data.apiKey; // 仅显示，不直接使用前端调用高德
+        }
+      } catch (e) {
+        console.warn('获取天气配置失败', e);
+      }
+    },
     async refreshWeather() {
       try {
         const res = await getWeatherData();
-        if (res.data && res.data.city) {
+        if (res.code === 200 && res.data && res.data.city) {
           this.weather = res.data;
           this.$message.success('天气信息已刷新');
+        } else {
+          const msg = res.msg || '天气接口调用失败';
+          this.$message.error(msg);
+          this.weather = { city: '', temperature: '', weather: '', humidity: '', wind: '', forecast: [] };
         }
       } catch (error) {
         console.error('刷新天气失败:', error);
-        const errorMessage = error.message || '请检查API Key或网络。';
+        const errorMessage = (error && error.message) ? error.message : '请检查API Key或网络。';
         this.$message.error(`刷新天气失败: ${errorMessage}`);
         this.weather = { city: '', temperature: '', weather: '', humidity: '', wind: '', forecast: [] };
       }
     },
-
-    showWeatherManagement() {
-      this.weatherManagementVisible = true
-    },
-
     saveWeatherConfig() {
-      // 仅保存前端配置，如自动刷新
-      localStorage.setItem('weatherConfig_autoRefresh', this.weatherConfig.autoRefresh);
-      localStorage.setItem('weatherConfig_city', this.weatherConfig.city);
-      this.weatherManagementVisible = false
-      this.$message.success('天气配置已保存，刷新页面后生效')
+      updateWeatherConfig({ apiKey: this.weatherConfig.apiKey, city: this.weatherConfig.city })
+        .then(() => {
+          this.weatherManagementVisible = false;
+          this.$message.success('天气配置已更新，重新获取中...');
+          this.refreshWeather();
+        })
+        .catch(err => {
+          console.error('更新天气配置失败', err);
+          this.$message.error('更新天气配置失败');
+        });
     },
 
     handleTimeRangeChange() {

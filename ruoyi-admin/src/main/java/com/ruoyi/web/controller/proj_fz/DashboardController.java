@@ -27,12 +27,39 @@ public class DashboardController extends BaseController {
     }
 
     /**
-     * 获取天气信息
+     * 获取天气信息（真实数据，失败时返回错误）
      */
     @GetMapping("/weather")
     public AjaxResult getWeatherInfo() {
         DashboardDTO.WeatherInfo weatherInfo = dashboardService.getWeatherInfo();
+        if (weatherInfo == null || weatherInfo.getCity() == null || weatherInfo.getTemperature() == null) {
+            return AjaxResult.error("天气接口调用失败，请确认高德Key的IP白名单或更新有效Key");
+        }
         return AjaxResult.success(weatherInfo);
+    }
+
+    /**
+     * 获取当前天气配置（仅用于前端展示与编辑）
+     */
+    @GetMapping("/weather/config")
+    public AjaxResult getWeatherConfig() {
+        return AjaxResult.success(dashboardService.getWeatherConfig());
+    }
+
+    /**
+     * 更新天气配置（动态更新 Key 和城市/城市编码）
+     * body: {"apiKey":"xxx","city":"成都"} 或 {"apiKey":"xxx","adcode":"510100"}
+     */
+    @PostMapping("/weather/config")
+    public AjaxResult updateWeatherConfig(@RequestBody Map<String, String> config) {
+        String apiKey = config.get("apiKey");
+        String city = config.get("city");
+        String adcode = config.get("adcode");
+        if ((apiKey == null || apiKey.isEmpty()) && (city == null && adcode == null)) {
+            return AjaxResult.error("缺少必要参数");
+        }
+        dashboardService.updateWeatherConfig(apiKey, city, adcode);
+        return AjaxResult.success("更新成功");
     }
 
     /**
