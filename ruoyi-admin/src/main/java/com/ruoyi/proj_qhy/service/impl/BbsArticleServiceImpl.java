@@ -26,6 +26,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import com.ruoyi.common.utils.StringUtils;
+import java.nio.file.Paths; // <-- 新增
+import java.nio.file.Path;  // <-- 新增
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+import java.io.ByteArrayOutputStream; // 内存流
+import javax.servlet.http.HttpServletResponse; // 响应对象
 
 /**
  * 文章管理Service业务层处理
@@ -91,189 +97,201 @@ public class BbsArticleServiceImpl implements IBbsArticleService {
     }
 
     /**
-     * (修正) 导出文章为 PDF
-     * (使用 Jsoup 解析 HTML，支持图片)
+     * (重写) 导出文章为 PDF (直接写入 Response 流，打包为 ZIP)
      */
     @Override
-    public List<String> exportArticlesToPdf(Long[] ids) throws Exception {
-        // 1. 查询文章数据
+    public void exportArticlesToPdf(Long[] ids, HttpServletResponse response) throws Exception {
         List<BbsArticle> articles = bbsArticleMapper.selectBbsArticleByIds(ids);
         if (articles == null || articles.isEmpty()) {
             throw new RuntimeException("没有找到要导出的文章");
         }
 
-        // 2. 准备保存路径
-        String savePath = RuoYiConfig.getProfile();
-        File saveDir = new File(savePath);
-        if (!saveDir.exists()) {
-            saveDir.mkdirs();
-        }
+        // 1. 设置响应头 (告诉浏览器这是一个要下载的 ZIP 文件)
+        response.setContentType("application/zip");
+        response.setCharacterEncoding("utf-8");
+        // 文件名: articles_导出时间.zip
+        String zipName = "articles_" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".zip";
+        response.setHeader("Content-Disposition", "attachment; filename=" + zipName);
 
-        // 3. 准备中文字体
-        BaseFont bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
+        // 2. 准备字体
+        BaseFont bfChinese = null;
+        try {
+            bfChinese = BaseFont.createFont("STSong-Light", "UniGB-UCS2-H", BaseFont.NOT_EMBEDDED);
+        } catch (Exception e) {
+            logger.error("字体加载失败", e);
+            throw new RuntimeException("字体加载失败");
+        }
         Font titleFont = new Font(bfChinese, 18, Font.BOLD);
         Font metaFont = new Font(bfChinese, 12, Font.ITALIC);
         Font bodyFont = new Font(bfChinese, 12, Font.NORMAL);
 
-        List<String> generatedFiles = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
-        // 4. 循环生成 PDF
-        for (BbsArticle article : articles) {
-            String title = cleanInvalidFileName(article.getTitle());
-            String time = sdf.format(article.getCreateTime() != null ? article.getCreateTime() : new Date());
-            String fileName = title + time + ".pdf";
-            String filePath = savePath + File.separator + fileName;
+        // 3. 创建 ZIP 输出流 (包裹 Response 输出流)
+        try (ZipOutputStream zos = new ZipOutputStream(response.getOutputStream())) {
 
-            Document document = new Document();
-            FileOutputStream fos = null;
+            for (BbsArticle article : articles) {
+                // --- A. 在内存中生成单个 PDF ---
+                try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                    Document document = new Document();
+                    PdfWriter.getInstance(document, baos);
+                    document.open();
 
-            try {
-                fos = new FileOutputStream(filePath);
-                PdfWriter.getInstance(document, fos);
-                document.open(); // 打开
+                    // 写入内容
+                    document.add(new Paragraph(article.getTitle(), titleFont));
+                    String meta = String.format("作者: %s | 发布于: %s",
+                            article.getAuthor(),
+                            new SimpleDateFormat("yyyy-MM-dd HH:mm").format(article.getCreateTime()));
+                    document.add(new Paragraph(meta, metaFont));
+                    document.add(new Paragraph("--- 摘要 ---", metaFont));
+                    parseAndAddHtml(document, article.getDigest(), bodyFont);
+                    document.add(new Paragraph("--- 正文 ---", metaFont));
+                    parseAndAddHtml(document, article.getContent(), bodyFont);
 
-                // --- 写入内容 ---
+                    document.close(); // 完成当前 PDF 生成
 
-                // 标题
-                document.add(new Paragraph(article.getTitle(), titleFont));
+                    // --- B. 将 PDF 数据写入 ZIP ---
+                    String title = cleanInvalidFileName(article.getTitle());
+                    String time = sdf.format(article.getCreateTime());
+                    // PDF 文件名
+                    String pdfFileName = title + "_" + time + ".pdf";
 
-                // 元数据
-                String meta = String.format("作者: %s | 类型: %s | 发布于: %s",
-                        article.getAuthor(), article.getArticleType(),
-                        new SimpleDateFormat("yyyy-MM-dd HH:mm").format(article.getCreateTime()));
-                document.add(new Paragraph(meta, metaFont));
-
-                // 摘要 (使用 Jsoup 解析)
-                document.add(new Paragraph("--- 摘要 ---", metaFont));
-                parseAndAddHtml(document, article.getDigest(), bodyFont); // <-- (新方法)
-
-                // 正文 (使用 Jsoup 解析)
-                document.add(new Paragraph("--- 正文 ---", metaFont));
-                parseAndAddHtml(document, article.getContent(), bodyFont); // <-- (新方法)
-
-            } catch (Exception e) {
-                logger.error("生成PDF文件 " + fileName + " 时出错", e);
-                throw new RuntimeException("生成PDF " + fileName + " 失败", e);
-            } finally {
-                // (关键) 在 finally 中关闭 document
-                if (document.isOpen()) {
-                    document.close();
-                }
-                // (fos 会在 document.close() 时自动关闭，但保险起见)
-                if (fos != null) {
-                    try {
-                        fos.close();
-                    } catch (Exception e) {
-                        // ignore
-                    }
+                    // 添加 ZIP 条目
+                    ZipEntry entry = new ZipEntry(pdfFileName);
+                    zos.putNextEntry(entry);
+                    zos.write(baos.toByteArray()); // 写入 PDF 数据
+                    zos.closeEntry();
+                } catch (Exception e) {
+                    logger.error("生成PDF出错: " + article.getTitle(), e);
+                    // 继续下一个，不中断整个下载
                 }
             }
 
-            // 返回可访问的 URL
-            generatedFiles.add(Constants.RESOURCE_PREFIX + "/" + fileName);
+            zos.finish(); // 完成 ZIP 压缩
         }
-
-        return generatedFiles;
     }
     /**
-     * (新增) 辅助方法：使用 Jsoup 解析 HTML 并添加到 PDF
-     * @param pdfDoc PDF 文档对象
-     * @param html HTML 内容
-     * @param defaultFont 默认字体
+     * (修正版) 辅助方法：入口
      */
     private void parseAndAddHtml(Document pdfDoc, String html, Font defaultFont) throws Exception {
         if (StringUtils.isBlank(html)) {
             return;
         }
-
         // 1. 使用 Jsoup 解析 HTML 片段
         org.jsoup.nodes.Document jsoupDoc = Jsoup.parseBodyFragment(html);
 
-        // 2. 遍历 body 下的所有子节点
-        for (org.jsoup.nodes.Node node : jsoupDoc.body().childNodes()) {
+        // 2. 开始递归遍历 (从 body 开始)
+        traverseAndAddNode(pdfDoc, jsoupDoc.body(), defaultFont);
+    }
 
-            if (node instanceof TextNode) {
-                // A. 如果是纯文本节点
-                String text = ((TextNode) node).getWholeText();
-                if (StringUtils.isNotBlank(text)) {
-                    pdfDoc.add(new Paragraph(text, defaultFont));
-                }
-            } else if (node instanceof Element) {
-                // B. 如果是 HTML 元素
-                Element element = (Element) node;
+    /**
+     * (新增) 递归遍历所有节点，确保找出所有嵌套的图片
+     */
+    private void traverseAndAddNode(Document pdfDoc, Node node, Font defaultFont) throws Exception {
+        for (Node child : node.childNodes()) {
+            if (child instanceof Element) {
+                Element element = (Element) child;
 
-                if (element.tagName().equals("img")) {
-                    // (重点!) 如果是图片
+                if ("img".equalsIgnoreCase(element.tagName())) {
+                    // --- 情况 A: 发现图片 ---
                     String src = element.attr("src");
-                    String physicalPath = resolveImagePath(src); // 解析为物理路径
+                    String physicalPath = resolveImagePath(src); // 解析路径
 
                     if (physicalPath != null) {
                         try {
                             File imgFile = new File(physicalPath);
                             if (imgFile.exists()) {
-                                // 将图片添加到 PDF
                                 Image pdfImage = Image.getInstance(physicalPath);
-                                // 缩放图片以适应页面宽度
+                                // 缩放图片适应页面
                                 float pageWidth = pdfDoc.getPageSize().getWidth() - pdfDoc.leftMargin() - pdfDoc.rightMargin();
                                 if (pdfImage.getWidth() > pageWidth) {
                                     pdfImage.scaleToFit(pageWidth, Float.MAX_VALUE);
                                 }
                                 pdfDoc.add(pdfImage);
+                                logger.info("PDF导出 - 成功添加图片: {}", physicalPath);
                             } else {
-                                logger.warn("PDF导出：找不到图片文件 " + physicalPath);
-                                pdfDoc.add(new Paragraph("[图片加载失败: " + src + "]", defaultFont));
+                                logger.warn("PDF导出 - 图片文件不存在: {}", physicalPath);
                             }
                         } catch (Exception e) {
-                            logger.warn("PDF导出：加载图片 " + physicalPath + " 出错", e);
-                            pdfDoc.add(new Paragraph("[图片加载失败: " + src + "]", defaultFont));
+                            logger.error("PDF导出 - 添加图片异常", e);
                         }
                     }
+                } else if ("br".equalsIgnoreCase(element.tagName())) {
+                    // --- 情况 B: 换行 ---
+                    pdfDoc.add(new Paragraph("\n"));
                 } else {
-                    // C. 如果是其他元素 (p, div, h1, ...)
-                    // (简化处理：只获取它们的纯文本)
-                    String text = element.text();
-                    if (StringUtils.isNotBlank(text)) {
-                        pdfDoc.add(new Paragraph(text, defaultFont));
-                    }
+                    // --- 情况 C: 其他容器标签 (p, div, span...) ---
+                    // 关键：递归进去找内容！
+                    traverseAndAddNode(pdfDoc, child, defaultFont);
+                }
+
+            } else if (child instanceof TextNode) {
+                // --- 情况 D: 纯文本 ---
+                String text = ((TextNode) child).getWholeText();
+                // 过滤掉只有空白字符的文本节点，避免排版过乱
+                if (StringUtils.isNotBlank(text.replace("\u00A0", " ").trim())) {
+                    pdfDoc.add(new Paragraph(text, defaultFont));
                 }
             }
         }
     }
-
-    /**
-     * (新增) 辅助方法：将前端的图片 URL 解析为服务器物理路径
-     * @param src (例如 /profile/upload/2025/11/16/image.png)
-
-     */
     private String resolveImagePath(String src) {
         if (StringUtils.isBlank(src)) {
             return null;
         }
 
-        // 获取若依的全局上传路径
+        // 1. 清理 URL (移除 http前缀 和 /dev-api 前缀)
+        String cleanSrc = src;
+
+        if (cleanSrc.startsWith("http")) {
+            int protocolIndex = cleanSrc.indexOf("//");
+            if (protocolIndex > -1) {
+                int pathStartIndex = cleanSrc.indexOf("/", protocolIndex + 2);
+                if (pathStartIndex > -1) {
+                    cleanSrc = cleanSrc.substring(pathStartIndex);
+                }
+            }
+        }
+
+        // 去掉 /dev-api
+        String apiPrefix = "/dev-api";
+        if (cleanSrc.startsWith(apiPrefix)) {
+            cleanSrc = cleanSrc.substring(apiPrefix.length());
+        }
+
+        // 2. 获取配置的根路径
         String profilePath = RuoYiConfig.getProfile();
-        // 获取资源前缀 (例如: /profile)
-        String resourcePrefix = Constants.RESOURCE_PREFIX;
+        String resourcePrefix = Constants.RESOURCE_PREFIX; // /profile
 
-        if (src.startsWith(resourcePrefix)) {
-            // 1. 移除 /profile
-            String relativePath = src.substring(resourcePrefix.length());
+        // 3. 智能拼接
+        if (cleanSrc.startsWith(resourcePrefix)) {
+            // 移除 /profile，得到 /upload/2025/11/25/image.png
+            // (注意：substring(8) 会保留开头的斜杠，如 /upload...)
+            String relativePath = cleanSrc.substring(resourcePrefix.length());
 
-            // 2. 拼接
-            // (profilePath: 
-            // (注意: .replace('/', File.separator) 确保跨平台)
-            return profilePath + relativePath.replace('/', File.separatorChar);
+            try {
+                // 使用 Paths.get 自动处理分隔符 (Windows反斜杠)
+                // Paths.get("D:\code...", "/upload/...") 会自动正确拼接
+                Path fullPathObj = Paths.get(profilePath, relativePath);
+                String fullPath = fullPathObj.toString();
+
+                File imgFile = new File(fullPath);
+
+                // 详细日志：帮助我们最后确认一次
+                if (imgFile.exists()) {
+                    logger.info("PDF导出 - 图片找到: {}", fullPath);
+                    return fullPath;
+                } else {
+                    logger.warn("PDF导出 - 图片文件不存在: {} (原URL: {})", fullPath, src);
+                    return null;
+                }
+            } catch (Exception e) {
+                logger.error("PDF导出 - 路径解析错误", e);
+                return null;
+            }
         }
 
-        // (如果图片是外部 http/https 链接，暂不支持下载)
-        if (src.startsWith("http")) {
-            logger.warn("PDF导出：跳过外部图片 " + src);
-            return null;
-        }
-
-        // (如果 src 是其他格式，尝试直接拼接)
-        return profilePath + src.replace('/', File.separatorChar);
+        return null;
     }
     /**
      * 辅助方法：移除HTML标签

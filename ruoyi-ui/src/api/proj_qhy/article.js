@@ -93,6 +93,7 @@ export function exportPdf(ids) {
   return request({
     url: '/proj_qhy/article/export-pdf',
     method: 'post',
-    data: ids // 直接发送 ID 数组
+    data: ids ,
+    responseType: 'blob'
   })
 }

@@ -128,16 +128,23 @@ public class BbsArticleController extends BaseController {
      * (新增) 批量导出文章为PDF
      */
     //@PreAuthorize("@ss.hasPermi('proj_qhy:article:export')") // 复用导出权限
+    /**
+     * (修改) 批量导出文章为PDF (ZIP下载)
+     * 注意：这里不返回 AjaxResult，而是直接写入 Response
+     */
     @Log(title = "文章导出PDF", businessType = BusinessType.EXPORT)
     @PostMapping("/export-pdf")
-    public AjaxResult exportPdf(@RequestBody Long[] ids) {
+    public void exportPdf(@RequestBody Long[] ids, HttpServletResponse response) {
         try {
-            List<String> fileUrls = bbsArticleService.exportArticlesToPdf(ids);
-            // 返回文件路径列表，前端可以引导下载
-            return AjaxResult.success("批量导出PDF成功", fileUrls);
+            bbsArticleService.exportArticlesToPdf(ids, response);
         } catch (Exception e) {
             logger.error("导出PDF失败", e);
-            return AjaxResult.error("导出PDF失败: " + e.getMessage());
+            // 如果出错，尝试写入错误信息 (如果流还没关闭)
+            try {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("utf-8");
+                response.getWriter().print(AjaxResult.error("导出失败: " + e.getMessage()));
+            } catch (Exception ex) {}
         }
     }
 }

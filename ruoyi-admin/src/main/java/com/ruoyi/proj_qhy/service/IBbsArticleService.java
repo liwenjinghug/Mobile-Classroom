@@ -3,6 +3,8 @@ package com.ruoyi.proj_qhy.service;
 import java.util.List;
 import com.ruoyi.proj_qhy.domain.BbsArticle;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * 文章管理Service接口
  */
@@ -58,5 +60,5 @@ public interface IBbsArticleService {
     /**
      * (新增) 导出文章为 PDF
      */
-    public List<String> exportArticlesToPdf(Long[] ids) throws Exception;
+    void exportArticlesToPdf(Long[] ids, HttpServletResponse response) throws Exception;
 }

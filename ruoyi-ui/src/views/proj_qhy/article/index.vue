@@ -31,140 +31,155 @@
       </el-form-item>
     </el-form>
 
-    <div style="margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+    <el-row :gutter="10" class="mb8">
       <template v-if="!isSelectionMode">
-        <el-button
-          type="primary"
-          icon="el-icon-plus"
-          @click="handleAdd"
-          v-hasPermi="['proj_qhy:article:add']"
-        >新增</el-button>
-        <el-button
-          type="warning"
-          icon="el-icon-download"
-          @click="handleExport"
-          v-hasPermi="['proj_qhy:article:export']"
-        >导出Excel</el-button>
-        <el-button
-          type="info"
-          icon="el-icon-check"
-          @click="toggleSelectionMode"
-        >选择</el-button>
+        <el-col :span="1.5">
+          <el-button
+            type="primary"
+            plain
+            icon="el-icon-plus"
+            @click="handleAdd"
+            v-hasPermi="['proj_qhy:article:add']"
+          >新增</el-button>
+        </el-col>
+
+        <el-col :span="1.5">
+          <el-button
+            type="info"
+            plain
+            icon="el-icon-check"
+            @click="toggleSelectionMode"
+          >选择</el-button>
+        </el-col>
       </template>
 
       <template v-else>
-        <el-button
-          type="danger"
-          icon="el-icon-delete"
-          :disabled="selectedIds.length === 0"
-          @click="handleDelete"
-          v-hasPermi="['proj_qhy:article:remove']"
-        >批量删除</el-button>
-        <el-button
-          type="warning"
-          icon="el-icon-document"
-          :disabled="selectedIds.length === 0"
-          @click="handleExportPdf"
-          v-hasPermi="['proj_qhy:article:export']"
-        >导出PDF</el-button>
-        <el-button
-          type="info"
-          icon="el-icon-close"
-          @click="toggleSelectionMode"
-        >取消选择</el-button>
+        <el-col :span="1.5">
+          <el-button
+            type="danger"
+            plain
+            icon="el-icon-delete"
+            :disabled="selectedIds.length === 0"
+            @click="handleDelete"
+            v-hasPermi="['proj_qhy:article:remove']"
+          >批量删除</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            type="warning"
+            plain
+            icon="el-icon-document"
+            :disabled="selectedIds.length === 0"
+            @click="handleExportPdf"
+            v-hasPermi="['proj_qhy:article:export']"
+          >导出PDF</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
+            type="info"
+            plain
+            icon="el-icon-close"
+            @click="toggleSelectionMode"
+          >取消选择</el-button>
+        </el-col>
       </template>
-    </div>
+    </el-row>
 
     <el-checkbox-group v-model="selectedIds">
       <div class="article-list" v-loading="loading">
+
         <div
-          class="article-item"
           v-for="article in articleList"
           :key="article.id"
+          class="article-wrapper"
           @click="handleArticleClick(article)"
         >
-          <el-checkbox
-            v-if="isSelectionMode"
-            :label="article.id"
-            @click.native.stop
-            class="article-checkbox"
-          >&nbsp;</el-checkbox> <div class="article-cover">
-          <el-image
-            :src="getFullImageUrl(article.cover)"
-            fit="cover"
-            class="cover-image"
-          >
-            <div slot="error" class="image-slot">
-              <i class="el-icon-picture-outline"></i>
-            </div>
-          </el-image>
-        </div>
+          <div v-if="isSelectionMode" class="selection-area">
+            <el-checkbox
+              :label="article.id"
+              @click.native.stop
+            >&nbsp;</el-checkbox>
+          </div>
 
-          <div class="article-content">
-            <div class="article-header">
-              <div class="article-title-section">
-                <h3 class="article-title">{{ article.title }}</h3>
-                <div class="article-tags">
-                  <el-tag
-                    size="mini"
-                    :type="getArticleTypeTagType(article.articleType)"
+          <div class="article-item">
+            <div class="article-cover">
+              <el-image
+                :src="getFullImageUrl(article.cover)"
+                fit="cover"
+                class="cover-image"
+              >
+                <div slot="error" class="image-slot">
+                  <i class="el-icon-picture-outline"></i>
+                </div>
+              </el-image>
+            </div>
+
+            <div class="article-content">
+              <div class="article-header">
+                <div class="article-title-section">
+                  <h3 class="article-title">{{ article.title }}</h3>
+                  <div class="article-tags">
+                    <el-tag
+                      size="mini"
+                      :type="getArticleTypeTagType(article.articleType)"
+                    >
+                      {{ article.articleType || '未分类' }}
+                    </el-tag>
+                    <el-tag
+                      size="mini"
+                      :type="article.status === 'published' ? 'success' : 'warning'"
+                    >
+                      {{ article.status === 'published' ? '已发布' : article.status === 'draft' ? '草稿' : '编辑中' }}
+                    </el-tag>
+                  </div>
+                </div>
+                <div class="action-buttons">
+                  <el-button
+                    type="text"
+                    class="like-btn"
+                    :class="{ 'liked': article.userLikeStatus === 1 }"
+                    @click.stop="handleLike(article)"
                   >
-                    {{ article.articleType || '未分类' }}
-                  </el-tag>
-                  <el-tag
-                    size="mini"
-                    :type="article.status === 'published' ? 'success' : 'warning'"
+                    赞 {{ article.likeCount || 0 }}
+                  </el-button>
+                  <el-button
+                    type="text"
+                    class="hate-btn"
+                    :class="{ 'hated': article.userLikeStatus === -1 }"
+                    @click.stop="handleHate(article)"
                   >
-                    {{ article.status === 'published' ? '已发布' : article.status === 'draft' ? '草稿' : '编辑中' }}
-                  </el-tag>
+                    踩 {{ article.hateCount || 0 }}
+                  </el-button>
                 </div>
               </div>
-              <div class="action-buttons">
-                <el-button
-                  type="text"
-                  class="like-btn"
-                  :class="{ 'liked': article.userLikeStatus === 1 }"
-                  @click.stop="handleLike(article)"
-                >
-                  赞 {{ article.likeCount || 0 }}
-                </el-button>
-                <el-button
-                  type="text"
-                  class="hate-btn"
-                  :class="{ 'hated': article.userLikeStatus === -1 }"
-                  @click.stop="handleHate(article)"
-                >
-                  踩 {{ article.hateCount || 0 }}
-                </el-button>
+
+              <p class="article-digest">{{ article.digest || '暂无摘要' }}</p>
+
+              <div class="article-meta">
+                <span class="article-author">{{ article.author || '未知作者' }}</span>
+
+                <div class="article-stats">
+                  <span class="view-count">{{ article.viewCount || 0 }} 观看</span>
+                  <span class="publish-time">{{ parseTime(article.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+                </div>
               </div>
-            </div>
 
-            <p class="article-digest">{{ article.digest || '暂无摘要' }}</p>
-
-            <div class="article-meta">
-              <span class="article-author">{{ article.author || '未知作者' }}</span>
-
-              <div class="article-stats">
-                <span class="view-count">{{ article.viewCount || 0 }} 观看</span>
-                <span class="publish-time">{{ parseTime(article.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+              <div class="article-actions">
+                <el-button
+                  size="mini"
+                  type="text"
+                  icon="el-icon-edit"
+                  @click.stop="handleUpdate(article)"
+                  v-hasPermi="['proj_qhy:article:edit']"
+                >修改</el-button>
+                <el-button
+                  size="mini"
+                  type="text"
+                  icon="el-icon-delete"
+                  @click.stop="handleDelete(article)"
+                  v-hasPermi="['proj_qhy:article:remove']"
+                >删除</el-button>
               </div>
-            </div>
-
-            <div class="article-actions">
-              <el-button
-                size="mini"
-                type="text"
-                icon="el-icon-edit"
-                @click.stop="handleUpdate(article)"
-                v-hasPermi="['proj_qhy:article:edit']"
-              >修改</el-button>
-              <el-button
-                size="mini"
-                type="text"
-                icon="el-icon-delete"
-                @click.stop="handleDelete(article)"
-                v-hasPermi="['proj_qhy:article:remove']"
-              >删除</el-button>
             </div>
           </div>
         </div>
@@ -182,10 +197,10 @@
     <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="文章标题" prop="title">
-          <el-input v-model="form.title" placeholder="请输入文章标题" />
+          <el-input v-model="form.title" placeholder="请输入文章标题" id="articleTitle" />
         </el-form-item>
         <el-form-item label="文章分类" prop="articleType">
-          <el-select v-model="form.articleType" placeholder="请选择文章分类">
+          <el-select v-model="form.articleType" placeholder="请选择文章分类" id="articleType">
             <el-option label="技术" value="技术" />
             <el-option label="生活" value="生活" />
             <el-option label="思考" value="思考" />
@@ -200,7 +215,7 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="文章摘要" prop="digest">
-          <el-input v-model="form.digest" type="textarea" placeholder="请输入内容" />
+          <el-input v-model="form.digest" type="textarea" placeholder="请输入内容" id="articleDigest" />
         </el-form-item>
         <el-form-item label="文章内容" prop="content">
           <editor v-model="form.content" :min-height="192"/>
@@ -218,7 +233,6 @@
 </template>
 
 <script>
-// (引入了新的 exportPdf)
 import {
   listArticle,
   getArticle,
@@ -265,7 +279,7 @@ export default {
           { required: true, message: "文章分类不能为空", trigger: "change" }
         ]
       },
-      // (选择模式)
+      // 选择模式相关
       isSelectionMode: false,
       selectedIds: [], // 选中的ID数组
     };
@@ -294,7 +308,13 @@ export default {
       return process.env.VUE_APP_BASE_API + url;
     },
 
-    // 文章点击事件 - 跳转或选择
+    // 切换选择模式
+    toggleSelectionMode() {
+      this.isSelectionMode = !this.isSelectionMode;
+      this.selectedIds = []; // 切换模式时清空选项
+    },
+
+    // 文章点击事件
     handleArticleClick(article) {
       if (this.isSelectionMode) {
         // 在选择模式下，点击卡片切换选中状态
@@ -305,17 +325,45 @@ export default {
           this.selectedIds.push(article.id);
         }
       } else {
-        // 正常模式下跳转
+        // 正常模式下跳转到详情
         this.$router.push(`/proj_qhy/article/detail/${article.id}`);
       }
     },
 
-    // (点赞/点踩 不变)
+    // 点赞处理
     async handleLike(article) {
-      // ... (保留)
+      try {
+        const response = await likeArticle(article.id);
+        if (response.code === 200) {
+          const oldStatus = article.userLikeStatus || 0;
+          if (oldStatus === 1) {
+            article.userLikeStatus = 0;
+            article.likeCount = Math.max(0, (article.likeCount || 0) - 1);
+          } else {
+            article.userLikeStatus = 1;
+            article.likeCount = (article.likeCount || 0) + 1;
+            if (oldStatus === -1) article.hateCount = Math.max(0, (article.hateCount || 0) - 1);
+          }
+        }
+      } catch (error) {}
     },
+
+    // 点踩处理
     async handleHate(article) {
-      // ... (保留)
+      try {
+        const response = await hateArticle(article.id);
+        if (response.code === 200) {
+          const oldStatus = article.userLikeStatus || 0;
+          if (oldStatus === -1) {
+            article.userLikeStatus = 0;
+            article.hateCount = Math.max(0, (article.hateCount || 0) - 1);
+          } else {
+            article.userLikeStatus = -1;
+            article.hateCount = (article.hateCount || 0) + 1;
+            if (oldStatus === 1) article.likeCount = Math.max(0, (article.likeCount || 0) - 1);
+          }
+        }
+      } catch (error) {}
     },
 
     // 文章分类标签类型
@@ -350,7 +398,7 @@ export default {
         likeCount: 0,
         hateCount: 0,
         bookmarkCount: 0,
-        author: this.$store.getters.name, // 默认作者设为当前登录用户昵称
+        author: this.$store.getters.name,
         userId: this.$store.getters.userId
       };
       this.resetForm("form");
@@ -368,12 +416,6 @@ export default {
       this.handleQuery();
     },
 
-    // (新增) 切换选择模式
-    toggleSelectionMode() {
-      this.isSelectionMode = !this.isSelectionMode;
-      this.selectedIds = []; // 切换模式时清空选项
-    },
-
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
@@ -384,7 +426,11 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      // (row.id 是卡片上的修改按钮传来的)
+      // 如果从顶部按钮点，row 为 null，此时提示在列表中修改
+      if (!row) {
+        this.$modal.msgWarning("请在文章列表中点击'修改'按钮");
+        return;
+      }
       const id = row.id;
       getArticle(id).then(response => {
         this.form = response.data;
@@ -404,7 +450,6 @@ export default {
               this.getList();
             });
           } else {
-            // 新增时自动填充作者信息
             this.form.author = this.$store.getters.name;
             this.form.userId = this.$store.getters.userId;
             addArticle(this.form).then(response => {
@@ -417,60 +462,59 @@ export default {
       });
     },
 
-    /** 删除按钮操作 (已适配批量) */
+    /** 删除按钮操作 */
     handleDelete(row) {
-      // row.id 存在表示是卡片按钮；否则使用 selectedIds
       const ids = row.id ? [row.id] : this.selectedIds;
-      const idsString = ids.join(',');
+      if (ids.length === 0) return;
 
-      this.$modal.confirm('是否确认删除文章编号为"' + idsString + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除？').then(function() {
         return delArticle(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-        this.selectedIds = []; // 清空选项
-        if (this.isSelectionMode) {
-          this.isSelectionMode = false; // 退出选择模式
+        this.selectedIds = [];
+        if (this.isSelectionMode && !row.id) {
+          this.isSelectionMode = false; // 如果是批量删除完，退出选择模式
         }
       }).catch(() => {});
     },
 
-    /** 导出Excel按钮操作 */
+    /** 导出Excel */
     handleExport() {
       const queryParams = this.queryParams;
       this.$modal.confirm('是否确认导出所有文章数据项？').then(() => {
-        this.exportLoading = true;
         return exportArticle(queryParams);
       }).then(response => {
         this.$download.name(response.msg);
-        this.exportLoading = false;
       }).catch(() => {});
     },
 
-    /** (新增) 导出PDF按钮操作 */
+    /** 导出PDF */
     handleExportPdf() {
       if (this.selectedIds.length === 0) {
         this.$modal.msgWarning("请至少选择一篇文章");
         return;
       }
-
       const ids = this.selectedIds;
       this.$modal.confirm('是否确认导出选中的 ' + ids.length + ' 篇文章为PDF？').then(() => {
-        this.loading = true; // 开启遮罩
+        this.$modal.msgSuccess("正在打包下载，请稍候...");
+        this.loading = true;
         return exportPdf(ids);
-      }).then(response => {
+      }).then((res) => {
+        const blob = new Blob([res], { type: 'application/zip' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = '文章批量导出_' + new Date().getTime() + '.zip';
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+
         this.loading = false;
-        // response.data 是一个 URL 列表
-        // 因为是多个文件，我们不能一次性下载
-        this.$modal.alert({
-          title: '导出成功',
-          message: '导出成功！ ' + response.data.length + ' 个PDF文件已保存在服务器的 /profile 目录 (即 ' + response.msg + ' 文件夹)。',
-          type: 'success'
-        });
         this.isSelectionMode = false;
         this.selectedIds = [];
-      }).catch(() => {
+      }).catch((err) => {
+        console.error(err);
         this.loading = false;
+        this.$modal.msgError("下载失败");
       });
     }
   }
@@ -478,132 +522,82 @@ export default {
 </script>
 
 <style scoped>
-/* Mac Style for Article List */
 .app-container {
-  padding: 40px 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #1d1d1f;
-  background-color: #f5f5f7;
-  min-height: 100vh;
+  padding: 20px;
+}
+.mb8 {
+  margin-bottom: 8px;
 }
 
-/* Form Styling */
-.app-container >>> .el-form-item__label {
-  font-weight: 500;
-  color: #1d1d1f;
+/* 外层包装器：Flex布局实现复选框与卡片并排 */
+.article-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s;
 }
 
-.app-container >>> .el-input__inner {
-  border-radius: 10px;
-  border: 1px solid #d2d2d7;
-  height: 36px;
-  transition: all 0.2s ease;
+/* 左侧复选框区域 */
+.selection-area {
+  width: 40px;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.selection-area ::v-deep .el-checkbox__inner {
+  width: 20px;
+  height: 20px;
+}
+.selection-area ::v-deep .el-checkbox__inner::after {
+  left: 7px;
+  top: 3px;
 }
 
-.app-container >>> .el-input__inner:focus {
-  border-color: #0071e3;
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
-}
-
-/* Button Styling */
-.app-container >>> .el-button {
-  border-radius: 980px;
-  font-weight: 500;
-  border: none;
-  padding: 9px 20px;
-  transition: all 0.2s ease;
-}
-
-.app-container >>> .el-button--primary {
-  background-color: #0071e3;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
-}
-
-.app-container >>> .el-button--primary:hover {
-  background-color: #0077ed;
-  transform: translateY(-1px);
-}
-
-.app-container >>> .el-button--success {
-  background-color: #34c759;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
-}
-
-.app-container >>> .el-button--warning {
-  background-color: #ff9500;
-  box-shadow: 0 2px 8px rgba(255, 149, 0, 0.2);
-}
-
-.app-container >>> .el-button--danger {
-  background-color: #ff3b30;
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
-}
-
-.app-container >>> .el-button--info {
-  background-color: #86868b;
-  box-shadow: 0 2px 8px rgba(134, 134, 139, 0.2);
-}
-
-.app-container >>> .el-button--text {
-  color: #0071e3;
-  background: none;
-  padding: 0 5px;
-  box-shadow: none;
-}
-
-.app-container >>> .el-button--text:hover {
-  color: #0077ed;
-  background: none;
-  transform: none;
-}
-
-/* Article List Styling */
+/* 文章列表容器 */
 .article-list {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 
+/* 文章卡片 */
 .article-item {
+  flex-grow: 1;
   display: flex;
-  padding: 24px;
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
-  border: none;
-  position: relative;
+  border: 1px solid #e8e8e8;
 }
 
 .article-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 .article-cover {
   flex-shrink: 0;
-  margin-right: 24px;
+  margin-right: 16px;
 }
 
 .cover-image {
-  width: 200px;
-  height: 130px;
-  border-radius: 12px;
+  width: 160px;
+  height: 100px;
+  border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .image-slot {
   width: 100%;
   height: 100%;
-  background: #f5f5f7;
+  background: #f5f7fa;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #86868b;
+  color: #909399;
   font-size: 24px;
 }
 
@@ -618,23 +612,22 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .article-title-section {
   flex: 1;
-  margin-right: 16px;
+  margin-right: 12px;
 }
 
 .article-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1d1d1f;
+  font-size: 16px;
+  font-weight: 600;
+  color: #18191c;
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -642,13 +635,7 @@ export default {
 .article-tags {
   display: flex;
   gap: 8px;
-  margin-top: 10px;
-}
-
-.app-container >>> .el-tag {
-  border-radius: 6px;
-  border: none;
-  font-weight: 500;
+  margin-top: 8px;
 }
 
 .action-buttons {
@@ -659,38 +646,36 @@ export default {
 
 .like-btn,
 .hate-btn {
-  padding: 6px 14px;
-  border: 1px solid #d2d2d7;
-  border-radius: 980px;
+  padding: 6px 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
   background: #fff;
-  transition: all 0.2s;
-  font-size: 13px;
-  color: #86868b;
-  font-weight: 500;
+  transition: all 0.3s;
+  font-size: 12px;
+  color: #61666d;
 }
 
 .like-btn:hover,
 .like-btn.liked {
-  border-color: #ff2d55;
-  color: #ff2d55;
-  background-color: rgba(255, 45, 85, 0.05);
+  border-color: #f56c6c;
+  color: #f56c6c;
+  background-color: #fff5f5;
 }
 
 .hate-btn:hover,
 .hate-btn.hated {
-  border-color: #86868b;
-  color: #1d1d1f;
-  background-color: #f5f5f7;
+  border-color: #909399;
+  color: #909399;
+  background-color: #f4f4f5;
 }
 
 .article-digest {
-  font-size: 15px;
-  color: #86868b;
-  margin: 0 0 16px 0;
-  line-height: 1.6;
+  font-size: 14px;
+  color: #61666d;
+  margin: 0 0 12px 0;
+  line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -699,89 +684,50 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  font-size: 13px;
+  margin-bottom: 8px;
 }
 
 .article-author {
-  color: #1d1d1f;
-  font-weight: 500;
+  font-size: 12px;
+  color: #9499a0;
 }
 
 .article-stats {
   display: flex;
   align-items: center;
   gap: 16px;
-  color: #86868b;
+  font-size: 12px;
+  color: #9499a0;
 }
 
 .view-count {
-  color: #86868b;
+  color: #61666d;
 }
 
 .publish-time {
-  color: #86868b;
+  color: #9499a0;
 }
 
 .article-actions {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   justify-content: flex-end;
-  border-top: 1px solid #f5f5f7;
-  padding-top: 12px;
-  margin-top: auto;
 }
 
-/* Dialog Styling */
-.app-container >>> .el-dialog {
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
-
-.app-container >>> .el-dialog__header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #f5f5f7;
-}
-
-.app-container >>> .el-dialog__title {
-  font-weight: 600;
-  font-size: 18px;
-  color: #1d1d1f;
-}
-
-.app-container >>> .el-dialog__body {
-  padding: 24px;
-}
-
-.app-container >>> .el-dialog__footer {
-  padding: 16px 24px;
-  border-top: 1px solid #f5f5f7;
-}
-
-/* Selection Mode */
-.article-checkbox {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  z-index: 10;
-  transform: scale(1.2);
-}
-
-/* Responsive */
+/* 响应式设计 */
 @media (max-width: 768px) {
   .article-item {
     flex-direction: column;
-    padding: 20px;
   }
 
   .article-cover {
     margin-right: 0;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 
   .cover-image {
     width: 100%;
-    height: 200px;
+    height: 180px;
   }
 
   .article-header {
@@ -790,7 +736,7 @@ export default {
   }
 
   .action-buttons {
-    margin-top: 12px;
+    margin-top: 8px;
   }
 
   .article-meta {
@@ -798,9 +744,5 @@ export default {
     align-items: flex-start;
     gap: 8px;
   }
-}
-
-.mb8 {
-  margin-bottom: 16px;
 }
 </style>
