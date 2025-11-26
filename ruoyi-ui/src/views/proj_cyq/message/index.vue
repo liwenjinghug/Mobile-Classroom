@@ -34,16 +34,22 @@
           <div class="stat-value">{{ stats.unreadCount }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="4">
         <div class="stat-item todo">
           <div class="stat-label">待办事项</div>
           <div class="stat-value">{{ getStatValue('typeStats', '待办事项') }}</div>
         </div>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="4">
         <div class="stat-item homework">
           <div class="stat-label">作业消息</div>
           <div class="stat-value">{{ getStatValue('typeStats', '作业消息') }}</div>
+        </div>
+      </el-col>
+      <el-col :span="4">
+        <div class="stat-item exam">
+          <div class="stat-label">考试通知</div>
+          <div class="stat-value">{{ getStatValue('typeStats', '考试通知') }}</div>
         </div>
       </el-col>
     </el-row>
@@ -63,6 +69,7 @@
             <i :class="getAvatarIcon(message.type)"></i>
           </el-avatar>
         </div>
+
         <div class="message-content">
           <div class="message-title">
             <span class="title-text">{{ message.title }}</span>
@@ -91,11 +98,21 @@
             </div>
           </div>
 
+          <div v-else-if="message.type === 'exam'" class="message-body">
+            <div class="exam-info">
+              <p><strong>考试名称：</strong>{{ message.examName }}</p>
+              <p><strong>考试时间：</strong>{{ parseTime(message.startTime) }} ~ {{ parseTime(message.endTime) }}</p>
+              <p><strong>考试时长：</strong>{{ message.duration }} 分钟</p>
+              <el-button type="primary" size="mini" @click="handleTakeExam(message.examId)" style="margin-top: 5px;" class="no-print">去考试</el-button>
+            </div>
+          </div>
+
           <div class="message-meta">
             <span class="sender">发送者：{{ message.sender }}</span>
             <span class="time">发送时间：{{ parseTime(message.sendTime) }}</span>
           </div>
         </div>
+
         <div class="message-actions no-print">
           <el-button
             v-if="message.isRead === '0'"
@@ -126,6 +143,7 @@ import {
   listMessage,
   markTodoAsRead,
   markHomeworkAsRead,
+  markExamAsRead,
   markAllAsRead,
   deleteMessage,
   getMessageStats
@@ -151,12 +169,14 @@ export default {
     this.getStats();
   },
   methods: {
+    /** 获取消息列表 */
     getList() {
       listMessage().then(response => {
         this.messageList = this.processMessageList(response.data || []);
       });
     },
 
+    /** 获取统计数据 */
     getStats() {
       getMessageStats().then(response => {
         if (response.code === 200) {
@@ -169,6 +189,7 @@ export default {
       });
     },
 
+    /** 导出 */
     handleExport() {
       this.exportLoading = true;
       this.download(
@@ -182,25 +203,37 @@ export default {
       });
     },
 
-    // 【新增】打印功能
+    /** 打印 */
     handlePrint() {
       window.print();
     },
 
+    /** 跳转去考试入口 */
+    handleTakeExam(examId) {
+      // 跳转到考试入口列表页
+      this.$router.push("/proj_lwj_exam/exam_portal");
+    },
+
+    /** 处理消息列表，生成唯一ID */
     processMessageList(messages) {
       const seenKeys = new Set();
       return messages.map(message => {
         let messageId = message.messageId;
-        if (!messageId || messageId === 'todo_null' || messageId === 'homework_null') {
+        // 如果ID无效，重新生成
+        if (!messageId || messageId.endsWith('null')) {
           if (message.type === 'todo' && message.todoId) {
             messageId = `todo_${message.todoId}`;
           } else if (message.type === 'homework' && message.homeworkId) {
             messageId = `homework_${message.homeworkId}`;
+          } else if (message.type === 'exam' && message.examId) {
+            messageId = `exam_${message.examId}`;
           } else {
             messageId = `${message.type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
           }
           message.messageId = messageId;
         }
+
+        // 确保ID唯一
         let finalMessageId = messageId;
         let counter = 1;
         while (seenKeys.has(finalMessageId)) {
@@ -208,6 +241,7 @@ export default {
           counter++;
         }
         seenKeys.add(finalMessageId);
+
         return {
           ...message,
           messageId: finalMessageId,
@@ -216,19 +250,27 @@ export default {
         };
       });
     },
+
+    /** 生成列表 Key */
     generateKey(message, index) {
-      if (message.messageId && message.messageId !== 'todo_null' && message.messageId !== 'homework_null') {
+      if (message.messageId && !message.messageId.endsWith('null')) {
         return message.messageId;
       }
       return `${message.type}_${index}_${Date.now()}`;
     },
+
+    /** 刷新 */
     handleRefresh() {
       this.getList();
       this.getStats();
     },
+
+    /** 返回 */
     handleBack() {
       this.$router.push("/proj_cyq");
     },
+
+    /** 标记单个已读 */
     handleMarkRead(message) {
       this.$set(message, 'markingRead', true);
       let promise;
@@ -236,14 +278,17 @@ export default {
         promise = markTodoAsRead(message.todoId);
       } else if (message.type === 'homework') {
         promise = markHomeworkAsRead(message.homeworkId);
+      } else if (message.type === 'exam') {
+        promise = markExamAsRead(message.examId);
       } else {
         promise = Promise.reject('未知的消息类型');
       }
+
       promise.then(response => {
         if (response.code === 200) {
           this.$modal.msgSuccess("标记已读成功");
           message.isRead = '1';
-          this.getStats();
+          this.getStats(); // 刷新统计
         } else {
           this.$modal.msgError(response.msg || "标记已读失败");
         }
@@ -253,6 +298,8 @@ export default {
         this.$set(message, 'markingRead', false);
       });
     },
+
+    /** 全部标记已读 */
     handleMarkAllRead() {
       this.markingAllRead = true;
       markAllAsRead().then(response => {
@@ -271,6 +318,8 @@ export default {
         this.markingAllRead = false;
       });
     },
+
+    /** 删除消息 */
     handleDelete(message, index) {
       this.$modal.confirm('是否确认删除该消息？').then(() => {
         this.$set(message, 'deleting', true);
@@ -289,30 +338,36 @@ export default {
         this.$set(message, 'deleting', false);
       });
     },
+
+    /** 辅助：获取统计值 */
     getStatValue(statType, name) {
       if (!this.stats[statType]) return 0;
       const item = this.stats[statType].find(s => s.name === name);
       return item ? item.value : 0;
     },
+
+    /** 辅助：获取消息类型样式 */
     getMessageType(type) {
-      const typeMap = { 'homework': 'success', 'todo': 'warning' };
+      const typeMap = { 'homework': 'success', 'todo': 'warning', 'exam': 'danger' };
       return typeMap[type] || 'info';
     },
     getTypeText(type) {
-      const textMap = { 'homework': '作业', 'todo': '待办' };
+      const textMap = { 'homework': '作业', 'todo': '待办', 'exam': '考试' };
       return textMap[type] || '消息';
     },
     getAvatarStyle(type) {
       const styleMap = {
         'homework': { backgroundColor: '#67c23a' },
-        'todo': { backgroundColor: '#e6a23c' }
+        'todo': { backgroundColor: '#e6a23c' },
+        'exam': { backgroundColor: '#f56c6c' }
       };
       return styleMap[type] || { backgroundColor: '#909399' };
     },
     getAvatarIcon(type) {
       const iconMap = {
         'homework': 'el-icon-document',
-        'todo': 'el-icon-alarm-clock'
+        'todo': 'el-icon-alarm-clock',
+        'exam': 'el-icon-edit-outline'
       };
       return iconMap[type] || 'el-icon-message';
     },
@@ -336,7 +391,6 @@ export default {
 </script>
 
 <style scoped>
-/* ... (原有样式保持不变) ... */
 .app-container {
   padding: 40px 20px;
   max-width: 1200px;
@@ -407,6 +461,7 @@ export default {
 .stat-item.unread .stat-value { color: #ff3b30; }
 .stat-item.todo .stat-value { color: #ff9500; }
 .stat-item.homework .stat-value { color: #34c759; }
+.stat-item.exam .stat-value { color: #f56c6c; }
 
 .message-list {
   background: #ffffff;
@@ -519,7 +574,6 @@ export default {
    【新增】打印样式专用设置
    ============================== */
 @media print {
-  /* 1. 隐藏不需要打印的元素 */
   .no-print,
   .navbar,
   .sidebar-container,
@@ -529,7 +583,6 @@ export default {
     display: none !important;
   }
 
-  /* 2. 调整容器 */
   .app-container {
     padding: 0;
     margin: 0;
@@ -537,7 +590,6 @@ export default {
     width: 100%;
   }
 
-  /* 3. 显示打印标题 */
   .print-title {
     display: block !important;
     text-align: center;
@@ -546,7 +598,6 @@ export default {
     font-weight: bold;
   }
 
-  /* 4. 优化统计概览打印 */
   .stats-overview {
     margin-bottom: 30px;
     border: 1px solid #ddd;
@@ -559,7 +610,6 @@ export default {
     padding: 15px;
   }
 
-  /* 5. 优化消息列表打印 */
   .message-list {
     box-shadow: none;
     border: 1px solid #ddd;
@@ -570,12 +620,10 @@ export default {
     page-break-inside: avoid; /* 防止消息被分页截断 */
   }
 
-  /* 确保文字颜色为纯黑，省墨且清晰 */
   .title-text, .message-body, .stat-value {
     color: #000 !important;
   }
 
-  /* 标签打印优化 */
   .el-tag {
     border: 1px solid #000 !important;
     background: none !important;
@@ -583,7 +631,6 @@ export default {
     padding: 0 5px !important;
   }
 
-  /* 隐藏未读状态的背景色 */
   .message-item.unread {
     background-color: transparent !important;
   }

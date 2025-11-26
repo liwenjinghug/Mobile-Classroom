@@ -7,8 +7,6 @@ import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-// 【修复】导入你自定义的 @Log 注解
 import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -23,7 +21,6 @@ public class MessageController extends BaseController {
     @Autowired
     private IMessageService messageService;
 
-    // (查询列表和统计通常不记录操作日志，保持不变)
     @GetMapping("/list")
     public AjaxResult list() {
         Long userId = getUserId();
@@ -42,11 +39,9 @@ public class MessageController extends BaseController {
         return success(messageService.getMessageStats(getUserId()));
     }
 
-    // 此注解现在会正确指向 ClassLogAspect
     @Log(title = "消息中心", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response)
-    {
+    public void export(HttpServletResponse response) {
         Long userId = getUserId();
         List<Map<String, Object>> list = messageService.getMessageList(userId);
 
@@ -80,6 +75,13 @@ public class MessageController extends BaseController {
     @PutMapping("/read/homework/{homeworkId}")
     public AjaxResult markHomeworkAsRead(@PathVariable Long homeworkId) {
         return toAjax(messageService.markHomeworkAsRead(homeworkId));
+    }
+
+    // 【修改】标记考试已读，直接调用接口方法
+    @Log(title = "标记考试消息已读", businessType = BusinessType.UPDATE)
+    @PutMapping("/read/exam/{examId}")
+    public AjaxResult markExamAsRead(@PathVariable Long examId) {
+        return toAjax(messageService.markExamAsRead(examId));
     }
 
     @Log(title = "批量标记消息已读", businessType = BusinessType.UPDATE)

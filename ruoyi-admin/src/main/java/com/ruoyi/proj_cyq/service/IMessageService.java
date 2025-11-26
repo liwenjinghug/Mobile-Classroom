@@ -38,5 +38,8 @@ public interface IMessageService {
      * 【新增】获取消息统计
      * (参考 ITodoService)
      */
+    // 【新增】
+    int markExamAsRead(Long examId);
+
     public Map<String, Object> getMessageStats(Long userId);
 }

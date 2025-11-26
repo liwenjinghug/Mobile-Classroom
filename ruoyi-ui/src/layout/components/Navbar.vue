@@ -2,24 +2,26 @@
   <div class="navbar">
     <hamburger id="hamburger-container" :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
 
-    <!-- ChatGPT style: Minimal top bar, no breadcrumbs usually, maybe just current section name -->
-    <!-- <breadcrumb v-if="!topNav" id="breadcrumb-container" class="breadcrumb-container" /> -->
     <div class="app-title" v-if="!topNav">Mobile Classroom</div>
-    
+
     <top-nav v-if="topNav" id="topmenu-container" class="topmenu-container" />
 
     <div class="right-menu">
       <template v-if="device!=='mobile'">
         <search id="header-search" class="right-menu-item" />
-        
-        <!-- Simplified icons -->
+
         <screenfull id="screenfull" class="right-menu-item hover-effect" />
+
+        <div class="right-menu-item hover-effect message-item-container" @click="goToMessageCenter">
+          <el-badge :value="unreadCount" :max="99" :hidden="unreadCount === 0" class="message-badge">
+            <i class="el-icon-bell" style="font-size: 20px;"></i>
+          </el-badge>
+        </div>
       </template>
 
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="hover">
         <div class="avatar-wrapper">
           <img :src="avatar" class="user-avatar">
-          <!-- <span class="user-nickname"> {{ nickName }} </span> -->
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown">
@@ -48,6 +50,7 @@ import SizeSelect from '@/components/SizeSelect'
 import Search from '@/components/HeaderSearch'
 import RuoYiGit from '@/components/RuoYi/Git'
 import RuoYiDoc from '@/components/RuoYi/Doc'
+import { getUnreadCount } from "@/api/proj_cyq/message";
 
 export default {
   emits: ['setLayout'],
@@ -60,6 +63,12 @@ export default {
     Search,
     RuoYiGit,
     RuoYiDoc
+  },
+  data() {
+    return {
+      unreadCount: 0,
+      timer: null
+    }
   },
   computed: {
     ...mapGetters([
@@ -79,7 +88,32 @@ export default {
       }
     }
   },
+  // 监听路由变化，跳转时自动刷新
+  watch: {
+    $route(to, from) {
+      this.fetchUnreadCount();
+    }
+  },
+  mounted() {
+    this.fetchUnreadCount();
+    // 每10秒刷新一次
+    this.timer = setInterval(this.fetchUnreadCount, 10000);
+  },
+  beforeDestroy() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  },
   methods: {
+    fetchUnreadCount() {
+      getUnreadCount().then(response => {
+        this.unreadCount = response.data || 0;
+      }).catch(error => {});
+    },
+    goToMessageCenter() {
+      this.$router.push('/proj_cyq/message');
+      setTimeout(() => { this.fetchUnreadCount() }, 500);
+    },
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },
@@ -107,8 +141,7 @@ export default {
   overflow: hidden;
   position: relative;
   background: #fff;
-  border-bottom: 1px solid #e5e5e5; // Minimal border
-  // box-shadow: 0 1px 4px rgba(0,21,41,.08); // Remove shadow
+  border-bottom: 1px solid #e5e5e5;
 
   .hamburger-container {
     line-height: 46px;
@@ -150,6 +183,7 @@ export default {
     float: right;
     height: 100%;
     line-height: 50px;
+    display: flex;
 
     &:focus {
       outline: none;
@@ -170,136 +204,59 @@ export default {
         &:hover {
           background: rgba(0, 0, 0, .025)
         }
+      }
+    }
+
+    /* 控制铃铛图标容器 */
+    .message-item-container {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      height: 50px;
+    }
+
+    /* 【核心修复】调整红点位置到右上角 */
+    .message-badge {
+      line-height: 1;
+
+      ::v-deep .el-badge__content {
+        /* top: -2px 往上提，贴合图标顶部 */
+        top: -2px !important;
+        /* right: 0px 往右移，悬挂在右上角 */
+        right: 0px !important;
+
+        height: 16px;
+        line-height: 16px;
+        padding: 0 4px;
+        border: none;
+        font-size: 10px;
       }
     }
 
     .avatar-container {
       margin-right: 30px;
 
+      display: flex !important;
+      align-items: center;
+
       .avatar-wrapper {
-        margin-top: 5px;
         position: relative;
+        margin-top: 0;
 
         .user-avatar {
           cursor: pointer;
-          width: 32px; // Smaller avatar
+          width: 32px;
           height: 32px;
-          border-radius: 4px; // Rounded square like ChatGPT
+          border-radius: 4px;
+          vertical-align: middle;
         }
 
         .el-icon-caret-bottom {
           cursor: pointer;
           position: absolute;
           right: -20px;
-          top: 10px; // Adjust for smaller avatar
-          font-size: 12px;
-        }
-      }
-    }
-  }
-}
-</style>        type: 'warning'
-      }).then(() => {
-        this.$store.dispatch('LogOut').then(() => {
-          location.href = '/index'
-        })
-      }).catch(() => {})
-    }
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-.navbar {
-  height: 50px;
-  overflow: hidden;
-  position: relative;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0,21,41,.08);
-
-  .hamburger-container {
-    line-height: 46px;
-    height: 100%;
-    float: left;
-    cursor: pointer;
-    transition: background .3s;
-    -webkit-tap-highlight-color:transparent;
-
-    &:hover {
-      background: rgba(0, 0, 0, .025)
-    }
-  }
-
-  .breadcrumb-container {
-    float: left;
-  }
-
-  .topmenu-container {
-    position: absolute;
-    left: 50px;
-  }
-
-  .errLog-container {
-    display: inline-block;
-    vertical-align: top;
-  }
-
-  .right-menu {
-    float: right;
-    height: 100%;
-    line-height: 50px;
-
-    &:focus {
-      outline: none;
-    }
-
-    .right-menu-item {
-      display: inline-block;
-      padding: 0 8px;
-      height: 100%;
-      font-size: 18px;
-      color: #5a5e66;
-      vertical-align: text-bottom;
-
-      &.hover-effect {
-        cursor: pointer;
-        transition: background .3s;
-
-        &:hover {
-          background: rgba(0, 0, 0, .025)
-        }
-      }
-    }
-
-    .avatar-container {
-      margin-right: 0px;
-      padding-right: 0px;
-
-      .avatar-wrapper {
-        margin-top: 10px;
-        right: 8px;
-        position: relative;
-
-        .user-avatar {
-          cursor: pointer;
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-        }
-
-        .user-nickname{
-          position: relative;
-          bottom: 10px;
-          left: 2px;
-          font-size: 14px;
-          font-weight: bold;
-        }
-
-        .el-icon-caret-bottom {
-          cursor: pointer;
-          position: absolute;
-          right: -20px;
-          top: 25px;
+          top: 50%;
+          transform: translateY(-50%);
           font-size: 12px;
         }
       }

@@ -24,6 +24,14 @@ export function markHomeworkAsRead(homeworkId) {
   })
 }
 
+// 【新增】标记考试消息已读
+export function markExamAsRead(examId) {
+  return request({
+    url: '/proj_cyq/message/read/exam/' + examId,
+    method: 'put'
+  })
+}
+
 // 批量标记所有消息已读
 export function markAllAsRead() {
   return request({
@@ -48,18 +56,16 @@ export function deleteMessage(messageId) {
   })
 }
 
-// ========== 新增：导出消息 ==========
-// (参考 todo.js)
+// 导出消息
 export function exportMessage() {
   return request({
     url: '/proj_cyq/message/export',
     method: 'post',
-    responseType: 'blob' // 导出功能需要 responseType: 'blob'
+    responseType: 'blob'
   })
 }
 
-// ========== 新增：获取消息统计 ==========
-// (参考 todo.js)
+// 获取消息统计
 export function getMessageStats() {
   return request({
     url: '/proj_cyq/message/stats',
