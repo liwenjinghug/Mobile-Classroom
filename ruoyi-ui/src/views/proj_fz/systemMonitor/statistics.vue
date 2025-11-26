@@ -96,10 +96,23 @@
           <el-button type="success" icon="el-icon-data-line" @click="gotoDatabaseMonitor">数据库监控</el-button>
           <el-button type="warning" icon="el-icon-document" @click="gotoMonitorRecord">监控记录</el-button>
           <el-button type="danger" icon="el-icon-refresh" @click="handleCollect">立即采集</el-button>
-          <el-button type="info" icon="el-icon-download" @click="handleExport">导出报表</el-button>
+          <el-button type="info" icon="el-icon-download" @click="showExportDialog">导出图表</el-button>
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 导出图表对话框 -->
+    <el-dialog title="导出图表" :visible.sync="exportDialogVisible" width="500px">
+      <el-checkbox-group v-model="selectedCharts">
+        <el-checkbox label="typeChart">监控类型分布</el-checkbox><br/>
+        <el-checkbox label="alertChart">告警级别分布</el-checkbox><br/>
+        <el-checkbox label="trendChart">监控趋势</el-checkbox>
+      </el-checkbox-group>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="exportDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="exportCharts">确定导出</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -119,7 +132,9 @@ export default {
       typeChart: null,
       alertChart: null,
       trendChart: null,
-      timer: null
+      timer: null,
+      exportDialogVisible: false,
+      selectedCharts: []
     }
   },
   mounted() {
@@ -367,8 +382,74 @@ export default {
         this.loadStatistics()
       }).catch(() => {})
     },
-    handleExport() {
-      this.download('proj_fz/monitor/export', {}, `monitor_report_${new Date().getTime()}.xlsx`)
+    showExportDialog() {
+      this.selectedCharts = ['typeChart', 'alertChart', 'trendChart'] // 默认全选
+      this.exportDialogVisible = true
+    },
+    exportCharts() {
+      if (this.selectedCharts.length === 0) {
+        this.$modal.msgWarning('请至少选择一个图表')
+        return
+      }
+
+      const chartMap = {
+        typeChart: { instance: this.typeChart, name: '监控类型分布' },
+        alertChart: { instance: this.alertChart, name: '告警级别分布' },
+        trendChart: { instance: this.trendChart, name: '监控趋势' }
+      }
+
+      // 使用canvas合并多个图表
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const padding = 20
+      const chartWidth = 800
+      const chartHeight = 500
+      const totalHeight = this.selectedCharts.length * (chartHeight + padding) + padding
+
+      canvas.width = chartWidth + 2 * padding
+      canvas.height = totalHeight
+
+      // 白色背景
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      let yOffset = padding
+      let loadedCount = 0
+
+      this.selectedCharts.forEach((chartKey, index) => {
+        const chart = chartMap[chartKey]
+        if (chart && chart.instance) {
+          const url = chart.instance.getDataURL({
+            type: 'png',
+            pixelRatio: 2,
+            backgroundColor: '#fff'
+          })
+
+          const img = new Image()
+          img.onload = () => {
+            // 绘制图表标题
+            ctx.fillStyle = '#000000'
+            ctx.font = 'bold 20px Arial'
+            ctx.fillText(chart.name, padding, yOffset + 25)
+
+            // 绘制图表
+            ctx.drawImage(img, padding, yOffset + 40, chartWidth, chartHeight - 60)
+            yOffset += chartHeight + padding
+
+            loadedCount++
+            if (loadedCount === this.selectedCharts.length) {
+              // 所有图表加载完成，导出
+              const link = document.createElement('a')
+              link.download = `监控统计图表_${this.parseTime(new Date(), '{y}{m}{d}{h}{i}{s}')}.png`
+              link.href = canvas.toDataURL('image/png')
+              link.click()
+              this.$modal.msgSuccess('导出成功')
+              this.exportDialogVisible = false
+            }
+          }
+          img.src = url
+        }
+      })
     }
   }
 }

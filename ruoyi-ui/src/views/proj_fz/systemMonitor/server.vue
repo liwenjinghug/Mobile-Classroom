@@ -139,6 +139,26 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 导出按钮 -->
+    <el-row style="margin-top: 20px;">
+      <el-col :span="24" style="text-align: center;">
+        <el-button type="primary" icon="el-icon-download" @click="showExportDialog">导出图表</el-button>
+      </el-col>
+    </el-row>
+
+    <!-- 导出图表对话框 -->
+    <el-dialog title="导出图表" :visible.sync="exportDialogVisible" width="500px">
+      <el-checkbox-group v-model="selectedCharts">
+        <el-checkbox label="serverTrendChart">资源使用趋势</el-checkbox><br/>
+        <el-checkbox label="cpuMemoryChart">CPU & 内存使用率</el-checkbox><br/>
+        <el-checkbox label="diskChart">磁盘使用情况</el-checkbox>
+      </el-checkbox-group>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="exportDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="exportCharts">确定导出</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -156,7 +176,9 @@ export default {
       serverTrendChart: null,
       cpuMemoryChart: null,
       diskChart: null,
-      timer: null
+      timer: null,
+      exportDialogVisible: false,
+      selectedCharts: []
     }
   },
   mounted() {
@@ -377,6 +399,70 @@ export default {
       }
 
       this.diskChart.setOption(option)
+    },
+    showExportDialog() {
+      this.selectedCharts = ['serverTrendChart', 'cpuMemoryChart', 'diskChart'] // 默认全选
+      this.exportDialogVisible = true
+    },
+    exportCharts() {
+      if (this.selectedCharts.length === 0) {
+        this.$modal.msgWarning('请至少选择一个图表')
+        return
+      }
+
+      const chartMap = {
+        serverTrendChart: { instance: this.serverTrendChart, name: '资源使用趋势' },
+        cpuMemoryChart: { instance: this.cpuMemoryChart, name: 'CPU & 内存使用率' },
+        diskChart: { instance: this.diskChart, name: '磁盘使用情况' }
+      }
+
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const padding = 20
+      const chartWidth = 800
+      const chartHeight = 500
+      const totalHeight = this.selectedCharts.length * (chartHeight + padding) + padding
+
+      canvas.width = chartWidth + 2 * padding
+      canvas.height = totalHeight
+
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      let yOffset = padding
+      let loadedCount = 0
+
+      this.selectedCharts.forEach((chartKey) => {
+        const chart = chartMap[chartKey]
+        if (chart && chart.instance) {
+          const url = chart.instance.getDataURL({
+            type: 'png',
+            pixelRatio: 2,
+            backgroundColor: '#fff'
+          })
+
+          const img = new Image()
+          img.onload = () => {
+            ctx.fillStyle = '#000000'
+            ctx.font = 'bold 20px Arial'
+            ctx.fillText(chart.name, padding, yOffset + 25)
+
+            ctx.drawImage(img, padding, yOffset + 40, chartWidth, chartHeight - 60)
+            yOffset += chartHeight + padding
+
+            loadedCount++
+            if (loadedCount === this.selectedCharts.length) {
+              const link = document.createElement('a')
+              link.download = `服务器监控图表_${this.parseTime(new Date(), '{y}{m}{d}{h}{i}{s}')}.png`
+              link.href = canvas.toDataURL('image/png')
+              link.click()
+              this.$modal.msgSuccess('导出成功')
+              this.exportDialogVisible = false
+            }
+          }
+          img.src = url
+        }
+      })
     }
   }
 }

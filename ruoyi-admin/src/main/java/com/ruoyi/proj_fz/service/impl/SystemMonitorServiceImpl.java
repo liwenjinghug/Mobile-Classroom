@@ -12,6 +12,7 @@ import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 import oshi.hardware.HardwareAbstractionLayer;
+import oshi.hardware.NetworkIF;
 import oshi.software.os.FileSystem;
 import oshi.software.os.OSFileStore;
 import oshi.util.Util;
@@ -129,9 +130,32 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
                 metrics.setDiskUsage(Math.round(100.0 * usedDisk / totalDisk * 100.0) / 100.0);
             }
 
-            // 网络速率（模拟数据，实际需要通过NetworkIF获取）
-            metrics.setUploadSpeed(Math.random() * 1000);
-            metrics.setDownloadSpeed(Math.random() * 2000);
+            // 网络速率（真实数据 - 通过NetworkIF获取）
+            try {
+                long totalBytesRecv = 0;
+                long totalBytesSent = 0;
+
+                si.getHardware().getNetworkIFs().forEach(net -> {
+                    net.updateAttributes();
+                });
+
+                // 等待一秒后再次获取，计算速率
+                Thread.sleep(1000);
+
+                for (NetworkIF net : si.getHardware().getNetworkIFs()) {
+                    net.updateAttributes();
+                    totalBytesRecv += net.getBytesRecv();
+                    totalBytesSent += net.getBytesSent();
+                }
+
+                // 转换为KB/s（因为等待了1秒）
+                metrics.setDownloadSpeed(Math.round(totalBytesRecv / 1024.0 * 100.0) / 100.0);
+                metrics.setUploadSpeed(Math.round(totalBytesSent / 1024.0 * 100.0) / 100.0);
+            } catch (Exception netEx) {
+                // 网络接口获取失败，设置为0
+                metrics.setUploadSpeed(0.0);
+                metrics.setDownloadSpeed(0.0);
+            }
 
             // JVM信息
             MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
@@ -155,22 +179,37 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
 
     @Override
     public List<ServerMetrics> getServerMetricsHistory(Integer hours) {
-        // 实际应该从历史监控记录中查询，这里模拟返回
+        // 从监控记录中查询真实历史数据
         List<ServerMetrics> list = new ArrayList<>();
-        Calendar cal = Calendar.getInstance();
 
-        for (int i = hours; i >= 0; i--) {
-            ServerMetrics metrics = new ServerMetrics();
-            cal.setTime(new Date());
-            cal.add(Calendar.HOUR, -i);
-            metrics.setMonitorTime(cal.getTime());
+        try {
+            // 查询最近N小时的服务器监控记录
+            List<SystemMonitor> records = systemMonitorMapper.selectSystemMonitorList(new SystemMonitor() {{
+                setMonitorType(1); // 服务器监控
+            }});
 
-            // 模拟数据
-            metrics.setCpuUsage(Math.random() * 100);
-            metrics.setMemoryUsage(Math.random() * 100);
-            metrics.setDiskUsage(Math.random() * 100);
+            // 只取最近hours小时的数据
+            Date cutoffTime = new Date(System.currentTimeMillis() - hours * 60 * 60 * 1000);
 
-            list.add(metrics);
+            for (SystemMonitor record : records) {
+                if (record.getMonitorTime() != null && record.getMonitorTime().after(cutoffTime)) {
+                    if (record.getMetrics() != null && !record.getMetrics().isEmpty()) {
+                        try {
+                            ServerMetrics metrics = JSON.parseObject(record.getMetrics(), ServerMetrics.class);
+                            metrics.setMonitorTime(record.getMonitorTime());
+                            list.add(metrics);
+                        } catch (Exception e) {
+                            // 解析失败，跳过该条记录
+                        }
+                    }
+                }
+            }
+
+            // 按时间排序
+            list.sort(Comparator.comparing(ServerMetrics::getMonitorTime));
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return list;
@@ -238,21 +277,37 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
 
     @Override
     public List<DatabaseMetrics> getDatabaseMetricsHistory(Integer hours) {
+        // 从监控记录中查询真实历史数据
         List<DatabaseMetrics> list = new ArrayList<>();
-        Calendar cal = Calendar.getInstance();
 
-        for (int i = hours; i >= 0; i--) {
-            DatabaseMetrics metrics = new DatabaseMetrics();
-            cal.setTime(new Date());
-            cal.add(Calendar.HOUR, -i);
-            metrics.setMonitorTime(cal.getTime());
+        try {
+            // 查询最近N小时的数据库监控记录
+            List<SystemMonitor> records = systemMonitorMapper.selectSystemMonitorList(new SystemMonitor() {{
+                setMonitorType(2); // 数据库监控
+            }});
 
-            // 模拟数据
-            metrics.setConnectionCount((int)(Math.random() * 100));
-            metrics.setQueryResponseTime((long)(Math.random() * 100));
-            metrics.setSlowQueryCount((int)(Math.random() * 10));
+            // 只取最近hours小时的数据
+            Date cutoffTime = new Date(System.currentTimeMillis() - hours * 60 * 60 * 1000);
 
-            list.add(metrics);
+            for (SystemMonitor record : records) {
+                if (record.getMonitorTime() != null && record.getMonitorTime().after(cutoffTime)) {
+                    if (record.getMetrics() != null && !record.getMetrics().isEmpty()) {
+                        try {
+                            DatabaseMetrics metrics = JSON.parseObject(record.getMetrics(), DatabaseMetrics.class);
+                            metrics.setMonitorTime(record.getMonitorTime());
+                            list.add(metrics);
+                        } catch (Exception e) {
+                            // 解析失败，跳过该条记录
+                        }
+                    }
+                }
+            }
+
+            // 按时间排序
+            list.sort(Comparator.comparing(DatabaseMetrics::getMonitorTime));
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return list;
