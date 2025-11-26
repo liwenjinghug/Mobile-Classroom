@@ -326,6 +326,41 @@ export const constantRoutes = [
       }
     ]
   },
+  // 系统监控模块
+  {
+    path: '/proj_fz/monitor',
+    component: Layout,
+    redirect: '/proj_fz/monitor/statistics',
+    name: 'SystemMonitor',
+    meta: { title: '系统监控', icon: 'monitor' },
+    alwaysShow: true,
+    children: [
+      {
+        path: 'statistics',
+        component: () => import('@/views/proj_fz/systemMonitor/statistics'),
+        name: 'MonitorStatistics',
+        meta: { title: '监控统计', icon: 'chart' }
+      },
+      {
+        path: 'server',
+        component: () => import('@/views/proj_fz/systemMonitor/server'),
+        name: 'ServerMonitor',
+        meta: { title: '服务器监控', icon: 'server' }
+      },
+      {
+        path: 'database',
+        component: () => import('@/views/proj_fz/systemMonitor/database'),
+        name: 'DatabaseMonitor',
+        meta: { title: '数据库监控', icon: 'database' }
+      },
+      {
+        path: 'record',
+        component: () => import('@/views/proj_fz/systemMonitor/record'),
+        name: 'MonitorRecord',
+        meta: { title: '监控记录', icon: 'documentation' }
+      }
+    ]
+  },
   {
     path: '/proj_qhy',
     component: Layout,
