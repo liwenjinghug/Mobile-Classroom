@@ -49,13 +49,13 @@
         <el-card class="metric-card">
           <div class="metric-header">
             <i class="el-icon-connection"></i>
-            <span>网络速率</span>
+            <span>网络流量</span>
           </div>
           <div class="metric-value normal" style="font-size: 24px;">
-            ↑{{ (serverMetrics.uploadSpeed || 0).toFixed(2) }}KB/s
+            ↑{{ (serverMetrics.uploadSpeed || 0).toFixed(2) }}MB
           </div>
           <div class="metric-detail">
-            ↓{{ (serverMetrics.downloadSpeed || 0).toFixed(2) }}KB/s
+            ↓{{ (serverMetrics.downloadSpeed || 0).toFixed(2) }}MB
           </div>
         </el-card>
       </el-col>

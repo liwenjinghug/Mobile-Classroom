@@ -130,17 +130,10 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
                 metrics.setDiskUsage(Math.round(100.0 * usedDisk / totalDisk * 100.0) / 100.0);
             }
 
-            // 网络速率（真实数据 - 通过NetworkIF获取）
+            // 网络流量（真实数据 - 累计值，单位MB）
             try {
                 long totalBytesRecv = 0;
                 long totalBytesSent = 0;
-
-                si.getHardware().getNetworkIFs().forEach(net -> {
-                    net.updateAttributes();
-                });
-
-                // 等待一秒后再次获取，计算速率
-                Thread.sleep(1000);
 
                 for (NetworkIF net : si.getHardware().getNetworkIFs()) {
                     net.updateAttributes();
@@ -148,9 +141,9 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
                     totalBytesSent += net.getBytesSent();
                 }
 
-                // 转换为KB/s（因为等待了1秒）
-                metrics.setDownloadSpeed(Math.round(totalBytesRecv / 1024.0 * 100.0) / 100.0);
-                metrics.setUploadSpeed(Math.round(totalBytesSent / 1024.0 * 100.0) / 100.0);
+                // 转换为MB（累计流量）
+                metrics.setDownloadSpeed(Math.round(totalBytesRecv / 1024.0 / 1024.0 * 100.0) / 100.0);
+                metrics.setUploadSpeed(Math.round(totalBytesSent / 1024.0 / 1024.0 * 100.0) / 100.0);
             } catch (Exception netEx) {
                 // 网络接口获取失败，设置为0
                 metrics.setUploadSpeed(0.0);

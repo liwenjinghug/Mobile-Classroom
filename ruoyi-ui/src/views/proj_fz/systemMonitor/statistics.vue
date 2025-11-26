@@ -170,24 +170,35 @@ export default {
     },
     calculateStats() {
       // 计算今日监控次数
-      if (this.statistics.trend) {
-        const today = new Date().toISOString().split('T')[0]
-        const todayData = this.statistics.trend.filter(item =>
-          item.time && item.time.startsWith(today)
-        )
+      if (this.statistics.trend && this.statistics.trend.length > 0) {
+        const today = this.parseTime(new Date(), '{y}-{m}-{d}')
+        const todayData = this.statistics.trend.filter(item => {
+          if (item.time) {
+            // 兼容不同格式的时间
+            const itemDate = item.time.substring(0, 10) // 取 YYYY-MM-DD 部分
+            return itemDate === today
+          }
+          return false
+        })
         this.todayCount = todayData.reduce((sum, item) => sum + (item.total || 0), 0)
+      } else {
+        this.todayCount = 0
       }
 
       // 计算本周监控总数
       if (this.statistics.trend) {
         this.weekCount = this.statistics.trend.reduce((sum, item) => sum + (item.total || 0), 0)
+      } else {
+        this.weekCount = 0
       }
 
       // 计算正常率
-      if (this.statistics.trend) {
+      if (this.statistics.trend && this.statistics.trend.length > 0) {
         const totalCount = this.statistics.trend.reduce((sum, item) => sum + (item.total || 0), 0)
         const alertCount = this.statistics.trend.reduce((sum, item) => sum + (item.alertCount || 0), 0)
         this.normalRate = totalCount > 0 ? ((totalCount - alertCount) / totalCount * 100).toFixed(2) : 100
+      } else {
+        this.normalRate = 100
       }
     },
     drawTypeChart() {
