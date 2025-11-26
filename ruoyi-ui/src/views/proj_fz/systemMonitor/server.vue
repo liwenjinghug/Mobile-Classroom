@@ -11,6 +11,7 @@
           <div class="metric-value" :class="getStatusClass(serverMetrics.cpuUsage, 80, 90)">
             {{ serverMetrics.cpuUsage || 0 }}%
           </div>
+          <div class="metric-detail">&nbsp;</div>
         </el-card>
       </el-col>
 
@@ -50,7 +51,7 @@
             <i class="el-icon-connection"></i>
             <span>网络速率</span>
           </div>
-          <div class="metric-value normal">
+          <div class="metric-value normal" style="font-size: 24px;">
             ↑{{ (serverMetrics.uploadSpeed || 0).toFixed(2) }}KB/s
           </div>
           <div class="metric-detail">
@@ -86,6 +87,7 @@
           <div class="metric-value normal">
             {{ serverMetrics.threadCount || 0 }}
           </div>
+          <div class="metric-detail">&nbsp;</div>
         </el-card>
       </el-col>
 
@@ -95,12 +97,12 @@
             <i class="el-icon-time"></i>
             <span>更新时间</span>
           </div>
-          <div class="metric-detail" style="margin-top: 20px;">
+          <div class="metric-value" style="font-size: 14px;">
             {{ updateTime }}
           </div>
-          <el-button type="primary" size="small" @click="refreshMetrics" style="margin-top: 10px;">
-            刷新数据
-          </el-button>
+          <div class="metric-detail">
+            <el-button type="primary" size="mini" @click="refreshMetrics">刷新数据</el-button>
+          </div>
         </el-card>
       </el-col>
     </el-row>
@@ -384,12 +386,22 @@ export default {
 .metric-card {
   text-align: center;
   margin-bottom: 20px;
+  min-height: 150px;
+}
+
+.metric-card >>> .el-card__body {
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .metric-header {
   font-size: 14px;
   color: #606266;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  height: 24px;
+  line-height: 24px;
 }
 
 .metric-header i {
@@ -402,6 +414,8 @@ export default {
   font-size: 32px;
   font-weight: bold;
   margin: 10px 0;
+  height: 40px;
+  line-height: 40px;
 }
 
 .metric-value.normal {
@@ -419,6 +433,8 @@ export default {
 .metric-detail {
   font-size: 12px;
   color: #909399;
+  height: 20px;
+  line-height: 20px;
 }
 </style>
 

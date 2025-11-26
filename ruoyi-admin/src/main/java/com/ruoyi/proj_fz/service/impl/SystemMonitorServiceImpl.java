@@ -188,52 +188,46 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
         try (Connection conn = dataSource.getConnection();
              Statement stmt = conn.createStatement()) {
 
-            // 查询连接数
+            // 查询连接数（真实数据）
             ResultSet rs = stmt.executeQuery("SHOW STATUS LIKE 'Threads_connected'");
             if (rs.next()) {
                 metrics.setConnectionCount(rs.getInt(2));
             }
             rs.close();
 
-            // 查询活跃连接
+            // 查询活跃连接（真实数据）
             rs = stmt.executeQuery("SHOW STATUS LIKE 'Threads_running'");
             if (rs.next()) {
                 metrics.setActiveConnections(rs.getInt(2));
             }
             rs.close();
 
+            // 计算空闲连接（真实数据）
             if (metrics.getConnectionCount() != null && metrics.getActiveConnections() != null) {
                 metrics.setIdleConnections(metrics.getConnectionCount() - metrics.getActiveConnections());
             }
 
-            // 查询QPS
+            // 查询QPS（真实数据 - 累计查询数）
             rs = stmt.executeQuery("SHOW STATUS LIKE 'Questions'");
             if (rs.next()) {
                 metrics.setQps(rs.getInt(2));
             }
             rs.close();
 
-            // 查询数据库大小
-            rs = stmt.executeQuery("SELECT SUM(data_length + index_length) / 1024 / 1024 AS size FROM information_schema.TABLES");
+            // 查询数据库大小（真实数据）
+            rs = stmt.executeQuery("SELECT SUM(data_length + index_length) / 1024 / 1024 AS size FROM information_schema.TABLES WHERE table_schema = DATABASE()");
             if (rs.next()) {
                 metrics.setDatabaseSize(rs.getDouble("size"));
             }
             rs.close();
 
-            // 慢查询数量（从历史记录模拟）
-            metrics.setSlowQueryCount((int)(Math.random() * 10));
-
-            // 查询响应时间（模拟）
-            metrics.setQueryResponseTime((long)(Math.random() * 100));
-
-            // 缓存命中率（模拟）
-            metrics.setCacheHitRate(Math.random() * 100);
-
-            // TPS（模拟）
-            metrics.setTps((int)(Math.random() * 1000));
-
-            // 表空间使用率（模拟）
-            metrics.setTablespaceUsage(Math.random() * 100);
+            // 注意：以下指标设置为null，前端将不显示这些指标
+            // 慢查询、响应时间、缓存命中率、TPS、表空间使用率需要更复杂的监控系统才能准确获取
+            metrics.setSlowQueryCount(null);
+            metrics.setQueryResponseTime(null);
+            metrics.setCacheHitRate(null);
+            metrics.setTps(null);
+            metrics.setTablespaceUsage(null);
 
         } catch (Exception e) {
             e.printStackTrace();

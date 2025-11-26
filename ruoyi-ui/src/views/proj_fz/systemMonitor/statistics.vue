@@ -160,17 +160,17 @@ export default {
         const todayData = this.statistics.trend.filter(item =>
           item.time && item.time.startsWith(today)
         )
-        this.todayCount = todayData.reduce((sum, item) => sum + (item.count || 0), 0)
+        this.todayCount = todayData.reduce((sum, item) => sum + (item.total || 0), 0)
       }
 
       // 计算本周监控总数
       if (this.statistics.trend) {
-        this.weekCount = this.statistics.trend.reduce((sum, item) => sum + (item.count || 0), 0)
+        this.weekCount = this.statistics.trend.reduce((sum, item) => sum + (item.total || 0), 0)
       }
 
       // 计算正常率
       if (this.statistics.trend) {
-        const totalCount = this.statistics.trend.reduce((sum, item) => sum + (item.count || 0), 0)
+        const totalCount = this.statistics.trend.reduce((sum, item) => sum + (item.total || 0), 0)
         const alertCount = this.statistics.trend.reduce((sum, item) => sum + (item.alertCount || 0), 0)
         this.normalRate = totalCount > 0 ? ((totalCount - alertCount) / totalCount * 100).toFixed(2) : 100
       }
@@ -191,9 +191,13 @@ export default {
       }
 
       const data = (this.statistics.typeStats || []).map(item => ({
-        name: typeNames[item.name] || item.name,
-        value: item.value
+        name: typeNames[String(item.type)] || '未知类型',
+        value: item.count || 0
       }))
+
+      if (data.length === 0) {
+        data.push({ name: '暂无数据', value: 0 })
+      }
 
       const option = {
         tooltip: {
@@ -249,9 +253,13 @@ export default {
       }
 
       const data = (this.statistics.alertStats || []).map(item => ({
-        name: alertNames[item.name] || item.name,
-        value: item.value
+        name: alertNames[String(item.level)] || '未知',
+        value: item.count || 0
       }))
+
+      if (data.length === 0) {
+        data.push({ name: '暂无数据', value: 0 })
+      }
 
       const option = {
         tooltip: {
@@ -290,10 +298,11 @@ export default {
 
       const trendData = this.statistics.trend || []
       const times = trendData.map(item => {
+        if (!item.time) return ''
         const date = new Date(item.time)
         return this.parseTime(date, '{m}-{d} {h}:00')
       })
-      const counts = trendData.map(item => item.count || 0)
+      const totals = trendData.map(item => item.total || 0)
       const alertCounts = trendData.map(item => item.alertCount || 0)
 
       const option = {
@@ -322,7 +331,7 @@ export default {
             name: '监控次数',
             type: 'line',
             stack: 'Total',
-            data: counts,
+            data: totals,
             areaStyle: {},
             smooth: true,
             itemStyle: { color: '#409EFF' }

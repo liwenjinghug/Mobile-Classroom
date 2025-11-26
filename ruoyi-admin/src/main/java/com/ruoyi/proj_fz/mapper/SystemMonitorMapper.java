@@ -72,7 +72,7 @@ public interface SystemMonitorMapper {
      * 更新处理状态
      */
     @Update("UPDATE class_sys_monitor SET handled = #{handled}, handler = #{handler}, " +
-            "handle_time = #{handleTime} WHERE monitor_id = #{monitorId}")
+            "handle_time = #{handleTime}, handle_remark = #{handleRemark} WHERE monitor_id = #{monitorId}")
     int updateHandleStatus(SystemMonitor systemMonitor);
 
     /**

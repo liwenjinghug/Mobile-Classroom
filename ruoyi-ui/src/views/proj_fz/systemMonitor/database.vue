@@ -1,8 +1,26 @@
 <template>
   <div class="app-container">
+    <!-- 可折叠的指标说明 -->
+    <el-collapse v-model="activeCollapse" style="margin-bottom: 20px;">
+      <el-collapse-item name="1">
+        <template slot="title">
+          <i class="el-icon-info"></i>
+          <span style="margin-left: 10px; font-weight: bold;">数据库监控指标说明</span>
+        </template>
+        <div style="line-height: 1.8; padding: 10px;">
+          <p><strong>连接数：</strong>当前数据库的总连接数（包括活跃和空闲连接）- 通过 SHOW STATUS 查询</p>
+          <p><strong>活跃连接：</strong>正在执行查询的连接数 - 通过 SHOW STATUS 查询</p>
+          <p><strong>空闲连接：</strong>总连接数减去活跃连接数</p>
+          <p><strong>数据库大小：</strong>当前数据库所有表的数据和索引大小总和，单位MB - 查询 information_schema.TABLES</p>
+          <p><strong>累计查询数：</strong>数据库启动以来执行的查询总数 - 通过 SHOW STATUS 查询</p>
+          <p style="color: #909399; font-size: 12px; margin-top: 10px;"><em>注意：所有显示的数据均为真实数据，通过MySQL系统表查询获取</em></p>
+        </div>
+      </el-collapse-item>
+    </el-collapse>
+
     <el-row :gutter="20">
-      <!-- 实时指标卡片 -->
-      <el-col :span="6">
+      <!-- 实时指标卡片 - 只显示真实数据 -->
+      <el-col :span="8">
         <el-card class="metric-card">
           <div class="metric-header">
             <i class="el-icon-connection"></i>
@@ -17,31 +35,7 @@
         </el-card>
       </el-col>
 
-      <el-col :span="6">
-        <el-card class="metric-card">
-          <div class="metric-header">
-            <i class="el-icon-time"></i>
-            <span>查询响应时间</span>
-          </div>
-          <div class="metric-value" :class="getResponseTimeClass(dbMetrics.queryResponseTime)">
-            {{ dbMetrics.queryResponseTime || 0 }}ms
-          </div>
-        </el-card>
-      </el-col>
-
-      <el-col :span="6">
-        <el-card class="metric-card">
-          <div class="metric-header">
-            <i class="el-icon-warning"></i>
-            <span>慢查询数</span>
-          </div>
-          <div class="metric-value" :class="getSlowQueryClass(dbMetrics.slowQueryCount)">
-            {{ dbMetrics.slowQueryCount || 0 }}
-          </div>
-        </el-card>
-      </el-col>
-
-      <el-col :span="6">
+      <el-col :span="8">
         <el-card class="metric-card">
           <div class="metric-header">
             <i class="el-icon-folder"></i>
@@ -50,62 +44,34 @@
           <div class="metric-value normal">
             {{ (dbMetrics.databaseSize || 0).toFixed(2) }}MB
           </div>
+          <div class="metric-detail">&nbsp;</div>
+        </el-card>
+      </el-col>
+
+      <el-col :span="8">
+        <el-card class="metric-card">
+          <div class="metric-header">
+            <i class="el-icon-s-data"></i>
+            <span>累计查询数</span>
+          </div>
+          <div class="metric-value normal">
+            {{ (dbMetrics.qps || 0).toLocaleString() }}
+          </div>
+          <div class="metric-detail">数据库启动以来</div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 性能指标 -->
+    <!-- 更新时间 -->
     <el-row :gutter="20" style="margin-top: 20px;">
-      <el-col :span="6">
-        <el-card class="metric-card">
-          <div class="metric-header">
-            <i class="el-icon-s-data"></i>
-            <span>QPS</span>
+      <el-col :span="24">
+        <el-card class="metric-card" style="min-height: auto;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #909399;">
+              <i class="el-icon-time"></i> 最后更新: {{ updateTime }}
+            </span>
+            <el-button type="primary" size="small" icon="el-icon-refresh" @click="refreshMetrics">刷新数据</el-button>
           </div>
-          <div class="metric-value normal">
-            {{ dbMetrics.qps || 0 }}
-          </div>
-          <div class="metric-detail">每秒查询数</div>
-        </el-card>
-      </el-col>
-
-      <el-col :span="6">
-        <el-card class="metric-card">
-          <div class="metric-header">
-            <i class="el-icon-s-operation"></i>
-            <span>TPS</span>
-          </div>
-          <div class="metric-value normal">
-            {{ dbMetrics.tps || 0 }}
-          </div>
-          <div class="metric-detail">每秒事务数</div>
-        </el-card>
-      </el-col>
-
-      <el-col :span="6">
-        <el-card class="metric-card">
-          <div class="metric-header">
-            <i class="el-icon-pie-chart"></i>
-            <span>缓存命中率</span>
-          </div>
-          <div class="metric-value normal">
-            {{ (dbMetrics.cacheHitRate || 0).toFixed(2) }}%
-          </div>
-        </el-card>
-      </el-col>
-
-      <el-col :span="6">
-        <el-card class="metric-card">
-          <div class="metric-header">
-            <i class="el-icon-refresh"></i>
-            <span>更新时间</span>
-          </div>
-          <div class="metric-detail" style="margin-top: 20px;">
-            {{ updateTime }}
-          </div>
-          <el-button type="primary" size="small" @click="refreshMetrics" style="margin-top: 10px;">
-            刷新数据
-          </el-button>
         </el-card>
       </el-col>
     </el-row>
@@ -153,6 +119,7 @@ export default {
   name: 'DatabaseMonitor',
   data() {
     return {
+      activeCollapse: [], // 默认折叠
       dbMetrics: {},
       updateTime: '',
       historyHours: 24,
@@ -343,12 +310,22 @@ export default {
 .metric-card {
   text-align: center;
   margin-bottom: 20px;
+  min-height: 150px;
+}
+
+.metric-card >>> .el-card__body {
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .metric-header {
   font-size: 14px;
   color: #606266;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
+  height: 24px;
+  line-height: 24px;
 }
 
 .metric-header i {
@@ -361,6 +338,8 @@ export default {
   font-size: 32px;
   font-weight: bold;
   margin: 10px 0;
+  height: 40px;
+  line-height: 40px;
 }
 
 .metric-value.normal {
@@ -378,6 +357,8 @@ export default {
 .metric-detail {
   font-size: 12px;
   color: #909399;
+  height: 20px;
+  line-height: 20px;
 }
 </style>
 
