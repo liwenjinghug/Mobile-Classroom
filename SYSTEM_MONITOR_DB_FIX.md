@@ -36,7 +36,7 @@ Unknown column 'remark' in 'field list'
 
 ## 数据库表结构（供参考）
 ```sql
-CREATE TABLE `proj_fz_system_monitor` (
+CREATE TABLE `class_sys_monitor` (
   `monitor_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `monitor_type` int(11) NOT NULL,
   `monitor_name` varchar(100) NOT NULL,
