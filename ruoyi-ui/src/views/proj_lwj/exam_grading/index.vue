@@ -11,9 +11,9 @@
           </el-form-item>
           <el-form-item label="选择考试">
             <el-select v-model="currentExamId" placeholder="请选择考试" filterable clearable style="width:300px" @change="onExamChange" :disabled="!currentSessionId">
-              <el-option v-for="ex in exams" :key="ex.id" :label="`${ex.examName} (${statusText(ex.status)})`" :value="ex.id">
+              <el-option v-for="ex in gradingSelectableExams" :key="ex.id" :label="`${ex.examName} (${statusTagForSelect(ex)})`" :value="ex.id">
                 <span style="float:left">{{ ex.examName }}</span>
-                <el-tag :type="statusTagType(ex.status)" size="mini" style="float:right;margin-left:8px">{{ statusText(ex.status) }}</el-tag>
+                <el-tag :type="statusTagType(ex.status)" size="mini" style="float:right;margin-left:8px">{{ statusTagForSelect(ex) }}</el-tag>
               </el-option>
             </el-select>
           </el-form-item>
@@ -100,6 +100,40 @@
 
       <!-- 未选择考试提示 -->
       <el-empty v-if="!currentExamId" description="请选择一个考试查看统计信息" :image-size="120" />
+
+      <!-- 新位置：提交可视化面板（在题目列表之前） -->
+      <div v-if="currentExamId && submissionStats" class="submission-visual">
+        <el-card shadow="hover" class="submission-card" :body-style="{padding:'16px'}">
+          <div class="submission-header">
+            <h3>实时提交统计</h3>
+            <div class="submission-actions">
+              <el-button size="mini" type="primary" icon="el-icon-refresh" :loading="loadingSubmission" @click="refreshSubmissionStats(true)">刷新</el-button>
+              <el-button size="mini" type="warning" v-if="submissionTimer" @click="stopSubmissionAuto">停止自动刷新</el-button>
+              <el-button size="mini" type="success" v-else @click="startSubmissionAuto">开启自动刷新</el-button>
+              <span class="last-update" v-if="submissionStats.lastFetch">上次更新：{{ formatTs(submissionStats.lastFetch) }}</span>
+            </div>
+          </div>
+          <!-- 第一行：两个图表 -->
+          <el-row :gutter="16">
+            <el-col :xs="24" :sm="12" :md="12">
+              <div ref="submissionChart" class="chart-box"></div>
+            </el-col>
+            <el-col :xs="24" :sm="12" :md="12">
+              <div ref="scoreDistChart" class="chart-box"></div>
+            </el-col>
+          </el-row>
+          <!-- 第二行：统计数字卡片（全宽下方） -->
+          <div class="stats-grid stats-grid-under">
+            <el-card class="mini-stat" shadow="never"><div class="stat-title">参与人数</div><div class="stat-value">{{ submissionStats.participants }}</div></el-card>
+            <el-card class="mini-stat" shadow="never"><div class="stat-title">已提交</div><div class="stat-value success-text">{{ submissionStats.submitted }}</div></el-card>
+            <el-card class="mini-stat" shadow="never"><div class="stat-title">未提交</div><div class="stat-value warning-text">{{ submissionStats.unsubmitted }}</div></el-card>
+            <el-card class="mini-stat" shadow="never"><div class="stat-title">平均分</div><div class="stat-value">{{ submissionStats.avgScore==null?'—':submissionStats.avgScore.toFixed(1) }}</div></el-card>
+            <el-card class="mini-stat" shadow="never"><div class="stat-title">最高分</div><div class="stat-value">{{ submissionStats.maxScore==null?'—':submissionStats.maxScore.toFixed(1) }}</div></el-card>
+            <el-card class="mini-stat" shadow="never"><div class="stat-title">及格率</div><div class="stat-value">{{ submissionStats.passRate==null?'—':submissionStats.passRate.toFixed(1)+'%' }}</div></el-card>
+          </div>
+          <el-alert v-if="submissionError" :title="submissionError" type="error" show-icon style="margin-top:12px" />
+        </el-card>
+      </div>
 
       <!-- 题目统计表格 -->
       <div v-if="currentExamId && questionStats" class="stats-section">
@@ -327,6 +361,7 @@
 
 <script>
 import request from '@/utils/request'
+import * as echarts from 'echarts'
 
 export default {
   name: 'ExamGrading',
@@ -354,37 +389,42 @@ export default {
       answersByQuestion: {}, // questionId -> 答案数组
       gradeDialogVisible: false,
       gradeForm: { id:null, questionId:null, studentNo:'', studentAnswer:'', correctAnswer:'', maxScore:0, score:0, comment:'', questionContent:'' },
-      gradingOne: false
+      gradingOne: false,
+      submissionStats: null, // {participants, submitted, unsubmitted, avgScore, maxScore, passRate, scoreBuckets, lastFetch}
+      loadingSubmission: false,
+      submissionTimer: null,
+      submissionError: null,
     }
   },
   computed: {
-    filteredExams() {
-      let result = this.exams
-      if (this.statusFilter !== null) {
-        result = result.filter(e => e.status === this.statusFilter)
-      }
-      if (this.sessionFilter !== null) {
-        result = result.filter(e => e.sessionId === this.sessionFilter)
-      }
-      // 按发布时间倒序（或创建时间）
-      return result.sort((a, b) => {
-        const timeA = new Date(a.startTime || a.createTime || 0).getTime()
-        const timeB = new Date(b.startTime || b.createTime || 0).getTime()
-        return timeB - timeA
+    // 仅显示进行中/已结束/已截止考试
+    gradingSelectableExams(){
+      const now = Date.now()
+      const parse = (v)=>this.parseDateTime(v)
+      return (this.exams||[]).filter(ex=>{
+        const status = Number(ex.status)
+        if(status===0) return false // 草稿排除
+        const start = parse(ex.startTime)
+        const end = parse(ex.endTime)
+        const isOngoing = start && end && now>=start && now<end
+        const isFinishedByStatus = status===3
+        const isFinishedByTime = end && now>=end
+        // 已发布但未开始 (status=1 且 now < start) 过滤掉
+        const isDraftOrNotStarted = (status===1 && (!start || now < start))
+        if(isDraftOrNotStarted) return false
+        return isOngoing || isFinishedByStatus || isFinishedByTime
+      }).sort((a,b)=> new Date(b.startTime||0)-new Date(a.startTime||0))
+    },
+    teacherSessions(){
+      const set = new Set()
+      this.gradingSelectableExams.forEach(ex=>{ if(ex.sessionId) set.add(ex.sessionId) })
+      return Array.from(set).map(sessionId=>{
+        const exam = this.gradingSelectableExams.find(e=>e.sessionId===sessionId)
+        return { sessionId, className: exam? exam.className : `课堂${sessionId}` }
       })
     },
-    uniqueSessions() {
-      const sessions = []
-      const seen = new Set()
-      this.exams.forEach(e => {
-        if (e.sessionId && !seen.has(e.sessionId)) {
-          seen.add(e.sessionId)
-          sessions.push({ sessionId: e.sessionId, className: e.className })
-        }
-      })
-      return sessions
-    },
-    sortedQuestions() {
+    // 保留必须的计算属性，其余移除
+    sortedQuestions(){
       if (!this.questionStats || !this.questionStats.questions) return []
       const participants = Number(this.questionStats.participantsCount || 0)
       return this.questionStats.questions.map((q, index) => {
@@ -396,81 +436,30 @@ export default {
         let ungradedCount = q.ungradedCount
         let gradedCount = 0
         if (isSubj) {
-          // 基于 answersByQuestion 重算主观题三类：未作答 / 未批改 / 已批改
           const answers = this.answersByQuestion[q.questionId] || []
           const answeredCount = answers.length
-          // graded: 有 correctorId 或 score 非空
           gradedCount = answers.filter(a => a.correctorId != null || (a.score != null && a.score !== '')).length
-          // ungraded: 已作答但无批改标记
           ungradedCount = answeredCount - gradedCount
-          // unanswered: 参与人数 - answeredCount
           unansweredCount = Math.max(participants - answeredCount, 0)
-          // 主观题不显示正确率，因此设为0或保留原值但前端不展示
           correctRate = 0
           correctCount = 0
           incorrectCount = 0
         }
-        return {
-          ...q,
-          _index: index + 1,
-          _activeTab: isSubj ? 'ungraded' : 'correct',
-          isSubjective: isSubj,
-          correctRate,
-          correctCount,
-            incorrectCount,
-          unansweredCount,
-          ungradedCount,
-          gradedCount,
-        }
+        return { ...q, _index:index+1, _activeTab: isSubj? 'ungraded':'correct', isSubjective:isSubj, correctRate, correctCount, incorrectCount, unansweredCount, ungradedCount, gradedCount }
       })
     },
-    hasUngradedSubjective() {
-      return this.ungraded && this.ungraded.length > 0
-    },
-    hasSelectedUngraded() {
-      return this.selectedUngraded.length > 0
-    },
-    hasMultipleSessions() {
-      return this.questionStats &&
-             this.questionStats.sessionDetails &&
-             this.questionStats.sessionDetails.length > 1
-    },
-    teacherSessions() {
-      // 假设教师只能看到自己创建的考试的课堂
-      const sessionSet = new Set()
-      this.exams.forEach(exam => {
-        if (exam.sessionId) {
-          sessionSet.add(exam.sessionId)
-        }
-      })
-      return Array.from(sessionSet).map(sessionId => {
-        const exam = this.exams.find(ex => ex.sessionId === sessionId)
-        return { sessionId, className: exam ? exam.className : `课堂${sessionId}` }
-      })
-    },
+    hasUngradedSubjective(){ return this.ungraded && this.ungraded.length>0 },
+    hasSelectedUngraded(){ return this.selectedUngraded.length>0 },
     batchMaxScore(){
-      // 取所选答卷所属题目最大分值（如果不同题目，取最小的一个作为上限保证安全）
       if(!this.selectedUngraded.length) return 0
-      const scores = this.selectedUngraded.map(a => {
-        const q = (this.questionStats && this.questionStats.questions || []).find(q => q.questionId === a.questionId)
-        return q && q.score ? Number(q.score) : 0
-      }).filter(s => !isNaN(s) && s>0)
-      if(!scores.length) return 0
-      return Math.min(...scores)
+      const scores = this.selectedUngraded.map(a=>{ const q=(this.questionStats&&this.questionStats.questions||[]).find(q=>q.questionId===a.questionId); return q&&q.score?Number(q.score):0 }).filter(s=>!isNaN(s)&&s>0)
+      return scores.length? Math.min(...scores):0
     },
     previewScore(){
       if(this.batchForm.scoreMode==='full') return this.batchMaxScore
       if(this.batchForm.scoreMode==='zero') return 0
-      if(this.batchForm.scoreMode==='custom') return this.batchForm.customScore || 0
+      if(this.batchForm.scoreMode==='custom') return this.batchForm.customScore||0
       return 0
-    },
-    filteredGradingExams(){
-      if(!this.gradingExams) return []
-      return this.gradingExams.filter(e=>{
-        if(this.gradingFilter==='need') return e.gradingNeeded
-        if(this.gradingFilter==='done') return e.hasSubjective && !e.gradingNeeded
-        return true
-      }).sort((a,b)=> new Date(b.startTime||0)-new Date(a.startTime||0))
     }
   },
   created() {
@@ -550,6 +539,8 @@ export default {
         this.reloadUngraded(),
         this.reloadAllAnswers()
       ])
+      await this.refreshSubmissionStats(true)
+      this.startSubmissionAuto()
     },
     async reloadQuestionStats() {
       if (!this.currentExamId) return
@@ -583,7 +574,7 @@ export default {
       if (!this.currentExamId) return
       try {
         const resp = await request({ url: `/proj_lwj/exam/${this.currentExamId}/ungraded`, method: 'get' })
-        let list = resp && (resp.rows || resp.data || resp.list || resp)
+        let list = resp && (resp.rows || resp.data || resp.list || [])
         if (!Array.isArray(list)) {
           console.warn('[reloadUngraded] 非数组返回，已置空：', resp)
           list = []
@@ -801,6 +792,80 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
         if(eid) this._pendingRestoreExamId = Number(eid)
       } catch(e){ /* ignore */ }
     },
+    formatTs(ts){ const d=new Date(ts); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}` },
+    async refreshSubmissionStats(force=false){
+      if(!this.currentExamId) return
+      if(this.loadingSubmission) return
+      // 若非强制且数据<15s则跳过
+      const now=Date.now()
+      if(!force && this.submissionStats && this.submissionStats.lastFetch && (now - this.submissionStats.lastFetch < 15000)) return
+      this.loadingSubmission=true
+      this.submissionError=null
+      try{
+        await this.computeSubmissionStats()
+        this.updateSubmissionChart()
+        this.updateScoreDistChart()
+      }catch(e){ console.warn('refreshSubmissionStats error', e); this.submissionError = '提交统计加载失败: '+(e.message||'网络错误') }
+      finally{ this.loadingSubmission=false }
+    },
+    startSubmissionAuto(){ if(this.submissionTimer) return; this.refreshSubmissionStats(true); this.submissionTimer=setInterval(()=> this.refreshSubmissionStats(false),30000) },
+    stopSubmissionAuto(){ if(this.submissionTimer){ clearInterval(this.submissionTimer); this.submissionTimer=null } },
+    async computeSubmissionStats(){
+      // 参与人数从 questionStats 或 exams 获取
+      const exam = (this.exams||[]).find(e=>Number(e.id)===Number(this.currentExamId)) || {}
+      const participants = Number(this.questionStats && this.questionStats.participantsCount || 0)
+      // 汇总 allAnswers
+      const answers = this.allAnswers || []
+      const byStudent = {}
+      answers.forEach(a=>{ if(!a.studentNo) return; if(!byStudent[a.studentNo]) byStudent[a.studentNo]={total:0, count:0}; if(a.score!=null && a.score!=='' && !isNaN(Number(a.score))){ byStudent[a.studentNo].total += Number(a.score); byStudent[a.studentNo].count++ } })
+      const submitted = Object.keys(byStudent).length
+      const unsubmitted = Math.max(participants - submitted, 0)
+      const scores = Object.values(byStudent).map(s=> s.count>0 ? s.total : null).filter(v=> v!=null)
+      const avgScore = scores.length? (scores.reduce((sum,v)=>sum+v,0)/scores.length): null
+      const maxScore = scores.length? Math.max(...scores): null
+      const passScore = Number(exam.passScore || exam.pass_score || 0)
+      const passCount = scores.filter(s=> passScore>0 ? s>=passScore : false).length
+      const passRate = submitted? (passCount/submitted*100): null
+      // 分数分布桶: 0-10,10-20,...依考试总分动态刻度（10段）
+      const totalScore = Number(exam.totalScore || exam.total_score || 100) || 100
+      const bucketSize = totalScore / 10
+      const buckets = Array.from({length:10},(_,i)=>({range:`${Math.round(i*bucketSize)}-${Math.round((i+1)*bucketSize)}`, count:0}))
+      scores.forEach(s=>{ const idx = Math.min(9, Math.floor(s / bucketSize)); buckets[idx].count++ })
+      this.submissionStats = { participants, submitted, unsubmitted, avgScore, maxScore, passRate, scoreBuckets:buckets, lastFetch:Date.now() }
+    },
+    updateSubmissionChart(){
+      if(!this.$refs.submissionChart || !this.submissionStats) return
+      if(!this._submissionChart){ this._submissionChart = echarts.init(this.$refs.submissionChart) }
+      const s=this.submissionStats
+      this._submissionChart.setOption({ tooltip:{trigger:'item'}, legend:{bottom:0}, series:[{ type:'pie', radius:['45%','70%'], avoidLabelOverlap:false, label:{show:true, formatter:'{b}: {c}'}, data:[ {name:'已提交', value:s.submitted}, {name:'未提交', value:s.unsubmitted} ], color:['#67C23A','#E6A23C'] }] })
+    },
+    updateScoreDistChart(){
+      if(!this.$refs.scoreDistChart || !this.submissionStats) return
+      if(!this._scoreDistChart){ this._scoreDistChart = echarts.init(this.$refs.scoreDistChart) }
+      const b=this.submissionStats.scoreBuckets
+      this._scoreDistChart.setOption({ tooltip:{}, grid:{left:40,right:10,top:10,bottom:40}, xAxis:{ type:'category', data:b.map(x=>x.range), axisLabel:{rotate:45} }, yAxis:{ type:'value' }, series:[{ type:'bar', data:b.map(x=>x.count), itemStyle:{color:'#409EFF'} }] })
+    },
+    // 时间解析（安全处理字符串）
+    parseDateTime(value){
+      if(!value) return null
+      if(value instanceof Date) return value.getTime()
+      if(typeof value==='number') return value
+      if(typeof value!=='string') return null
+      const str = value.trim().replace('T',' ').replace(/\..*/,'')
+      const m = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/)
+      if(!m) return null
+      const [,Y,M,D,h='00',mi='00',s='00'] = m
+      const dt = new Date(Number(Y),Number(M)-1,Number(D),Number(h),Number(mi),Number(s))
+      const t = dt.getTime(); return isNaN(t)? null : t
+    },
+    statusTagForSelect(ex){
+      const now=Date.now(); const start=this.parseDateTime(ex.startTime); const end=this.parseDateTime(ex.endTime); const st=Number(ex.status)
+      if(st===3 || (end && now>=end)) return '已结束'
+      if(start && end && now>=start && now<end) return '进行中'
+      if(end && now>=end && st!==3) return '已截止'
+      return '进行中'
+    },
+    // ...existing code (keep reloadData single definition, remove duplicate later if any)...
   }
 }
 </script>
@@ -892,4 +957,19 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
 
 .batch-grade-body { max-height: 60vh; overflow: auto; }
 .q-preview { background:#fafafa; padding:8px 12px; border-radius:4px; font-size:13px; line-height:1.6; max-height:180px; overflow:auto; }
+
+.submission-visual { margin-top:16px; }
+.submission-card { border-radius:8px; }
+.submission-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.submission-header h3 { margin:0; font-size:16px; font-weight:600; }
+.submission-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.last-update { font-size:12px; color:#909399; }
+.chart-box { width:100%; height:230px; background:#fff; border:1px solid #ebeef5; border-radius:6px; }
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
+.stats-grid-under { margin-top:16px; }
+.mini-stat { text-align:center; }
+.mini-stat .stat-title { font-size:12px; color:#909399; }
+.mini-stat .stat-value { font-size:18px; font-weight:600; margin-top:2px; }
+.success-text { color:#67C23A; }
+.warning-text { color:#E6A23C; }
 </style>

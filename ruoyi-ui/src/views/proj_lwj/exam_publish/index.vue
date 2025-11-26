@@ -109,8 +109,76 @@
         type="info" show-icon class="process-alert"/>
       <!-- 在考试列表上方增加当前所选考试的得分汇总提示 -->
       <el-alert v-if="scoreSummary" :title="scoreSummaryTitle" type="warning" show-icon class="score-alert" />
-      <el-table :data="list" v-loading="listLoading" style="width:100%" :row-key="rowKeyField" :row-class-name="rowClassName" @selection-change="onSelectionChange" class="beautified-table">
+      <el-table :data="list" v-loading="listLoading" style="width:100%" :row-key="rowKeyField" :row-class-name="rowClassName" @selection-change="onSelectionChange" class="beautified-table" @expand-change="handleExpandChange">
         <el-table-column type="selection" width="42" reserve-selection />
+        <!-- 新增：展开列显示提交统计 -->
+        <el-table-column type="expand">
+          <template #default="scope">
+            <div class="exam-submission-panel" v-loading="submissionStats[scope.row.id] && submissionStats[scope.row.id].loading">
+              <template v-if="submissionStats[scope.row.id] && !submissionStats[scope.row.id].loading">
+                <div class="submission-summary">
+                  <div class="ring-wrapper">
+                    <div class="ring" :style="{ background: 'conic-gradient(#67c23a ' + (submissionStats[scope.row.id].submittedRate || 0) + '%, #ebeef5 0)'}">
+                      <div class="ring-inner">
+                        <strong>{{ (submissionStats[scope.row.id].submittedRate || 0).toFixed(1) }}%</strong>
+                        <div class="ring-text">提交率</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="stats-cards">
+                    <el-card shadow="hover" class="mini-stat" body-style="{padding:'12px'}">
+                      <div class="stat-title">总人数</div>
+                      <div class="stat-value">{{ submissionStats[scope.row.id].participantsCount }}</div>
+                    </el-card>
+                    <el-card shadow="hover" class="mini-stat" body-style="{padding:'12px'}">
+                      <div class="stat-title">已提交</div>
+                      <div class="stat-value success-text">{{ submissionStats[scope.row.id].submittedCount }}</div>
+                    </el-card>
+                    <el-card shadow="hover" class="mini-stat" body-style="{padding:'12px'}">
+                      <div class="stat-title">未提交</div>
+                      <div class="stat-value warning-text">{{ submissionStats[scope.row.id].unsubmittedCount }}</div>
+                    </el-card>
+                    <el-card shadow="hover" class="mini-stat" body-style="{padding:'12px'}">
+                      <div class="stat-title">平均分</div>
+                      <div class="stat-value">{{ submissionStats[scope.row.id].averageScore != null ? submissionStats[scope.row.id].averageScore.toFixed(1) : '—' }}</div>
+                    </el-card>
+                    <el-card shadow="hover" class="mini-stat" body-style="{padding:'12px'}">
+                      <div class="stat-title">及格率</div>
+                      <div class="stat-value">{{ submissionStats[scope.row.id].passRate != null ? (submissionStats[scope.row.id].passRate.toFixed(1) + '%') : '—' }}</div>
+                    </el-card>
+                  </div>
+                </div>
+                <div class="submission-actions">
+                  <el-button type="primary" size="mini" icon="el-icon-refresh" @click="forceRefresh(scope.row)">刷新</el-button>
+                  <el-button size="mini" type="info" @click="stopAuto(scope.row)" v-if="submissionStats[scope.row.id].timer">停止自动刷新</el-button>
+                  <el-button size="mini" type="success" @click="startAuto(scope.row)" v-else>开启自动刷新</el-button>
+                  <span class="last-fetch" v-if="submissionStats[scope.row.id].lastFetch">上次更新：{{ fmtTime(submissionStats[scope.row.id].lastFetch) }}</span>
+                  <span class="error-tip" v-if="submissionStats[scope.row.id].error">{{ submissionStats[scope.row.id].error }}</span>
+                </div>
+                <el-table :data="submissionStats[scope.row.id].records" size="mini" class="submission-table" max-height="300" v-if="submissionStats[scope.row.id].records && submissionStats[scope.row.id].records.length">
+                  <el-table-column type="index" width="50" label="#" />
+                  <el-table-column prop="studentNo" label="学号" width="140" />
+                  <el-table-column prop="submitted" label="状态" width="90">
+                    <template #default="r">
+                      <el-tag :type="r.row.submitted ? 'success' : 'info'">{{ r.row.submitted ? '已提交' : '未提交' }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="score" label="得分" width="90">
+                    <template #default="r">{{ r.row.score == null ? '—' : r.row.score }}</template>
+                  </el-table-column>
+                  <el-table-column prop="passed" label="及格" width="70">
+                    <template #default="r">
+                      <el-tag size="mini" :type="r.row.passed ? 'success' : 'danger'">{{ r.row.passed ? '是' : '否' }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="answerCount" label="答题数" width="80" />
+                </el-table>
+                <el-empty v-else description="暂无提交记录" :image-size="80" />
+              </template>
+              <el-empty v-else description="加载中..." :image-size="60" />
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="examName" label="名称" min-width="140" />
         <el-table-column label="时间" min-width="220">
           <template #default="scope">{{ fmt(scope.row.startTime) }} ~ {{ fmt(scope.row.endTime) }}</template>
@@ -379,6 +447,8 @@ export default {
       scoreSummary: null,
       selection: [],
       bulkDeleting: false,
+      submissionStats: {}, // examId -> { loading, participantsCount, submittedCount, unsubmittedCount, submittedRate, averageScore, passRate, records:[], lastFetch, timer, error }
+      expandedExamIds: [],
     }
   },
   watch: {
@@ -944,6 +1014,105 @@ export default {
         }).catch(e=>{ console.error(e); this.$message.error('结束失败') })
       }).catch(()=>{})
     },
+    fmtTime(ts){
+      const d = new Date(ts); const pad=n=>String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+    },
+    handleExpandChange(row, expandedRows){
+      this.expandedExamIds = expandedRows.map(r=> r.id || r.examId)
+      const isExpanded = this.expandedExamIds.includes(row.id)
+      if(isExpanded){
+        this.ensureSubmissionStats(row)
+      } else {
+        // 折叠时停止自动刷新
+        const stat = this.submissionStats[row.id]
+        if(stat && stat.timer){ clearInterval(stat.timer); stat.timer=null }
+      }
+    },
+    ensureSubmissionStats(row){
+      if(!row || !row.id) return
+      const stat = this.submissionStats[row.id]
+      const now = Date.now()
+      if(!stat || !stat.lastFetch || (now - stat.lastFetch > 15000)){
+        this.fetchSubmissionStats(row)
+      }
+      // 若无定时器，则开启自动刷新
+      if(!this.submissionStats[row.id].timer){
+        this.startAuto(row)
+      }
+    },
+    startAuto(row){
+      if(!row || !row.id) return
+      const stat = this.submissionStats[row.id] || {}
+      if(stat.timer) return
+      stat.timer = setInterval(()=> this.fetchSubmissionStats(row, true), 30000)
+      this.$set(this.submissionStats, row.id, stat)
+    },
+    stopAuto(row){
+      if(!row || !row.id) return
+      const stat = this.submissionStats[row.id]
+      if(stat && stat.timer){ clearInterval(stat.timer); stat.timer=null }
+    },
+    forceRefresh(row){ this.fetchSubmissionStats(row, false, true) },
+    async fetchSubmissionStats(row, silent=false, force=false){
+      if(!row || !row.id) return
+      const examId = row.id
+      if(!this.submissionStats[examId]){ this.$set(this.submissionStats, examId, { loading:false, records:[], submittedCount:0, participantsCount:0, unsubmittedCount:0, submittedRate:0, averageScore:null, passRate:null, lastFetch:null, timer:null, error:null }) }
+      const stat = this.submissionStats[examId]
+      if(stat.loading) return
+      stat.loading = true
+      stat.error = null
+      try {
+        // 获取参与人数等概要
+        const summaryResp = await request({ url: `/proj_lwj/exam/${examId}/questionCorrectSummary`, method:'get' })
+        const summaryData = summaryResp && (summaryResp.data || summaryResp)
+        const participantsCount = Number(summaryData.participantsCount || 0)
+        // 获取所有答案
+        const ansResp = await request({ url:'/proj_lwj/exam/answer/list', method:'get', params:{ examId } })
+        const answersRaw = ansResp && (ansResp.rows || ansResp.data || ansResp.list || [])
+        const answers = Array.isArray(answersRaw) ? answersRaw : []
+        const byStudent = {}
+        answers.forEach(a => {
+          const no = a.studentNo || a.student_no
+          if(!no) return
+          if(!byStudent[no]) byStudent[no] = { studentNo: no, answers: [], totalScore:0, scoreCount:0 }
+          byStudent[no].answers.push(a)
+          const s = a.score
+          if(s!=null && s!=='' && !isNaN(Number(s))){ byStudent[no].totalScore += Number(s); byStudent[no].scoreCount += 1 }
+        })
+        const submittedStudents = Object.keys(byStudent)
+        const submittedCount = submittedStudents.length
+        const passScore = Number(row.passScore || row.pass_score || 0)
+        const records = submittedStudents.map(no => {
+          const info = byStudent[no]
+          const score = info.scoreCount > 0 ? info.totalScore : null
+          return {
+            studentNo: no,
+            submitted: true,
+            score: score,
+            passed: score != null && passScore>0 ? (score >= passScore) : false,
+            answerCount: info.answers.length
+          }
+        })
+        // 若无法获取未提交学生名单，仅统计数量
+        const unsubmittedCount = Math.max(participantsCount - submittedCount, 0)
+        // 统计平均分与及格率（仅对已提交学生且有得分）
+        const scored = records.filter(r => r.score != null && !isNaN(r.score))
+        const averageScore = scored.length ? (scored.reduce((sum,r)=>sum+r.score,0)/scored.length) : null
+        const passedCount = records.filter(r => r.passed).length
+        const passRate = submittedCount ? (passedCount / submittedCount * 100) : null
+        const submittedRate = participantsCount ? (submittedCount / participantsCount * 100) : 0
+        Object.assign(stat, { participantsCount, submittedCount, unsubmittedCount, submittedRate, averageScore, passRate, records, lastFetch: Date.now() })
+      } catch(e){
+        console.warn('fetchSubmissionStats error', e)
+        stat.error = silent ? null : ('统计加载失败: ' + (e.message || '网络错误'))
+      } finally { stat.loading = false }
+    },
+    // ...existing code...
+  },
+  beforeDestroy(){
+    // 清理自动刷新定时器
+    Object.values(this.submissionStats).forEach(s => { if(s && s.timer){ clearInterval(s.timer) } })
   }
 }
 </script>
@@ -1233,6 +1402,24 @@ export default {
 /* 批量发布对话框 */
 .batch-dialog-body { max-height:520px; overflow-y:auto; }
 .batch-summary { margin-top:4px; }
+
+/* 提交统计展开行样式 */
+.exam-submission-panel { background:#fafafa; padding:12px 16px; border:1px solid #ebeef5; border-radius:8px; }
+.submission-summary { display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start; }
+.ring-wrapper { display:flex; align-items:center; justify-content:center; }
+.ring { width:120px; height:120px; border-radius:50%; position:relative; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.08); }
+.ring-inner { position:absolute; width:84px; height:84px; background:#fff; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:14px; box-shadow:0 0 0 4px rgba(255,255,255,.6); }
+.ring-text { font-size:12px; color:#909399; margin-top:2px; }
+.stats-cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(110px,1fr)); gap:8px; flex:1; }
+.mini-stat { text-align:center; }
+.mini-stat .stat-title { font-size:12px; color:#909399; }
+.mini-stat .stat-value { font-size:18px; font-weight:600; margin-top:4px; }
+.success-text { color:#67c23a; }
+.warning-text { color:#e6a23c; }
+.submission-actions { margin-top:12px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.last-fetch { font-size:12px; color:#909399; }
+.error-tip { font-size:12px; color:#f56c6c; }
+.submission-table { margin-top:12px; }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
