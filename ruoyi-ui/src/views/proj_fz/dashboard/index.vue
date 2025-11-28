@@ -581,6 +581,56 @@
       </div>
     </el-dialog>
 
+    <!-- 作业明细详情对话框 -->
+    <el-dialog :title="homeworkDetailTitle" :visible.sync="homeworkDetailDialogVisible" width="900px" append-to-body>
+      <el-descriptions v-if="currentHomeworkDetail" :column="2" border>
+        <el-descriptions-item label="作业ID">{{ currentHomeworkDetail.homeworkId }}</el-descriptions-item>
+        <el-descriptions-item label="作业名称">{{ currentHomeworkDetail.title }}</el-descriptions-item>
+        <el-descriptions-item label="课程名称">{{ currentHomeworkDetail.course }}</el-descriptions-item>
+        <el-descriptions-item label="发布时间">{{ formatTime(currentHomeworkDetail.publishTime) }}</el-descriptions-item>
+        <el-descriptions-item label="截止时间">{{ formatTime(currentHomeworkDetail.deadline) }}</el-descriptions-item>
+        <el-descriptions-item label="作业状态">
+          <el-tag :type="currentHomeworkDetail.status === '进行中' ? 'success' : 'danger'" size="small">
+            {{ currentHomeworkDetail.status }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="提交人数">{{ currentHomeworkDetail.submittedCount }}</el-descriptions-item>
+        <el-descriptions-item label="未提交人数">{{ currentHomeworkDetail.pendingCount }}</el-descriptions-item>
+        <el-descriptions-item label="提交率">{{ getSubmissionPercentage(currentHomeworkDetail) }}%</el-descriptions-item>
+        <el-descriptions-item label="批改人数">{{ currentHomeworkDetail.gradedCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="批改率">
+          {{ currentHomeworkDetail.submittedCount > 0 ?
+             Math.round((currentHomeworkDetail.gradedCount || 0) / currentHomeworkDetail.submittedCount * 100) : 0 }}%
+        </el-descriptions-item>
+        <el-descriptions-item label="平均分">{{ currentHomeworkDetail.averageScore || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="最高分">{{ currentHomeworkDetail.maxScore || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="最低分">{{ currentHomeworkDetail.minScore || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="作业内容" :span="2">
+          <div style="max-height: 200px; overflow-y: auto;">
+            {{ currentHomeworkDetail.content || '无' }}
+          </div>
+        </el-descriptions-item>
+        <el-descriptions-item label="附件" :span="2">
+          <div v-if="currentHomeworkDetail.attachments && currentHomeworkDetail.attachments.length > 0">
+            <el-tag v-for="(file, index) in currentHomeworkDetail.attachments" :key="index" style="margin-right: 5px;">
+              {{ file.fileName }}
+            </el-tag>
+          </div>
+          <span v-else>无附件</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="备注" :span="2">{{ currentHomeworkDetail.remark || '无' }}</el-descriptions-item>
+      </el-descriptions>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleHomeworkNavigation('first')" :disabled="currentHomeworkIndex <= 0">首条</el-button>
+        <el-button @click="handleHomeworkNavigation('prev')" :disabled="currentHomeworkIndex <= 0">上一条</el-button>
+        <el-button @click="handleHomeworkNavigation('next')" :disabled="currentHomeworkIndex >= homeworkDetails.length - 1">下一条</el-button>
+        <el-button @click="handleHomeworkNavigation('last')" :disabled="currentHomeworkIndex >= homeworkDetails.length - 1">末尾</el-button>
+        <el-button type="primary" @click="handlePrintHomeworkDetail">打印</el-button>
+        <el-button type="success" @click="handleExportHomeworkDetail">导出</el-button>
+        <el-button @click="homeworkDetailDialogVisible = false">关闭</el-button>
+      </div>
+    </el-dialog>
+
     <!-- 天气管理对话框 -->
     <el-dialog
       title="天气管理"
@@ -625,7 +675,9 @@ import {
   exportNotices,
   exportOperationLogs,
   getWeatherConfig,
-  updateWeatherConfig
+  updateWeatherConfig,
+  getHomeworkDetail,
+  exportSingleHomework
 } from '@/api/proj_fz/dashboard'
 
 export default {
@@ -704,8 +756,12 @@ export default {
       noticeDialogVisible: false,
       logDialogVisible: false,
       weatherManagementVisible: false,
+      homeworkDetailDialogVisible: false,
       currentNotice: null,
       currentLog: null,
+      currentHomeworkDetail: null,
+      currentHomeworkIndex: 0,
+      homeworkDetailTitle: '作业详情',
 
       // 状态控制
       weatherDetailVisible: false,
@@ -1783,7 +1839,118 @@ export default {
     },
 
     showHomeworkItemDetail(item) {
-      this.$message.info(`查看作业详情: ${item.title}`)
+      // 获取作业ID，兼容不同的字段名
+      const homeworkId = item.homeworkId || item.id
+      if (!homeworkId) {
+        this.$message.error('无法获取作业ID')
+        return
+      }
+
+      this.currentHomeworkIndex = this.homeworkDetails.findIndex(h => (h.homeworkId || h.id) === homeworkId)
+      getHomeworkDetail(homeworkId).then(response => {
+        this.currentHomeworkDetail = response.data
+        // 确保homeworkId字段存在
+        if (!this.currentHomeworkDetail.homeworkId && this.currentHomeworkDetail.id) {
+          this.currentHomeworkDetail.homeworkId = this.currentHomeworkDetail.id
+        }
+        this.homeworkDetailDialogVisible = true
+        this.homeworkDetailTitle = '作业详情'
+      }).catch(error => {
+        // 如果后端API还没实现，使用列表数据
+        this.currentHomeworkDetail = { ...item }
+        // 确保homeworkId字段存在
+        if (!this.currentHomeworkDetail.homeworkId && this.currentHomeworkDetail.id) {
+          this.currentHomeworkDetail.homeworkId = this.currentHomeworkDetail.id
+        }
+        this.homeworkDetailDialogVisible = true
+        this.homeworkDetailTitle = '作业详情'
+      })
+    },
+
+    // 作业详情导航
+    handleHomeworkNavigation(action) {
+      let newIndex = this.currentHomeworkIndex
+      if (action === 'first') {
+        newIndex = 0
+      } else if (action === 'prev') {
+        newIndex = Math.max(0, this.currentHomeworkIndex - 1)
+      } else if (action === 'next') {
+        newIndex = Math.min(this.homeworkDetails.length - 1, this.currentHomeworkIndex + 1)
+      } else if (action === 'last') {
+        newIndex = this.homeworkDetails.length - 1
+      }
+
+      if (newIndex !== this.currentHomeworkIndex) {
+        this.currentHomeworkIndex = newIndex
+        const row = this.homeworkDetails[newIndex]
+        const homeworkId = row.homeworkId || row.id
+
+        getHomeworkDetail(homeworkId).then(response => {
+          this.currentHomeworkDetail = response.data
+          // 确保homeworkId字段存在
+          if (!this.currentHomeworkDetail.homeworkId && this.currentHomeworkDetail.id) {
+            this.currentHomeworkDetail.homeworkId = this.currentHomeworkDetail.id
+          }
+        }).catch(error => {
+          // 如果后端API还没实现，使用列表数据
+          this.currentHomeworkDetail = { ...row }
+          // 确保homeworkId字段存在
+          if (!this.currentHomeworkDetail.homeworkId && this.currentHomeworkDetail.id) {
+            this.currentHomeworkDetail.homeworkId = this.currentHomeworkDetail.id
+          }
+        })
+      }
+    },
+
+    // 打印作业详情
+    handlePrintHomeworkDetail() {
+      const printContent = document.querySelector('.el-descriptions')
+      const printWindow = window.open('', '_blank')
+      printWindow.document.write('<html><head><title>作业详情打印</title>')
+      printWindow.document.write('<style>')
+      printWindow.document.write('body { font-family: Arial, sans-serif; padding: 20px; }')
+      printWindow.document.write('h2 { text-align: center; }')
+      printWindow.document.write('.print-header { margin-bottom: 20px; }')
+      printWindow.document.write('table { border-collapse: collapse; width: 100%; }')
+      printWindow.document.write('table, th, td { border: 1px solid #ddd; }')
+      printWindow.document.write('th, td { padding: 8px; text-align: left; }')
+      printWindow.document.write('</style>')
+      printWindow.document.write('</head><body>')
+      printWindow.document.write('<h2>作业明细详情报表</h2>')
+      printWindow.document.write('<div class="print-header">')
+      printWindow.document.write('<p>作业名称：' + this.currentHomeworkDetail.title + '</p>')
+      printWindow.document.write('<p>打印时间：' + this.parseTime(new Date()) + '</p>')
+      printWindow.document.write('</div>')
+      printWindow.document.write(printContent.innerHTML)
+      printWindow.document.write('</body></html>')
+      printWindow.document.close()
+      printWindow.print()
+    },
+
+    // 导出单个作业详情
+    handleExportHomeworkDetail() {
+      // 获取作业ID，兼容不同的字段名
+      const homeworkId = this.currentHomeworkDetail.homeworkId || this.currentHomeworkDetail.id
+
+      if (!homeworkId) {
+        this.$message.error('无法获取作业ID，请重新打开详情')
+        return
+      }
+
+      this.$confirm('是否确认导出该作业详情?', "提示", { type: "warning" }).then(() => {
+        this.$modal.loading("正在导出数据，请稍后...")
+        return exportSingleHomework(homeworkId)
+      }).then((response) => {
+        const fileName = `作业详情_${this.currentHomeworkDetail.title}_${new Date().getTime()}.xlsx`
+        this.handleBlobDownload(response, fileName)
+        this.$modal.closeLoading()
+        this.$modal.msgSuccess("导出成功")
+      }).catch((error) => {
+        this.$modal.closeLoading()
+        if (error !== 'cancel') {
+          console.error('导出失败:', error)
+        }
+      })
     },
 
     // ===============================================

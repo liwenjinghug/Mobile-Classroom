@@ -136,3 +136,20 @@ export function exportOperationLogs(params) {
     headers: { 'Content-Type': 'application/json' }
   })
 }
+// 获取单个作业详情
+export function getHomeworkDetail(homeworkId) {
+  return request({
+    url: `/proj_fz/dashboard/homework-detail/${homeworkId}`,
+    method: 'get'
+  })
+}
+
+// 导出单个作业详情
+export function exportSingleHomework(homeworkId) {
+  return request({
+    url: `/proj_fz/dashboard/export-single-homework/${homeworkId}`,
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
