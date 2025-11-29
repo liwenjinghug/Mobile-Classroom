@@ -8,18 +8,27 @@
   <view style="margin-top:12px;">
     <input password placeholder="密码（可为空，开发模式）" bindinput="onPasswordInput" value="{{password}}" />
   </view>
-  <!-- 验证码区域 -->
-  <view style="margin-top:12px;" wx:if="{{captchaEnabled}}">
+  <!-- 验证码区域（始终显示） -->
+  <view style="margin-top:12px;">
     <view style="display:flex;align-items:center;">
       <input placeholder="请输入验证码" bindinput="onCaptchaInput" value="{{captchaCode}}" style="flex:1;" />
-      <image src="{{captchaImg ? (captchaImg.indexOf('data:')===0 ? captchaImg : 'data:image/gif;base64,'+captchaImg) : ''}}" style="width:120px;height:40px;margin-left:8px;" bindtap="refreshCaptcha" mode="aspectFit" />
+      <image src="{{captchaImg ? (captchaImg.indexOf('data:')===0 ? captchaImg : 'data:image/gif;base64,'+captchaImg) : ''}}" style="width:120px;height:40px;margin-left:8px;" bindtap="refreshCaptcha" mode="aspectFit" wx:if="{{captchaImg}}"/>
+      <view style="margin-left:8px" wx:else>
+        <button size="mini" bindtap="openWebCaptcha">网页查看验证码</button>
+      </view>
     </view>
-    <view style="font-size:12px;color:#888;margin-top:6px;">提示：点击图片可刷新验证码</view>
+    <view style="font-size:12px;color:#888;margin-top:6px;">提示：点击图片可刷新验证码（若未显示图片可点击“网页查看验证码”）</view>
+    <view wx:if="{{captchaError}}" style="color:#e60012;margin-top:8px;font-size:13px">{{captchaError}}</view>
   </view>
   <view style="margin-top:20px;">
     <button bindtap="onSubmit" class="button">登录</button>
   </view>
   <view style="margin-top:14px;color:#888;">
     <text>说明：此处为示例登录，默认会调用后端 /login（需你按后端调整）</text>
+  </view>
+  <!-- debug area: show raw last login response for troubleshooting -->
+  <view wx:if="{{lastLoginResponse}}" style="margin-top:12px;padding:10px;border:1px solid #eee;background:#fff;font-size:12px;color:#333;white-space:pre-wrap;">
+    <text>后端返回（调试信息）：</text>
+    <view style="margin-top:6px;color:#666;">{{lastLoginResponse}}</view>
   </view>
 </view>

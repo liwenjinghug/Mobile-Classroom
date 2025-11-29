@@ -7,20 +7,13 @@ Page({
     captchaImg: '',
     captchaUuid: '',
     captchaCode: '',
-    localDebugSkipCaptcha: false
+    // always attempt captcha by default; remove auto-skip in local environments so dev can test captcha flows
+    localDebugSkipCaptcha: false,
+    captchaError: '',
+    lastLoginResponse: ''
   },
   onLoad() {
-    // 尝试加载验证码
-    // 如果后端是 localhost，本地调试时自动跳过验证码（便于调试）
-    try {
-      const base = getApp().globalData && getApp().globalData.baseUrl ? getApp().globalData.baseUrl : '';
-      if (base.indexOf('localhost') !== -1 || base.indexOf('127.0.0.1') !== -1) {
-        this.setData({ localDebugSkipCaptcha: true, captchaEnabled: false });
-        console.log('本地调试：跳过验证码提交');
-        return;
-      }
-    } catch (e) {}
-
+    // 尝试加载验证码（始终尝试加载以便测试验证码相关逻辑）
     this.refreshCaptcha();
   },
   onStudentNoInput(e) {
@@ -30,7 +23,16 @@ Page({
     this.setData({ password: e.detail.value });
   },
   onCaptchaInput(e) {
-    this.setData({ captchaCode: e.detail.value });
+    this.setData({ captchaCode: e.detail.value, captchaError: '' });
+  },
+  openWebCaptcha() {
+    // open a web-view page showing the captchaImage endpoint
+    try {
+      const base = getApp().globalData && getApp().globalData.baseUrl ? getApp().globalData.baseUrl : '';
+      // Use the direct captcha image endpoint which most backends expose
+      const url = (base ? base.replace(/\/$/, '') : '') + '/captchaImage'
+      wx.navigateTo({ url: '/pages/login/webcaptcha?url=' + encodeURIComponent(url) })
+    } catch (e) { console.error('openWebCaptcha failed', e) }
   },
   refreshCaptcha() {
     const that = this;
@@ -41,14 +43,14 @@ Page({
         const img = (res && res.img) ? res.img : (res && res.data && res.data.img ? res.data.img : null);
         const uuid = (res && res.uuid) ? res.uuid : (res && res.data && res.data.uuid ? res.data.uuid : null);
         const enabled = (res && typeof res.captchaEnabled !== 'undefined') ? res.captchaEnabled : (res && res.data && typeof res.data.captchaEnabled !== 'undefined' ? res.data.captchaEnabled : true);
-        that.setData({ captchaImg: img, captchaUuid: uuid, captchaEnabled: enabled });
+        that.setData({ captchaImg: img, captchaUuid: uuid, captchaEnabled: enabled, captchaError: '', lastLoginResponse: '' });
       } catch (e) {
         console.warn('parse captcha response failed', e, res);
       }
     }).catch(err => {
       console.error('getCaptcha error', err);
       // 仍然保证页面可用
-      that.setData({ captchaEnabled: false });
+      that.setData({ captchaEnabled: false, captchaError: '获取验证码失败，请稍后重试' });
     });
   },
   onSubmit() {
@@ -75,14 +77,28 @@ Page({
     wx.showLoading({ title: '登录中...' });
     try {
       // 本地调试时跳过验证码参数，避免后端验证码导致的登录失败
-      const payload = { studentNo: studentNo.trim(), password: password || '' };
-      if (!localDebugSkipCaptcha) {
-        payload.code = captchaCode || '';
-        payload.uuid = captchaUuid || '';
+      const payload = { studentNo: studentNo.trim(), password: password || '', code: (captchaCode || ''), uuid: (captchaUuid || '') };
+      // If captcha is enabled on UI, require the user to input a code
+      if (this.data.captchaEnabled && (!captchaCode || String(captchaCode).trim() === '')) {
+        wx.hideLoading();
+        wx.showToast({ title: '请输入验证码', icon: 'none' });
+        return;
       }
       api.login(payload)
         .then(res => {
           wx.hideLoading();
+          // Defensive: if login resolved but token missing, show the raw response for debugging
+          if (!res || !res.token) {
+            try {
+              const raw = res && res.raw ? res.raw : res
+              const detail = typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2)
+              this.setData({ lastLoginResponse: detail })
+            } catch (e) {}
+            wx.showModal({ title: '登录未成功（无 token）', content: '后端未返回 token，请查看下方的调试信息', showCancel: false })
+            return
+          }
+          // clear last response debug
+          this.setData({ lastLoginResponse: '' });
           wx.setStorageSync('token', res.token);
           wx.showToast({ title: '登录成功', icon: 'success' });
           // 登录后切换到课程 tab
@@ -90,6 +106,8 @@ Page({
         })
         .catch(err => {
           wx.hideLoading();
+          // show raw response in debug area for easier troubleshooting
+          try { const raw = (err && err.raw) ? err.raw : err; this.setData({ lastLoginResponse: typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2) }); } catch(e){}
           // 如果后端返回了结构化的 NO_TOKEN 错误，弹窗显示原始响应并提供复制功能
           if (err && err.code === 'NO_TOKEN') {
             const raw = err.raw || err;
@@ -98,7 +116,8 @@ Page({
             try {
               const rawObj = typeof raw === 'string' ? JSON.parse(raw) : raw;
               if (rawObj && rawObj.msg && rawObj.msg.indexOf('验证码') !== -1) {
-                wx.showToast({ title: '验证码已失效，已刷新', icon: 'none' });
+                // show inline error and refresh the captcha image
+                this.setData({ captchaError: '验证码已失效请刷新' });
                 // 仅在非本地调试下刷新验证码
                 if (!this.data.localDebugSkipCaptcha) this.refreshCaptcha();
               }

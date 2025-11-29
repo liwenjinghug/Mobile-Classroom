@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/login/login",
+    "pages/login/webcaptcha",
     "pages/course/list",
     "pages/course/detail",
     "pages/messages/messages",
