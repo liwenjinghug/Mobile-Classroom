@@ -1,0 +1,122 @@
+<view class="container">
+  <!-- 顶部 Tab 导航 -->
+  <view class="nav-tabs">
+    <view class="nav-item {{currentTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">论坛</view>
+    <view class="nav-item {{currentTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">文章</view>
+  </view>
+
+  <!-- 论坛列表区域 -->
+  <view class="content-box" wx:if="{{currentTab === 0}}">
+    <block wx:for="{{postList}}" wx:key="postId">
+      <view class="post-item">
+        <view class="post-header">
+          <image class="avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+          <view class="user-info">
+            <text class="nickname">{{item.nickName}}</text>
+            <text class="post-time">{{item.createTime}}</text>
+          </view>
+        </view>
+        <view class="post-body">
+          <text class="post-text" user-select>{{item.content}}</text>
+          <view class="post-imgs" wx:if="{{item.imageArray && item.imageArray.length > 0}}">
+            <block wx:for="{{item.imageArray}}" wx:for-item="img" wx:key="*this">
+              <image class="p-img" src="{{img}}" mode="aspectFill" bindtap="previewImage" data-current="{{img}}" data-urls="{{item.imageArray}}"></image>
+            </block>
+          </view>
+        </view>
+        <view class="post-footer">
+          <view class="action-btn" bindtap="handleLikePost" data-id="{{item.postId}}" data-index="{{index}}">
+            <text class="icon {{item.isLiked ? 'liked' : ''}}">❤</text>
+            <text>{{item.likeCount || 0}}</text>
+          </view>
+          <view class="action-btn" bindtap="handleCommentPost" data-id="{{item.postId}}">
+            <text class="icon">💬</text>
+            <text>{{item.commentCount || 0}}</text>
+          </view>
+        </view>
+
+        <!-- 评论互动区 -->
+        <view class="comment-box" wx:if="{{(item.comments && item.comments.length > 0) || (item.likes && item.likes.length > 0)}}">
+          <view class="triangle"></view>
+          <view class="like-list" wx:if="{{item.likes && item.likes.length > 0}}">
+            <text class="like-icon">♡</text>
+            <block wx:for="{{item.likes}}" wx:for-item="likeUser" wx:key="userId" wx:for-index="idx">
+              <text class="c-user">{{likeUser.nickName}}</text>
+              <text wx:if="{{idx < item.likes.length - 1}}">, </text>
+            </block>
+          </view>
+          <view class="line" wx:if="{{(item.likes && item.likes.length > 0) && (item.comments && item.comments.length > 0)}}"></view>
+          <block wx:for="{{item.comments}}" wx:for-item="comment" wx:key="commentId">
+            <view class="comment-row" bindtap="handleReplyComment" data-postid="{{item.postId}}" data-comment="{{comment}}">
+              <text class="c-user">{{comment.nickName}}</text>
+              <block wx:if="{{comment.replyToNickName}}">
+                <text class="c-text"> 回复 </text>
+                <text class="c-user">{{comment.replyToNickName}}</text>
+              </block>
+              <text class="c-text">：{{comment.content}}</text>
+            </view>
+          </block>
+        </view>
+
+      </view>
+    </block>
+    <view class="empty" wx:if="{{postList.length === 0 && !loading}}">暂无帖子</view>
+  </view>
+
+  <!-- 文章列表区域 -->
+  <view class="content-box" wx:if="{{currentTab === 1}}">
+    <block wx:for="{{articleList}}" wx:key="id">
+      <view class="article-item" bindtap="goToArticle" data-id="{{item.id}}">
+        <view class="article-info">
+          <view class="article-title">{{item.title}}</view>
+          <view class="article-desc">{{item.digest || '暂无摘要'}}</view>
+          <view class="article-meta">
+            <text class="tag">{{item.articleType}}</text>
+            <text class="author">{{item.author}}</text>
+            <text class="views">{{item.viewCount}} 阅读</text>
+          </view>
+        </view>
+        <view class="article-cover" wx:if="{{item.cover}}">
+          <image src="{{item.cover}}" mode="aspectFill"></image>
+        </view>
+      </view>
+    </block>
+    <view class="empty" wx:if="{{articleList.length === 0 && !loading}}">暂无文章</view>
+  </view>
+  
+  <view class="loading" wx:if="{{loading}}">加载中...</view>
+
+  <!-- 悬浮通知按钮 -->
+  <view class="float-btn" bindtap="openNotices">
+    <text class="notice-icon">🔔</text>
+  </view>
+
+  <!-- 通知列表弹窗 -->
+  <view class="notice-mask" wx:if="{{showNotice}}" bindtap="closeNotices">
+    <view class="notice-box" catchtap="true">
+      <!-- (修改) 关闭按钮移至右上角 -->
+      <view class="n-close" bindtap="closeNotices">×</view>
+      <view class="n-title">消息通知</view>
+      
+      <scroll-view scroll-y class="n-scroll">
+        <block wx:for="{{noticeList}}" wx:key="noticeId">
+          <view class="n-item">
+            <image class="n-avatar" src="{{item.operatorAvatar}}" mode="aspectFill"></image>
+            <view class="n-info">
+              <view class="n-top">
+                <text class="n-name">{{item.operatorNickName}}</text>
+                <text class="n-time">{{item.createTime}}</text>
+              </view>
+              <view class="n-content">
+                <text wx:if="{{item.noticeType === 1}}">赞了你的帖子</text>
+                <text wx:elif="{{item.noticeType === 2}}">评论了你的帖子: {{item.commentContent}}</text>
+              </view>
+            </view>
+          </view>
+        </block>
+        <view wx:if="{{noticeList.length === 0}}" class="n-empty">暂无消息</view>
+      </scroll-view>
+    </view>
+  </view>
+
+</view>

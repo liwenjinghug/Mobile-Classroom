@@ -147,4 +147,38 @@ quitClass(sessionId) {
     method: 'POST'
   })
 },
+
+// --- 社区：论坛相关 (新增) ---
+getPostList() {
+  return request({ url: '/proj_qhy/forum/posts', method: 'get' });
+},
+likePost(postId) {
+  return request({ url: '/proj_qhy/forum/like/' + postId, method: 'post' });
+},
+getLikesByPostId(postId) {
+  return request({ url: `/proj_qhy/forum/likes/${postId}`, method: 'get' });
+},
+getCommentsByPostId(postId) {
+  return request({ url: `/proj_qhy/forum/comments/${postId}`, method: 'get' });
+},
+addComment(data) {
+  return request({ url: '/proj_qhy/forum/comment/add', method: 'post', data: data });
+},
+getUserNotices() {
+  return request({ url: '/proj_qhy/forum/notices', method: 'get' });
+},
+
+// --- 社区：文章相关 (新增) ---
+listArticle(query) {
+  return request({ url: '/proj_qhy/article/list', method: 'get', data: query });
+},
+getArticle(id) {
+  return request({ url: '/proj_qhy/article/' + id, method: 'get' });
+},
+likeArticle(id) {
+  return request({ url: '/proj_qhy/article/like/' + id, method: 'post' });
+},
+viewArticle(id) {
+  return request({ url: '/proj_qhy/article/view/' + id, method: 'post' });
+}
 };

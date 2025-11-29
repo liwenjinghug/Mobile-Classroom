@@ -1,0 +1,59 @@
+<view class="container">
+  <view class="article-header">
+    <view class="title">{{article.title}}</view>
+    <view class="meta">
+      <text class="author">{{article.author}}</text>
+      <text class="time">{{article.createTime}}</text>
+      <text class="read">阅读 {{article.viewCount}}</text>
+    </view>
+  </view>
+
+  <!-- 文章封面 -->
+  <image wx:if="{{article.cover}}" src="{{article.cover}}" mode="widthFix" class="cover-img"></image>
+
+  <!-- 文章摘要 -->
+  <view class="article-digest" wx:if="{{article.digest}}">
+    <view class="digest-card">
+      <text class="digest-icon">❝</text>
+      <text class="digest-text">{{article.digest}}</text>
+    </view>
+  </view>
+
+  <!-- 富文本内容 -->
+  <view class="article-content">
+    <rich-text nodes="{{article.content}}"></rich-text>
+  </view>
+
+  <!-- 附件列表 -->
+  <view class="attachment-box" wx:if="{{attachments.length > 0}}">
+    <view class="att-title">附件下载</view>
+    <block wx:for="{{attachments}}" wx:key="url">
+      <view class="att-item" bindtap="openAttachment" data-url="{{item.url}}">
+        <text class="att-icon">📎</text>
+        <text class="att-name">{{item.name}}</text>
+        <text class="att-arrow">查看 ></text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 底部固定栏 -->
+  <view class="bottom-bar">
+    <view class="action-item" bindtap="handleLike">
+      <text class="icon {{article.userLikeStatus === 1 ? 'liked' : ''}}">👍</text>
+      <text>{{article.likeCount || 0}}</text>
+    </view>
+  </view>
+
+  <!-- (新增) TXT 文本预览弹窗 -->
+  <view class="txt-preview-mask" wx:if="{{showTxtPreview}}" bindtap="closeTxtPreview">
+    <view class="txt-content-box" catchtap="stopProp">
+      <view class="txt-header">
+        <text>文本预览</text>
+        <view class="close-btn" bindtap="closeTxtPreview">×</view>
+      </view>
+      <scroll-view scroll-y class="txt-scroll">
+        <text user-select>{{txtContent}}</text>
+      </scroll-view>
+    </view>
+  </view>
+</view>
