@@ -1,0 +1,5 @@
+/* course list styles */
+.course-item { background:#fff;border-radius:6px;margin-bottom:8px;padding:12px; }
+button.button { width:100%; background:#2d8cf0; color:#fff; padding:10px; border-radius:6px; }
+.container { padding: 16px; }
+
