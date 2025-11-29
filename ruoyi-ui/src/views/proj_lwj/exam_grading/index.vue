@@ -397,8 +397,8 @@ export default {
     }
   },
   computed: {
-    // 仅显示进行中/已结束/已截止考试
-    gradingSelectableExams(){
+    // 新增：仅按状态/时间过滤（不按课堂过滤），供课堂列表与考试过滤的基准集合
+    allowedExams(){
       const now = Date.now()
       const parse = (v)=>this.parseDateTime(v)
       return (this.exams||[]).filter(ex=>{
@@ -409,19 +409,30 @@ export default {
         const isOngoing = start && end && now>=start && now<end
         const isFinishedByStatus = status===3
         const isFinishedByTime = end && now>=end
-        // 已发布但未开始 (status=1 且 now < start) 过滤掉
         const isDraftOrNotStarted = (status===1 && (!start || now < start))
         if(isDraftOrNotStarted) return false
         return isOngoing || isFinishedByStatus || isFinishedByTime
       }).sort((a,b)=> new Date(b.startTime||0)-new Date(a.startTime||0))
     },
+    // 仅显示进行中/已结束/已截止考试，且当选择了课堂时只显示该课堂的
+    gradingSelectableExams(){
+      const list = this.allowedExams
+      if(!this.currentSessionId) return list
+      return list.filter(ex=> String(ex.sessionId) === String(this.currentSessionId))
+    },
     teacherSessions(){
       const set = new Set()
-      this.gradingSelectableExams.forEach(ex=>{ if(ex.sessionId) set.add(ex.sessionId) })
+      // 使用 allowedExams（不按课堂过滤）来构建可选课堂列表
+      this.allowedExams.forEach(ex=>{ if(ex.sessionId!=null) set.add(String(ex.sessionId)) })
       return Array.from(set).map(sessionId=>{
-        const exam = this.gradingSelectableExams.find(e=>e.sessionId===sessionId)
-        return { sessionId, className: exam? exam.className : `课堂${sessionId}` }
+        const exam = this.allowedExams.find(e=> String(e.sessionId)===String(sessionId))
+        return { sessionId: Number(sessionId), className: exam? (exam.className || `课堂${sessionId}`) : `课堂${sessionId}` }
       })
+    },
+    hasMultipleSessions(){
+      const details = this.questionStats && (this.questionStats.sessionDetails || [])
+      const count = this.questionStats && (this.questionStats.sessionCount || (Array.isArray(details)? details.length : 0))
+      return Number(count || 0) > 1
     },
     // 保留必须的计算属性，其余移除
     sortedQuestions(){
@@ -633,6 +644,20 @@ export default {
       const map = { 0: 'info', 1: '', 2: 'success', 3: 'danger' }
       return map[Number(s)] || 'info'
     },
+    // Provide a readable short status label for select options
+    statusTagForSelect(ex) {
+      if (!ex) return ''
+      const s = Number(ex.status)
+      if (s === 0) return '草稿'
+      if (s === 1) {
+        const start = this.parseDateTime(ex.startTime)
+        const now = Date.now()
+        return (start && now < start) ? '未开始' : '已发布'
+      }
+      if (s === 2) return '进行中'
+      if (s === 3) return '已结束'
+      return '未知'
+    },
     getRateColor(rate) {
       if (rate >= 70) return '#67c23a'
       if (rate >= 30) return '#e6a23c'
@@ -793,6 +818,33 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
       } catch(e){ /* ignore */ }
     },
     formatTs(ts){ const d=new Date(ts); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}` },
+    // 解析日期/时间为毫秒时间戳（兼容 ISO / yyyy-MM-dd HH:mm:ss / 数字秒/毫秒）
+    parseDateTime(value){
+      if (value === null || value === undefined || value === '') return null
+      // Date object
+      if (value instanceof Date) return value.getTime()
+      // number (assume ms if large, seconds if 10-digit)
+      if (typeof value === 'number') return value
+      if (typeof value === 'string') {
+        const s = value.trim()
+        // pure digits -> treat as timestamp
+        if (/^\d+$/.test(s)) {
+          const n = Number(s)
+          // 10-digit seconds -> convert to ms
+          if (s.length === 10) return n * 1000
+          return n
+        }
+        // normalize common formats: replace 'T' with space and drop fractional seconds
+        const norm = s.replace('T', ' ').replace(/\.[\d]+$/, '')
+        // try Date parsing
+        const dt = new Date(norm)
+        if (!isNaN(dt.getTime())) return dt.getTime()
+        // try replacing '-' with '/' for older parsers
+        const dt2 = new Date(norm.replace(/-/g, '/'))
+        if (!isNaN(dt2.getTime())) return dt2.getTime()
+      }
+      return null
+    },
     async refreshSubmissionStats(force=false){
       if(!this.currentExamId) return
       if(this.loadingSubmission) return
@@ -834,38 +886,56 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
       this.submissionStats = { participants, submitted, unsubmitted, avgScore, maxScore, passRate, scoreBuckets:buckets, lastFetch:Date.now() }
     },
     updateSubmissionChart(){
-      if(!this.$refs.submissionChart || !this.submissionStats) return
-      if(!this._submissionChart){ this._submissionChart = echarts.init(this.$refs.submissionChart) }
-      const s=this.submissionStats
-      this._submissionChart.setOption({ tooltip:{trigger:'item'}, legend:{bottom:0}, series:[{ type:'pie', radius:['45%','70%'], avoidLabelOverlap:false, label:{show:true, formatter:'{b}: {c}'}, data:[ {name:'已提交', value:s.submitted}, {name:'未提交', value:s.unsubmitted} ], color:['#67C23A','#E6A23C'] }] })
+      // Ensure DOM ref is present and data exists
+      if(!this.submissionStats) return
+      this.$nextTick(()=>{
+        try{
+          const dom = this.$refs.submissionChart
+          if(!dom) return
+          if(!this._submissionChart){
+            try{ this._submissionChart = echarts.init(dom) } catch(e){ console.warn('echarts.init failed for submissionChart', e); return }
+            // resize on window resize
+            this._submissionChartResizeHandler = () => { try{ this._submissionChart && this._submissionChart.resize() }catch(e){} }
+            window.addEventListener('resize', this._submissionChartResizeHandler)
+          }
+          const s = this.submissionStats || { submitted:0, unsubmitted:0 }
+          const option = { tooltip:{trigger:'item'}, legend:{bottom:0}, series:[{ type:'pie', radius:['45%','70%'], avoidLabelOverlap:false, label:{show:true, formatter:'{b}: {c}'}, data:[ {name:'已提交', value:s.submitted}, {name:'未提交', value:s.unsubmitted} ], color:['#67C23A','#E6A23C'] }] }
+          try{ this._submissionChart.setOption(option, true) } catch(e){ console.warn('setOption failed for submissionChart', e) }
+        }catch(e){ console.warn('updateSubmissionChart unexpected error', e) }
+      })
     },
     updateScoreDistChart(){
-      if(!this.$refs.scoreDistChart || !this.submissionStats) return
-      if(!this._scoreDistChart){ this._scoreDistChart = echarts.init(this.$refs.scoreDistChart) }
-      const b=this.submissionStats.scoreBuckets
-      this._scoreDistChart.setOption({ tooltip:{}, grid:{left:40,right:10,top:10,bottom:40}, xAxis:{ type:'category', data:b.map(x=>x.range), axisLabel:{rotate:45} }, yAxis:{ type:'value' }, series:[{ type:'bar', data:b.map(x=>x.count), itemStyle:{color:'#409EFF'} }] })
+      if(!this.submissionStats) return
+      this.$nextTick(()=>{
+        try{
+          const dom = this.$refs.scoreDistChart
+          if(!dom) return
+          if(!this._scoreDistChart){
+            try{ this._scoreDistChart = echarts.init(dom) } catch(e){ console.warn('echarts.init failed for scoreDistChart', e); return }
+            this._scoreDistChartResizeHandler = () => { try{ this._scoreDistChart && this._scoreDistChart.resize() }catch(e){} }
+            window.addEventListener('resize', this._scoreDistChartResizeHandler)
+          }
+          const b = this.submissionStats.scoreBuckets || []
+          const option = { tooltip:{}, grid:{left:40,right:10,top:10,bottom:40}, xAxis:{ type:'category', data:b.map(x=>x.range), axisLabel:{rotate:45} }, yAxis:{ type:'value' }, series:[{ type:'bar', data:b.map(x=>x.count), itemStyle:{color:'#409EFF'} }] }
+          try{ this._scoreDistChart.setOption(option, true) } catch(e){ console.warn('setOption failed for scoreDistChart', e) }
+        }catch(e){ console.warn('updateScoreDistChart unexpected error', e) }
+      })
     },
-    // 时间解析（安全处理字符串）
-    parseDateTime(value){
-      if(!value) return null
-      if(value instanceof Date) return value.getTime()
-      if(typeof value==='number') return value
-      if(typeof value!=='string') return null
-      const str = value.trim().replace('T',' ').replace(/\..*/,'')
-      const m = str.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/)
-      if(!m) return null
-      const [,Y,M,D,h='00',mi='00',s='00'] = m
-      const dt = new Date(Number(Y),Number(M)-1,Number(D),Number(h),Number(mi),Number(s))
-      const t = dt.getTime(); return isNaN(t)? null : t
+    // Cleanup charts on component destroy
+    destroyCharts(){
+      try{
+        if(this._submissionChart){ try{ this._submissionChart.dispose() }catch(e){} this._submissionChart = null }
+        if(this._scoreDistChart){ try{ this._scoreDistChart.dispose() }catch(e){} this._scoreDistChart = null }
+        if(this._submissionChartResizeHandler) { window.removeEventListener('resize', this._submissionChartResizeHandler); this._submissionChartResizeHandler = null }
+        if(this._scoreDistChartResizeHandler) { window.removeEventListener('resize', this._scoreDistChartResizeHandler); this._scoreDistChartResizeHandler = null }
+      }catch(e){ console.warn('destroyCharts error', e) }
     },
-    statusTagForSelect(ex){
-      const now=Date.now(); const start=this.parseDateTime(ex.startTime); const end=this.parseDateTime(ex.endTime); const st=Number(ex.status)
-      if(st===3 || (end && now>=end)) return '已结束'
-      if(start && end && now>=start && now<end) return '进行中'
-      if(end && now>=end && st!==3) return '已截止'
-      return '进行中'
-    },
-    // ...existing code (keep reloadData single definition, remove duplicate later if any)...
+  },
+  beforeDestroy(){
+    //  清理自动刷新定时器
+    Object.values(this.submissionStats).forEach(s => { if(s && s.timer){ clearInterval(s.timer) } })
+    // 清理 echarts 实例
+    try{ this.destroyCharts() }catch(e){}
   }
 }
 </script>

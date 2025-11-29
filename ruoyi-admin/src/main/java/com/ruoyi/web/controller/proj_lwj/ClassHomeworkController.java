@@ -298,6 +298,8 @@ public class ClassHomeworkController extends BaseController {
                 if (sh.getHomeworkTitle() == null || sh.getHomeworkTitle().trim().isEmpty()) sh.setHomeworkTitle(hw.getTitle());
             }
         }
+        // 需求：作业删除后不出现在学生提交记录
+        list = filterOutDeletedHomework(list);
         ensureStudentNames(list); // ensure studentName present
         resolveSubmissionFilePaths(list);
         return AjaxResult.success(list);
@@ -316,6 +318,7 @@ public class ClassHomeworkController extends BaseController {
         // If we resolved a studentId, return by studentId (preferred)
         if (sid != null) {
             List<ClassStudentHomework> list = studentHomeworkService.selectByStudentId(sid);
+            list = filterOutDeletedHomework(list);
             ensureStudentNames(list);
             resolveSubmissionFilePaths(list);
             return AjaxResult.success(list);
@@ -327,6 +330,7 @@ public class ClassHomeworkController extends BaseController {
             try {
                 List<ClassStudentHomework> list = studentHomeworkService.selectByStudentNo(studentNo.trim());
                 if (list != null && !list.isEmpty()) {
+                    list = filterOutDeletedHomework(list);
                     ensureStudentNames(list);
                     resolveSubmissionFilePaths(list);
                     return AjaxResult.success(list);
@@ -341,6 +345,7 @@ public class ClassHomeworkController extends BaseController {
             try {
                 List<ClassStudentHomework> list = studentHomeworkService.selectByStudentIdentifier(studentName.trim());
                 if (list != null && !list.isEmpty()) {
+                    list = filterOutDeletedHomework(list);
                     ensureStudentNames(list);
                     resolveSubmissionFilePaths(list);
                     return AjaxResult.success(list);
@@ -505,6 +510,30 @@ public class ClassHomeworkController extends BaseController {
                 logger.debug("ensureStudentNames: failed resolving name for studentNo {}", studentNo, ex);
             }
         }
+    }
+
+    /**
+     * 过滤掉引用已删除作业的提交记录
+     */
+    private List<ClassStudentHomework> filterOutDeletedHomework(List<ClassStudentHomework> list){
+        if(list == null || list.isEmpty()) return list;
+        List<ClassStudentHomework> kept = new java.util.ArrayList<>();
+        for(ClassStudentHomework sh : list){
+            try{
+                Long hwId = sh.getHomeworkId();
+                if(hwId == null){
+                    // drop
+                    continue;
+                }
+                ClassHomework hw = homeworkService.selectHomeworkById(hwId);
+                if(hw == null){
+                    // drop
+                    continue;
+                }
+                kept.add(sh);
+            }catch(Exception ignore){}
+        }
+        return kept;
     }
 
     // NOTE: submission responses now include courseId/courseName mapped in mapper; no extra join needed here.

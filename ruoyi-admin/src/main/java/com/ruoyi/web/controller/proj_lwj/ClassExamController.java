@@ -975,6 +975,25 @@ public class ClassExamController extends BaseController {
                 }
             }
         }
+        // 额外回退：若仍然没有学生（例如课堂与学生关联未建立），尝试按课程查找去重学生
+        if (studentBaseMap.isEmpty() && exam.getCourseId() != null) {
+            try {
+                List<ClassStudent> courseStudents = classStudentMapper.selectDistinctStudentsByCourseId(exam.getCourseId());
+                if (courseStudents != null) {
+                    for (ClassStudent stu : courseStudents) {
+                        if (stu.getStudentId() == null) continue;
+                        if (!studentBaseMap.containsKey(stu.getStudentId())) {
+                            Map<String,Object> info = new LinkedHashMap<>();
+                            info.put("studentId", stu.getStudentId());
+                            info.put("studentNo", stu.getStudentNo());
+                            info.put("studentName", stu.getStudentName());
+                            info.put("sessionId", exam.getSessionId());
+                            studentBaseMap.put(stu.getStudentId(), info);
+                        }
+                    }
+                }
+            } catch (Exception ignore) {}
+        }
         int baseStudentCount = studentBaseMap.size();
         // 参与者（作答过任一题或有参与记录的学生）映射：用于补齐姓名
         Map<Long, ClassExamParticipant> participantMap = new HashMap<>();
@@ -1060,7 +1079,13 @@ public class ClassExamController extends BaseController {
         payload.put("totalQuestions", questions == null ? 0 : questions.size());
         payload.put("questions", result);
         payload.put("participantsCount", baseStudentCount);
-
+        // 调试信息（可用于前端或日志）：返回参与统计/课堂ID列表大小，帮助定位无数据原因
+        Map<String,Object> _debug = new LinkedHashMap<>();
+        _debug.put("sessionIdsCount", sessionIds.size());
+        _debug.put("studentBaseCount", studentBaseMap.size());
+        _debug.put("answerCount", answers == null ? 0 : answers.size());
+        _debug.put("questionCount", questions == null ? 0 : questions.size());
+        payload.put("_debug", _debug);
         // 新增：课堂明细统计
         List<Map<String, Object>> sessionDetails = new ArrayList<>();
         for (Long sid : sessionIds) {

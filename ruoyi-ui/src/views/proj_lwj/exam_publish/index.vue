@@ -218,8 +218,8 @@
                 </el-tooltip>
               </template>
               <el-button v-else size="mini" icon="el-icon-upload" type="success" @click="publish(scope.row)" circle />
-              <el-tooltip :content="Number(scope.row.status)===2?'结束考试':'已结束或未开始'" placement="top" :enterable="false">
-                <el-button size="mini" icon="el-icon-switch-button" type="info" @click="end(scope.row)" :disabled="Number(scope.row.status) !== 2" circle />
+              <el-tooltip :content="isRunning(scope.row)?'结束考试':(Number(scope.row.status)===3?'已结束':'未开始')" placement="top" :enterable="false">
+                <el-button size="mini" icon="el-icon-switch-button" type="info" @click="end(scope.row)" :disabled="!isRunning(scope.row)" circle />
               </el-tooltip>
               <template v-if="removeDisabled(scope.row)">
                 <el-tooltip :content="removeDisabled(scope.row)" placement="top" :enterable="false">
@@ -1000,7 +1000,9 @@ export default {
     },
     end(row){
       if(!row || !row.id) return
-      if(Number(row.status)!==2){
+      // Allow ending when the exam is actually running (based on time window + status not ended),
+      // because UI may display "进行中" derived from time even if backend status isn't updated to 2.
+      if(!this.isRunning(row)){
         return this.$message.warning('仅进行中的考试可以结束')
       }
       this.$confirm('确定结束该考试？结束后学生不可继续作答','提示',{type:'warning'}).then(()=>{
@@ -1108,7 +1110,6 @@ export default {
         stat.error = silent ? null : ('统计加载失败: ' + (e.message || '网络错误'))
       } finally { stat.loading = false }
     },
-    // ...existing code...
   },
   beforeDestroy(){
     // 清理自动刷新定时器
