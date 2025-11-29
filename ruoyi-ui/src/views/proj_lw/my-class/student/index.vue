@@ -39,9 +39,6 @@
           </el-table-column>
           <el-table-column label="操作" align="center" width="120" class-name="small-padding fixed-width">
             <template slot-scope="{row}">
-              <el-button type="primary" size="mini" @click="handleEnterClass(row)">
-                进入
-              </el-button>
               <el-button type="danger" size="mini" @click="handleQuit(row)">
                 退出
               </el-button>
