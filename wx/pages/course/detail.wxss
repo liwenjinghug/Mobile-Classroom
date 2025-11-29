@@ -1,0 +1,5 @@
+/* course detail styles */
+.container { padding: 16px; }
+.icon-grid { display:flex; flex-wrap:wrap; margin-top:12px; }
+.icon-item { width:25%; text-align:center; padding:12px; }
+

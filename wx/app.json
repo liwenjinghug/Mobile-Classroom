@@ -1,0 +1,41 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/course/list",
+    "pages/course/detail",
+    "pages/messages/messages",
+    "pages/forum/forum",
+    "pages/mine/mine"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "移动课堂",
+    "backgroundColor": "#f8f8f8",
+    "backgroundTextStyle": "light"
+  },
+  "tabBar": {
+    "color": "#8a8a8a",
+    "selectedColor": "#2d8cf0",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/course/list",
+        "text": "课程"
+      },
+      {
+        "pagePath": "pages/messages/messages",
+        "text": "消息"
+      },
+      {
+        "pagePath": "pages/forum/forum",
+        "text": "论坛"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的"
+      }
+    ]
+  }
+}

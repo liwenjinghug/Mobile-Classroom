@@ -1,0 +1,7 @@
+/* 全局样式 */
+page { background: #f8f8f8; }
+.container { padding: 16px; }
+.icon-grid { display: flex; flex-wrap: wrap; }
+.icon-item { width: 25%; text-align: center; padding: 12px; }
+.button { background: #2d8cf0; color: #fff; padding: 10px; border-radius: 6px; text-align: center; }
+

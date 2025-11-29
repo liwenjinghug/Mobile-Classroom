@@ -1,0 +1,5 @@
+/* login page styles */
+.container { padding: 24px; }
+input { display:block; width:100%; padding:10px; border:1px solid #ddd; border-radius:6px; }
+button.button { width:100%; background:#2d8cf0; color:#fff; padding:10px; border-radius:6px; }
+
