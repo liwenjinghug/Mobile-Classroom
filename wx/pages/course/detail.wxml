@@ -1,6 +1,6 @@
 <view class="container">
   <view style="padding:12px;background:#fff;border-radius:6px;">
-    <text style="font-size:18px;font-weight:600;">{{course.title || '课堂详情'}}</text>
+    <text style="font-size:18px;font-weight:600;">{{course.className || course.title || '课堂详情'}}</text>
     <text style="display:block;color:#888;margin-top:6px;">课堂ID: {{course.id}}</text>
   </view>
   <view style="margin-top:12px;" class="icon-grid">

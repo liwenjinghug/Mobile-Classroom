@@ -2,12 +2,12 @@ const api = require('../../utils/api');
 Page({
   data: { course: {} },
   onLoad(options) {
-    const courseId = options.courseId;
-    if (courseId) {
-      api.getCourseDetail(courseId).then(res => {
-        this.setData({ course: res || { id: courseId, title: '课堂 ' + courseId } });
+    const sessionId = options.sessionId;  
+    if (sessionId) {
+      api.getCourseDetail(sessionId).then(res => {
+        this.setData({ course: res || { id: sessionId, title: '课堂 ' + sessionId } });
       }).catch(() => {
-        this.setData({ course: { id: courseId, title: '课堂 ' + courseId } });
+        this.setData({ course: { id: sessionId, title: '课堂 ' + sessionId } });
       });
     }
   },
@@ -16,4 +16,3 @@ Page({
   goToSign() { wx.showToast({ title: '进入签到（后续实现）', icon: 'none' }); },
   goToForum() { wx.navigateTo({ url: '/pages/forum/forum' }); }
 });
-

@@ -175,13 +175,23 @@ Page({
     }
   },
 
-  // 进入课堂详情
-  onEnterClass(e) {
-    const sessionId = e.currentTarget.dataset.sessionid
-    wx.navigateTo({
-      url: `/pages/course/detail?sessionId=${sessionId}`
+// 进入课堂详情
+onEnterClass(e) {
+  const sessionId = e.currentTarget.dataset.sessionid
+  console.log('点击进入课堂，sessionId:', sessionId) // 添加日志
+  
+  if (!sessionId) {
+    wx.showToast({
+      title: '课堂ID缺失',
+      icon: 'none'
     })
-  },
+    return
+  }
+  
+  wx.navigateTo({
+    url: `/pages/course/detail?sessionId=${sessionId}`
+  })
+},
 
   // 格式化时间
   formatSessionTime(session) {
