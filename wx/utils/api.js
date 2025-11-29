@@ -92,5 +92,59 @@ module.exports = {
   },
   getCourseDetail(courseId) {
     return request({ url: '/api/courses/' + courseId, method: 'GET' });
-  }
+  },
+
+  //course 
+// 在 module.exports 中添加以下接口：
+
+// 获取已加入课堂
+getJoinedClasses(query = {}) {
+  return request({
+    url: '/proj_lw/student/class/joined',
+    method: 'GET',
+    data: query
+  })
+},
+
+// 获取可申请课堂
+getAvailableClasses(query = {}) {
+  return request({
+    url: '/proj_lw/student/class/available',
+    method: 'GET',
+    data: query
+  })
+},
+
+// 获取我的申请
+getMyApplications(query = {}) {
+  return request({
+    url: '/proj_lw/student/class/applications',
+    method: 'GET',
+    data: query
+  })
+},
+
+// 申请加入课堂
+applyJoinClass(sessionId) {
+  return request({
+    url: `/proj_lw/student/class/apply/${sessionId}`,
+    method: 'POST'
+  })
+},
+
+// 取消申请
+cancelApplication(applicationId) {
+  return request({
+    url: `/proj_lw/student/class/application/cancel/${applicationId}`,
+    method: 'POST'
+  })
+},
+
+// 退出课堂  
+quitClass(sessionId) {
+  return request({
+    url: `/proj_lw/student/class/quit/${sessionId}`,
+    method: 'POST'
+  })
+},
 };
