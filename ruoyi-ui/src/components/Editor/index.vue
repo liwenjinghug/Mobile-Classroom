@@ -13,6 +13,20 @@
       v-if="this.type == 'url'"
     >
     </el-upload>
+
+    <el-upload
+      class="upload-file-insert"
+      :action="uploadCommonUrl"
+      :before-upload="beforeFileUpload"
+      :on-success="handleFileSuccess"
+      :on-error="handleUploadError"
+      :headers="headers"
+      :show-file-list="false"
+      style="display: none"
+    >
+      <button ref="fileInsertButton"></button>
+    </el-upload>
+
     <div class="editor" ref="editor" :style="styles"></div>
   </div>
 </template>
@@ -61,7 +75,8 @@ export default {
   },
   data() {
     return {
-      uploadUrl: process.env.VUE_APP_BASE_API + "/common/upload", // 上传的图片服务器地址
+      uploadUrl: process.env.VUE_APP_BASE_API + "/common/upload", // 图片上传地址
+      uploadCommonUrl: process.env.VUE_APP_BASE_API + "/common/upload", // (新增) 通用文件上传地址
       headers: {
         Authorization: "Bearer " + getToken()
       },
@@ -73,18 +88,34 @@ export default {
         debug: "warn",
         modules: {
           // 工具栏配置
-          toolbar: [
-            ["bold", "italic", "underline", "strike"],       // 加粗 斜体 下划线 删除线
-            ["blockquote", "code-block"],                    // 引用  代码块
-            [{ list: "ordered" }, { list: "bullet" }],       // 有序、无序列表
-            [{ indent: "-1" }, { indent: "+1" }],            // 缩进
-            [{ size: ["small", false, "large", "huge"] }],   // 字体大小
-            [{ header: [1, 2, 3, 4, 5, 6, false] }],         // 标题
-            [{ color: [] }, { background: [] }],             // 字体颜色、字体背景颜色
-            [{ align: [] }],                                 // 对齐方式
-            ["clean"],                                       // 清除文本格式
-            ["link", "image", "video"]                       // 链接、图片、视频
-          ],
+          toolbar: {
+            container: [
+              ["bold", "italic", "underline", "strike"],       // 加粗 斜体 下划线 删除线
+              ["blockquote", "code-block"],                    // 引用  代码块
+              [{ list: "ordered" }, { list: "bullet" }],       // 有序、无序列表
+              [{ indent: "-1" }, { indent: "+1" }],            // 缩进
+              [{ size: ["small", false, "large", "huge"] }],   // 字体大小
+              [{ header: [1, 2, 3, 4, 5, 6, false] }],         // 标题
+              [{ color: [] }, { background: [] }],             // 字体颜色、字体背景颜色
+              [{ align: [] }],                                 // 对齐方式
+              ["clean"],                                       // 清除文本格式
+              ["link", "image", "video"]                       // 链接、图片、视频
+            ],
+            // (新增) 在这里定义按钮的处理逻辑
+            handlers: {
+              // 劫持 'link' 按钮 -> 触发文件上传
+              link: (value) => {
+                if (value) {
+                  // 触发上面新增的隐藏上传按钮
+                  this.$refs.fileInsertButton.click();
+                } else {
+                  this.Quill.format("link", false);
+                }
+              },
+              // 这里的 image 处理逻辑也可以移到这里，或者保持你在 init() 里的写法
+              // 为了不破坏你原有的逻辑，image 我暂时不动，只加 link
+            }
+          }
         },
         placeholder: "请输入内容",
         readOnly: this.readOnly,
@@ -126,7 +157,8 @@ export default {
     init() {
       const editor = this.$refs.editor
       this.Quill = new Quill(editor, this.options)
-      // 如果设置了上传地址则自定义图片上传事件
+
+      // 原有的图片上传逻辑 (保持不变)
       if (this.type == 'url') {
         let toolbar = this.Quill.getModule("toolbar")
         toolbar.addHandler("image", (value) => {
@@ -138,7 +170,9 @@ export default {
         })
         this.Quill.root.addEventListener('paste', this.handlePasteCapture, true)
       }
+
       this.Quill.clipboard.dangerouslyPasteHTML(this.currentValue)
+
       this.Quill.on("text-change", (delta, oldDelta, source) => {
         const html = this.$refs.editor.children[0].innerHTML
         const text = this.Quill.getText()
@@ -157,16 +191,48 @@ export default {
         this.$emit("on-editor-change", eventName, ...args)
       })
     },
-    // 上传前校检格式和大小
+
+    // ================= (新增) 附件上传相关方法 =================
+    // 1. 上传前校验
+    beforeFileUpload(file) {
+      // 可以在这里限制文件类型，例如不让传 exe 等
+      return true;
+    },
+
+    // 2. 附件上传成功 -> 插入链接到光标处
+    handleFileSuccess(res, file) {
+      // res 是后端返回的数据，根据若依标准，通常包含 url 和 fileName
+      if (res.code === 200) {
+        // 获取当前光标位置
+        let range = this.Quill.getSelection(true);
+        let length = range ? range.index : this.Quill.getLength();
+
+        // 获取文件名和下载链接
+        let fileName = res.originalFilename || file.name;
+        // 拼接完整的下载地址
+        let fileUrl = process.env.VUE_APP_BASE_API + res.fileName;
+
+        // 插入文本
+        this.Quill.insertText(length, fileName, "link", fileUrl);
+
+        // 移动光标到插入文本之后，避免后续输入也被加上链接
+        this.Quill.setSelection(length + fileName.length);
+
+        this.$message.success("附件插入成功");
+      } else {
+        this.$message.error(res.msg);
+      }
+    },
+    // =========================================================
+
+    // ... (原有的图片上传相关方法，保持不变)
     handleBeforeUpload(file) {
       const type = ["image/jpeg", "image/jpg", "image/png", "image/svg"]
       const isJPG = type.includes(file.type)
-      // 检验文件格式
       if (!isJPG) {
         this.$message.error(`图片格式错误!`)
         return false
       }
-      // 校检文件大小
       if (this.fileSize) {
         const isLt = file.size / 1024 / 1024 < this.fileSize
         if (!isLt) {
@@ -177,24 +243,18 @@ export default {
       return true
     },
     handleUploadSuccess(res, file) {
-      // 如果上传成功
       if (res.code == 200) {
-        // 获取富文本组件实例
         let quill = this.Quill
-        // 获取光标所在位置
         let length = quill.getSelection().index
-        // 插入图片  res.url为服务器返回的图片地址
         quill.insertEmbed(length, "image", process.env.VUE_APP_BASE_API + res.fileName)
-        // 调整光标到最后
         quill.setSelection(length + 1)
       } else {
         this.$message.error("图片插入失败")
       }
     },
     handleUploadError() {
-      this.$message.error("图片插入失败")
+      this.$message.error("插入失败")
     },
-    // 复制粘贴图片处理
     handlePasteCapture(e) {
       const clipboard = e.clipboardData || window.clipboardData
       if (clipboard && clipboard.items) {
@@ -220,6 +280,7 @@ export default {
 </script>
 
 <style>
+/* ... (样式保持不变) */
 .editor, .ql-toolbar {
   white-space: pre-wrap !important;
   line-height: normal !important;

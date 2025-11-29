@@ -76,6 +76,15 @@
         </el-col>
         <el-col :span="1.5">
           <el-button
+            type="primary"
+            plain
+            icon="el-icon-document"
+            :disabled="selectedIds.length === 0"
+            @click="handleExportWord"
+          >导出Word</el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
             type="info"
             plain
             icon="el-icon-close"
@@ -242,7 +251,8 @@ import {
   exportArticle,
   likeArticle,
   hateArticle,
-  exportPdf
+  exportPdf,
+  exportWord
 } from "@/api/proj_qhy/article";
 
 export default {
@@ -516,7 +526,35 @@ export default {
         this.loading = false;
         this.$modal.msgError("下载失败");
       });
-    }
+    },
+    /** 导出Word按钮操作 */
+    handleExportWord() {
+      if (this.selectedIds.length === 0) {
+        this.$modal.msgWarning("请至少选择一篇文章");
+        return;
+      }
+      const ids = this.selectedIds;
+      this.$modal.confirm('是否确认导出选中的 ' + ids.length + ' 篇文章为 Word？').then(() => {
+        this.$modal.msgSuccess("正在打包下载，请稍候...");
+        this.loading = true;
+        return exportWord(ids);
+      }).then((res) => {
+        const blob = new Blob([res], { type: 'application/zip' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = '文章Word导出_' + new Date().getTime() + '.zip';
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+
+        this.loading = false;
+        this.isSelectionMode = false;
+        this.selectedIds = [];
+      }).catch((err) => {
+        console.error(err);
+        this.loading = false;
+        this.$modal.msgError("下载失败");
+      });
+    },
   }
 };
 </script>

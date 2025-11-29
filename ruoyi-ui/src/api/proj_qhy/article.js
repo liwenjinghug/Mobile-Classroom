@@ -97,3 +97,12 @@ export function exportPdf(ids) {
     responseType: 'blob'
   })
 }
+// (新增) 导出 Word
+export function exportWord(ids) {
+  return request({
+    url: '/proj_qhy/article/export-word',
+    method: 'post',
+    data: ids,
+    responseType: 'blob' // 必须是 blob
+  })
+}

@@ -57,6 +57,7 @@ public interface IBbsArticleService {
      */
     public List<BbsArticle> selectBbsArticleByIds(Long[] ids);
 
+    void exportArticlesToWord(Long[] ids, HttpServletResponse response) throws Exception;
     /**
      * (新增) 导出文章为 PDF
      */
