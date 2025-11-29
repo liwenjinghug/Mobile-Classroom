@@ -151,4 +151,31 @@ public class DashboardController extends BaseController {
         Map<String, Object> studentActivity = dashboardService.getStudentActivity();
         return AjaxResult.success(studentActivity);
     }
+
+    /**
+     * 获取单个作业详情
+     */
+    @GetMapping("/homework-detail/{homeworkId}")
+    public AjaxResult getHomeworkDetail(@PathVariable Long homeworkId) {
+        try {
+            Map<String, Object> homeworkDetail = dashboardService.getHomeworkDetailById(homeworkId);
+            return AjaxResult.success(homeworkDetail);
+        } catch (Exception e) {
+            logger.error("查询作业详情失败", e);
+            return AjaxResult.error("查询失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 导出单个作业详情
+     */
+    @GetMapping("/export-single-homework/{homeworkId}")
+    public void exportSingleHomework(@PathVariable Long homeworkId, javax.servlet.http.HttpServletResponse response) {
+        try {
+            dashboardService.exportSingleHomework(homeworkId, response);
+        } catch (Exception e) {
+            logger.error("导出作业详情失败", e);
+            throw new RuntimeException("导出失败: " + e.getMessage());
+        }
+    }
 }

@@ -94,4 +94,14 @@ public interface IDashboardService {
      * 更新天气配置
      */
     void updateWeatherConfig(String apiKey, String city, String adcode);
+
+    /**
+     * 获取单个作业详情
+     */
+    Map<String, Object> getHomeworkDetailById(Long homeworkId);
+
+    /**
+     * 导出单个作业详情
+     */
+    void exportSingleHomework(Long homeworkId, HttpServletResponse response);
 }

@@ -441,6 +441,118 @@ public class DashboardServiceImpl implements IDashboardService {
         }
     }
 
+    @Override
+    public Map<String, Object> getHomeworkDetailById(Long homeworkId) {
+        log.info("查询作业详情，作业ID: {}", homeworkId);
+        Map<String, Object> detail = dashboardMapper.getHomeworkDetailById(homeworkId);
+        if (detail == null) {
+            throw new RuntimeException("作业不存在，ID: " + homeworkId);
+        }
+        // 类型安全转换
+        int submittedCount = getIntValue(detail.get("submittedCount"));
+        int pendingCount = getIntValue(detail.get("pendingCount"));
+        int gradedCount = getIntValue(detail.get("gradedCount"));
+        int totalStudents = submittedCount + pendingCount;
+        if (totalStudents > 0) {
+            detail.put("submissionRate", Math.round((double) submittedCount / totalStudents * 100));
+        } else {
+            detail.put("submissionRate", 0);
+        }
+        if (submittedCount > 0) {
+            detail.put("gradingRate", Math.round((double) gradedCount / submittedCount * 100));
+        } else {
+            detail.put("gradingRate", 0);
+        }
+        return detail;
+    }
+
+    /**
+     * 类型安全获取int值
+     */
+    private int getIntValue(Object value) {
+        if (value == null) return 0;
+        if (value instanceof Number) return ((Number) value).intValue();
+        try {
+            return Integer.parseInt(value.toString());
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    @Override
+    public void exportSingleHomework(Long homeworkId, HttpServletResponse response) {
+        log.info("导出单个作业详情，作业ID: {}", homeworkId);
+        Map<String, Object> detail = getHomeworkDetailById(homeworkId);
+
+        String fileName = "作业详情_" + detail.getOrDefault("title", "未命名");
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("作业详情");
+
+            // 创建标题样式
+            CellStyle titleStyle = workbook.createCellStyle();
+            Font titleFont = workbook.createFont();
+            titleFont.setBold(true);
+            titleFont.setFontHeightInPoints((short) 14);
+            titleStyle.setFont(titleFont);
+
+            // 创建标签样式
+            CellStyle labelStyle = workbook.createCellStyle();
+            labelStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            labelStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            Font labelFont = workbook.createFont();
+            labelFont.setBold(true);
+            labelStyle.setFont(labelFont);
+
+            int rowNum = 0;
+
+            // 标题行
+            Row titleRow = sheet.createRow(rowNum++);
+            Cell titleCell = titleRow.createCell(0);
+            titleCell.setCellValue("作业详情报表");
+            titleCell.setCellStyle(titleStyle);
+            sheet.addMergedRegion(new org.apache.poi.ss.util.CellRangeAddress(0, 0, 0, 1));
+            rowNum++;
+
+            // 详细信息
+            addDetailRow(sheet, rowNum++, labelStyle, "作业ID", Objects.toString(detail.get("homeworkId"), ""));
+            addDetailRow(sheet, rowNum++, labelStyle, "作业名称", Objects.toString(detail.get("title"), ""));
+            addDetailRow(sheet, rowNum++, labelStyle, "课程名称", Objects.toString(detail.get("course"), ""));
+            addDetailRow(sheet, rowNum++, labelStyle, "发布时间", formatDateForExcel(detail.get("publishTime")));
+            addDetailRow(sheet, rowNum++, labelStyle, "截止时间", formatDateForExcel(detail.get("deadline")));
+            addDetailRow(sheet, rowNum++, labelStyle, "作业状态", Objects.toString(detail.get("status"), ""));
+            addDetailRow(sheet, rowNum++, labelStyle, "提交人数", Objects.toString(detail.get("submittedCount"), "0"));
+            addDetailRow(sheet, rowNum++, labelStyle, "未提交人数", Objects.toString(detail.get("pendingCount"), "0"));
+            addDetailRow(sheet, rowNum++, labelStyle, "提交率", detail.getOrDefault("submissionRate", 0) + "%");
+            addDetailRow(sheet, rowNum++, labelStyle, "批改人数", Objects.toString(detail.get("gradedCount"), "0"));
+            addDetailRow(sheet, rowNum++, labelStyle, "批改率", detail.getOrDefault("gradingRate", 0) + "%");
+            addDetailRow(sheet, rowNum++, labelStyle, "平均分", Objects.toString(detail.getOrDefault("averageScore", "-"), "-"));
+            addDetailRow(sheet, rowNum++, labelStyle, "最高分", Objects.toString(detail.getOrDefault("maxScore", "-"), "-"));
+            addDetailRow(sheet, rowNum++, labelStyle, "最低分", Objects.toString(detail.getOrDefault("minScore", "-"), "-"));
+            addDetailRow(sheet, rowNum++, labelStyle, "作业内容", Objects.toString(detail.getOrDefault("content", "无"), "无"));
+            addDetailRow(sheet, rowNum++, labelStyle, "备注", Objects.toString(detail.getOrDefault("remark", "无"), "无"));
+
+            // 自动调整列宽
+            sheet.setColumnWidth(0, 20 * 256);
+            sheet.setColumnWidth(1, 50 * 256);
+
+            writeToResponse(response, workbook, fileName);
+        } catch (Exception e) {
+            log.error("导出单个作业详情失败", e);
+            throw new RuntimeException("导出单个作业详情失败", e);
+        }
+    }
+
+    private void addDetailRow(Sheet sheet, int rowNum, CellStyle labelStyle, String label, String value) {
+        Row row = sheet.createRow(rowNum);
+        Cell labelCell = row.createCell(0);
+        labelCell.setCellValue(label);
+        labelCell.setCellStyle(labelStyle);
+
+        Cell valueCell = row.createCell(1);
+        valueCell.setCellValue(value);
+    }
+
     private String formatDateForExcel(Object dateObj) {
         if (dateObj instanceof Date) {
             return DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, (Date) dateObj);

@@ -198,4 +198,28 @@ public interface DashboardMapper {
     @Select("SELECT count(*) FROM class_student_homework WHERE is_graded = 1 AND update_time BETWEEN DATE_SUB(NOW(), INTERVAL #{end} DAY) AND DATE_SUB(NOW(), INTERVAL #{start} DAY)")
     int getGradedCountBetweenDays(@Param("start") int start, @Param("end") int end);
 
+    // 获取单个作业详情
+    @Select("SELECT " +
+            "h.homework_id as homeworkId, " +
+            "h.title, " +
+            "c.course_name as course, " +
+            "h.content, " +
+            "h.create_time as publishTime, " +
+            "h.deadline, " +
+            "h.remark, " +
+            "CASE WHEN h.deadline >= NOW() THEN '进行中' ELSE '已过期' END as status, " +
+            "COUNT(DISTINCT CASE WHEN sh.status IN ('1', '2', '3') THEN sh.student_id END) as submittedCount, " +
+            "COUNT(DISTINCT CASE WHEN sh.status = '0' OR sh.student_id IS NULL THEN cs.student_id END) as pendingCount, " +
+            "COUNT(DISTINCT CASE WHEN sh.is_graded = 1 THEN sh.student_id END) as gradedCount, " +
+            "ROUND(AVG(CASE WHEN sh.grade IS NOT NULL AND sh.grade > 0 THEN sh.grade END), 2) as averageScore, " +
+            "MAX(CASE WHEN sh.grade IS NOT NULL AND sh.grade > 0 THEN sh.grade END) as maxScore, " +
+            "MIN(CASE WHEN sh.grade IS NOT NULL AND sh.grade > 0 THEN sh.grade END) as minScore " +
+            "FROM class_homework h " +
+            "LEFT JOIN class_course c ON h.course_id = c.course_id " +
+            "LEFT JOIN class_student cs ON 1=1 " +
+            "LEFT JOIN class_student_homework sh ON h.homework_id = sh.homework_id AND cs.student_id = sh.student_id " +
+            "WHERE h.homework_id = #{homeworkId} " +
+            "GROUP BY h.homework_id, h.title, c.course_name, h.content, h.create_time, h.deadline, h.remark")
+    Map<String, Object> getHomeworkDetailById(@Param("homeworkId") Long homeworkId);
+
 }

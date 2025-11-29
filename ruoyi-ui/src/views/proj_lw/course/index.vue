@@ -265,10 +265,85 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('/proj_lw/course/export', {
-        ...this.queryParams
-      }, `course_${new Date().getTime()}.xlsx`)
+      this.$confirm('是否确认导出所有课程数据项?', "警告", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        this.exportCSV();
+      }).catch(() => {});
     },
+
+    /** CSV导出方法 */
+    exportCSV() {
+      this.loading = true;
+
+      // 构建查询参数
+      const params = [];
+      for (const key in this.queryParams) {
+        if (this.queryParams[key] !== null && this.queryParams[key] !== '' && this.queryParams[key] !== undefined) {
+          params.push(key + '=' + encodeURIComponent(this.queryParams[key]));
+        }
+      }
+
+      const queryString = params.length ? '?' + params.join('&') : '';
+      const exportUrl = `/proj_lw/course/export${queryString}`;
+
+      console.log('导出URL:', exportUrl);
+
+      // 使用 fetch 进行导出
+      fetch(exportUrl)
+        .then(response => {
+          console.log('响应状态:', response.status);
+
+          if (!response.ok) {
+            return response.text().then(text => {
+              throw new Error(`导出失败: ${response.status} ${text}`);
+            });
+          }
+
+          return response.blob();
+        })
+        .then(blob => {
+          this.loading = false;
+          console.log('Blob大小:', blob.size);
+
+          if (blob.size === 0) {
+            throw new Error('导出的文件为空');
+          }
+
+          // 创建下载链接
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `课程数据_${new Date().getTime()}.csv`;
+
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          this.$modal.msgSuccess('导出成功');
+        })
+        .catch(error => {
+          this.loading = false;
+          console.error('导出错误:', error);
+
+          // 处理错误信息
+          let errorMsg = error.message;
+          if (errorMsg.includes('{')) {
+            try {
+              const errorObj = JSON.parse(errorMsg);
+              errorMsg = errorObj.msg || errorObj.message || errorMsg;
+            } catch (e) {
+              // 如果不是 JSON，保持原错误信息
+            }
+          }
+
+          this.$modal.msgError(`导出失败: ${errorMsg}`);
+        });
+    },
+
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
@@ -302,5 +377,3 @@ export default {
   }
 };
 </script>
-
-<!-- 样式保持不变 -->

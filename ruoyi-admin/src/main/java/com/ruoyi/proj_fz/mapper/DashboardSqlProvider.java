@@ -8,7 +8,7 @@ public class DashboardSqlProvider {
 
     public String getHomeworkDetailsSql(Map<String, Object> params) {
         return new SQL() {{
-            SELECT("h.homework_id as id, h.title, c.course_name as course, h.create_time as publishTime");
+            SELECT("h.homework_id as homeworkId, h.title, c.course_name as course, h.create_time as publishTime");
             SELECT("h.deadline as deadline");
             SELECT("(SELECT COUNT(*) FROM class_student_homework sh WHERE sh.homework_id = h.homework_id AND sh.status IN ('1','2','3')) as submittedCount");
             SELECT("(SELECT COUNT(*) FROM class_student_homework sh WHERE sh.homework_id = h.homework_id AND sh.status = '0') as pendingCount");
