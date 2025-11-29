@@ -1,26 +1,201 @@
-<view class="container">
-  <view>
-    <text style="font-size:16px;font-weight:600;">我听的课</text>
-    <view wx:if="{{listening.length === 0}}" style="color:#888;margin-top:8px;">暂无加入的课堂，点击下方“加入课堂”或创建课堂</view>
-    <block wx:for="{{listening}}" wx:key="id">
-      <view class="course-item" bindtap="openCourse" data-id="{{item.id}}" style="padding:10px;border-bottom:1px solid #eee;">
-        <text>{{item.title}}</text>
-      </view>
-    </block>
-    <view style="margin-top:12px;">
-      <button bindtap="onJoinClass" class="button">加入课堂</button>
+<view class="course-page">
+  <!-- 标签页导航 -->
+  <view class="tabs">
+    <view 
+      class="tab {{activeTab === 'joined' ? 'active' : ''}}" 
+      data-tab="joined"
+      bindtap="onTabChange"
+    >
+      我的课堂
+    </view>
+    <view 
+      class="tab {{activeTab === 'available' ? 'active' : ''}}" 
+      data-tab="available"
+      bindtap="onTabChange"
+    >
+      发现课堂
+    </view>
+    <view 
+      class="tab {{activeTab === 'applications' ? 'active' : ''}}" 
+      data-tab="applications"
+      bindtap="onTabChange"
+    >
+      我的申请
     </view>
   </view>
-  <view style="margin-top:18px;">
-    <text style="font-size:16px;font-weight:600;">我教的课</text>
-    <block wx:for="{{teaching}}" wx:key="id">
-      <view class="course-item" bindtap="openCourse" data-id="{{item.id}}" style="padding:10px;border-bottom:1px solid #eee;">
-        <text>{{item.title}}</text>
-      </view>
-    </block>
-    <view style="margin-top:12px;">
-      <button bindtap="onCreateClass" class="button">创建课堂</button>
+
+  <!-- 我的课堂 -->
+  <view wx:if="{{activeTab === 'joined'}}" class="tab-content">
+    <!-- 搜索栏 -->
+    <view class="search-bar">
+      <input 
+        class="search-input" 
+        placeholder="课堂名称" 
+        value="{{joinedQuery.className}}"
+        bindinput="onJoinedInput"
+        bindconfirm="onJoinedSearch"
+      />
+      <button class="search-btn" bindtap="onJoinedSearch">搜索</button>
     </view>
+
+    <!-- 课堂列表 -->
+    <view wx:if="{{joinedLoading && joinedList.length === 0}}" class="loading">加载中...</view>
+    
+    <view wx:if="{{joinedList.length === 0 && !joinedLoading}}" class="empty">
+      暂无已加入的课堂
+    </view>
+
+    <scroll-view wx:else scroll-y class="list-container">
+      <view wx:for="{{joinedList}}" wx:key="sessionId" class="class-card">
+        <view class="card-header">
+          <text class="class-name">{{item.className}}</text>
+          <text class="class-id">ID: {{item.sessionId}}</text>
+        </view>
+        
+        <view class="card-content">
+          <view class="info-row">
+            <text class="label">教师：</text>
+            <text class="value">{{item.teacher}}</text>
+          </view>
+          <view class="info-row">
+            <text class="label">上课时间：</text>
+            <text class="value">{{formatSessionTime(item)}}</text>
+          </view>
+          <view class="info-row">
+            <text class="label">加入时间：</text>
+            <text class="value">{{item.assignedAt}}</text>
+          </view>
+        </view>
+        
+        <view class="card-actions">
+          <button class="btn primary" bindtap="onEnterClass" data-sessionid="{{item.sessionId}}">
+            进入课堂
+          </button>
+          <button class="btn danger" bindtap="onQuitClass" 
+            data-sessionid="{{item.sessionId}}" data-classname="{{item.className}}">
+            退出
+          </button>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 发现课堂 -->
+  <view wx:elif="{{activeTab === 'available'}}" class="tab-content">
+    <!-- 搜索栏 -->
+    <view class="search-bar">
+      <input 
+        class="search-input" 
+        placeholder="课堂名称" 
+        value="{{availableQuery.className}}"
+        bindinput="onAvailableClassNameInput"
+        bindconfirm="onAvailableSearch"
+      />
+      <input 
+        class="search-input" 
+        placeholder="教师姓名" 
+        value="{{availableQuery.teacher}}"
+        bindinput="onAvailableTeacherInput"
+        bindconfirm="onAvailableSearch"
+      />
+      <button class="search-btn" bindtap="onAvailableSearch">搜索</button>
+    </view>
+
+    <view wx:if="{{availableLoading && availableList.length === 0}}" class="loading">加载中...</view>
+    
+    <view wx:if="{{availableList.length === 0 && !availableLoading}}" class="empty">
+      暂无可申请的课堂
+    </view>
+
+    <scroll-view wx:else scroll-y class="list-container">
+      <view wx:for="{{availableList}}" wx:key="sessionId" class="class-card">
+        <view class="card-header">
+          <text class="class-name">{{item.className}}</text>
+          <text class="class-id">ID: {{item.sessionId}}</text>
+        </view>
+        
+        <view class="card-content">
+          <view class="info-row">
+            <text class="label">教师：</text>
+            <text class="value">{{item.teacher}}</text>
+          </view>
+          <view class="info-row">
+            <text class="label">总人数：</text>
+            <text class="value">{{item.totalStudents || 0}}</text>
+          </view>
+          <view class="info-row">
+            <text class="label">上课时间：</text>
+            <text class="value">{{formatSessionTime(item)}}</text>
+          </view>
+        </view>
+        
+        <view class="card-actions">
+          <button 
+            class="btn {{item.applied ? 'disabled' : 'primary'}}" 
+            bindtap="onApplyJoin"
+            data-sessionid="{{item.sessionId}}"
+            data-index="{{index}}"
+            disabled="{{item.applied || item.applying}}"
+          >
+            {{item.applying ? '申请中...' : (item.applied ? '已申请' : '申请加入')}}
+          </button>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 我的申请 -->
+  <view wx:elif="{{activeTab === 'applications'}}" class="tab-content">
+    <view wx:if="{{applicationsLoading && applicationsList.length === 0}}" class="loading">加载中...</view>
+    
+    <view wx:if="{{applicationsList.length === 0 && !applicationsLoading}}" class="empty">
+      暂无申请记录
+    </view>
+
+    <scroll-view wx:else scroll-y class="list-container">
+      <view wx:for="{{applicationsList}}" wx:key="applicationId" class="class-card">
+        <view class="card-header">
+          <text class="class-name">{{item.className}}</text>
+          <text class="class-id">申请ID: {{item.applicationId}}</text>
+        </view>
+        
+        <view class="card-content">
+          <view class="info-row">
+            <text class="label">教师：</text>
+            <text class="value">{{item.teacherName}}</text>
+          </view>
+          <view class="info-row">
+            <text class="label">申请时间：</text>
+            <text class="value">{{item.applyTime}}</text>
+          </view>
+          <view class="info-row">
+            <text class="label">状态：</text>
+            <text class="value status-{{getApplicationStatusColor(item.status)}}">
+              {{getApplicationStatusText(item.status)}}
+            </text>
+          </view>
+          <view class="info-row">
+            <text class="label">审核时间：</text>
+            <text class="value">{{item.auditTime || '-'}}</text>
+          </view>
+          <view class="info-row">
+            <text class="label">备注：</text>
+            <text class="value">{{item.remark || '-'}}</text>
+          </view>
+        </view>
+        
+        <view class="card-actions">
+          <button 
+            wx:if="{{item.status === '0'}}"
+            class="btn danger" 
+            bindtap="onCancelApplication"
+            data-applicationid="{{item.applicationId}}"
+          >
+            取消申请
+          </button>
+          <text wx:else class="no-action">-</text>
+        </view>
+      </view>
+    </scroll-view>
   </view>
 </view>
-
