@@ -147,4 +147,17 @@ public class BbsArticleController extends BaseController {
             } catch (Exception ex) {}
         }
     }
+
+    /**
+     * (新增) 批量导出文章为 Word
+     */
+    @Log(title = "文章导出Word", businessType = BusinessType.EXPORT)
+    @PostMapping("/export-word")
+    public void exportWord(@RequestBody Long[] ids, HttpServletResponse response) {
+        try {
+            bbsArticleService.exportArticlesToWord(ids, response);
+        } catch (Exception e) {
+            logger.error("导出Word失败", e);
+        }
+    }
 }
