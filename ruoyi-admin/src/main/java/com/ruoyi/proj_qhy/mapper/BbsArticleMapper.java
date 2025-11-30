@@ -13,7 +13,16 @@ public interface BbsArticleMapper {
     /**
      * 查询文章管理
      */
-    @Select("SELECT id, title, digest, content, cover, article_type as articleType, status, view_count as viewCount, comment_count as commentCount, like_count as likeCount, hate_count as hateCount, bookmark_count as bookmarkCount, author, user_id as userId, create_by as createBy, create_time as createTime, update_by as updateBy, update_time as updateTime, remark FROM class_article WHERE id = #{id}")
+    @Select("SELECT a.id, a.title, a.digest, a.content, a.cover, a.article_type as articleType, a.status, " +
+            "a.view_count as viewCount, a.comment_count as commentCount, a.like_count as likeCount, " +
+                     "a.hate_count as hateCount, a.bookmark_count as bookmarkCount, " +
+                     "IFNULL(u.nick_name, a.author) as author, " +
+                     "u.avatar as authorAvatar, " +
+                     "a.user_id as userId, a.create_by as createBy, a.create_time as createTime, " +
+                     "a.update_by as updateBy, a.update_time as updateTime, a.remark " +
+                     "FROM class_article a " +
+                     "LEFT JOIN sys_user u ON a.user_id = u.user_id " +
+                     "WHERE a.id = #{id}")
     BbsArticle selectBbsArticleById(Long id);
 
     /**
@@ -143,8 +152,8 @@ public interface BbsArticleMapper {
             "SELECT a.id, a.title, a.digest, a.content, a.cover, a.article_type as articleType, a.status, ",
             "a.view_count as viewCount, a.comment_count as commentCount, a.like_count as likeCount, ",
             "a.hate_count as hateCount, a.bookmark_count as bookmarkCount, ",
-            // (关键修改) 优先使用用户表的昵称，如果没有关联用户，则回退到文章表的 author 字段
             "IFNULL(u.nick_name, a.author) as author, ",
+            "u.avatar as authorAvatar, ",
             "a.user_id as userId, a.create_by as createBy, a.create_time as createTime ",
             "FROM class_article a ",
             "LEFT JOIN sys_user u ON a.user_id = u.user_id ",

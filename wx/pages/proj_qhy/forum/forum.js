@@ -8,8 +8,6 @@ Page({
     articleList: [],
     loading: false,
     baseUrl: app.globalData.baseUrl || 'http://localhost:8080',
-    
-    // (新增) 通知相关
     showNotice: false,
     noticeList: []
   },
@@ -35,7 +33,6 @@ Page({
     }
   },
 
-  // --- (新增) 通知逻辑 ---
   openNotices() {
     this.setData({ showNotice: true });
     this.getNotices();
@@ -49,7 +46,6 @@ Page({
     wx.showLoading({ title: '加载通知...' });
     api.getUserNotices().then(res => {
       const list = (res.data || []).map(item => {
-        // 处理头像
         item.operatorAvatar = this.handleUrl(item.operatorAvatar);
         return item;
       });
@@ -108,15 +104,29 @@ Page({
     }
   },
 
+  // (修改) 点赞/取消点赞处理
   handleLikePost(e) {
     const { id, index } = e.currentTarget.dataset;
-    api.likePost(id).then(res => {
-      const list = this.data.postList;
-      const isLiked = !list[index].isLiked;
-      list[index].isLiked = isLiked;
-      list[index].likeCount += isLiked ? 1 : -1;
-      this.setData({ postList: list });
+    const list = this.data.postList;
+    const post = list[index];
+    
+    // 判断是点赞还是取消
+    const action = post.isLiked ? api.cancelLikePost : api.likePost;
+
+    action(id).then(res => {
+      // 1. 本地更新状态
+      const isLiked = !post.isLiked;
+      post.isLiked = isLiked;
+      post.likeCount += isLiked ? 1 : -1;
+      
+      // 使用 key 更新，性能更好
+      this.setData({ 
+        [`postList[${index}]`]: post 
+      });
+      
+      // 2. 重新拉取点赞人列表（确保名字显示正确）
       this.getPostLikes(id, index);
+      
       wx.showToast({ title: isLiked ? '点赞成功' : '取消点赞', icon: 'none' });
     });
   },
@@ -176,7 +186,8 @@ Page({
   // --- 文章逻辑 ---
   getArticles() {
     this.setData({ loading: true });
-    api.listArticle({}).then(res => {
+    // 加回过滤条件
+    api.listArticle({ status: 'published' }).then(res => {
       const list = (res.rows || []).map(item => {
         item.cover = this.handleUrl(item.cover);
         return item;

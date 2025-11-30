@@ -158,6 +158,9 @@ likePost(postId) {
 getLikesByPostId(postId) {
   return request({ url: `/proj_qhy/forum/likes/${postId}`, method: 'get' });
 },
+cancelLikePost(postId) {
+  return request({ url: '/proj_qhy/forum/like/cancel/' + postId, method: 'post' });
+},
 getCommentsByPostId(postId) {
   return request({ url: `/proj_qhy/forum/comments/${postId}`, method: 'get' });
 },

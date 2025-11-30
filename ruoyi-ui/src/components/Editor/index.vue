@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- 1. 原有的图片上传组件 -->
     <el-upload
       :action="uploadUrl"
       :before-upload="handleBeforeUpload"
@@ -14,6 +15,7 @@
     >
     </el-upload>
 
+    <!-- 2. 附件上传组件 -->
     <el-upload
       class="upload-file-insert"
       :action="uploadCommonUrl"
@@ -24,9 +26,11 @@
       :show-file-list="false"
       style="display: none"
     >
+      <!-- ref="fileInsertButton" 用于代码触发点击 -->
       <button ref="fileInsertButton"></button>
     </el-upload>
 
+    <!-- 编辑器实体 -->
     <div class="editor" ref="editor" :style="styles"></div>
   </div>
 </template>
@@ -38,6 +42,12 @@ import "quill/dist/quill.core.css"
 import "quill/dist/quill.snow.css"
 import "quill/dist/quill.bubble.css"
 import { getToken } from "@/utils/auth"
+
+// 1. 定义字体白名单
+const fonts = ['SimSun', 'SimHei', 'Microsoft-YaHei', 'KaiTi', 'FangSong'];
+const Font = Quill.import('formats/font');
+Font.whitelist = fonts; // 将字体加入到白名单
+Quill.register(Font, true);
 
 export default {
   name: "Editor",
@@ -76,7 +86,7 @@ export default {
   data() {
     return {
       uploadUrl: process.env.VUE_APP_BASE_API + "/common/upload", // 图片上传地址
-      uploadCommonUrl: process.env.VUE_APP_BASE_API + "/common/upload", // (新增) 通用文件上传地址
+      uploadCommonUrl: process.env.VUE_APP_BASE_API + "/common/upload", // 通用文件上传地址
       headers: {
         Authorization: "Bearer " + getToken()
       },
@@ -94,14 +104,18 @@ export default {
               ["blockquote", "code-block"],                    // 引用  代码块
               [{ list: "ordered" }, { list: "bullet" }],       // 有序、无序列表
               [{ indent: "-1" }, { indent: "+1" }],            // 缩进
-              [{ size: ["small", false, "large", "huge"] }],   // 字体大小
+
+              // 添加字体选择器和字号选择器
+              [{ 'font': fonts }],                             // 字体
+              [{ size: ["small", false, "large", "huge"] }],   // 字号
+
               [{ header: [1, 2, 3, 4, 5, 6, false] }],         // 标题
               [{ color: [] }, { background: [] }],             // 字体颜色、字体背景颜色
               [{ align: [] }],                                 // 对齐方式
               ["clean"],                                       // 清除文本格式
               ["link", "image", "video"]                       // 链接、图片、视频
             ],
-            // (新增) 在这里定义按钮的处理逻辑
+            // 在这里定义按钮的处理逻辑
             handlers: {
               // 劫持 'link' 按钮 -> 触发文件上传
               link: (value) => {
@@ -112,8 +126,6 @@ export default {
                   this.Quill.format("link", false);
                 }
               },
-              // 这里的 image 处理逻辑也可以移到这里，或者保持你在 init() 里的写法
-              // 为了不破坏你原有的逻辑，image 我暂时不动，只加 link
             }
           }
         },
@@ -158,7 +170,7 @@ export default {
       const editor = this.$refs.editor
       this.Quill = new Quill(editor, this.options)
 
-      // 原有的图片上传逻辑 (保持不变)
+      // 原有的图片上传逻辑
       if (this.type == 'url') {
         let toolbar = this.Quill.getModule("toolbar")
         toolbar.addHandler("image", (value) => {
@@ -192,32 +204,19 @@ export default {
       })
     },
 
-    // ================= (新增) 附件上传相关方法 =================
-    // 1. 上传前校验
+    // ================= 附件上传相关方法 =================
     beforeFileUpload(file) {
-      // 可以在这里限制文件类型，例如不让传 exe 等
       return true;
     },
 
-    // 2. 附件上传成功 -> 插入链接到光标处
     handleFileSuccess(res, file) {
-      // res 是后端返回的数据，根据若依标准，通常包含 url 和 fileName
       if (res.code === 200) {
-        // 获取当前光标位置
         let range = this.Quill.getSelection(true);
         let length = range ? range.index : this.Quill.getLength();
-
-        // 获取文件名和下载链接
         let fileName = res.originalFilename || file.name;
-        // 拼接完整的下载地址
         let fileUrl = process.env.VUE_APP_BASE_API + res.fileName;
-
-        // 插入文本
         this.Quill.insertText(length, fileName, "link", fileUrl);
-
-        // 移动光标到插入文本之后，避免后续输入也被加上链接
         this.Quill.setSelection(length + fileName.length);
-
         this.$message.success("附件插入成功");
       } else {
         this.$message.error(res.msg);
@@ -225,7 +224,7 @@ export default {
     },
     // =========================================================
 
-    // ... (原有的图片上传相关方法，保持不变)
+    // 原有的图片上传相关方法
     handleBeforeUpload(file) {
       const type = ["image/jpeg", "image/jpg", "image/png", "image/svg"]
       const isJPG = type.includes(file.type)
@@ -280,7 +279,6 @@ export default {
 </script>
 
 <style>
-/* ... (样式保持不变) */
 .editor, .ql-toolbar {
   white-space: pre-wrap !important;
   line-height: normal !important;
@@ -299,6 +297,7 @@ export default {
 .ql-snow .ql-tooltip[data-mode="video"]::before {
   content: "请输入视频地址:";
 }
+/* 字号下拉框 */
 .ql-snow .ql-picker.ql-size .ql-picker-label::before,
 .ql-snow .ql-picker.ql-size .ql-picker-item::before {
   content: "14px";
@@ -315,6 +314,8 @@ export default {
 .ql-snow .ql-picker.ql-size .ql-picker-item[data-value="huge"]::before {
   content: "32px";
 }
+
+/* 标题下拉框 */
 .ql-snow .ql-picker.ql-header .ql-picker-label::before,
 .ql-snow .ql-picker.ql-header .ql-picker-item::before {
   content: "文本";
@@ -343,16 +344,53 @@ export default {
 .ql-snow .ql-picker.ql-header .ql-picker-item[data-value="6"]::before {
   content: "标题6";
 }
+
+/* 字体下拉框 (仅工具栏显示) */
 .ql-snow .ql-picker.ql-font .ql-picker-label::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item::before {
   content: "标准字体";
 }
-.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="serif"]::before,
-.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="serif"]::before {
-  content: "衬线字体";
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="SimSun"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="SimSun"]::before {
+  content: "宋体";
+  font-family: "SimSun";
 }
-.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="monospace"]::before,
-.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="monospace"]::before {
-  content: "等宽字体";
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="SimHei"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="SimHei"]::before {
+  content: "黑体";
+  font-family: "SimHei";
+}
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="Microsoft-YaHei"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="Microsoft-YaHei"]::before {
+  content: "微软雅黑";
+  font-family: "Microsoft YaHei";
+}
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="KaiTi"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="KaiTi"]::before {
+  content: "楷体";
+  font-family: "KaiTi";
+}
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="FangSong"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="FangSong"]::before {
+  content: "仿宋";
+  font-family: "FangSong";
+}
+
+/* --- (关键新增) 编辑器内部内容实时预览样式 --- */
+/* 只有加了这些，编辑框里的文字才会真的变字体 */
+.ql-container .ql-editor .ql-font-SimSun {
+  font-family: "SimSun", "宋体";
+}
+.ql-container .ql-editor .ql-font-SimHei {
+  font-family: "SimHei", "黑体";
+}
+.ql-container .ql-editor .ql-font-Microsoft-YaHei {
+  font-family: "Microsoft YaHei", "微软雅黑";
+}
+.ql-container .ql-editor .ql-font-KaiTi {
+  font-family: "KaiTi", "楷体";
+}
+.ql-container .ql-editor .ql-font-FangSong {
+  font-family: "FangSong", "仿宋";
 }
 </style>
