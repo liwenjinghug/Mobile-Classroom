@@ -163,43 +163,49 @@ Page({
     }
   },
 
-  // 取消申请
-  async onCancelApplication(e) {
-    const { applicationid } = e.currentTarget.dataset
-    try {
-      await wx.showModal({
-        title: '确认取消',
-        content: '确定要取消申请吗？',
-        confirmColor: '#ff4757'
-      })
-      await api.cancelApplication(applicationid)
-      wx.showToast({ title: '取消成功', icon: 'success' })
-      this.loadMyApplications()
-    } catch (error) {
-      if (error.errMsg !== 'showModal:fail cancel') {
-        wx.showToast({ title: error.message || '取消失败', icon: 'none' })
+// 取消申请
+async onCancelApplication(e) {
+  const { applicationid } = e.currentTarget.dataset
+  
+  wx.showModal({
+    title: '确认取消',
+    content: '确定要取消申请吗？',
+    confirmColor: '#ff4757',
+    success: async (res) => {
+      if (res.confirm) {
+        try {
+          await api.cancelApplication(applicationid)
+          wx.showToast({ title: '取消成功', icon: 'success' })
+          this.loadMyApplications()
+        } catch (error) {
+          wx.showToast({ title: error.message || '取消失败', icon: 'none' })
+        }
       }
     }
-  },
+  })
+},
 
-  // 退出课堂
-  async onQuitClass(e) {
-    const { sessionid, classname } = e.currentTarget.dataset
-    try {
-      await wx.showModal({
-        title: '确认退出',
-        content: `确定要退出「${classname}」课堂吗？`,
-        confirmColor: '#ff4757'
-      })
-      await api.quitClass(sessionid)
-      wx.showToast({ title: '退出成功', icon: 'success' })
-      this.loadJoinedClasses()
-    } catch (error) {
-      if (error.errMsg !== 'showModal:fail cancel') {
-        wx.showToast({ title: error.message || '退出失败', icon: 'none' })
+ // 退出课堂
+async onQuitClass(e) {
+  const { sessionid, classname } = e.currentTarget.dataset
+  
+  wx.showModal({
+    title: '确认退出',
+    content: `确定要退出「${classname}」课堂吗？`,
+    confirmColor: '#ff4757',
+    success: async (res) => {
+      if (res.confirm) {
+        try {
+          await api.quitClass(sessionid)
+          wx.showToast({ title: '退出成功', icon: 'success' })
+          this.loadJoinedClasses()
+        } catch (error) {
+          wx.showToast({ title: error.message || '退出失败', icon: 'none' })
+        }
       }
     }
-  },
+  })
+},
 
   // 进入课堂详情
   onEnterClass(e) {
