@@ -57,13 +57,14 @@
             <text class="label">教师：</text>
             <text class="value">{{item.teacher}}</text>
           </view>
-          <view class="info-row">
+         <!-- 在我的课堂中显示时间 -->
+         <view class="info-row">
             <text class="label">上课时间：</text>
-            <text class="value">{{formatSessionTime(item)}}</text>
-          </view>
-          <view class="info-row">
+            <text class="value">{{item.formattedTime}}</text>
+         </view>
+         <view class="info-row">
             <text class="label">加入时间：</text>
-            <text class="value">{{item.assignedAt}}</text>
+            <text class="value">{{item.formattedAssignedAt}}</text>
           </view>
         </view>
         
@@ -125,7 +126,7 @@
           </view>
           <view class="info-row">
             <text class="label">上课时间：</text>
-            <text class="value">{{formatSessionTime(item)}}</text>
+            <text class="value">{{item.formattedTime}}</text>
           </view>
         </view>
         
@@ -166,17 +167,15 @@
           </view>
           <view class="info-row">
             <text class="label">申请时间：</text>
-            <text class="value">{{item.applyTime}}</text>
+            <text class="value">{{item.formattedApplyTime}}</text>
           </view>
           <view class="info-row">
             <text class="label">状态：</text>
-            <text class="value status-{{getApplicationStatusColor(item.status)}}">
-              {{getApplicationStatusText(item.status)}}
-            </text>
+            <text class="value">{{item.statusText}}</text>
           </view>
           <view class="info-row">
             <text class="label">审核时间：</text>
-            <text class="value">{{item.auditTime || '-'}}</text>
+            <text class="value">{{item.formattedAuditTime || '-'}}</text>
           </view>
           <view class="info-row">
             <text class="label">备注：</text>
