@@ -255,6 +255,7 @@ export default {
     },
     /** 课堂详情按钮操作 */
     handleSession(row) {
+      // 修改这里：传递courseId而不是classNumber
       this.$router.push({
         path: '/proj_lw/session',
         query: {
