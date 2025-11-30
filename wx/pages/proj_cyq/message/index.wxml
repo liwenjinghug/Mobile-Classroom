@@ -1,0 +1,85 @@
+<view class="container">
+  <view class="tabs">
+    <view class="tab {{currentTab==='msg'?'active':''}}" bindtap="switchTab" data-key="msg">
+      消息通知 <view class="badge" wx:if="{{unreadCount > 0}}">{{unreadCount}}</view>
+    </view>
+    <view class="tab {{currentTab==='todo'?'active':''}}" bindtap="switchTab" data-key="todo">待办事项</view>
+    <view class="tab {{currentTab==='notice'?'active':''}}" bindtap="switchTab" data-key="notice">系统公告</view>
+  </view>
+
+  <scroll-view scroll-y class="content-area" wx:if="{{currentTab === 'msg'}}" refresher-enabled bindrefresherrefresh="onRefresh" refresher-triggered="{{isRefreshing}}">
+    <view class="header-actions">
+      <view class="btn-group">
+        <button class="mini-btn default" bindtap="handleMarkAllRead">一键已读</button>
+        <button class="mini-btn primary" bindtap="requestSubscribe">开启提醒</button>
+      </view>
+    </view>
+
+    <view class="empty-tip" wx:if="{{messageList.length === 0}}">暂无新消息</view>
+
+    <block wx:for="{{messageList}}" wx:key="messageId">
+      <view class="card message-card {{item.isRead === '0' ? 'unread' : ''}}" bindtap="handleMessageClick" data-item="{{item}}">
+        <view class="card-header">
+          <view class="header-left">
+            <text class="tag {{item.type}}">{{item.type === 'todo' ? '待办' : (item.type === 'homework' ? '作业' : '考试')}}</text>
+            <text class="time">{{item.sendTime}}</text>
+          </view>
+          <view class="status-tag {{item.isRead === '0' ? 'status-unread' : 'status-read'}}">
+            {{item.isRead === '0' ? '未读' : '已读'}}
+          </view>
+        </view>
+        
+        <view class="card-title">{{item.title}}</view>
+        <view class="card-body text-ellipsis">{{item.content}}</view>
+        
+        <view class="card-footer">
+          <text class="click-tip">点击查看详情 ></text>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+
+  <scroll-view scroll-y class="content-area" wx:if="{{currentTab === 'todo'}}" refresher-enabled bindrefresherrefresh="onRefresh" refresher-triggered="{{isRefreshing}}">
+    <view class="todo-header">
+      <text class="section-title">我的待办</text>
+      <view class="add-btn" bindtap="navigateToAddTodo">+ 新增</view>
+    </view>
+
+    <view class="empty-tip" wx:if="{{todoList.length === 0}}">暂无待办事项</view>
+
+    <block wx:for="{{todoList}}" wx:key="todoId">
+      <view class="card todo-card">
+        <view class="todo-row">
+          <view class="check-container" catchtap="toggleTodoStatus" data-id="{{item.todoId}}" data-status="{{item.status}}">
+            <view class="check-circle {{item.status === '1' ? 'checked' : ''}}">
+              <icon wx:if="{{item.status === '1'}}" type="success_no_circle" size="14" color="#fff"/>
+            </view>
+          </view>
+          
+          <view class="todo-content {{item.status === '1' ? 'done' : ''}}" bindtap="navigateToEditTodo" data-id="{{item.todoId}}">
+            <view class="todo-title">
+              {{item.title}}
+              <text wx:if="{{item.status === '2'}}" class="expired-tag">已过期</text>
+            </view>
+            <view class="todo-date">截止: {{item.endTime}}</view>
+          </view>
+          <view class="delete-btn" bindtap="deleteTodoItem" data-id="{{item.todoId}}">✕</view>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+
+  <scroll-view scroll-y class="content-area" wx:if="{{currentTab === 'notice'}}" refresher-enabled bindrefresherrefresh="onRefresh" refresher-triggered="{{isRefreshing}}">
+    <view class="empty-tip" wx:if="{{noticeList.length === 0}}">暂无公告</view>
+
+    <block wx:for="{{noticeList}}" wx:key="noticeId">
+      <view class="card notice-card" bindtap="navigateToNoticeDetail" data-id="{{item.noticeId}}">
+        <view class="notice-title">{{item.title}}</view>
+        <view class="notice-meta">
+          <text>发布人: {{item.createBy}}</text>
+          <text>{{item.createTime}}</text>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+</view>

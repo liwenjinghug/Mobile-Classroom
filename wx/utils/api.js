@@ -183,5 +183,78 @@ likeArticle(id) {
 },
 viewArticle(id) {
   return request({ url: '/proj_qhy/article/view/' + id, method: 'post' });
-}
+},
+// ================== 1. 消息中心 (MessageController) ==================
+getMessageList() {
+  return request({ url: '/proj_cyq/message/list', method: 'GET' });
+},
+getUnreadCount() {
+  return request({ url: '/proj_cyq/message/unreadCount', method: 'GET' });
+},
+// 标记已读 (type: todo/homework/exam)
+markRead(type, id) {
+  return request({ url: `/proj_cyq/message/read/${type}/${id}`, method: 'PUT' });
+},
+// 一键已读
+markAllRead() {
+  return request({ url: '/proj_cyq/message/read/all', method: 'PUT' });
+},
+
+// ================== 2. 待办事项 (TodoController) ==================
+getTodoList(query) {
+  return request({ url: '/proj_cyq/todo/list', method: 'GET', data: query });
+},
+getTodoDetail(todoId) {
+  return request({ url: `/proj_cyq/todo/${todoId}`, method: 'GET' });
+},
+addTodo(data) {
+  return request({ url: '/proj_cyq/todo', method: 'POST', data: data });
+},
+updateTodo(data) {
+  return request({ url: '/proj_cyq/todo', method: 'PUT', data: data });
+},
+deleteTodo(todoId) {
+  return request({ url: `/proj_cyq/todo/${todoId}`, method: 'DELETE' });
+},
+
+// ================== 3. 通告管理 (ClassNoticeController) ==================
+getNoticeList(query) {
+  return request({ url: '/proj_cyq/notice/list', method: 'GET', data: query });
+},
+getNoticeDetail(noticeId) {
+  return request({ url: `/proj_cyq/notice/${noticeId}`, method: 'GET' });
+},
+// ================== 4. 用户个人中心 (系统接口) ==================
+  // 获取个人信息
+  getUserProfile() {
+    return request({ url: '/system/user/profile', method: 'GET' });
+  },
+  // 修改密码
+  updateUserPwd(oldPassword, newPassword) {
+    return request({
+      url: '/system/user/profile/updatePwd',
+      method: 'PUT',
+      data: { oldPassword, newPassword } // <--- 必须用 data 传递 JSON Body
+    });
+  },
+  // 上传头像
+  uploadAvatar(filePath) {
+    const token = wx.getStorageSync('token');
+    const baseUrl = getApp().globalData.baseUrl || 'http://localhost:8080';
+    return new Promise((resolve, reject) => {
+      wx.uploadFile({
+        url: baseUrl + '/system/user/profile/avatar',
+        filePath: filePath,
+        name: 'avatarfile',
+        header: { 'Authorization': 'Bearer ' + token },
+        success: (res) => {
+          const data = JSON.parse(res.data);
+          if (data.code === 200) resolve(data);
+          else reject(data);
+        },
+        fail: reject
+      });
+    });
+  }
+
 };

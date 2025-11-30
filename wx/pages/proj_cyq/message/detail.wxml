@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="header">
+    <view class="title-row">
+      <text class="tag {{msg.type}}">{{msg.typeName}}</text>
+      <text class="title">{{msg.title}}</text>
+    </view>
+    <view class="meta">
+      <text class="sender">发送者：{{msg.sender}}</text>
+      <text class="time">{{msg.sendTime}}</text>
+    </view>
+  </view>
+
+  <view class="divider"></view>
+
+  <view class="content-box">
+    <text class="content-text" user-select>{{msg.content}}</text>
+  </view>
+
+  <view class="footer-actions" wx:if="{{msg.type === 'exam'}}">
+    <button type="primary" bindtap="handleAction">去处理</button>
+  </view>
+</view>

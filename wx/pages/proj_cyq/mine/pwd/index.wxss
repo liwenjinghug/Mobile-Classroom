@@ -1,0 +1,38 @@
+page { background-color: #f5f7fa; }
+.container { padding: 30rpx; }
+
+.form-card { 
+  background: #fff; 
+  border-radius: 16rpx; 
+  padding: 0 30rpx; 
+  margin-bottom: 60rpx; 
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.03);
+}
+
+.form-item { 
+  border-bottom: 1rpx solid #eee; 
+  padding: 30rpx 0; 
+  display: flex; 
+  align-items: center; 
+}
+.form-item:last-child { border-bottom: none; }
+
+.label { 
+  width: 160rpx; 
+  font-size: 30rpx; 
+  color: #333; 
+  font-weight: bold; 
+}
+
+.input { 
+  flex: 1; 
+  font-size: 30rpx; 
+}
+
+.submit-btn { 
+  border-radius: 50rpx; 
+  background: #2d8cf0; 
+  font-weight: bold; 
+  box-shadow: 0 4rpx 12rpx rgba(45, 140, 240, 0.3);
+}
+.submit-btn:active { opacity: 0.9; }
