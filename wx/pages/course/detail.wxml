@@ -1,25 +1,41 @@
 <view class="container">
-  <view style="padding:12px;background:#fff;border-radius:6px;">
-    <text style="font-size:18px;font-weight:600;">{{course.className || course.title || '课堂详情'}}</text>
-    <text style="display:block;color:#888;margin-top:6px;">课堂ID: {{course.id}}</text>
+  <!-- 课堂信息卡片 -->
+  <view class="course-header">
+    <view class="course-title">{{course.className || course.title || '课堂详情'}}</view>
+    <view class="course-id">课堂ID：{{course.id}}</view>
   </view>
-  <view style="margin-top:12px;" class="icon-grid">
-    <view class="icon-item" bindtap="goToHomework">
-      <image src="/assets/icons/homework.png" style="width:44px;height:44px;"/>
-      <text>作业</text>
+
+  <!-- 状态提示 -->
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <!-- 功能入口网格 -->
+  <view class="function-grid">
+    <view class="function-item" bindtap="goToHomework">
+      <view class="function-icon homework-icon">
+        <text class="icon-text">📝</text>
+      </view>
+      <text class="function-label">作业</text>
     </view>
-    <view class="icon-item" bindtap="goToExam">
-      <image src="/assets/icons/exam.png" style="width:44px;height:44px;"/>
-      <text>考试</text>
+
+    <view class="function-item" bindtap="goToExam">
+      <view class="function-icon exam-icon">
+        <text class="icon-text">📋</text>
+      </view>
+      <text class="function-label">考试</text>
     </view>
-    <view class="icon-item" bindtap="goToSign">
-      <image src="/assets/icons/sign.png" style="width:44px;height:44px;"/>
-      <text>签到</text>
+
+    <view class="function-item" bindtap="goToSign">
+      <view class="function-icon sign-icon">
+        <text class="icon-text">✓</text>
+      </view>
+      <text class="function-label">签到</text>
     </view>
-    <view class="icon-item" bindtap="goToForum">
-      <image src="/assets/icons/forum.png" style="width:44px;height:44px;"/>
-      <text>讨论</text>
+
+    <view class="function-item" bindtap="goToForum">
+      <view class="function-icon forum-icon">
+        <text class="icon-text">💬</text>
+      </view>
+      <text class="function-label">讨论</text>
     </view>
   </view>
 </view>
-

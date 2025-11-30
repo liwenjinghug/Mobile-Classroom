@@ -1,0 +1,334 @@
+.page {
+  padding: 12rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding: 12rpx;
+  background: #fff;
+  border-radius: 8rpx;
+}
+
+.header {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8rpx;
+}
+
+/* 筛选器样式 */
+.filter-bar {
+  display: flex;
+  justify-content: space-around;
+  background: #fff;
+  padding: 12rpx 0;
+  margin-bottom: 16rpx;
+  border-radius: 8rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+}
+
+.filter-item {
+  flex: 1;
+  text-align: center;
+  padding: 8rpx 0;
+  font-size: 26rpx;
+  color: #666;
+  border-bottom: 3rpx solid transparent;
+  transition: all 0.3s;
+}
+
+.filter-item.active {
+  color: #1890ff;
+  font-weight: bold;
+  border-bottom-color: #1890ff;
+}
+
+/* 考试项样式 */
+.exam-item {
+  background: #fff;
+  padding: 24rpx;
+  /* 增加底部内边距，避免按钮覆盖内容 */
+  padding-bottom: 88rpx;
+  margin-bottom: 16rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+  border: 1rpx solid #f0f0f0;
+  transition: all 0.2s;
+  /* 作为绝对定位的参照容器 */
+  position: relative;
+}
+
+.exam-item.has-score {
+  padding-bottom: 128rpx;
+}
+
+.exam-item:active {
+  transform: translateY(-2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+}
+
+.exam-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 30rpx;
+  color: #333;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.status-tag {
+  padding: 6rpx 14rpx;
+  border-radius: 4rpx;
+  font-size: 22rpx;
+  white-space: nowrap;
+  margin-left: 12rpx;
+  font-weight: 500;
+}
+
+.status-pending {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-pending::before {
+  content: '• ';
+}
+
+.status-submitted {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.status-submitted::before {
+  content: '• ';
+}
+
+.status-graded {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.status-graded::before {
+  content: '• ';
+}
+
+.status-expired {
+  background: #f5f5f5;
+  color: #999;
+}
+
+.status-upcoming {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.exam-info {
+  margin-bottom: 16rpx;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 8rpx;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
+.info-row .label {
+  color: #666;
+  min-width: 140rpx;
+}
+
+.info-row .value {
+  color: #333;
+  flex: 1;
+}
+
+.score-row {
+  margin-top: 12rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx dashed #e8e8e8;
+}
+
+.score-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #52c41a;
+}
+
+/* 成绩显示区域 */
+.score-section {
+  margin-top: 16rpx;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  border: 1rpx solid;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafafa;
+}
+
+/* 及格样式 - 绿色柔和 */
+.score-section.score-passed {
+  background: #f1f8f4;
+  border-color: #52c41a;
+}
+
+.score-section.score-passed .score-main {
+  color: #52c41a;
+}
+
+.score-section.score-passed .score-status {
+  color: #52c41a;
+  background: rgba(82, 196, 26, 0.1);
+  padding: 6rpx 12rpx;
+  border-radius: 4rpx;
+  font-weight: 500;
+}
+
+/* 不及格样式 - 橙色柔和 */
+.score-section.score-failed {
+  background: #fff8f0;
+  border-color: #ff9800;
+}
+
+.score-section.score-failed .score-main {
+  color: #ff9800;
+}
+
+.score-section.score-failed .score-status {
+  color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
+  padding: 6rpx 12rpx;
+  border-radius: 4rpx;
+  font-weight: 500;
+}
+
+.score-label {
+  font-size: 24rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.score-display {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+}
+
+.score-main {
+  font-size: 48rpx;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.score-unit {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.score-total {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 8rpx;
+}
+
+.score-status {
+  font-size: 22rpx;
+}
+
+.actions {
+  position: absolute;
+  left: 24rpx;
+  bottom: 24rpx;
+  margin-top: 0;
+  display: flex;
+  justify-content: flex-start;
+  gap: 12rpx;
+}
+
+/* 通用按钮尺寸更小更精致 */
+.actions button {
+  min-width: 120rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+  padding: 10rpx 16rpx;
+  border: none;
+  transition: all 0.2s;
+}
+
+/* 开始考试按钮 - 蓝色 */
+.start-btn {
+  background: #1890ff;
+  color: #fff !important;
+  box-shadow: 0 2rpx 6rpx rgba(24, 144, 255, 0.25);
+}
+
+/* 待批改按钮 - 更小更柔和的橙色标签样式 */
+.pending-btn {
+  background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%);
+  color: #b36b00 !important;
+  border: 2rpx solid #ffb74d !important;
+  box-shadow: 0 2rpx 6rpx rgba(255, 152, 0, 0.15);
+}
+
+.pending-btn::before {
+  content: '⏳ ';
+  font-size: 24rpx;
+  margin-right: 4rpx;
+}
+
+/* 点击效果 */
+.actions button:active {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
+/* 加载和错误状态 */
+.loading {
+  text-align: center;
+  padding: 60rpx 0;
+  color: #999;
+  font-size: 28rpx;
+}
+
+.empty {
+  text-align: center;
+  color: #999;
+  margin-top: 80rpx;
+  font-size: 28rpx;
+}
+
+.error-box {
+  background: #fff2f0;
+  border: 1rpx solid #ffccc7;
+  border-radius: 8rpx;
+  padding: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.error-box text {
+  color: #ff4d4f;
+  font-size: 26rpx;
+}
+
+.error-box button {
+  margin-top: 8rpx;
+}

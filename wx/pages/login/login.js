@@ -100,6 +100,11 @@ Page({
           // clear last response debug
           this.setData({ lastLoginResponse: '' });
           wx.setStorageSync('token', res.token);
+          // 保存学号和用户信息
+          wx.setStorageSync('studentNo', studentNo.trim());
+          if (res.raw && res.raw.user) {
+            wx.setStorageSync('userInfo', res.raw.user);
+          }
           wx.showToast({ title: '登录成功', icon: 'success' });
           // 登录后切换到课程 tab
           wx.switchTab({ url: '/pages/course/list' });

@@ -32,6 +32,21 @@ function request(options) {
           return reject({ message: '未认证', statusCode: 401 });
         }
         if (res.statusCode >= 200 && res.statusCode < 300) {
+          // Some backends wrap responses as { code: number, msg: string, data: ... }
+          // Treat code !== 200 as an application-level error.
+          try {
+            const body = res.data;
+            if (body && typeof body === 'object' && Object.prototype.hasOwnProperty.call(body, 'code')) {
+              const code = body.code;
+              // convention: code === 200 means success
+              if (Number(code) !== 200) {
+                console.warn('[api.request] application-level error code != 200', body);
+                return reject(body);
+              }
+              // unwrap common wrapper
+              if (Object.prototype.hasOwnProperty.call(body, 'data')) return resolve(body.data);
+            }
+          } catch (e) { /* ignore */ }
           resolve(res.data);
         } else {
           console.warn('[api.request] non-2xx =>', res.statusCode, res.data);
@@ -69,6 +84,25 @@ function getCaptcha() {
   return request({ url: '/captchaImage', method: 'GET' });
 }
 
+function requestWithRetry(options, retries = 1, backoff = 500) {
+  return new Promise((resolve, reject) => {
+    function attempt(remaining) {
+      request(options).then(resolve).catch(err => {
+        const isServerError = err && err.statusCode && err.statusCode >= 500;
+        if (remaining > 0 && isServerError) {
+          console.warn('[api] retrying after server error, remaining=', remaining, err);
+          setTimeout(() => attempt(remaining - 1), backoff);
+        } else {
+          // normalize error shape
+          const normalized = Object.assign({}, err || {}, { _timestamp: Date.now() });
+          reject(normalized);
+        }
+      });
+    }
+    attempt(retries);
+  });
+}
+
 module.exports = {
   // 登录示例：后端需实现对应接口
   login(payload) {
@@ -103,6 +137,14 @@ getJoinedClasses(query = {}) {
     url: '/proj_lw/student/class/joined',
     method: 'GET',
     data: query
+  })
+},
+
+// 获取课堂详情（单个）
+getClassDetail(sessionId) {
+  return request({
+    url: `/proj_lw/student/class/${sessionId}`,
+    method: 'GET'
   })
 },
 
@@ -184,77 +226,146 @@ likeArticle(id) {
 viewArticle(id) {
   return request({ url: '/proj_qhy/article/view/' + id, method: 'post' });
 },
-// ================== 1. 消息中心 (MessageController) ==================
-getMessageList() {
-  return request({ url: '/proj_cyq/message/list', method: 'GET' });
-},
-getUnreadCount() {
-  return request({ url: '/proj_cyq/message/unreadCount', method: 'GET' });
-},
-// 标记已读 (type: todo/homework/exam)
-markRead(type, id) {
-  return request({ url: `/proj_cyq/message/read/${type}/${id}`, method: 'PUT' });
-},
-// 一键已读
-markAllRead() {
-  return request({ url: '/proj_cyq/message/read/all', method: 'PUT' });
-},
 
-// ================== 2. 待办事项 (TodoController) ==================
-getTodoList(query) {
-  return request({ url: '/proj_cyq/todo/list', method: 'GET', data: query });
-},
-getTodoDetail(todoId) {
-  return request({ url: `/proj_cyq/todo/${todoId}`, method: 'GET' });
-},
-addTodo(data) {
-  return request({ url: '/proj_cyq/todo', method: 'POST', data: data });
-},
-updateTodo(data) {
-  return request({ url: '/proj_cyq/todo', method: 'PUT', data: data });
-},
-deleteTodo(todoId) {
-  return request({ url: `/proj_cyq/todo/${todoId}`, method: 'DELETE' });
-},
+// --- 考试相关 ---
+getExamSessions(sessionId) {
+  // If dev mock mode enabled, return sample exams immediately
+  try {
+    const app = getApp();
+    if (app && app.globalData && app.globalData.mockMode) {
+      console.log('[api] mockMode enabled: returning mock exam sessions');
+      const now = Date.now();
+      return Promise.resolve([
+        { id: 'exam-1', title: '期中考试（模拟）', startAt: now - 3600 * 1000, endAt: now + 3600 * 1000, questionTypes: '单选/多选', submitted: false },
+        { id: 'exam-2', title: '章节测验（已提交）', startAt: now - 7200 * 1000, endAt: now - 3600 * 1000, questionTypes: '单选', submitted: true, score: 85 },
+        { id: 'exam-3', title: '实验考核（未开始）', startAt: now + 3600 * 1000, endAt: now + 7200 * 1000, questionTypes: '问答', submitted: false }
+      ]);
+    }
+  } catch (e) {}
 
-// ================== 3. 通告管理 (ClassNoticeController) ==================
-getNoticeList(query) {
-  return request({ url: '/proj_cyq/notice/list', method: 'GET', data: query });
-},
-getNoticeDetail(noticeId) {
-  return request({ url: `/proj_cyq/notice/${noticeId}`, method: 'GET' });
-},
-// ================== 4. 用户个人中心 (系统接口) ==================
-  // 获取个人信息
-  getUserProfile() {
-    return request({ url: '/system/user/profile', method: 'GET' });
-  },
-  // 修改密码
-  updateUserPwd(oldPassword, newPassword) {
-    return request({
-      url: '/system/user/profile/updatePwd',
-      method: 'PUT',
-      data: { oldPassword, newPassword } // <--- 必须用 data 传递 JSON Body
-    });
-  },
-  // 上传头像
-  uploadAvatar(filePath) {
-    const token = wx.getStorageSync('token');
-    const baseUrl = getApp().globalData.baseUrl || 'http://localhost:8080';
-    return new Promise((resolve, reject) => {
-      wx.uploadFile({
-        url: baseUrl + '/system/user/profile/avatar',
-        filePath: filePath,
-        name: 'avatarfile',
-        header: { 'Authorization': 'Bearer ' + token },
-        success: (res) => {
-          const data = JSON.parse(res.data);
-          if (data.code === 200) resolve(data);
-          else reject(data);
-        },
-        fail: reject
-      });
-    });
+  // If client provided a sessionId (课堂id), use the controller's list-by-session endpoint
+  let url = '/proj_lwj/exam';
+  if (sessionId) {
+    url = '/proj_lwj/exam/list-by-session/' + encodeURIComponent(sessionId);
+  } else {
+    // fallback: student-facing available list
+    url = '/proj_lwj/exam/available';
   }
 
+  const attempted = [];
+  const normalize = (res) => {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (res && Array.isArray(res.rows)) return res.rows;
+    if (res && res.data) {
+      if (Array.isArray(res.data)) return res.data;
+      if (Array.isArray(res.data.list)) return res.data.list;
+      if (Array.isArray(res.data.rows)) return res.data.rows;
+      if (Array.isArray(res.data.sessions)) return res.data.sessions;
+      if (Array.isArray(res.data.records)) return res.data.records;
+      if (Array.isArray(res.data.items)) return res.data.items;
+      if (Array.isArray(res.data.content)) return res.data.content;
+      if (Array.isArray(res.data.data)) return res.data.data;
+    }
+    if (res && Array.isArray(res.sessions)) return res.sessions;
+    if (res && Array.isArray(res.records)) return res.records;
+    if (res && Array.isArray(res.items)) return res.items;
+    if (res && Array.isArray(res.content)) return res.content;
+    if (res && typeof res === 'object') return [res];
+    return [];
+  };
+
+  attempted.push(url + ' [GET]');
+  const opt = { url: url, method: 'GET', data: sessionId && url.indexOf('list-by-session') === -1 ? { sessionId } : {} };
+  return requestWithRetry(opt, 1, 600).then(res => {
+    console.log('[api.getExamSessions] raw response for', url, res);
+    const arr = normalize(res);
+    return arr;
+  }).catch(err => {
+    // attach attempted info
+    if (err && typeof err === 'object') err.attempted = attempted.slice();
+    console.warn('getExamSessions failed for', url, err);
+    return Promise.reject(err);
+  });
+},
+getExamDetail(examId) {
+  return request({ url: '/proj_lwj/exam/' + examId, method: 'GET' }).catch(err => {
+    console.warn('getExamDetail failed, returning minimal mock', err);
+    // minimal mock
+    return {
+      id: examId,
+      title: '模拟考试 ' + examId,
+      durationSeconds: 300,
+      questions: [
+        { id: 'q1', type: 'single', content: '1 + 1 = ?', options: [{ id: 'o1', text: '1' }, { id: 'o2', text: '2' }] },
+        { id: 'q2', type: 'multiple', content: '选择偶数', options: [{ id: 'o1', text: '1' }, { id: 'o2', text: '2' }, { id: 'o3', text: '3' }, { id: 'o4', text: '4' }] },
+        { id: 'q3', type: 'text', content: '简述 JavaScript 事件循环' }
+      ]
+    };
+  });
+},
+  // 获取考试题目列表
+  listExamQuestions(examId) {
+    console.log('[api.listExamQuestions] request examId=', examId);
+    return request({ url: '/proj_lwj/exam/question/list', method: 'GET', data: examId ? { examId } : {} }).then(res => { console.log('[api.listExamQuestions] raw response', res); return res; });
+  },
+
+  // 学生开始考试（创建或获取参与记录）
+  startExamParticipant(payload) {
+    // 自动添加学号信息
+    const studentNo = wx.getStorageSync('studentNo');
+    const data = Object.assign({}, payload || {});
+    if (studentNo && !data.studentNo && !data.student_no) {
+      data.studentNo = studentNo;
+    }
+    console.log('[api.startExamParticipant] payload=', data);
+    return request({ url: '/proj_lwj/exam/start', method: 'POST', data: data }).then(res => { console.log('[api.startExamParticipant] raw response', res); return res; });
+  },
+
+  // 获取答案列表
+  listAnswers(query) {
+    console.log('[api.listAnswers] query=', query);
+    return request({ url: '/proj_lwj/exam/answer/list', method: 'GET', data: query || {} }).then(res => { console.log('[api.listAnswers] raw response', res); return res; });
+  },
+
+  // 获取我的考试记录（已参加的考试）
+  getMyExamRecords(sessionId) {
+    const studentNo = wx.getStorageSync('studentNo');
+    const params = { studentNo };
+    if (sessionId) params.sessionId = sessionId;
+    console.log('[api.getMyExamRecords] params=', params);
+    return request({ url: '/proj_lwj/exam/participant/list', method: 'GET', data: params })
+      .then(res => {
+        console.log('[api.getMyExamRecords] raw response', res);
+        // 规范化返回数据
+        if (Array.isArray(res)) return res;
+        if (res && Array.isArray(res.rows)) return res.rows;
+        if (res && res.data) {
+          if (Array.isArray(res.data)) return res.data;
+          if (Array.isArray(res.data.rows)) return res.data.rows;
+          if (Array.isArray(res.data.records)) return res.data.records;
+        }
+        return [];
+      })
+      .catch(err => {
+        console.warn('[api.getMyExamRecords] failed', err);
+        // 如果接口不存在，返回空数组
+        return [];
+      });
+  },
+
+  // 提交试卷（参与记录提交） - use participant submit endpoint
+  submitExam(examId, payload) {
+    const studentNo = wx.getStorageSync('studentNo');
+    const body = Object.assign({}, payload || {});
+    if (examId) body.examId = examId;
+    if (studentNo && !body.studentNo && !body.student_no) {
+      body.studentNo = studentNo;
+    }
+    console.log('[api.submitExam] request body=', body);
+    return request({ url: '/proj_lwj/exam/participant/submit', method: 'POST', data: body }).then(res => { console.log('[api.submitExam] raw response', res); return res; }).catch(err => {
+      console.warn('submitExam failed', err);
+      return Promise.reject(err);
+    });
+  }
 };

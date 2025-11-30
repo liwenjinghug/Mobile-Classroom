@@ -4,6 +4,8 @@
     "pages/login/webcaptcha",
     "pages/course/list",
     "pages/course/detail",
+    "pages/proj_lwj/exam/list",
+    "pages/proj_lwj/exam/attempt",
     "pages/proj_qhy/forum/forum",
     "pages/mine/mine",
     "pages/proj_qhy/article/detail",

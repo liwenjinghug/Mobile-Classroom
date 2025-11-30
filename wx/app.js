@@ -7,9 +7,20 @@ App({
     if (!token) {
       wx.reLaunch({ url: '/pages/login/login' });
     }
+
+    // Dev helper: require a non-executing placeholder so devtools marks exam pages as used
+    try {
+      if (this.globalData && this.globalData.mockMode) {
+        require('pages/exam/_entry');
+      }
+    } catch (e) {
+      console.warn('dev placeholder require failed', e);
+    }
   },
   globalData: {
     // 本地开发默认后端地址，若使用 ngrok/https 请替换为 https://xxxx.ngrok.io
-    baseUrl: 'http://localhost:8080'
+    baseUrl: 'http://localhost:8080',
+    // mockMode 开关：默认关闭，使用真实后端数据；仅在后端未就绪时临时打开
+    mockMode: false
   }
 });

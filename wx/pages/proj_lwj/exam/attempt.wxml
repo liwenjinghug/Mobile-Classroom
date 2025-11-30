@@ -1,0 +1,40 @@
+<view class="page">
+  <view class="header">{{exam.title}}</view>
+  <view class="meta">剩余时间：{{remainingDisplay}}</view>
+  <block wx:for="{{exam.questions}}" wx:key="id" wx:for-index="index" wx:for-item="item">
+    <view class="question">
+      <view class="q-title">{{index + 1}}. {{item.content}}</view>
+      <!-- 单选题 -->
+      <block wx:if="{{item.type==='single'}}">
+        <radio-group value="{{answers[item.id] || ''}}" bindchange="onSingleChange" data-qid="{{item.id}}">
+          <block wx:for="{{item.options}}" wx:key="id" wx:for-item="option">
+            <label class="option"><radio value="{{option.id}}" /> {{option.text}}</label>
+          </block>
+        </radio-group>
+      </block>
+      <!-- 判断题 -->
+      <block wx:if="{{item.type==='judge'}}">
+        <radio-group value="{{answers[item.id] || ''}}" bindchange="onSingleChange" data-qid="{{item.id}}">
+          <block wx:for="{{item.options}}" wx:key="id" wx:for-item="option">
+            <label class="option"><radio value="{{option.id}}" /> {{option.text}}</label>
+          </block>
+        </radio-group>
+      </block>
+      <!-- 多选题 -->
+      <block wx:if="{{item.type==='multiple'}}">
+        <checkbox-group value="{{answers[item.id] || []}}" bindchange="onMultiChange" data-qid="{{item.id}}">
+          <block wx:for="{{item.options}}" wx:key="id" wx:for-item="option">
+            <label class="option"><checkbox value="{{option.id}}" />{{option.text}}</label>
+          </block>
+        </checkbox-group>
+      </block>
+      <!-- 问答题/填空题 -->
+      <block wx:if="{{item.type==='text'}}">
+        <textarea placeholder="请输入答案" bindinput="onTextInput" bindblur="onTextBlur" data-qid="{{item.id}}" value="{{answers[item.id] || ''}}"></textarea>
+      </block>
+    </view>
+  </block>
+  <view class="actions">
+    <button bindtap="submitExam">提交考试</button>
+  </view>
+</view>
