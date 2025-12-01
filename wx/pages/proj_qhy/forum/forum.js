@@ -45,7 +45,10 @@ Page({
   getNotices() {
     wx.showLoading({ title: '加载通知...' });
     api.getUserNotices().then(res => {
-      const list = (res.data || []).map(item => {
+      // 【兼容修改】自动判断 res.data 还是 res
+      const rawList = (res && res.data) ? res.data : res;
+      
+      const list = (rawList || []).map(item => {
         item.operatorAvatar = this.handleUrl(item.operatorAvatar);
         return item;
       });
@@ -61,7 +64,10 @@ Page({
   getForumPosts() {
     this.setData({ loading: true });
     api.getPostList().then(res => {
-      const list = (res.data || []).map(item => {
+      // 【兼容修改】自动判断 res.data 还是 res
+      const rawList = (res && res.data) ? res.data : res;
+
+      const list = (rawList || []).map(item => {
         item.avatar = this.handleUrl(item.avatar);
         if (item.imageUrls) {
           item.imageArray = item.imageUrls.split(',').map(url => this.handleUrl(url));
@@ -85,15 +91,21 @@ Page({
 
   getPostComments(postId, index) {
     api.getCommentsByPostId(postId).then(res => {
+      // 【兼容修改】自动判断 res.data 还是 res
+      const rawData = (res && res.data) ? res.data : res;
+      
       const key = `postList[${index}].comments`;
-      this.setData({ [key]: res.data || [] });
+      this.setData({ [key]: rawData || [] });
     });
   },
 
   getPostLikes(postId, index) {
     api.getLikesByPostId(postId).then(res => {
+      // 【兼容修改】自动判断 res.data 还是 res
+      const rawData = (res && res.data) ? res.data : res;
+      
       const key = `postList[${index}].likes`;
-      this.setData({ [key]: res.data || [] });
+      this.setData({ [key]: rawData || [] });
     });
   },
 
@@ -188,7 +200,12 @@ Page({
     this.setData({ loading: true });
     // 加回过滤条件
     api.listArticle({ status: 'published' }).then(res => {
-      const list = (res.rows || []).map(item => {
+      // 【兼容修改】判断 rows 在哪。
+      // 若依分页通常是 { total: x, rows: [] }。
+      // 如果被解包了，res 就是 { rows: ... }。如果没解包，res.data.rows
+      const rows = res.rows || (res.data && res.data.rows) || [];
+      
+      const list = rows.map(item => {
         item.cover = this.handleUrl(item.cover);
         return item;
       });

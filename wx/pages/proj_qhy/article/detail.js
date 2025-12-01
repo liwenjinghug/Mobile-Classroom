@@ -20,7 +20,8 @@ Page({
 
   getDetail(id) {
     api.getArticle(id).then(res => {
-      const data = res.data;
+      const data = (res && res.data) ? res.data : res;
+      //const data = res.data;
       data.cover = this.handleUrl(data.cover);
       
       const attachments = [];
@@ -31,10 +32,10 @@ Page({
         data.content = data.content.replace(/src="\/profile/g, `src="${this.data.baseUrl}/profile`);
         
         // 2. 优化图片样式
-        data.content = data.content.replace(/<img/g, '<img style="max-width:100%;height:auto;display:block;margin:10px 0;"');
+        data.content = data.content.replace(/<img/g, '< img style="max-width:100%;height:auto;display:block;margin:10px 0;"');
 
         // 3. 提取附件链接 (修正正则逻辑)
-        // 匹配 <a ...>...</a>
+        // 匹配 <a ...>...</a >
         const linkRegex = /<a[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
         let match;
         while ((match = linkRegex.exec(data.content)) !== null) {

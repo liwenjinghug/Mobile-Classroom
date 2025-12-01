@@ -1007,6 +1007,10 @@ export default {
   box-shadow: 0 20px 40px rgba(0,0,0,0.15);
 }
 
+.app-container >>> .el-dialog__wrapper {
+  position: absolute !important;
+}
+
 .app-container >>> .el-dialog__header {
   padding: 20px 24px;
   border-bottom: 1px solid #f5f5f7;

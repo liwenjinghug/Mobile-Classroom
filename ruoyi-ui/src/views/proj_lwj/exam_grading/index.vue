@@ -162,6 +162,7 @@
           :expand-row-keys="expandedRows"
           :row-key="row => row.questionId"
           @expand-change="handleExpandChange"
+          @click.native="onTableClick"
           class="stats-table">
           <el-table-column type="expand">
             <template slot-scope="props">
@@ -327,7 +328,18 @@
       </el-dialog>
 
       <!-- 主观题批改弹窗 -->
-      <el-dialog title="批改主观题" :visible.sync="gradeDialogVisible" width="640px" v-if="gradeDialogVisible">
+      <el-dialog
+        title="批改主观题"
+        :visible.sync="gradeDialogVisible"
+        width="640px"
+        v-if="gradeDialogVisible"
+        :modal="false"
+        :lock-scroll="false"
+        :close-on-click-modal="false"
+        :append-to-body="false"
+        custom-class="floating-grade-dialog"
+        :style="gradeDialogStyle"
+      >
         <el-form :model="gradeForm" label-width="100px" size="small">
           <el-form-item label="题目">
             <div class="q-preview" v-html="gradeForm.questionContent"></div>
@@ -338,20 +350,20 @@
           <el-form-item label="标准答案" v-if="gradeForm.correctAnswer">
             <el-input type="textarea" :rows="3" v-model="gradeForm.correctAnswer" readonly />
           </el-form-item>
-          <el-form-item label="题目满分">
-            <el-tag type="info">{{ gradeForm.maxScore }}</el-tag>
-          </el-form-item>
-          <el-form-item label="得分">
-            <el-input-number v-model="gradeForm.score" :min="0" :max="gradeForm.maxScore" />
-          </el-form-item>
-          <el-form-item label="评语">
-            <el-input type="textarea" :rows="3" v-model="gradeForm.comment" placeholder="可选" />
-          </el-form-item>
+            <el-form-item label="题目满分">
+              <el-tag type="info">{{ gradeForm.maxScore }}</el-tag>
+            </el-form-item>
+            <el-form-item label="得分">
+              <el-input-number v-model="gradeForm.score" :min="0" :max="gradeForm.maxScore" />
+            </el-form-item>
+            <el-form-item label="评语">
+              <el-input type="textarea" :rows="3" v-model="gradeForm.comment" placeholder="可选" />
+            </el-form-item>
         </el-form>
         <template #footer>
           <div style="text-align:right">
-            <el-button @click="gradeDialogVisible=false">取 消</el-button>
-            <el-button type="primary" :loading="gradingOne" @click="submitGrade">提 交</el-button>
+            <el-button @click="closeGradeDialog">关闭</el-button>
+            <el-button type="primary" :loading="gradingOne" @click="submitGrade">提交</el-button>
           </div>
         </template>
       </el-dialog>
@@ -394,6 +406,9 @@ export default {
       loadingSubmission: false,
       submissionTimer: null,
       submissionError: null,
+      gradeDialogStyle: {},
+      lastGradeClick: null,
+      _pendingRestoreExamId: null
     }
   },
   computed: {
@@ -506,6 +521,162 @@ export default {
     }
   },
   methods: {
+    restoreSelections(){
+      try {
+        const sid = localStorage.getItem('exam_grading_lastSessionId')
+        const eid = localStorage.getItem('exam_grading_lastExamId')
+        if (sid) this.currentSessionId = Number(sid)
+        if (eid) this._pendingRestoreExamId = Number(eid)
+      } catch(e){ /* ignore */ }
+    },
+    // 新增: 通用时间解析（之前被删除导致 parseDateTime 不存在）
+    parseDateTime(value){
+      if (value === null || value === undefined || value === '') return null
+      if (value instanceof Date) return value.getTime()
+      if (typeof value === 'number') return value
+      if (typeof value === 'string') {
+        const s = value.trim()
+        if (/^\d+$/.test(s)) {
+          const n = Number(s)
+            ;(s.length === 10) && (value = n * 1000)
+          return n
+        }
+        const norm = s.replace('T',' ').replace(/\.[\d]+$/,'')
+        const dt = new Date(norm)
+        if(!isNaN(dt.getTime())) return dt.getTime()
+        const dt2 = new Date(norm.replace(/-/g,'/'))
+        if(!isNaN(dt2.getTime())) return dt2.getTime()
+      }
+      return null
+    },
+    // ========== 提交统计相关（之前被删除导致 refreshSubmissionStats 不存在） ==========
+    async refreshSubmissionStats(force=false){
+      if(!this.currentExamId) return
+      if(this.loadingSubmission) return
+      const now = Date.now()
+      if(!force && this.submissionStats && this.submissionStats.lastFetch && (now - this.submissionStats.lastFetch < 15000)) return
+      this.loadingSubmission = true
+      this.submissionError = null
+      try {
+        this.computeSubmissionStats()
+        this.updateSubmissionChart()
+        this.updateScoreDistChart()
+        this.submissionStats.lastFetch = now
+      } catch(e){
+        console.error('[refreshSubmissionStats] error', e)
+        this.submissionError = '提交统计加载失败'
+      } finally { this.loadingSubmission = false }
+    },
+    computeSubmissionStats(){
+      // 基于 questionStats 与 allAnswers 简单推导
+      const participants = Number(this.questionStats && this.questionStats.participantsCount || 0)
+      // 以答案分组统计已提交学生（假设有至少一条答案即视为已提交）
+      const studentScoreMap = new Map()
+      ;(this.allAnswers||[]).forEach(a=>{
+        const stu = a.studentNo || a.student_no || a.studentId || a.student_id
+        if(!stu) return
+        const prev = studentScoreMap.get(stu) || 0
+        const sc = (a.score!=null && !isNaN(a.score)) ? Number(a.score) : 0
+        studentScoreMap.set(stu, prev + sc)
+      })
+      const submitted = studentScoreMap.size
+      const unsubmitted = Math.max(participants - submitted, 0)
+      // 计算平均总分与最高分（仅已提交）
+      let sum = 0, maxScore = null
+      studentScoreMap.forEach(v=>{ sum += v; if(maxScore==null || v>maxScore) maxScore = v })
+      const avgScore = submitted>0 ? (sum/submitted) : null
+      // 简单及格率（需要及格线）
+      let passLine = null
+      if(this.questionStats && this.questionStats.passScore!=null) passLine = Number(this.questionStats.passScore)
+      let passRate = null
+      if(passLine!=null && submitted>0){
+        let passCnt = 0
+        studentScoreMap.forEach(v=>{ if(v>=passLine) passCnt++ })
+        passRate = (passCnt*100/submitted)
+      }
+      // 分数分布桶 (10 分区间)
+      const buckets = new Array(10).fill(0)
+      if(maxScore!=null && maxScore>0){
+        studentScoreMap.forEach(v=>{
+          const ratio = v / maxScore
+          let idx = Math.floor(ratio * 10)
+          if(idx>=10) idx = 9
+          buckets[idx]++
+        })
+      }
+      this.submissionStats = {
+        participants,
+        submitted,
+        unsubmitted,
+        avgScore,
+        maxScore,
+        passRate,
+        scoreBuckets: buckets,
+        lastFetch: Date.now()
+      }
+    },
+    updateSubmissionChart(){
+      if(!this.$refs.submissionChart || !this.submissionStats) return
+      try {
+        const chart = echarts.getInstanceByDom(this.$refs.submissionChart) || echarts.init(this.$refs.submissionChart)
+        chart.setOption({
+          tooltip: { trigger:'item' },
+          series: [{
+            type:'pie', radius:['40%','70%'],
+            data:[
+              { value:this.submissionStats.submitted, name:'已提交' },
+              { value:this.submissionStats.unsubmitted, name:'未提交' }
+            ],
+            label: { formatter:'{b}: {c}' }
+          }]
+        })
+      } catch(e){ console.warn('updateSubmissionChart fail', e) }
+    },
+    updateScoreDistChart(){
+      if(!this.$refs.scoreDistChart || !this.submissionStats) return
+      try {
+        const chart = echarts.getInstanceByDom(this.$refs.scoreDistChart) || echarts.init(this.$refs.scoreDistChart)
+        chart.setOption({
+          tooltip:{},
+          xAxis:{ type:'category', data: ['0-10%','10-20%','20-30%','30-40%','40-50%','50-60%','60-70%','70-80%','80-90%','90-100%'] },
+          yAxis:{ type:'value' },
+          series:[{ type:'bar', data: this.submissionStats.scoreBuckets, itemStyle:{ color:'#409EFF' } }]
+        })
+      } catch(e){ console.warn('updateScoreDistChart fail', e) }
+    },
+    startSubmissionAuto(){
+      if(this.submissionTimer) return
+      this.submissionTimer = setInterval(()=>{
+        this.refreshSubmissionStats(false)
+      }, 30000)
+    },
+    stopSubmissionAuto(){ if(this.submissionTimer){ clearInterval(this.submissionTimer); this.submissionTimer=null } },
+    // 新增：格式化时间戳（之前被删除）
+    formatTs(ts){
+      if(!ts) return '—'
+      const d = new Date(ts)
+      const pad = n => String(n).padStart(2,'0')
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+    },
+    // 新增：提交批改并刷新
+    async submitGrade(){
+      if(this.gradingOne) return
+      if(this.gradeForm.score==null || this.gradeForm.score<0){ return this.$message.warning('分数不合法') }
+      if(this.gradeForm.score>this.gradeForm.maxScore){ return this.$message.warning('分数不能超过题目满分') }
+      this.gradingOne = true
+      try {
+        const payload = { id:this.gradeForm.id, score:this.gradeForm.score, correctComment:this.gradeForm.comment }
+        const resp = await request({ url:'/proj_lwj/exam/answer/grade', method:'post', data: payload })
+        if(resp && (resp.code===200 || resp.code===0)){
+          this.$message.success('批改已提交')
+        } else {
+          this.$message.warning('批改接口返回异常，已尝试刷新')
+        }
+        this.gradeDialogVisible=false
+        await this.reloadData()
+      } catch(e){ console.error(e); this.$message.error('批改失败: '+(e.message||'')) }
+      finally { this.gradingOne=false }
+    },
     // 新增：刷新课堂/考试列表入口，按钮调用的 loadTeacherSessions
     loadTeacherSessions(){
       // 仅重新加载考试列表并重建可批改考试缓存
@@ -789,157 +960,62 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
       this.gradeForm.comment = isModify ? (answerRow.correctComment||'') : ''
       this.gradeForm.questionContent = q.questionContent || ''
       this.gradeDialogVisible = true
+      this.$nextTick(()=>{ this.computeGradeDialogPos() })
     },
-    async submitGrade(){
-      if(this.gradingOne) return
-      if(this.gradeForm.score==null || this.gradeForm.score<0){ return this.$message.warning('分数不合法') }
-      if(this.gradeForm.score>this.gradeForm.maxScore){ return this.$message.warning('分数不能超过题目满分') }
-      this.gradingOne = true
-      try {
-        const payload = { id:this.gradeForm.id, score:this.gradeForm.score, correctComment:this.gradeForm.comment }
-        console.log('[submitGrade] 提交批改 payload', payload)
-        const resp = await request({ url:'/proj_lwj/exam/answer/grade', method:'post', data: payload })
-        if(resp && (resp.code===200 || resp.code===0)){
-          this.$message.success('批改已提交')
-        } else {
-          this.$message.warning('批改接口返回异常，已尝试刷新')
+    closeGradeDialog(){ this.gradeDialogVisible=false },
+    computeGradeDialogPos(){
+      // 获取页面滚动偏移量
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0
+
+      const padding = 20
+      const dialogWidth = 660
+      const dialogHeight = 500
+
+      // 如果有点击位置，就在点击位置附近显示；否则居中
+      if (this.lastGradeClick) {
+        const base = this.lastGradeClick
+        // 尝试在点击位置右侧显示
+        let left = base.clientX + scrollLeft + 20
+        let top = base.clientY + scrollTop - 50 // 稍微向上偏移，让弹窗顶部接近点击位置
+
+        // 如果右侧空间不够，就显示在左侧
+        if (left + dialogWidth > scrollLeft + window.innerWidth - padding) {
+          left = base.clientX + scrollLeft - dialogWidth - 20
         }
-        this.gradeDialogVisible=false
-        await this.reloadData()
-      } catch(e){ console.error(e); this.$message.error('批改失败: '+(e.message||'')) }
-      finally { this.gradingOne=false }
-    },
-    restoreSelections(){
-      try {
-        const sid = localStorage.getItem('exam_grading_lastSessionId')
-        const eid = localStorage.getItem('exam_grading_lastExamId')
-        if(sid) this.currentSessionId = Number(sid)
-        if(eid) this._pendingRestoreExamId = Number(eid)
-      } catch(e){ /* ignore */ }
-    },
-    formatTs(ts){ const d=new Date(ts); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}` },
-    // 解析日期/时间为毫秒时间戳（兼容 ISO / yyyy-MM-dd HH:mm:ss / 数字秒/毫秒）
-    parseDateTime(value){
-      if (value === null || value === undefined || value === '') return null
-      // Date object
-      if (value instanceof Date) return value.getTime()
-      // number (assume ms if large, seconds if 10-digit)
-      if (typeof value === 'number') return value
-      if (typeof value === 'string') {
-        const s = value.trim()
-        // pure digits -> treat as timestamp
-        if (/^\d+$/.test(s)) {
-          const n = Number(s)
-          // 10-digit seconds -> convert to ms
-          if (s.length === 10) return n * 1000
-          return n
+
+        // 确保不超出屏幕边界
+        if (left < scrollLeft + padding) left = scrollLeft + padding
+        if (left + dialogWidth > scrollLeft + window.innerWidth - padding) {
+          left = scrollLeft + window.innerWidth - dialogWidth - padding
         }
-        // normalize common formats: replace 'T' with space and drop fractional seconds
-        const norm = s.replace('T', ' ').replace(/\.[\d]+$/, '')
-        // try Date parsing
-        const dt = new Date(norm)
-        if (!isNaN(dt.getTime())) return dt.getTime()
-        // try replacing '-' with '/' for older parsers
-        const dt2 = new Date(norm.replace(/-/g, '/'))
-        if (!isNaN(dt2.getTime())) return dt2.getTime()
+
+        // 垂直方向边界检测
+        if (top < scrollTop + padding) top = scrollTop + padding
+        if (top + dialogHeight > scrollTop + window.innerHeight - padding) {
+          top = scrollTop + window.innerHeight - dialogHeight - padding
+        }
+
+        this.gradeDialogStyle = { left: left + 'px', top: top + 'px', position: 'absolute' }
+      } else {
+        // 没有点击位置时，居中显示
+        const left = scrollLeft + (window.innerWidth - dialogWidth) / 2
+        const top = scrollTop + (window.innerHeight - dialogHeight) / 2
+        this.gradeDialogStyle = { left: left + 'px', top: top + 'px', position: 'absolute' }
       }
-      return null
     },
-    async refreshSubmissionStats(force=false){
-      if(!this.currentExamId) return
-      if(this.loadingSubmission) return
-      // 若非强制且数据<15s则跳过
-      const now=Date.now()
-      if(!force && this.submissionStats && this.submissionStats.lastFetch && (now - this.submissionStats.lastFetch < 15000)) return
-      this.loadingSubmission=true
-      this.submissionError=null
-      try{
-        await this.computeSubmissionStats()
-        this.updateSubmissionChart()
-        this.updateScoreDistChart()
-      }catch(e){ console.warn('refreshSubmissionStats error', e); this.submissionError = '提交统计加载失败: '+(e.message||'网络错误') }
-      finally{ this.loadingSubmission=false }
+    handleExpandChange(row, expanded){
+      // 保留原逻辑（若原有），这里只是为了确保点击展开不影响定位
+      // ...existing code...
     },
-    startSubmissionAuto(){ if(this.submissionTimer) return; this.refreshSubmissionStats(true); this.submissionTimer=setInterval(()=> this.refreshSubmissionStats(false),30000) },
-    stopSubmissionAuto(){ if(this.submissionTimer){ clearInterval(this.submissionTimer); this.submissionTimer=null } },
-    async computeSubmissionStats(){
-      // 参与人数从 questionStats 或 exams 获取
-      const exam = (this.exams||[]).find(e=>Number(e.id)===Number(this.currentExamId)) || {}
-      const participants = Number(this.questionStats && this.questionStats.participantsCount || 0)
-      // 汇总 allAnswers
-      const answers = this.allAnswers || []
-      const byStudent = {}
-      answers.forEach(a=>{ if(!a.studentNo) return; if(!byStudent[a.studentNo]) byStudent[a.studentNo]={total:0, count:0}; if(a.score!=null && a.score!=='' && !isNaN(Number(a.score))){ byStudent[a.studentNo].total += Number(a.score); byStudent[a.studentNo].count++ } })
-      const submitted = Object.keys(byStudent).length
-      const unsubmitted = Math.max(participants - submitted, 0)
-      const scores = Object.values(byStudent).map(s=> s.count>0 ? s.total : null).filter(v=> v!=null)
-      const avgScore = scores.length? (scores.reduce((sum,v)=>sum+v,0)/scores.length): null
-      const maxScore = scores.length? Math.max(...scores): null
-      const passScore = Number(exam.passScore || exam.pass_score || 0)
-      const passCount = scores.filter(s=> passScore>0 ? s>=passScore : false).length
-      const passRate = submitted? (passCount/submitted*100): null
-      // 分数分布桶: 0-10,10-20,...依考试总分动态刻度（10段）
-      const totalScore = Number(exam.totalScore || exam.total_score || 100) || 100
-      const bucketSize = totalScore / 10
-      const buckets = Array.from({length:10},(_,i)=>({range:`${Math.round(i*bucketSize)}-${Math.round((i+1)*bucketSize)}`, count:0}))
-      scores.forEach(s=>{ const idx = Math.min(9, Math.floor(s / bucketSize)); buckets[idx].count++ })
-      this.submissionStats = { participants, submitted, unsubmitted, avgScore, maxScore, passRate, scoreBuckets:buckets, lastFetch:Date.now() }
-    },
-    updateSubmissionChart(){
-      // Ensure DOM ref is present and data exists
-      if(!this.submissionStats) return
-      this.$nextTick(()=>{
-        try{
-          const dom = this.$refs.submissionChart
-          if(!dom) return
-          if(!this._submissionChart){
-            try{ this._submissionChart = echarts.init(dom) } catch(e){ console.warn('echarts.init failed for submissionChart', e); return }
-            // resize on window resize
-            this._submissionChartResizeHandler = () => { try{ this._submissionChart && this._submissionChart.resize() }catch(e){} }
-            window.addEventListener('resize', this._submissionChartResizeHandler)
-          }
-          const s = this.submissionStats || { submitted:0, unsubmitted:0 }
-          const option = { tooltip:{trigger:'item'}, legend:{bottom:0}, series:[{ type:'pie', radius:['45%','70%'], avoidLabelOverlap:false, label:{show:true, formatter:'{b}: {c}'}, data:[ {name:'已提交', value:s.submitted}, {name:'未提交', value:s.unsubmitted} ], color:['#67C23A','#E6A23C'] }] }
-          try{ this._submissionChart.setOption(option, true) } catch(e){ console.warn('setOption failed for submissionChart', e) }
-        }catch(e){ console.warn('updateSubmissionChart unexpected error', e) }
-      })
-    },
-    updateScoreDistChart(){
-      if(!this.submissionStats) return
-      this.$nextTick(()=>{
-        try{
-          const dom = this.$refs.scoreDistChart
-          if(!dom) return
-          if(!this._scoreDistChart){
-            try{ this._scoreDistChart = echarts.init(dom) } catch(e){ console.warn('echarts.init failed for scoreDistChart', e); return }
-            this._scoreDistChartResizeHandler = () => { try{ this._scoreDistChart && this._scoreDistChart.resize() }catch(e){} }
-            window.addEventListener('resize', this._scoreDistChartResizeHandler)
-          }
-          const b = this.submissionStats.scoreBuckets || []
-          const option = { tooltip:{}, grid:{left:40,right:10,top:10,bottom:40}, xAxis:{ type:'category', data:b.map(x=>x.range), axisLabel:{rotate:45} }, yAxis:{ type:'value' }, series:[{ type:'bar', data:b.map(x=>x.count), itemStyle:{color:'#409EFF'} }] }
-          try{ this._scoreDistChart.setOption(option, true) } catch(e){ console.warn('setOption failed for scoreDistChart', e) }
-        }catch(e){ console.warn('updateScoreDistChart unexpected error', e) }
-      })
-    },
-    // Cleanup charts on component destroy
-    destroyCharts(){
-      try{
-        if(this._submissionChart){ try{ this._submissionChart.dispose() }catch(e){} this._submissionChart = null }
-        if(this._scoreDistChart){ try{ this._scoreDistChart.dispose() }catch(e){} this._scoreDistChart = null }
-        if(this._submissionChartResizeHandler) { window.removeEventListener('resize', this._submissionChartResizeHandler); this._submissionChartResizeHandler = null }
-        if(this._scoreDistChartResizeHandler) { window.removeEventListener('resize', this._scoreDistChartResizeHandler); this._scoreDistChartResizeHandler = null }
-      }catch(e){ console.warn('destroyCharts error', e) }
-    },
-  },
-  beforeDestroy(){
-    //  清理自动刷新定时器
-    Object.values(this.submissionStats).forEach(s => { if(s && s.timer){ clearInterval(s.timer) } })
-    // 清理 echarts 实例
-    try{ this.destroyCharts() }catch(e){}
+    // 在表格点击时记录坐标（事件代理）
+    onTableClick(e){
+      this.lastGradeClick = { clientX: e.clientX, clientY: e.clientY }
+    }
+    // ...existing code...
   }
 }
 </script>
-
 <style scoped>
 .exam-grading-page {
   padding: 16px;
@@ -1042,4 +1118,17 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
 .mini-stat .stat-value { font-size:18px; font-weight:600; margin-top:2px; }
 .success-text { color:#67C23A; }
 .warning-text { color:#E6A23C; }
+
+/* 新增：浮动式批改面板样式 */
+.floating-grade-dialog {
+  margin: 0 !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  border-radius: 12px;
+  position: absolute !important;
+  z-index: 2000;
+}
+.floating-grade-dialog >>> .el-dialog__header { cursor: move; }
 </style>

@@ -238,7 +238,7 @@
     </el-card>
 
     <!-- 批量发布对话框 -->
-    <el-dialog title="批量发布考试" :visible.sync="batchVisible" width="680px" class="beautified-dialog">
+    <el-dialog title="批量发布考试" :visible.sync="batchVisible" width="680px" class="beautified-dialog" :modal="false" :lock-scroll="false" :close-on-click-modal="false">
       <div v-if="batchVisible" class="batch-dialog-body">
         <el-alert type="info" :closable="false" show-icon style="margin-bottom:16px"
           title="在左侧选择要发布到的课堂；右侧填写考试的基础信息与时间范围" />
@@ -327,7 +327,7 @@
     </el-dialog>
 
     <!-- 编辑考试配置弹窗 -->
-    <el-dialog title="编辑考试配置" :visible.sync="examEditVisible" width="760px" class="beautified-dialog">
+    <el-dialog title="编辑考试配置" :visible.sync="examEditVisible" width="760px" class="beautified-dialog" :modal="false" :lock-scroll="false" :close-on-click-modal="false">
       <el-form :model="examEditForm" label-width="100px" class="beautified-form" size="small">
         <el-form-item label="考试名称">
           <el-input v-model="examEditForm.examName" placeholder="请输入考试名称" />
@@ -1457,5 +1457,10 @@ export default {
 .beautified-dialog .el-dialog__title {
   font-weight: 700;
   color: #1a1a1a;
+}
+
+/* 让弹窗跟随页面滚动，而非固定在视口 */
+.beautified-dialog .el-dialog__wrapper {
+  position: absolute !important;
 }
 </style>

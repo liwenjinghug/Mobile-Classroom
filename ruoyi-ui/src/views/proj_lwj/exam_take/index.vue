@@ -4,11 +4,9 @@
       <div class="exam-title">{{ exam ? exam.examName : '考试' }} (ID: {{ examId }})</div>
       <div class="exam-meta">
         <span>状态: <el-tag size="mini" :type="statusTagType">{{ statusLabel }}</el-tag></span>
-        <!-- 仅在开始后显示剩余时间；未开始不显示倒计时，也不显示“已超时” -->
         <span v-if="started && timeRemaining !== null && timeRemaining >= 0">剩余时间: <strong>{{ formatDuration(timeRemaining) }}</strong></span>
         <span v-else-if="started && timeRemaining !== null && timeRemaining < 0">已超时</span>
-        <!-- 移除头部的当前得分显示，避免考试过程中展示总分进度 -->
-        <!-- <span>当前得分: {{ (participant && participant.totalScore) || 0 }} / {{ (exam && exam.totalScore) || 0 }}</span> -->
+        <el-tag v-if="antiCheatEnabled" size="mini" type="danger">防作弊已启用</el-tag>
       </div>
       <div class="exam-actions">
         <el-button size="mini" type="primary" :disabled="!canStart || started" @click="start">开始考试</el-button>
@@ -160,7 +158,14 @@ export default {
       analysisMode: false,
       autoSaveTimer: null,
       // 新增：答题自动保存去抖定时器
-      answerSaveTimer: null
+      answerSaveTimer: null,
+      // 防作弊状态
+      antiCheatActive: false,
+      cheatViolations: 0,
+      lastViolationAt: 0,
+      blurTimer: null,
+      visibilityTimer: null,
+      cheatGraceUntil: 0 // 时间戳：此时间之前不计违规
     }
   },
   computed: {
@@ -273,6 +278,9 @@ export default {
       if(mode === 1) return true
       if(mode === 2) return this.submitted
       return false
+    },
+    antiCheatEnabled(){
+      return !!(this.exam && (this.exam.antiCheat === 1 || this.exam.anti_cheat === 1))
     }
   },
   created() {
@@ -291,7 +299,20 @@ export default {
       }
     }
   },
-  beforeDestroy(){ if (this.timer) clearInterval(this.timer); if (this.autoSaveTimer) clearInterval(this.autoSaveTimer); if (this.answerSaveTimer) clearTimeout(this.answerSaveTimer) },
+  beforeRouteLeave(to, from, next){
+    // 考试进行中且启用防作弊，禁止路由离开
+    if (this.started && !this.submitted && this.antiCheatEnabled) {
+      this.$message.error('防作弊开启：考试进行中禁止离开页面');
+      return next(false);
+    }
+    next();
+  },
+  beforeDestroy(){
+    if (this.timer) clearInterval(this.timer);
+    if (this.autoSaveTimer) clearInterval(this.autoSaveTimer);
+    if (this.answerSaveTimer) clearTimeout(this.answerSaveTimer);
+    this.unbindAntiCheat();
+  },
   methods: {
     // 考试类型标签映射
     examTypeLabel(t) {
@@ -353,11 +374,14 @@ export default {
         }
       },1000)
     },
-    selectIndex(i){ if(!this.started){ this.$message.info('请先点击“开始考试”'); return } this.currentIndex=i; this.workingAnswer=this.answerMap[this.currentQuestion.id]||'' },
+    selectIndex(i){ if(!this.started){ this.$message.info('请先点击“开始考试”'); return } this.currentIndex=i; this.workingAnswer=this.answerMap[this.currentQuestion.id]||''; // 题目切换后短暂宽限避免内部焦点变动触发失焦
+      this.cheatGraceUntil = Date.now() + 800; },
     prev(){ if(this.currentIndex>0) this.selectIndex(this.currentIndex-1) },
     next(){ if(this.currentIndex < this.questions.length-1) this.selectIndex(this.currentIndex+1) },
     typeLabel(t){ return t===1?'单选':t===3?'判断':t===5?'简答':t===4?'填空':'其它' },
-    async start(){ if(!this.canStart) return this.$message.error('尚未到可开始时间或考试未发布'); try { const res=await startExamParticipant({ examId:Number(this.examId), studentNo:this.studentNo }); this.participant=res.data; this.started=true; this.computeRemaining(); this.$message.success('考试已开始') } catch(e){ console.error(e); this.$message.error('开始考试失败') } },
+    async start(){ if(!this.canStart) return this.$message.error('尚未到可开始时间或考试未发布'); try { const res=await startExamParticipant({ examId:Number(this.examId), studentNo:this.studentNo }); this.participant=res.data; this.started=true; this.computeRemaining(); this.$message.success('考试已开始')
+      if (this.antiCheatEnabled) { this.bindAntiCheat(); this.cheatGraceUntil = Date.now() + 2000; }
+     } catch(e){ console.error(e); this.$message.error('开始考试失败') } },
     formatScore(s){ return (s===undefined||s===null)?'—': (Number(s)%1===0?Number(s):Number(s).toFixed(2)) },
     recalculateTotal(){ if(!this.participant) this.participant={}; if(this.participant.totalScore==null) { this.participant.totalScore=this.displayedTotal } },
     // 新增：答题变化时的自动保存（去抖）
@@ -461,11 +485,123 @@ export default {
       } catch(e){
         console.error(e)
         this.$message.error('交卷失败')
+      } finally {
+        // 无论成功失败，结束考试流程均解除防作弊监听，避免影响其他页面
+        this.unbindAntiCheat();
       }
     },
-    openAnalysis(){ this.summaryVisible=false; this.analysisMode=true; if(!this.started && this.questions && this.questions.length>0){ this.currentIndex=0 } },
-    autoSubmitIfNeeded(){ if(this.exam && this.exam.autoSubmit===1 && this.started && !this.submitted){ this.$message.warning('时间到，自动交卷'); this.submitPaper() } },
-    autoSaveTick(){ if(!this.started || !this.currentQuestion) return; const qid=this.currentQuestion.id; const current=this.workingAnswer; const saved=this.answerMap[qid]; if(current && current!==saved){ this.saveCurrent().catch(()=>{}) } },
+    // 防作弊：绑定/解绑监听
+    bindAntiCheat(){
+      if (this.antiCheatActive) return;
+      this.antiCheatActive = true;
+      this.cheatViolations = 0;
+      this.lastViolationAt = 0;
+      document.addEventListener('visibilitychange', this.onVisibilityChange, true);
+      window.addEventListener('blur', this.onWindowBlur, true);
+      window.addEventListener('focus', this.onWindowFocus, true);
+      window.addEventListener('beforeunload', this.onBeforeUnload);
+      // 禁止复制/粘贴/剪切/右键
+      document.addEventListener('copy', this.blockUserEvent, true);
+      document.addEventListener('cut', this.blockUserEvent, true);
+      document.addEventListener('paste', this.blockUserEvent, true);
+      document.addEventListener('contextmenu', this.blockUserEvent, true);
+      // 键盘快捷键
+      document.addEventListener('keydown', this.onKeyDown, true);
+    },
+    unbindAntiCheat(){
+      if (!this.antiCheatActive) return;
+      this.antiCheatActive = false;
+      document.removeEventListener('visibilitychange', this.onVisibilityChange, true);
+      window.removeEventListener('blur', this.onWindowBlur, true);
+      window.removeEventListener('focus', this.onWindowFocus, true);
+      window.removeEventListener('beforeunload', this.onBeforeUnload);
+      document.removeEventListener('copy', this.blockUserEvent, true);
+      document.removeEventListener('cut', this.blockUserEvent, true);
+      document.removeEventListener('paste', this.blockUserEvent, true);
+      document.removeEventListener('contextmenu', this.blockUserEvent, true);
+      document.removeEventListener('keydown', this.onKeyDown, true);
+      if (this.blurTimer) { clearTimeout(this.blurTimer); this.blurTimer = null; }
+      if (this.visibilityTimer) { clearTimeout(this.visibilityTimer); this.visibilityTimer = null; }
+    },
+    blockUserEvent(e){
+      if (!this.antiCheatActive || !this.started || this.submitted || !this.antiCheatEnabled) return;
+      e.preventDefault();
+      try { e.stopPropagation(); } catch(_){}
+      this.$message.warning('已启用防作弊，禁止复制/粘贴/右键操作');
+      return false;
+    },
+    onKeyDown(e){
+      if (!this.antiCheatActive || !this.started || this.submitted || !this.antiCheatEnabled) return;
+      const key = (e.key || '').toLowerCase();
+      const blockCombo = (e.ctrlKey || e.metaKey) && ['c','x','v','a','s','p'].includes(key);
+      const blockF = (e.keyCode === 123) || (e.ctrlKey && e.shiftKey && ['i','j','c','u'].includes(key));
+      if (blockCombo || blockF) {
+        e.preventDefault();
+        try { e.stopPropagation(); } catch(_){}
+        this.$message.warning('已启用防作弊，部分快捷键被禁用');
+        return false;
+      }
+    },
+    onBeforeUnload(e){
+      if (!this.antiCheatActive || !this.started || this.submitted || !this.antiCheatEnabled) return;
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    },
+    onWindowBlur(){
+      if (!this.antiCheatActive || !this.started || this.submitted || !this.antiCheatEnabled) return;
+      if (Date.now() < this.cheatGraceUntil) return; // 宽限期内忽略
+      if (this.blurTimer) return;
+      this.blurTimer = setTimeout(() => {
+        this.blurTimer = null;
+        if (Date.now() < this.cheatGraceUntil) return; // 宽限期结束再检查
+        if (document.hidden) return;
+        try { const ae = document.activeElement; const root = this.$el; if (ae && root && root.contains(ae)) return; } catch (e) {}
+        const now = Date.now();
+        if (now - this.lastViolationAt < 1500) return;
+        this.handleCheatViolation('检测到窗口失焦/页面切换');
+      }, 800);
+    },
+    onWindowFocus(){
+      // 获得焦点，取消待处理的失焦判定
+      if (this.blurTimer) { clearTimeout(this.blurTimer); this.blurTimer = null; }
+    },
+    onVisibilityChange(){
+      if (!this.antiCheatActive || !this.started || this.submitted || !this.antiCheatEnabled) return;
+      if (document.hidden) {
+        if (Date.now() < this.cheatGraceUntil) return; // 宽限期内忽略
+        if (this.visibilityTimer) return;
+        this.visibilityTimer = setTimeout(() => {
+          this.visibilityTimer = null;
+          if (Date.now() < this.cheatGraceUntil) return;
+          if (document.hidden) {
+            const now = Date.now();
+            if (now - this.lastViolationAt < 1500) return;
+            this.handleCheatViolation('检测到页面不可见');
+          }
+        }, 600);
+      } else {
+        if (this.visibilityTimer) { clearTimeout(this.visibilityTimer); this.visibilityTimer = null; }
+      }
+    },
+    handleCheatViolation(reason){
+      // 再次宽限判断，防止极端竞态
+      if (Date.now() < this.cheatGraceUntil) return;
+      const now = Date.now();
+      this.lastViolationAt = now;
+      const next = (this.cheatViolations || 0) + 1;
+      this.cheatViolations = next;
+      const left = Math.max(0, 3 - next);
+      if (next < 3) {
+        this.$notify({ title: '防作弊警告', message: `${reason}。已记录(${next}/3)，再违规${left}次将自动交卷。`, type: 'warning', duration: 3000 });
+        return;
+      }
+      this.$notify({ title: '防作弊处理', message: `${reason}。违规已达(${next}/3)，将自动交卷。`, type: 'error', duration: 2500 });
+      if (this.started && !this.submitted) {
+        this.autoSubmitIfNeeded();
+        if (!this.exam || this.exam.autoSubmit !== 1) { this.submitPaper(); }
+      }
+    },
     formatDuration(sec){ if(sec==null) return '--:--'; if(sec<0) return '00:00'; const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60; return (h>0?String(h).padStart(2,'0')+':':'')+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0') },
     goBackPortal(){
       // 先关闭弹窗，避免 Element UI 遮罩在路由切换后短暂残留

@@ -1,17 +1,32 @@
 const api = require('../../../utils/api');
 let timer = null;
 Page({
-  data: { exam: { questions: [] }, answers: {}, remaining: 0, remainingDisplay: '', loading: true },
+  data: { exam: { questions: [] }, answers: {}, remaining: 0, remainingDisplay: '', loading: true, antiCheatEnabled: false, violations: 0, lastViolationAt: 0 },
   onLoad(options) {
     const examId = options && options.examId ? options.examId : null;
     if (!examId) { wx.showToast({ title: '考试缺失ID', icon: 'none' }); return; }
     this.examId = examId;
     this.participant = null;
+    try { if (wx.hideShareMenu) wx.hideShareMenu(); } catch(e) {}
     this.loadAndStartExam(examId);
+  },
+  onShow() {
+    // no-op; violation is recorded onHide
+  },
+  onHide() {
+    // 记录一次违规（切出页面/进入后台）
+    if (this.data.antiCheatEnabled) {
+      const now = Date.now();
+      if (now - (this.data.lastViolationAt || 0) > 1500) {
+        this.setData({ lastViolationAt: now });
+        this.handleViolation('检测到切出考试页面/进入后台');
+      }
+    }
   },
   onUnload() {
     if (timer) clearInterval(timer);
     timer = null;
+    try { if (wx.disableAlertBeforeUnload) wx.disableAlertBeforeUnload(); } catch(e) {}
   },
 
   // Combined flow: start participant, load exam meta, load questions, load answers
@@ -29,6 +44,14 @@ Page({
       .then(examMeta => {
         // set minimal exam info now; questions will be loaded next
         const exam = examMeta || { id: examId, title: '考试 ' + examId, durationSeconds: 0, questions: [] };
+        // 防作弊开关
+        const antiCheatEnabled = !!(exam && (exam.antiCheat === 1 || exam.anti_cheat === 1));
+        that.setData({ antiCheatEnabled });
+        try {
+          if (antiCheatEnabled && wx.enableAlertBeforeUnload) {
+            wx.enableAlertBeforeUnload({ message: '考试进行中，离开将记违规，三次违规后将自动交卷' });
+          }
+        } catch(e) {}
         // prefer durationSeconds or examDuration or exam.duration or examTimeLimit
         let duration = exam.durationSeconds || exam.examDuration || exam.duration || exam.examTimeLimit || exam.timeLimit || 0;
         // 如果是分钟数，转换为秒
@@ -186,6 +209,29 @@ Page({
     this.setData({ answers });
   },
 
+
+  // 顶层长按捕获：作为一次违规（无法完全屏蔽复制，但可提示与计数）
+  onLongPress() {
+    if (!this.data.antiCheatEnabled) return;
+    const now = Date.now();
+    if (now - (this.data.lastViolationAt || 0) <= 1500) return;
+    this.setData({ lastViolationAt: now });
+    this.handleViolation('检测到长按操作');
+  },
+
+  handleViolation(reason) {
+    if (!this.data.antiCheatEnabled) return;
+    const count = (this.data.violations || 0) + 1;
+    this.setData({ violations: count });
+    const left = Math.max(0, 3 - count);
+    if (count < 3) {
+      wx.showToast({ title: `防作弊警告(${count}/3)：${reason}。再违规${left}次将自动交卷`, icon: 'none', duration: 2500 });
+    } else {
+      wx.showToast({ title: '多次违规，正在自动交卷', icon: 'none', duration: 1500 });
+      // 提交试卷
+      setTimeout(() => this.submitExam(), 800);
+    }
+  },
 
   submitExam() {
     const that = this;

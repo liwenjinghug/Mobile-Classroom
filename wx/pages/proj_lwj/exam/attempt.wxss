@@ -29,8 +29,21 @@
 
 .actions button {
   width: 80%;
-  background-color: #1890ff;
+  background: linear-gradient(135deg, #1890ff 0%, #66b1ff 100%);
   color: #fff;
 }
 
-
+/* Anti-copy: disable selection and long-press callout on non-input content */
+.page, .question, .q-title, .option {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+/* Allow selection and standard behavior within input area */
+textarea {
+  -webkit-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
