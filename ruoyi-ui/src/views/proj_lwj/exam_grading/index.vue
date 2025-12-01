@@ -565,6 +565,8 @@ export default {
       this.submissionError = null
       try {
         this.computeSubmissionStats()
+        // 使用 $nextTick 确保 DOM 渲染完成后再初始化图表
+        await this.$nextTick()
         this.updateSubmissionChart()
         this.updateScoreDistChart()
         this.submissionStats.lastFetch = now
@@ -622,33 +624,53 @@ export default {
       }
     },
     updateSubmissionChart(){
-      if(!this.$refs.submissionChart || !this.submissionStats) return
-      try {
-        const chart = echarts.getInstanceByDom(this.$refs.submissionChart) || echarts.init(this.$refs.submissionChart)
-        chart.setOption({
-          tooltip: { trigger:'item' },
-          series: [{
-            type:'pie', radius:['40%','70%'],
-            data:[
-              { value:this.submissionStats.submitted, name:'已提交' },
-              { value:this.submissionStats.unsubmitted, name:'未提交' }
-            ],
-            label: { formatter:'{b}: {c}' }
-          }]
-        })
-      } catch(e){ console.warn('updateSubmissionChart fail', e) }
+      if(!this.submissionStats) return
+      // 使用 $nextTick 和延迟确保 DOM 已渲染
+      this.$nextTick(() => {
+        setTimeout(() => {
+          if(!this.$refs.submissionChart) {
+            console.warn('submissionChart ref not ready')
+            return
+          }
+          try {
+            const chart = echarts.getInstanceByDom(this.$refs.submissionChart) || echarts.init(this.$refs.submissionChart)
+            chart.setOption({
+              tooltip: { trigger:'item' },
+              series: [{
+                type:'pie', radius:['40%','70%'],
+                data:[
+                  { value:this.submissionStats.submitted, name:'已提交' },
+                  { value:this.submissionStats.unsubmitted, name:'未提交' }
+                ],
+                label: { formatter:'{b}: {c}' }
+              }]
+            })
+            console.log('Submission chart updated successfully')
+          } catch(e){ console.warn('updateSubmissionChart fail', e) }
+        }, 100)
+      })
     },
     updateScoreDistChart(){
-      if(!this.$refs.scoreDistChart || !this.submissionStats) return
-      try {
-        const chart = echarts.getInstanceByDom(this.$refs.scoreDistChart) || echarts.init(this.$refs.scoreDistChart)
-        chart.setOption({
-          tooltip:{},
-          xAxis:{ type:'category', data: ['0-10%','10-20%','20-30%','30-40%','40-50%','50-60%','60-70%','70-80%','80-90%','90-100%'] },
-          yAxis:{ type:'value' },
-          series:[{ type:'bar', data: this.submissionStats.scoreBuckets, itemStyle:{ color:'#409EFF' } }]
-        })
-      } catch(e){ console.warn('updateScoreDistChart fail', e) }
+      if(!this.submissionStats) return
+      // 使用 $nextTick 和延迟确保 DOM 已渲染
+      this.$nextTick(() => {
+        setTimeout(() => {
+          if(!this.$refs.scoreDistChart) {
+            console.warn('scoreDistChart ref not ready')
+            return
+          }
+          try {
+            const chart = echarts.getInstanceByDom(this.$refs.scoreDistChart) || echarts.init(this.$refs.scoreDistChart)
+            chart.setOption({
+              tooltip:{},
+              xAxis:{ type:'category', data: ['0-10%','10-20%','20-30%','30-40%','40-50%','50-60%','60-70%','70-80%','80-90%','90-100%'] },
+              yAxis:{ type:'value' },
+              series:[{ type:'bar', data: this.submissionStats.scoreBuckets, itemStyle:{ color:'#409EFF' } }]
+            })
+            console.log('Score distribution chart updated successfully')
+          } catch(e){ console.warn('updateScoreDistChart fail', e) }
+        }, 100)
+      })
     },
     startSubmissionAuto(){
       if(this.submissionTimer) return
