@@ -162,7 +162,6 @@
           :expand-row-keys="expandedRows"
           :row-key="row => row.questionId"
           @expand-change="handleExpandChange"
-          @click.native="onTableClick"
           class="stats-table">
           <el-table-column type="expand">
             <template slot-scope="props">
@@ -284,7 +283,16 @@
       </div>
 
       <!-- 批量批改主观题对话框 -->
-      <el-dialog title="批量批改主观题" :visible.sync="batchGradeDialog" width="600px" v-if="batchGradeDialog">
+      <el-dialog
+        title="批量批改主观题"
+        :visible.sync="batchGradeDialog"
+        width="600px"
+        v-if="batchGradeDialog"
+        :modal="false"
+        :lock-scroll="false"
+        :close-on-click-modal="false"
+        custom-class="centered-batch-dialog"
+      >
         <div v-if="selectedUngraded.length===0">
           <el-empty description="请在题目展开的待批改列表中勾选需要批改的答卷" :image-size="80" />
         </div>
@@ -336,9 +344,7 @@
         :modal="false"
         :lock-scroll="false"
         :close-on-click-modal="false"
-        :append-to-body="false"
-        custom-class="floating-grade-dialog"
-        :style="gradeDialogStyle"
+        custom-class="centered-grade-dialog"
       >
         <el-form :model="gradeForm" label-width="100px" size="small">
           <el-form-item label="题目">
@@ -350,15 +356,15 @@
           <el-form-item label="标准答案" v-if="gradeForm.correctAnswer">
             <el-input type="textarea" :rows="3" v-model="gradeForm.correctAnswer" readonly />
           </el-form-item>
-            <el-form-item label="题目满分">
-              <el-tag type="info">{{ gradeForm.maxScore }}</el-tag>
-            </el-form-item>
-            <el-form-item label="得分">
-              <el-input-number v-model="gradeForm.score" :min="0" :max="gradeForm.maxScore" />
-            </el-form-item>
-            <el-form-item label="评语">
-              <el-input type="textarea" :rows="3" v-model="gradeForm.comment" placeholder="可选" />
-            </el-form-item>
+          <el-form-item label="题目满分">
+            <el-tag type="info">{{ gradeForm.maxScore }}</el-tag>
+          </el-form-item>
+          <el-form-item label="得分">
+            <el-input-number v-model="gradeForm.score" :min="0" :max="gradeForm.maxScore" />
+          </el-form-item>
+          <el-form-item label="评语">
+            <el-input type="textarea" :rows="3" v-model="gradeForm.comment" placeholder="可选" />
+          </el-form-item>
         </el-form>
         <template #footer>
           <div style="text-align:right">
@@ -538,7 +544,7 @@ export default {
         const s = value.trim()
         if (/^\d+$/.test(s)) {
           const n = Number(s)
-            ;(s.length === 10) && (value = n * 1000)
+          ;(s.length === 10) && (value = n * 1000)
           return n
         }
         const norm = s.replace('T',' ').replace(/\.[\d]+$/,'')
@@ -764,7 +770,7 @@ export default {
         this.ungraded = list.map(a => ({
           ...a,
           _editScore: a.score || 0,
-            _editComment: a.correctComment || '',
+          _editComment: a.correctComment || '',
           _dirty: false
         }))
         // 分组
@@ -923,7 +929,7 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
           const summary = await request({ url:`/proj_lwj/exam/${ex.id}/questionCorrectSummary`, method:'get' })
           const hasSubjective = summary && summary.data ? summary.data.hasSubjective : summary.hasSubjective
           let ungradedTotal = 0
-            ;(summary.data? summary.data.questions : summary.questions || []).forEach(q=>{ if(q.ungradedCount) ungradedTotal += q.ungradedCount })
+          ;(summary.data? summary.data.questions : summary.questions || []).forEach(q=>{ if(q.ungradedCount) ungradedTotal += q.ungradedCount })
           target.push({
             id: ex.id,
             examName: ex.examName,
@@ -960,58 +966,30 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
       this.gradeForm.comment = isModify ? (answerRow.correctComment||'') : ''
       this.gradeForm.questionContent = q.questionContent || ''
       this.gradeDialogVisible = true
-      this.$nextTick(()=>{ this.computeGradeDialogPos() })
+
+      // 强制重新计算位置
+      this.$nextTick(() => {
+        const dialogs = document.querySelectorAll('.centered-grade-dialog, .centered-batch-dialog')
+        dialogs.forEach(dialog => {
+          if (dialog) {
+            const wrapper = dialog.closest('.el-dialog__wrapper')
+            if (wrapper) {
+              wrapper.style.position = 'fixed'
+              wrapper.style.top = '0'
+              wrapper.style.left = '0'
+              wrapper.style.right = '0'
+              wrapper.style.bottom = '0'
+              wrapper.style.display = 'flex'
+              wrapper.style.alignItems = 'center'
+              wrapper.style.justifyContent = 'center'
+              wrapper.style.zIndex = '2000'
+              wrapper.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        })
+      })
     },
-    closeGradeDialog(){ this.gradeDialogVisible=false },
-    computeGradeDialogPos(){
-      // 获取页面滚动偏移量
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0
-      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft || 0
-
-      const padding = 20
-      const dialogWidth = 660
-      const dialogHeight = 500
-
-      // 如果有点击位置，就在点击位置附近显示；否则居中
-      if (this.lastGradeClick) {
-        const base = this.lastGradeClick
-        // 尝试在点击位置右侧显示
-        let left = base.clientX + scrollLeft + 20
-        let top = base.clientY + scrollTop - 50 // 稍微向上偏移，让弹窗顶部接近点击位置
-
-        // 如果右侧空间不够，就显示在左侧
-        if (left + dialogWidth > scrollLeft + window.innerWidth - padding) {
-          left = base.clientX + scrollLeft - dialogWidth - 20
-        }
-
-        // 确保不超出屏幕边界
-        if (left < scrollLeft + padding) left = scrollLeft + padding
-        if (left + dialogWidth > scrollLeft + window.innerWidth - padding) {
-          left = scrollLeft + window.innerWidth - dialogWidth - padding
-        }
-
-        // 垂直方向边界检测
-        if (top < scrollTop + padding) top = scrollTop + padding
-        if (top + dialogHeight > scrollTop + window.innerHeight - padding) {
-          top = scrollTop + window.innerHeight - dialogHeight - padding
-        }
-
-        this.gradeDialogStyle = { left: left + 'px', top: top + 'px', position: 'absolute' }
-      } else {
-        // 没有点击位置时，居中显示
-        const left = scrollLeft + (window.innerWidth - dialogWidth) / 2
-        const top = scrollTop + (window.innerHeight - dialogHeight) / 2
-        this.gradeDialogStyle = { left: left + 'px', top: top + 'px', position: 'absolute' }
-      }
-    },
-    handleExpandChange(row, expanded){
-      // 保留原逻辑（若原有），这里只是为了确保点击展开不影响定位
-      // ...existing code...
-    },
-    // 在表格点击时记录坐标（事件代理）
-    onTableClick(e){
-      this.lastGradeClick = { clientX: e.clientX, clientY: e.clientY }
-    }
+    closeGradeDialog(){ this.gradeDialogVisible=false }
     // ...existing code...
   }
 }
@@ -1119,16 +1097,134 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
 .success-text { color:#67C23A; }
 .warning-text { color:#E6A23C; }
 
-/* 新增：浮动式批改面板样式 */
-.floating-grade-dialog {
-  margin: 0 !important;
+/* 弹窗居中样式 - 增强版 */
+.centered-grade-dialog >>> .el-dialog__wrapper,
+.centered-batch-dialog >>> .el-dialog__wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2000 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  overflow: auto !important;
+}
+
+.centered-grade-dialog >>> .el-dialog,
+.centered-batch-dialog >>> .el-dialog {
+  position: static !important;
   top: auto !important;
   left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
   transform: none !important;
+  margin: 0 !important;
+  max-height: 85vh !important;
+  max-width: 90vw !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 8px;
+  overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-  border-radius: 12px;
-  position: absolute !important;
-  z-index: 2000;
 }
-.floating-grade-dialog >>> .el-dialog__header { cursor: move; }
+
+.centered-grade-dialog >>> .el-dialog__header,
+.centered-batch-dialog >>> .el-dialog__header {
+  padding: 15px 20px;
+  background: #f5f7fa;
+  border-bottom: 1px solid #ebeef5;
+  flex-shrink: 0;
+}
+
+.centered-grade-dialog >>> .el-dialog__body,
+.centered-batch-dialog >>> .el-dialog__body {
+  overflow-y: auto;
+  max-height: calc(85vh - 110px);
+  flex: 1;
+  padding: 20px;
+}
+
+.centered-grade-dialog >>> .el-dialog__footer,
+.centered-batch-dialog >>> .el-dialog__footer {
+  padding: 15px 20px;
+  background: #f5f7fa;
+  border-top: 1px solid #ebeef5;
+  flex-shrink: 0;
+}
+</style>
+
+<style>
+/* 全局样式 - 确保弹窗居中（无 scoped） */
+.centered-grade-dialog .el-dialog__wrapper,
+.centered-batch-dialog .el-dialog__wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2000 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  overflow: auto !important;
+}
+
+.centered-grade-dialog .el-dialog,
+.centered-batch-dialog .el-dialog {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  max-height: 85vh !important;
+  max-width: 90vw !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+}
+
+.centered-grade-dialog .el-dialog__body,
+.centered-batch-dialog .el-dialog__body {
+  overflow-y: auto !important;
+  max-height: calc(85vh - 110px) !important;
+  flex: 1 !important;
+}
+
+/* 确保弹窗在最上层 */
+.centered-grade-dialog,
+.centered-batch-dialog {
+  z-index: 2001 !important;
+}
+
+/* 强制覆盖 Element UI 默认样式 */
+body .el-dialog__wrapper {
+  position: fixed !important;
+}
+
+body .el-dialog {
+  margin-top: 15vh !important;
+  margin-bottom: 15vh !important;
+}
+
+/* 重要：使用更具体的选择器 */
+body .centered-grade-dialog .el-dialog__wrapper,
+body .centered-batch-dialog .el-dialog__wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body .centered-grade-dialog .el-dialog,
+body .centered-batch-dialog .el-dialog {
+  margin: 0 !important;
+  position: static !important;
+}
 </style>

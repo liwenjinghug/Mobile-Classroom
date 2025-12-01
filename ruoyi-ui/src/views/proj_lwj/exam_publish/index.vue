@@ -1442,16 +1442,35 @@ export default {
 </style>
 
 <style>
-/* 美化对话框 */
+/* 美化对话框 - 使用 fixed + transform 完美居中 */
+.beautified-dialog .el-dialog__wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow: auto !important;
+}
+
 .beautified-dialog .el-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
   border-radius: 12px;
   overflow: hidden;
+  max-height: 90vh;
+  max-width: 95vw;
+  display: flex;
+  flex-direction: column;
 }
 
 .beautified-dialog .el-dialog__header {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   padding: 20px 24px;
   border-bottom: 1px solid #e1e5e9;
+  flex-shrink: 0;
 }
 
 .beautified-dialog .el-dialog__title {
@@ -1459,8 +1478,12 @@ export default {
   color: #1a1a1a;
 }
 
-/* 让弹窗跟随页面滚动，而非固定在视口 */
-.beautified-dialog .el-dialog__wrapper {
-  position: absolute !important;
+.beautified-dialog .el-dialog__body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.beautified-dialog .el-dialog__footer {
+  flex-shrink: 0;
 }
 </style>

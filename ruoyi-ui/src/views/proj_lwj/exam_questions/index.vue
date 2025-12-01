@@ -1001,19 +1001,35 @@ export default {
   border-bottom: 1px solid #f5f5f7;
 }
 
-/* Dialog Styling */
-.app-container >>> .el-dialog {
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+/* Dialog Styling - 使用 fixed + transform 完美居中 */
+.app-container >>> .el-dialog__wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow: auto !important;
 }
 
-.app-container >>> .el-dialog__wrapper {
-  position: absolute !important;
+.app-container >>> .el-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  max-height: 90vh;
+  max-width: 95vw;
+  display: flex;
+  flex-direction: column;
 }
+
 
 .app-container >>> .el-dialog__header {
   padding: 20px 24px;
   border-bottom: 1px solid #f5f5f7;
+  flex-shrink: 0;
 }
 
 .app-container >>> .el-dialog__title {
@@ -1024,11 +1040,14 @@ export default {
 
 .app-container >>> .el-dialog__body {
   padding: 24px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .app-container >>> .el-dialog__footer {
   padding: 16px 24px;
   border-top: 1px solid #f5f5f7;
+  flex-shrink: 0;
 }
 
 /* Tags */
