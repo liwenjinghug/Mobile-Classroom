@@ -71,6 +71,17 @@ public class ClassExamController extends BaseController {
         ClassExam query = new ClassExam();
         query.setSessionId(sessionId);
         List<ClassExam> list = examService.selectExamList(query);
+        // 仅返回已发布及以后状态的考试（隐藏草稿）
+        if (list != null) {
+            List<ClassExam> filtered = new java.util.ArrayList<>();
+            for (ClassExam ex : list) {
+                Integer st = ex == null ? null : ex.getStatus();
+                if (st != null && st != 0) { // 非草稿
+                    filtered.add(ex);
+                }
+            }
+            list = filtered;
+        }
         return AjaxResult.success(list);
     }
 
@@ -240,8 +251,18 @@ public class ClassExamController extends BaseController {
             if (studentNo == null || studentNo.trim().isEmpty()) {
                 return AjaxResult.success(java.util.Collections.emptyList());
             }
-            // 包含已结束考试（状态3），前端自行分组显示
+            // 包含已结束考试（状态3），前端自行分组显示；隐藏草稿（状态0）
             List<ClassExam> exams = examService.selectAvailableByStudentNo(studentNo.trim());
+            if (exams != null) {
+                List<ClassExam> filtered = new java.util.ArrayList<>();
+                for (ClassExam ex : exams) {
+                    Integer st = ex == null ? null : ex.getStatus();
+                    if (st != null && st != 0) { // 非草稿
+                        filtered.add(ex);
+                    }
+                }
+                exams = filtered;
+            }
             return AjaxResult.success(exams);
         } catch (Exception ex) {
             return AjaxResult.success(java.util.Collections.emptyList()).put("error", ex.getMessage());

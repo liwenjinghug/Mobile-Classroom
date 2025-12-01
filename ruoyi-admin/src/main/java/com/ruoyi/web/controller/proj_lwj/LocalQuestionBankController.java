@@ -23,10 +23,12 @@ public class LocalQuestionBankController extends BaseController {
                            @RequestParam(required = false) Integer questionType,
                            @RequestParam(required = false) Integer difficulty,
                            @RequestParam(required = false) String category,
+                           @RequestParam(required = false) Integer status,
                            @RequestParam(defaultValue = "1") Integer pageNum,
-                           @RequestParam(defaultValue = "10") Integer pageSize) {
+                           @RequestParam(defaultValue = "50") Integer pageSize) {
         int page = pageNum == null || pageNum < 1 ? 0 : pageNum - 1;
-        List<ClassLocalQuestionBank> list = service.search(keyword, questionType, difficulty, category, 1, page, pageSize);
+        // status 为空则不加状态过滤
+        List<ClassLocalQuestionBank> list = service.search(keyword, questionType, difficulty, category, status, page, pageSize);
         return AjaxResult.success(list);
     }
 

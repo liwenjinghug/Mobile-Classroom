@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-alert :title="'题目配置（课程：' + (courseName || '—') + (courseId ? '，ID：' + courseId : '') + '）'" type="info" show-icon style="margin-bottom:12px" />
+    <el-alert :title="'题目配置（课程：' + (courseName || '—') + (courseId ? '，ID：' + courseId : '') + '） - 考试总分：' + ((examInfo && examInfo.totalScore != null) ? examInfo.totalScore : '—') + '（当前配置总分：' + currentExamTotalScore + '）'" type="info" show-icon style="margin-bottom:12px" />
     <div style="margin-bottom:12px; display:flex; gap:8px; align-items:center; flex-wrap: wrap;">
       <el-select v-model="filter.type" placeholder="题型" clearable style="width:140px" @change="onFilterChange">
         <el-option :value="1" label="单选题"/>
@@ -15,11 +15,11 @@
       <el-button type="success" @click="saveDraft" :disabled="!realExamId || savingMeta">保存草稿</el-button>
       <el-button type="warning" @click="doPublish" :disabled="!canPublish" :loading="publishing">发布考试</el-button>
       <el-button type="info" @click="goBackPublish">返回发布页面</el-button>
-      <span style="color:#909399" v-if="!canPublish">（需至少1题且考试ID有效才能发布）</span>
+      <span style="color:#909399" v-if="!canPublish">（需至少1题、考试ID有效，且当前配置总分须等于考试总分）</span>
       <span style="color:#909399" v-if="filter.type">（已按题型筛选，已临时禁用拖拽排序）</span>
     </div>
 
-    <el-table :data="list" row-key="id" style="width:100%" @selection-change="onSel" v-loading="loading" ref="table">
+    <el-table :data="list" row-key="id" style="width:100%" @selection-change="onSel" ref="table">
       <el-table-column type="selection" width="45" />
       <el-table-column label="拖拽" width="60">
         <template>
@@ -41,7 +41,7 @@
     </el-table>
 
     <!-- 题目编辑对话框（可视化表单） -->
-    <el-dialog :title="editMode ? '编辑题目' : '新增题目'" :visible.sync="dialogVisible" width="720px">
+    <el-dialog :title="editMode ? '编辑题目' : '新增题目'" :visible.sync="dialogVisible" width="720px" :modal="false" :lock-scroll="false" :append-to-body="true">
       <el-form :model="form" label-width="100px">
         <el-form-item label="课程">
           <el-input :value="(courseName || '—') + (courseId ? '（ID：' + courseId + '）' : '')" disabled />
@@ -110,29 +110,29 @@
     </el-dialog>
 
     <!-- API题库导入对话框 -->
-    <el-dialog title="从题库导入题目" :visible.sync="apiImportVisible" width="900px">
+    <el-dialog title="从题库导入题目" :visible.sync="apiImportVisible" width="900px" :modal="false" :lock-scroll="false" :append-to-body="true">
       <div style="margin-bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-        <el-select v-model="apiFilter.type" placeholder="题型" clearable style="width: 120px">
+        <el-select v-model="apiFilter.type" placeholder="题型" clearable style="width: 120px" @change="onApiFilterChange">
           <el-option :value="1" label="单选题"/>
           <el-option :value="3" label="判断题"/>
           <el-option :value="5" label="简答题"/>
         </el-select>
-        <el-select v-model="apiFilter.difficulty" placeholder="难度" clearable style="width: 120px">
+        <el-select v-model="apiFilter.difficulty" placeholder="难度" clearable style="width: 120px" @change="onApiFilterChange">
           <el-option :value="1" label="简单"/>
           <el-option :value="2" label="一般"/>
           <el-option :value="3" label="困难"/>
         </el-select>
-        <el-input v-model="apiFilter.keyword" placeholder="关键词搜索" style="width: 200px" clearable />
-        <el-button @click="searchApiQuestions" :loading="apiLoading">搜索题目</el-button>
+        <el-input v-model="apiFilter.keyword" placeholder="关键词搜索" style="width: 200px" clearable @input="onApiKeywordInput" />
+        <!-- 移除搜索按钮，自动检索 -->
         <div style="margin-left: auto; color: #666;">
-          已选择：{{ selectedApiQuestions.length }} 题，
+          已选择：{{ selectedAllCount }} 题，
           总分值：{{ selectedTotalScore }}分，
           当前考试总分：{{ currentExamTotalScore }}分
         </div>
       </div>
 
-      <el-table :data="apiQuestions" style="width: 100%" @selection-change="onApiSelectionChange" v-loading="apiLoading" max-height="400">
-        <el-table-column type="selection" width="45" />
+      <el-table :data="apiQuestions" ref="apiTable" row-key="id" style="width: 100%" @selection-change="onApiSelectionChange" max-height="400" :empty-text="apiLoading ? '加载中…' : '暂无题目'">
+        <el-table-column type="selection" width="45" :reserve-selection="true" />
         <el-table-column prop="type" label="题型" width="90">
           <template slot-scope="scope">{{ typeText(scope.row.type) }}</template>
         </el-table-column>
@@ -140,7 +140,7 @@
         <el-table-column prop="difficulty" label="难度" width="80">
           <template slot-scope="scope">{{ difficultyText(scope.row.difficulty) }}</template>
         </el-table-column>
-        <el-table-column label="分值" width="100">
+        <el-table-column label="分值" width="120">
           <template slot-scope="scope">
             <el-input-number
               v-model="scope.row.score"
@@ -148,7 +148,8 @@
               :step="0.5"
               :max="100"
               size="mini"
-              style="width: 80px"
+              style="width: 90px"
+              @change="onRowScoreChange(scope.row)"
             />
           </template>
         </el-table-column>
@@ -156,8 +157,8 @@
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="apiImportVisible = false">取 消</el-button>
-        <el-button type="primary" @click="importSelectedQuestions" :loading="importing" :disabled="selectedApiQuestions.length === 0">
-          导入选中题目 ({{ selectedApiQuestions.length }})
+        <el-button type="primary" @click="importSelectedQuestions" :loading="importing" :disabled="selectedAllCount === 0">
+          导入选中题目 ({{ selectedAllCount }})
         </el-button>
       </div>
     </el-dialog>
@@ -206,7 +207,12 @@ export default {
         type: null,
         difficulty: null,
         keyword: ''
-      }
+      },
+      apiPrefetched: false,
+      selectedIdMap: {},
+      selectedScoreMap: {},
+      keywordDebounceTimer: null,
+      examInfo: null,
     }
   },
   computed: {
@@ -253,13 +259,32 @@ export default {
       return NaN
     },
     canPublish() {
-      return this.realExamId > 0 && Array.isArray(this.list) && this.list.length > 0
+      const hasExam = this.realExamId > 0
+      const hasQuestions = Array.isArray(this.list) && this.list.length > 0
+      const expected = Number(this.examInfo && this.examInfo.totalScore)
+      const configured = Number(this.currentExamTotalScore)
+      const totalsOk = Number.isFinite(expected) && expected > 0 && configured === expected
+      return hasExam && hasQuestions && totalsOk
+    },
+    publishReason() {
+      if (!(this.realExamId > 0)) return '考试ID无效'
+      if (!Array.isArray(this.list) || this.list.length === 0) return '至少添加1道题目'
+      const expected = Number(this.examInfo && this.examInfo.totalScore)
+      const configured = Number(this.currentExamTotalScore)
+      if (!Number.isFinite(expected) || expected <= 0) return '考试总分未设置或不合法'
+      if (configured !== expected) return `当前配置总分(${configured})需等于考试总分(${expected})`
+      return ''
+    },
+    selectedAllCount() {
+      return Object.keys(this.selectedIdMap || {}).length
     },
     selectedTotalScore() {
-      return this.selectedApiQuestions.reduce((sum, q) => sum + (q.score || 0), 0)
+      // 统计全局已选题目的总分（跨筛选）
+      const m = this.selectedScoreMap || {}
+      return Object.keys(m).reduce((sum, id) => sum + (Number(m[id]) || 0), 0)
     },
     currentExamTotalScore() {
-      return this.list.reduce((sum, q) => sum + (q.score || 0), 0)
+      return (this.list || []).reduce((sum, q) => sum + (Number(q.score) || 0), 0)
     }
   },
   mounted() {
@@ -271,6 +296,7 @@ export default {
       return
     }
     this.fetchCourseType().then(()=> this.reload())
+    this.prefetchApiQuestions()
   },
   methods: {
     async fetchCourseType(){
@@ -298,6 +324,7 @@ export default {
       } catch(e) { console.warn('fetch course info failed', e) }
     },
     typeText(t){ return {1:'单选',3:'判断',5:'简答'}[Number(t)||0] || t },
+    difficultyText(d){ const map = {1:'简单', 2:'一般', 3:'困难'}; const n = Number(d); return map[n] || '未知' },
     reload(){
       this.loading = true
       const eid = this.realExamId
@@ -592,33 +619,41 @@ export default {
 
     // API题库导入相关方法（切换为本地题库）
     openApiImport() {
+      // 重新进入题库时清零已选
+      this.selectedIdMap = {}
+      this.selectedScoreMap = {}
+      // 不清空数据，保持已预取题目，进入即可选择
+      if (!this.apiPrefetched) {
+        this.searchApiQuestions().then(()=>{ this.apiPrefetched = true })
+      }
       this.apiImportVisible = true
-      this.apiQuestions = []
-      this.selectedApiQuestions = []
-      this.apiFilter = { type: null, difficulty: null, keyword: '' }
-      // 自动加载本地题库列表，避免首次打开显示“暂无数据”需要手动点击搜索
       this.$nextTick(() => {
-        this.searchApiQuestions()
+        try {
+          const table = this.$refs.apiTable
+          if (table && table.clearSelection) table.clearSelection()
+        } catch(e) {}
+        // 打开弹窗后移除可能残留的焦点，避免 aria-hidden 焦点阻塞警告
+        try { const ae = document.activeElement; if (ae && typeof ae.blur === 'function') ae.blur() } catch (e) {}
       })
     },
-
-    // 将考试题型(1单选/3判断/5简答)映射为本地题库题型(1单选/2判断/3简答)
-    examTypeToLocalType(examType) {
-      const t = Number(examType)
-      if (t === 1) return 1
-      if (t === 3) return 2
-      if (t === 5) return 3
-      return undefined
+    prefetchApiQuestions(){
+      if (this.apiPrefetched) return
+      this.searchApiQuestions().then(()=>{ this.apiPrefetched = true })
     },
-    // 将本地题库题型映射为考试题型
-    localTypeToExamType(localType) {
-      const t = Number(localType)
-      if (t === 1) return 1
-      if (t === 2) return 3
-      if (t === 3) return 5
-      return 5
+    onApiFilterChange(){
+      // 选择题型或难度后自动搜索
+      this.autoSearchApi()
     },
-
+    onApiKeywordInput(){
+      // 关键词输入去抖自动搜索
+      if (this.keywordDebounceTimer) clearTimeout(this.keywordDebounceTimer)
+      this.keywordDebounceTimer = setTimeout(()=>{ this.autoSearchApi() }, 400)
+    },
+    autoSearchApi(){
+      // 避免重复搜索阻塞；不显示遮罩，仅刷新数据
+      if (this.apiLoading) return
+      this.searchApiQuestions()
+    },
     async searchApiQuestions() {
       this.apiLoading = true
       try {
@@ -632,14 +667,13 @@ export default {
         const response = await request({ url: '/proj_lwj/local-question/list', method: 'get', params })
         const raw = (response && (response.rows || response.data)) ? (response.rows || response.data) : []
         this.apiQuestions = raw.map(q => {
-          // optionsJson 可能为 JSON 字符串或 null
           let options = []
           try {
             if (q.optionsJson) {
               const parsed = typeof q.optionsJson === 'string' ? JSON.parse(q.optionsJson) : q.optionsJson
               if (Array.isArray(parsed)) options = parsed
             }
-          } catch (e) { /* ignore parse error */ }
+          } catch (e) {}
           return {
             id: q.id,
             type: this.localTypeToExamType(q.questionType),
@@ -650,11 +684,27 @@ export default {
             score: Number(q.score || 1)
           }
         })
-
+        // 重新应用已选勾选状态，并同步分值
+        this.$nextTick(() => {
+          try {
+            const table = this.$refs.apiTable
+            if (table && table.clearSelection) {
+              table.clearSelection()
+              (this.apiQuestions || []).forEach(row => {
+                if (this.selectedIdMap[row.id]) {
+                  if (this.selectedScoreMap[row.id] != null) {
+                    row.score = Number(this.selectedScoreMap[row.id]) || Number(row.score) || 1
+                  } else {
+                    this.$set(this.selectedScoreMap, row.id, Number(row.score) || 1)
+                  }
+                  table.toggleRowSelection(row, true)
+                }
+              })
+            }
+          } catch (e) {}
+        })
         if (this.apiQuestions.length === 0) {
           this.$message.warning('未找到符合条件的题目')
-        } else {
-          this.$message.success(`找到 ${this.apiQuestions.length} 道题目`)
         }
       } catch (error) {
         this.$message.error('搜索题目失败: ' + (error.message || '网络错误'))
@@ -665,63 +715,96 @@ export default {
     },
 
     onApiSelectionChange(selection) {
-      this.selectedApiQuestions = selection
+      // 仅更新当前可见数据对应的选择，在全局集合中保留其他筛选下已选的ID
+      const currentIds = new Set((this.apiQuestions || []).map(q => q.id))
+      // 清除当前可见中的记录
+      currentIds.forEach(id => {
+        if (this.selectedIdMap[id]) this.$delete(this.selectedIdMap, id)
+        if (this.selectedScoreMap[id] != null) this.$delete(this.selectedScoreMap, id)
+      })
+      // 写入当前选择
+      ;(selection || []).forEach(row => {
+        if (row && row.id != null) {
+          this.$set(this.selectedIdMap, row.id, true)
+          this.$set(this.selectedScoreMap, row.id, Number(row.score) || 0)
+        }
+      })
     },
 
-    difficultyText(difficulty) {
-      const map = { 1: '简单', 2: '一般', 3: '困难' }
-      return map[difficulty] || '未知'
+    onRowScoreChange(row) {
+      // 若该题已被选中，同步更新其分值
+      if (row && row.id != null && this.selectedIdMap[row.id]) {
+        this.$set(this.selectedScoreMap, row.id, Number(row.score) || 0)
+      }
     },
 
     async importSelectedQuestions() {
-      if (this.selectedApiQuestions.length === 0) {
+      const ids = Object.keys(this.selectedIdMap || {}).map(id => Number(id)).filter(Boolean)
+      if (ids.length === 0) {
         this.$message.warning('请选择要导入的题目')
         return
       }
-
-      // 检查重复题目（按题干完全一致）
-      const duplicates = this.selectedApiQuestions.filter(apiQ =>
-        this.list.some(localQ =>
-          localQ.questionContent && apiQ.question &&
-          localQ.questionContent.trim() === apiQ.question.trim()
-        )
-      )
-
-      if (duplicates.length > 0) {
-        try {
-          await this.$confirm(
-            `检测到 ${duplicates.length} 道重复题目，是否继续导入？`,
-            '重复题目提醒',
-            { type: 'warning' }
-          )
-        } catch {
-          return
-        }
-      }
-
       this.importing = true
       try {
-        const maxOrder = Math.max(...this.list.map(q => q.sortOrder || 0), 0)
+        const mapNow = {}
+        ;(this.apiQuestions || []).forEach(q => { mapNow[q.id] = q })
+        const needFetch = ids.filter(id => !mapNow[id])
+        const fetched = []
+        for (const id of needFetch) {
+          try {
+            const res = await request({ url: `/proj_lwj/local-question/${id}`, method: 'get' })
+            const q = (res && (res.data || res)) ? (res.data || res) : null
+            if (q && q.id) {
+              let options = []
+              try {
+                if (q.optionsJson) {
+                  const parsed = typeof q.optionsJson === 'string' ? JSON.parse(q.optionsJson) : q.optionsJson
+                  if (Array.isArray(parsed)) options = parsed
+                }
+              } catch(e){}
+              fetched.push({
+                id: q.id,
+                type: this.localTypeToExamType(q.questionType),
+                question: q.questionContent,
+                options,
+                correctAnswer: q.correctAnswer,
+                difficulty: Number(q.difficulty) || 1,
+                score: Number(q.score || 1)
+              })
+            }
+          } catch (e) { /* 忽略单个失败 */ }
+        }
+        const allSelected = ids.map(id => mapNow[id] || fetched.find(x => x.id === id)).filter(Boolean)
 
-        for (let i = 0; i < this.selectedApiQuestions.length; i++) {
-          const apiQ = this.selectedApiQuestions[i]
+        const duplicates = allSelected.filter(apiQ =>
+          this.list.some(localQ => localQ.questionContent && apiQ.question && localQ.questionContent.trim() === apiQ.question.trim())
+        )
+        if (duplicates.length > 0) {
+          try {
+            await this.$confirm(`检测到 ${duplicates.length} 道重复题目，是否继续导入？`, '重复题目提醒', { type: 'warning' })
+          } catch { this.importing = false; return }
+        }
+
+        const maxOrder = Math.max(...this.list.map(q => q.sortOrder || 0), 0)
+        for (let i = 0; i < allSelected.length; i++) {
+          const apiQ = allSelected[i]
+          const id = apiQ.id
+          const selScore = this.selectedScoreMap && this.selectedScoreMap[id] != null ? Number(this.selectedScoreMap[id]) : undefined
           const payload = {
             examId: this.realExamId,
             questionType: apiQ.type,
             questionContent: apiQ.question,
             questionOptions: Array.isArray(apiQ.options) ? JSON.stringify(apiQ.options) : (apiQ.options || ''),
             correctAnswer: apiQ.correctAnswer,
-            score: apiQ.score || 1,
+            score: selScore != null ? selScore : (apiQ.score || 1),
             difficulty: apiQ.difficulty || 1,
             sortOrder: maxOrder + i + 1,
             analysis: '',
             subject: this.courseName || this.courseType || ''
           }
-
           await addExamQuestion(payload)
         }
-
-        this.$message.success(`成功导入 ${this.selectedApiQuestions.length} 道题目`)
+        this.$message.success(`成功导入 ${allSelected.length} 道题目`)
         this.apiImportVisible = false
         this.reload()
       } catch (error) {
@@ -771,7 +854,24 @@ export default {
     },
     goBackPublish(){
       this.$router.push({ path:'/proj_lwj_exam/exam_publish' }).catch(()=>{})
-    }
+    },
+    // 将考试题型(1单选/3判断/5简答)映射为本地题库题型(1单选/2判断/3简答)
+    examTypeToLocalType(examType) {
+      const t = Number(examType)
+      if (t === 1) return 1
+      if (t === 3) return 2
+      if (t === 5) return 3
+      return undefined
+    },
+    // 将本地题库题型映射为考试题型
+    localTypeToExamType(localType) {
+      const t = Number(localType)
+      if (t === 1) return 1
+      if (t === 2) return 3
+      if (t === 3) return 5
+      // 默认按简答归类
+      return 5
+    },
   }
 }
 </script>

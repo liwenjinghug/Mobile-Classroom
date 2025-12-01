@@ -281,21 +281,9 @@ export default {
     this.init()
   },
   watch: {
-    '$route.query.autoStart': { handler(val){ if (String(val)==='1' && !this.started && this.canStart) { this.start() } }, immediate:true },
-    // 自动开始考试：当考试数据加载完成且满足开始条件时自动开始
-    canStart: {
-      handler(val) {
-        if (val && !this.started && !this.submitted && this.exam) {
-          // 延迟500ms后自动开始，避免数据未完全加载
-          setTimeout(() => {
-            if (this.canStart && !this.started && !this.submitted) {
-              this.start()
-            }
-          }, 500)
-        }
-      },
-      immediate: false
-    },
+    '$route.query.autoStart': { handler(val){ /* 禁用自动开始 */ }, immediate:false },
+    // 移除自动开始考试逻辑，用户需手动点击“开始考试”
+    // canStart 变化不再触发自动开始
     summaryVisible(val){
       if(val){
         // 打开弹窗时移除可能残留在题目选项上的焦点，避免 aria-hidden 焦点警告

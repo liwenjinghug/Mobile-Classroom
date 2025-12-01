@@ -274,14 +274,15 @@
   transition: all 0.2s;
 }
 
-/* 开始考试按钮 - 蓝色 */
+/* 开始考试按钮 - 渐变蓝色 */
 .start-btn {
-  background: #1890ff;
+  background: linear-gradient(135deg, #1890ff 0%, #66b1ff 100%);
   color: #fff !important;
   box-shadow: 0 2rpx 6rpx rgba(24, 144, 255, 0.25);
+  border: none;
 }
 
-/* 待批改按钮 - 更小更柔和的橙色标签样式 */
+/* 待批改按钮 - 橙色标签样式 */
 .pending-btn {
   background: linear-gradient(135deg, #fff7e6 0%, #ffe7ba 100%);
   color: #b36b00 !important;
