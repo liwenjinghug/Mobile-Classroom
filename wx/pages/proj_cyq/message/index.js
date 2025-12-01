@@ -41,12 +41,16 @@ Page({
   // --- 消息模块 ---
   loadMessages() {
     return api.getMessageList().then(res => {
-      this.setData({ messageList: res.data || [] });
+      // 【兼容修复】优先取 res.data，如果没有则取 res 本身
+      const list = res.data || res || [];
+      this.setData({ messageList: list });
     });
   },
   updateUnreadCount() {
     return api.getUnreadCount().then(res => {
-      this.setData({ unreadCount: res.data || 0 });
+      // 【兼容修复】如果是数字直接用，否则取 res.data
+      const count = (typeof res === 'number') ? res : (res.data || 0);
+      this.setData({ unreadCount: count });
     });
   },
   handleMarkAllRead() {
@@ -77,7 +81,6 @@ Page({
       url: `/pages/proj_cyq/message/detail?item=${itemStr}`
     });
   },
-  
   requestSubscribe() {
     if (this.data.tmplIds.length === 0) {
       return wx.showToast({ title: '请先配置模板ID', icon: 'none' });
@@ -92,7 +95,9 @@ Page({
   // --- 待办模块 ---
   loadTodos() {
     return api.getTodoList({ pageNum: 1, pageSize: 50 }).then(res => {
-      this.setData({ todoList: res.rows || [] });
+      // 【兼容修复】兼容 rows (若依标准分页) 和 data/直接数组
+      const list = res.rows || res.data || res || [];
+      this.setData({ todoList: list });
     });
   },
   navigateToAddTodo() {
@@ -102,23 +107,14 @@ Page({
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({ url: `/pages/proj_cyq/todo/edit?id=${id}` });
   },
-
-  // 【核心修复】切换待办状态
   toggleTodoStatus(e) {
     const id = e.currentTarget.dataset.id;
-    // 确保状态为字符串
     const currentStatus = String(e.currentTarget.dataset.status);
-    
-    // 逻辑：如果当前是完成('1')，则设为未完成('0')
-    // 如果当前是未完成('0') 或 过期('2')，则设为完成('1')
     const newStatus = currentStatus === '1' ? '0' : '1';
-    
     api.updateTodo({ todoId: id, status: newStatus }).then(() => {
-      // 成功后重新加载列表以更新UI
       this.loadTodos();
     });
   },
-
   deleteTodoItem(e) {
     const id = e.currentTarget.dataset.id;
     wx.showModal({
@@ -138,7 +134,9 @@ Page({
   // --- 通告模块 ---
   loadNotices() {
     return api.getNoticeList({ pageNum: 1, pageSize: 20 }).then(res => {
-      this.setData({ noticeList: res.rows || [] });
+      // 【兼容修复】
+      const list = res.rows || res.data || res || [];
+      this.setData({ noticeList: list });
     });
   },
   navigateToNoticeDetail(e) {

@@ -7,8 +7,8 @@ Page({
       title: '',
       content: '',
       priority: '0',
-      todoType: 'other', 
-      status: '0', // 【新增】默认为未完成
+      todoType: 'other',
+      status: '0',
       endTime: ''
     },
     date: '',
@@ -19,15 +19,16 @@ Page({
       { label: '生活', value: 'life' },
       { label: '其他', value: 'other' }
     ],
-    typeIndex: 3 
+    typeIndex: 3
   },
 
   onLoad(opts) {
     if (opts.id) {
       wx.setNavigationBarTitle({ title: '编辑待办' });
       api.getTodoDetail(opts.id).then(res => {
-        const data = res.data;
-        // 解析时间
+        // 【兼容修复】
+        const data = res.data || res;
+        
         let date = '', time = '';
         if (data.endTime) {
           const parts = data.endTime.split(' ');
@@ -35,10 +36,8 @@ Page({
           time = parts[1] ? parts[1].substring(0, 5) : ''; 
         }
         
-        // 解析类型索引
         const typeIndex = this.data.typeOptions.findIndex(opt => opt.value === data.todoType);
 
-        // data.status 会自动覆盖 form.status
         this.setData({ 
           form: data, 
           date: date, 
@@ -56,28 +55,14 @@ Page({
     }
   },
 
-  onInput(e) {
-    const field = e.currentTarget.dataset.field;
-    this.setData({ [`form.${field}`]: e.detail.value });
-  },
-
-  onPriorityChange(e) { 
-    this.setData({ 'form.priority': e.detail.value }); 
-  },
-
-  // 【新增】状态改变监听
-  onStatusChange(e) {
-    this.setData({ 'form.status': e.detail.value });
-  },
-
+  // ... (以下方法保持不变：onInput, onPriorityChange, onStatusChange, onTypeChange, onDateChange, onTimeChange) ...
+  onInput(e) { this.setData({ [`form.${e.currentTarget.dataset.field}`]: e.detail.value }); },
+  onPriorityChange(e) { this.setData({ 'form.priority': e.detail.value }); },
+  onStatusChange(e) { this.setData({ 'form.status': e.detail.value }); },
   onTypeChange(e) {
     const index = e.detail.value;
-    this.setData({
-      typeIndex: index,
-      'form.todoType': this.data.typeOptions[index].value
-    });
+    this.setData({ typeIndex: index, 'form.todoType': this.data.typeOptions[index].value });
   },
-
   onDateChange(e) { this.setData({ date: e.detail.value }); },
   onTimeChange(e) { this.setData({ time: e.detail.value }); },
 
@@ -86,7 +71,6 @@ Page({
     if (!this.data.date) return wx.showToast({ title: '请选择截止日期', icon: 'none' });
     
     const formData = { ...this.data.form };
-    
     let timeStr = this.data.time;
     if (!timeStr) timeStr = '23:59:59';
     else if (timeStr.length === 5) timeStr = timeStr + ':00';
@@ -96,11 +80,13 @@ Page({
     const req = formData.todoId ? api.updateTodo : api.addTodo;
     
     req(formData).then(res => {
-      if (res.code === 200) {
+      // 【兼容修复】如果 res 已经是数据本身，通常意味着成功；或者检查 code
+      const code = res.code !== undefined ? res.code : 200; // 默认成功
+      if (code === 200) {
         wx.showToast({ title: '保存成功' });
         setTimeout(() => wx.navigateBack(), 800);
       } else {
-        wx.showModal({ title: '保存失败', content: res.msg, showCancel: false });
+        wx.showModal({ title: '保存失败', content: res.msg || '未知错误', showCancel: false });
       }
     });
   }
