@@ -429,7 +429,16 @@
     </el-card>
 
     <!-- 编辑附件弹窗 -->
-    <el-dialog :visible.sync="editDialogVisible" title="修改提交文件" width="640px" append-to-body>
+    <el-dialog
+      :visible.sync="editDialogVisible"
+      title="修改提交文件"
+      width="640px"
+      append-to-body
+      :modal="false"
+      :lock-scroll="false"
+      :close-on-click-modal="false"
+      custom-class="centered-homework-dialog"
+    >
       <div v-if="editingSubmissionRow">
         <div class="edit-dialog-info">
           <p><strong>作业：</strong>{{ editingSubmissionRow.homeworkTitle || ('#'+editingSubmissionRow.homeworkId) }}</p>
@@ -1740,3 +1749,26 @@ export default {
 
 /* 其他样式保持不变 */
 </style>
+
+<style>
+/* 全局样式 - 确保作业上传弹窗居中在用户屏幕中间（无 scoped） */
+.centered-homework-dialog .el-dialog__wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow: auto !important;
+}
+
+.centered-homework-dialog .el-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  max-height: 90vh;
+  max-width: 95vw;
+}
+</style>
+

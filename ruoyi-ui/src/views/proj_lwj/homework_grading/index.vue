@@ -144,10 +144,15 @@
     </div>
 
     <!-- 批改对话框 -->
-    <el-dialog :title="`批改作业 - ${gradingRow.studentName || gradingRow.studentId}`"
-               :visible.sync="gradeDialogVisible"
-               width="500px"
-               :close-on-click-modal="false">
+    <el-dialog
+      :title="`批改作业 - ${gradingRow.studentName || gradingRow.studentId}`"
+      :visible.sync="gradeDialogVisible"
+      width="500px"
+      :close-on-click-modal="false"
+      :modal="false"
+      :lock-scroll="false"
+      custom-class="centered-homework-dialog"
+    >
       <div class="grade-dialog-content">
         <div class="student-info">
           <div><strong>学号：</strong> {{ gradingRow.student_no || gradingRow.studentNo || '—' }}</div>
@@ -456,9 +461,33 @@ export default {
         console.log('提交批改数据:', payload)
         await gradeSubmission(payload)
 
+        // 更新本地数据，而不是重新加载
+        const index = this.submissions.findIndex(s =>
+          (s.studentHomeworkId === this.gradingRow.studentHomeworkId) ||
+          (s.id === this.gradingRow.id) ||
+          (s.studentId === this.gradingRow.studentId && s.homeworkId === this.gradingRow.homeworkId)
+        )
+
+        if (index !== -1) {
+          // 更新该记录的批改信息
+          this.$set(this.submissions, index, {
+            ...this.submissions[index],
+            score: this.gradeForm.score,
+            remark: this.gradeForm.remark,
+            status: 2,
+            is_graded: 1,
+            correctedTime: new Date().toISOString(),
+            corrected_time: new Date().toISOString()
+          })
+        }
+
         this.$message.success('批改已保存')
         this.gradeDialogVisible = false
-        this.refreshSubmissions()
+
+        // 可选：在后台静默刷新数据
+        setTimeout(() => {
+          this.refreshSubmissions()
+        }, 500)
       } catch (error) {
         console.error('批改保存失败:', error)
         this.$message.error('保存失败: ' + (error.message || '网络错误'))
@@ -624,3 +653,26 @@ export default {
   gap: 12px;
 }
 </style>
+
+<style>
+/* 全局样式 - 确保作业批改弹窗居中在用户屏幕中间（无 scoped） */
+.centered-homework-dialog .el-dialog__wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow: auto !important;
+}
+
+.centered-homework-dialog .el-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  max-height: 90vh;
+  max-width: 95vw;
+}
+</style>
+
