@@ -20,44 +20,45 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `class_article`;
 CREATE TABLE `class_article` (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '文章ID',
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文章标题',
-  `digest` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '文章摘要',
-  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '文章内容',
-  `cover` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '封面图片',
-  `article_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '技术' COMMENT '文章分类',
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'editting' COMMENT '状态：editting-编辑中,published-已发布,draft-草稿',
-  `view_count` bigint DEFAULT '0' COMMENT '阅读数',
-  `comment_count` bigint DEFAULT '0' COMMENT '评论数',
-  `like_count` bigint DEFAULT '0' COMMENT '点赞数',
-  `hate_count` bigint DEFAULT '0' COMMENT '点踩数',
-  `bookmark_count` bigint DEFAULT '0' COMMENT '收藏数',
-  `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '作者',
-  `user_id` bigint DEFAULT NULL COMMENT '用户ID',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
-  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
-  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `idx_title` (`title`) USING BTREE,
-  KEY `idx_author` (`author`) USING BTREE,
-  KEY `idx_create_time` (`create_time`) USING BTREE,
-  KEY `idx_article_type` (`article_type`) USING BTREE,
-  KEY `idx_status` (`status`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章表';
+                                 `id` bigint NOT NULL AUTO_INCREMENT COMMENT '文章ID',
+                                 `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文章标题',
+                                 `digest` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '文章摘要',
+                                 `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '文章内容',
+                                 `cover` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '封面图片',
+                                 `article_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '技术' COMMENT '文章分类',
+                                 `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'editting' COMMENT '状态：editting-编辑中,published-已发布,draft-草稿',
+                                 `view_count` bigint DEFAULT '0' COMMENT '阅读数',
+                                 `comment_count` bigint DEFAULT '0' COMMENT '评论数',
+                                 `like_count` bigint DEFAULT '0' COMMENT '点赞数',
+                                 `hate_count` bigint DEFAULT '0' COMMENT '点踩数',
+                                 `bookmark_count` bigint DEFAULT '0' COMMENT '收藏数',
+                                 `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '作者',
+                                 `user_id` bigint DEFAULT NULL COMMENT '用户ID',
+                                 `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '创建者',
+                                 `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                 `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '更新者',
+                                 `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                 `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+                                 PRIMARY KEY (`id`) USING BTREE,
+                                 KEY `idx_title` (`title`) USING BTREE,
+                                 KEY `idx_author` (`author`) USING BTREE,
+                                 KEY `idx_create_time` (`create_time`) USING BTREE,
+                                 KEY `idx_article_type` (`article_type`) USING BTREE,
+                                 KEY `idx_status` (`status`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='文章表';
 
 -- ----------------------------
 -- Records of class_article
 -- ----------------------------
-INSERT INTO `class_article` VALUES ('1', 'Spring Boot 入门教程', '本文介绍Spring Boot的基本使用和配置', '<h1>入门</h1>', 'https://picsum.photos/id/1029/600/400', '技术', 'published', '178', '12', '59', '12', '0', '岂皓月', '1', 'admin', '2025-11-01 23:24:22', '', '2025-11-30 02:36:59', null);
+INSERT INTO `class_article` VALUES ('1', 'Spring Boot 入门教程', '本文介绍Spring Boot的基本使用和配置', '<h1>入门</h1>', 'https://picsum.photos/id/1029/600/400', '技术', 'published', '180', '12', '59', '12', '0', '岂皓月', '1', 'admin', '2025-11-01 23:24:22', '', '2025-12-01 23:51:47', null);
 INSERT INTO `class_article` VALUES ('2', '生活中的小确幸', '记录生活中的美好瞬间，( •̀ ω •́ )y', '<p>生活中总有一些小确幸让我们感到温暖...美好！</p>', 'https://picsum.photos/id/1035/600/400', '生活', 'published', '98', '8', '34', '1', '0', '岂皓月', '1', 'admin', '2025-11-01 23:24:22', '', '2025-11-30 02:31:10', null);
-INSERT INTO `class_article` VALUES ('3', 'Java编程思想', '深入理解Java编程思想', '<p>Java编程思想是每个Java开发者都应该掌握的...</p>', 'https://picsum.photos/id/1/600/400', '技术', 'published', '217', '25', '78', '0', '0', '岂皓月', '1', 'admin', '2025-11-01 23:24:22', '', '2025-11-30 02:48:29', null);
-INSERT INTO `class_article` VALUES ('9', '1', null, '<p>111</p>', '/profile/upload/2025/11/12/一．文件和文件系统_20251112231007A001.png', '技术', 'editting', '5', '0', '0', '0', '0', '若依', null, null, '2025-11-12 23:10:11', '', '2025-11-21 23:12:54', null);
-INSERT INTO `class_article` VALUES ('10', '计算机网络', '1', '<p><img src=\"/dev-api/profile/upload/2025/11/16/屏幕截图 2025-11-06 110411_20251116060547A001.png\"></p>', '/profile/upload/2025/11/16/屏幕截图 2025-11-13 105252_20251116060620A002.png', '技术', 'published', '16', '0', '0', '0', '0', 'admin', '1', null, '2025-11-16 06:06:22', '', '2025-11-30 03:05:08', null);
-INSERT INTO `class_article` VALUES ('11', 'haha', null, '<p>我头像呢</p>', '/profile/upload/2025/11/21/屏幕截图 2025-05-24 014721_20251121231416A004.png', '技术', 'editting', '7', '0', '0', '0', '0', 'admin', '1', null, '2025-11-21 23:13:23', '', '2025-11-30 02:27:57', null);
-INSERT INTO `class_article` VALUES ('13', '附件测试', '附件测试请成功。', '<p><a href=\"/dev-api/profile/upload/2025/11/27/readme_20251127020226A001.txt\" rel=\"noopener noreferrer\" target=\"_blank\"><img src=\"/dev-api/profile/upload/2025/11/27/屏幕截图 2024-05-08 205252_20251127022257A001.png\">readme.txt</a>11111</p>', '/profile/upload/2025/11/27/屏幕截图 2024-01-27 021513_20251127020306A002.png', '技术', 'published', '14', '0', '2', '0', '0', 'admin', '1', null, '2025-11-27 02:03:13', '', '2025-11-30 03:04:59', null);
-INSERT INTO `class_article` VALUES ('14', '为何如此', '图呢', '<p><a href=\"/dev-api/profile/upload/2025/11/27/周报模板_20251127023457A003.doc\" rel=\"noopener noreferrer\" target=\"_blank\">周报模板.doc</a><img src=\"/dev-api/profile/upload/2025/11/27/1_20251127023336A001.png\"></p>', '/profile/upload/2025/11/27/屏幕截图 2023-11-08 201536_20251127023354A002.png', '技术', 'published', '9', '0', '0', '0', '0', 'admin', '1', null, '2025-11-27 02:33:57', '', '2025-11-30 03:04:40', null);
+INSERT INTO `class_article` VALUES ('3', 'Java编程思想', '深入理解Java编程思想', '<p>Java编程思想是每个Java开发者都应该掌握的...</p>', 'https://picsum.photos/id/1/600/400', '技术', 'published', '219', '25', '78', '0', '0', '若依', '1', 'admin', '2025-11-01 23:24:22', '', '2025-11-30 15:59:04', null);
+INSERT INTO `class_article` VALUES ('9', '1', null, '<p>111</p>', '/profile/upload/2025/11/12/一．文件和文件系统_20251112231007A001.png', '技术', 'editting', '7', '0', '0', '0', '0', '若依', null, null, '2025-11-12 23:10:11', '', '2025-11-30 15:59:19', null);
+INSERT INTO `class_article` VALUES ('10', '计算机网络', '1', '<p><img src=\"/dev-api/profile/upload/2025/11/16/屏幕截图 2025-11-06 110411_20251116060547A001.png\"></p>', '/profile/upload/2025/11/16/屏幕截图 2025-11-13 105252_20251116060620A002.png', '技术', 'published', '19', '0', '0', '0', '0', 'admin', '1', null, '2025-11-16 06:06:22', '', '2025-12-01 23:49:16', null);
+INSERT INTO `class_article` VALUES ('11', 'haha', null, '<p>我头像呢</p>', '/profile/upload/2025/11/21/屏幕截图 2025-05-24 014721_20251121231416A004.png', '技术', 'editting', '9', '0', '0', '0', '0', 'admin', '1', null, '2025-11-21 23:13:23', '', '2025-11-30 16:28:03', null);
+INSERT INTO `class_article` VALUES ('13', '附件图片字体字号测试', '测试请成功。', '<p class=\"ql-align-center\"><strong class=\"ql-size-huge\">标题居中加粗</strong></p><ol><li data-list=\"ordered\"><span class=\"ql-ui\" contenteditable=\"false\"></span><em>倾斜</em></li><li data-list=\"ordered\"><span class=\"ql-ui\" contenteditable=\"false\"></span><u>下划线</u></li><li data-list=\"ordered\"><span class=\"ql-ui\" contenteditable=\"false\"></span><span class=\"ql-font-KaiTi\">楷体</span></li></ol><p><strong class=\"ql-size-large\">代码</strong></p><div class=\"ql-code-block-container\" spellcheck=\"false\"><div class=\"ql-code-block\" data-language=\"plain\">//代码</div><div class=\"ql-code-block\" data-language=\"plain\">package com.ruoyi.proj_qhy.mapper;</div></div><p><span style=\"color: rgb(230, 0, 0);\">变色</span></p><p><span style=\"background-color: rgb(255, 255, 0);\">背景</span></p><p><br></p><p><strong class=\"ql-size-large\">插入图片</strong></p><p><img src=\"/dev-api/profile/upload/2025/11/30/屏幕截图 2024-05-08 205252_20251130063037A001.png\"></p><p><br></p><p><strong class=\"ql-size-large\">插入链接</strong></p><p><a href=\"/dev-api/profile/upload/2025/11/27/周报模板_20251127023457A003.doc\" rel=\"noopener noreferrer\" target=\"_blank\">周报模板.doc</a></p><p><a href=\"/dev-api/profile/upload/2025/11/27/readme_20251127020226A001.txt\" rel=\"noopener noreferrer\" target=\"_blank\">readme.txt</a></p>', '/profile/upload/2025/11/27/屏幕截图 2024-01-27 021513_20251127020306A002.png', '技术', 'published', '110', '0', '2', '0', '0', '若依', '1', null, '2025-11-27 02:03:13', '', '2025-12-01 23:56:21', null);
+INSERT INTO `class_article` VALUES ('14', '为何如此', '图呢', '<p><a href=\"/dev-api/profile/upload/2025/11/27/周报模板_20251127023457A003.doc\" rel=\"noopener noreferrer\" target=\"_blank\">周报模板.doc</a><img src=\"/dev-api/profile/upload/2025/11/27/1_20251127023336A001.png\"></p>', '/profile/upload/2025/11/27/屏幕截图 2023-11-08 201536_20251127023354A002.png', '技术', 'published', '30', '0', '0', '0', '0', 'admin', '1', null, '2025-11-27 02:33:57', '', '2025-12-01 23:51:39', null);
+
 -- ----------------------------
 -- Table structure for class_article_like
 -- ----------------------------

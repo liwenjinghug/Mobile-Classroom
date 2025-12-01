@@ -43,7 +43,7 @@ Page({
         // 2. 【修复点】优化图片样式
         // 之前的代码里 < img 多了个空格，导致图片变成了文字链接
         // 现已修复为 <img
-        data.content = data.content.replace(/<img/g, '< img style="max-width:100%;height:auto;display:block;margin:10px 0;"');
+        data.content = data.content.replace(/<img/g, '<img style="max-width:100%;height:auto;display:block;margin:10px 0;"');
 
         // 3. 提取附件链接
         const linkRegex = /<a[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
