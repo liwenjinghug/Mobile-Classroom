@@ -66,6 +66,15 @@ public class ClassHomeworkController extends BaseController {
         try {
             // log incoming payload for debugging
             logger.info("添加作业请求 payload: {}", hw);
+
+            // Check for duplicate title in the same session
+            if (hw.getSessionId() != null && hw.getTitle() != null && !hw.getTitle().trim().isEmpty()) {
+                boolean exists = homeworkService.existsBySessionAndTitle(hw.getSessionId(), hw.getTitle(), null);
+                if (exists) {
+                    return AjaxResult.error("当前课堂已存在相同标题的作业，请修改标题后重试");
+                }
+            }
+
             int r = homeworkService.addHomework(hw);
             // TODO: 自动为班级学生生成 class_student_homework 记录（根据 session 或 course 关联学生）
             return toAjax(r);
@@ -80,6 +89,15 @@ public class ClassHomeworkController extends BaseController {
     @PutMapping
     public AjaxResult edit(@RequestBody com.ruoyi.proj_lwj.domain.ClassHomework hw) {
         hw.setUpdateBy(getUsername());
+
+        // Check for duplicate title in the same session (excluding current homework)
+        if (hw.getSessionId() != null && hw.getTitle() != null && !hw.getTitle().trim().isEmpty()) {
+            boolean exists = homeworkService.existsBySessionAndTitle(hw.getSessionId(), hw.getTitle(), hw.getHomeworkId());
+            if (exists) {
+                return AjaxResult.error("当前课堂已存在相同标题的作业，请修改标题后重试");
+            }
+        }
+
         return toAjax(homeworkService.editHomework(hw));
     }
 
