@@ -56,7 +56,7 @@
         placeholder="请输入你的答案..."
         value="{{answer}}"
         bindinput="onAnswerInput"
-        disabled="{{isExpired || status === '已提交'}}"
+        disabled="{{isExpired && !submission}}"
         maxlength="5000"
       />
 

@@ -214,9 +214,12 @@ Page({
     const uploadPromises = files.map(file => {
       return new Promise((resolve, reject) => {
         wx.uploadFile({
-          url: baseUrl + '/common/upload',
+          url: baseUrl + '/proj_fz/file/uploadOriginal',
           filePath: file.path,
           name: 'file',
+          formData: {
+            'originalName': file.name  // 传递原始文件名
+          },
           header: {
             'Authorization': 'Bearer ' + token
           },
@@ -224,9 +227,10 @@ Page({
             try {
               const data = JSON.parse(res.data);
               if (data.code === 200) {
+                const fileInfo = data.data || {};
                 resolve({
-                  name: file.name,
-                  url: data.url || data.fileName,
+                  name: fileInfo.originalFilename || file.name,
+                  url: fileInfo.url || fileInfo.fileName || data.url || data.fileName,
                   size: file.size
                 });
               } else {
