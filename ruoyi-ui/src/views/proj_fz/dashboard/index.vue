@@ -359,20 +359,21 @@
               :default-sort="{prop: 'deadline', order: 'ascending'}"
               v-loading="homeworkLoading"
               height="300"
+              :fit="true"
             >
-              <el-table-column prop="title" label="作业名称" min-width="150" sortable="custom"></el-table-column>
-              <el-table-column prop="course" label="课程" width="120" sortable="custom"></el-table-column>
-              <el-table-column prop="publishTime" label="发布时间" width="120" sortable="custom">
+              <el-table-column prop="title" label="作业名称" min-width="140" sortable="custom" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="course" label="课程" min-width="90" sortable="custom" show-overflow-tooltip></el-table-column>
+              <el-table-column prop="publishTime" label="发布时间" min-width="110" sortable="custom">
                 <template #default="scope">
                   {{ formatTime(scope.row.publishTime) }}
                 </template>
               </el-table-column>
-              <el-table-column prop="deadline" label="截止时间" width="120" sortable="custom">
+              <el-table-column prop="deadline" label="截止时间" min-width="110" sortable="custom">
                 <template #default="scope">
                   {{ formatTime(scope.row.deadline) }}
                 </template>
               </el-table-column>
-              <el-table-column label="提交情况" width="100" sortable="custom" :sort-by="['submittedCount', 'pendingCount']">
+              <el-table-column label="提交" min-width="85" sortable="custom" :sort-by="['submittedCount', 'pendingCount']">
                 <template #default="scope">
                   <el-progress
                     :percentage="getSubmissionPercentage(scope.row)"
@@ -384,14 +385,14 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column prop="status" label="状态" width="80" sortable="custom">
+              <el-table-column prop="status" label="状态" width="75" sortable="custom">
                 <template #default="scope">
                   <el-tag :type="scope.row.status === '进行中' ? 'success' : 'danger'" size="small">
                     {{ scope.row.status }}
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" width="160" fixed="right">
+              <el-table-column label="操作" width="65" fixed="right" align="center">
                 <template #default="scope">
                   <el-button
                     size="mini"
@@ -2921,11 +2922,57 @@ export default {
   padding: 0 15px 15px;
 }
 
+/* 去除表格单元格之间的空隙，让表项平铺占满 */
+.table-container >>> .el-table {
+  border-spacing: 0 !important;
+  border-collapse: collapse !important;
+  table-layout: auto !important;
+}
+
+.table-container >>> .el-table td,
+.table-container >>> .el-table th {
+  padding: 8px 5px !important;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.table-container >>> .el-table--border td,
+.table-container >>> .el-table--border th {
+  border-right: 1px solid #ebeef5;
+}
+
+.table-container >>> .el-table th.is-leaf {
+  border-bottom: 1px solid #ebeef5;
+}
+
+.table-container >>> .el-table__body tr:hover > td {
+  background-color: #f5f7fa;
+}
+
+.table-container >>> .el-table__body-wrapper {
+  overflow-x: hidden !important;
+}
+
+.table-container >>> .el-table colgroup col[name="gutter"] {
+  display: none;
+  width: 0 !important;
+}
+
 .submission-text {
   font-size: 12px;
   color: #909399;
   text-align: center;
   margin-top: 4px;
+}
+
+/* 确保详情按钮不会出现省略号 */
+.table-container .el-button--mini {
+  padding: 5px 0;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.table-container .el-button--text {
+  padding: 5px 0;
 }
 
 /* 空状态样式 */

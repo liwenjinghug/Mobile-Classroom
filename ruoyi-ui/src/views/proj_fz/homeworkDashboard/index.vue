@@ -281,31 +281,35 @@
         <el-table-column
           prop="homeworkId"
           label="作业ID"
-          width="80"
-          sortable>
+          width="70"
+          sortable
+          align="center">
         </el-table-column>
         <el-table-column
           prop="homeworkTitle"
           label="作业名称"
-          min-width="200"
-          show-overflow-tooltip>
+          width="180"
+          show-overflow-tooltip
+          sortable>
         </el-table-column>
         <el-table-column
           prop="courseName"
           label="课程"
-          width="120"
-          sortable>
+          width="100"
+          sortable
+          show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           prop="className"
           label="课堂"
-          width="120"
-          sortable>
+          width="100"
+          sortable
+          show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           prop="createTime"
           label="发布时间"
-          width="160"
+          width="140"
           sortable>
           <template #default="scope">
             <span>{{ formatDate(scope.row.createTime) }}</span>
@@ -314,7 +318,7 @@
         <el-table-column
           prop="deadline"
           label="截止时间"
-          width="160"
+          width="140"
           sortable>
           <template #default="scope">
             <span>{{ formatDate(scope.row.deadline) }}</span>
@@ -323,10 +327,11 @@
         <el-table-column
           prop="submissionRate"
           label="提交率"
-          width="100"
-          sortable>
+          width="80"
+          sortable
+          align="center">
           <template #default="scope">
-            <el-tag :type="getSubmissionRateType(scope.row.submissionRate)">
+            <el-tag :type="getSubmissionRateType(scope.row.submissionRate)" size="small">
               {{ scope.row.submissionRate || 0 }}%
             </el-tag>
           </template>
@@ -334,26 +339,30 @@
         <el-table-column
           prop="submittedCount"
           label="已提交"
-          width="80"
-          sortable>
+          width="70"
+          sortable
+          align="center">
         </el-table-column>
         <el-table-column
           prop="notSubmittedCount"
           label="未提交"
-          width="80"
-          sortable>
+          width="70"
+          sortable
+          align="center">
         </el-table-column>
         <el-table-column
           prop="overdueCount"
           label="逾期"
-          width="80"
-          sortable>
+          width="60"
+          sortable
+          align="center">
         </el-table-column>
         <el-table-column
           prop="averageScore"
           label="平均分"
-          width="100"
-          sortable>
+          width="80"
+          sortable
+          align="center">
           <template #default="scope">
             <span v-if="scope.row.averageScore">{{ scope.row.averageScore.toFixed(1) }}</span>
             <span v-else style="color: #909399;">未批改</span>
@@ -362,9 +371,10 @@
         <el-table-column
           prop="createBy"
           label="发布者"
-          width="100">
+          width="90"
+          show-overflow-tooltip>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="100" fixed="right">
+        <el-table-column label="操作" align="center" width="60" fixed="right">
           <template #default="scope">
             <el-button
               size="mini"
@@ -1397,6 +1407,17 @@ export default {
   font-weight: 600;
   border-bottom: 1px solid #f5f5f7;
   padding: 12px 0;
+}
+
+/* 确保详情按钮不会出现省略号 */
+.app-container >>> .el-table .el-button--mini {
+  padding: 5px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.app-container >>> .el-table .el-button--text {
+  padding: 5px 0;
 }
 
 .app-container >>> .el-table td {
