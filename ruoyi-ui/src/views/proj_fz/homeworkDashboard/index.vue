@@ -364,8 +364,88 @@
           label="发布者"
           width="100">
         </el-table-column>
+        <el-table-column label="操作" align="center" width="100" fixed="right">
+          <template #default="scope">
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-view"
+              @click="handleViewDetail(scope.row)"
+            >详情</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-card>
+
+    <!-- 作业详情对话框 -->
+    <el-dialog :title="detailDialogTitle" :visible.sync="detailDialogVisible" width="900px" append-to-body>
+      <el-descriptions v-if="currentDetailRow" :column="2" border>
+        <el-descriptions-item label="作业ID">{{ currentDetailRow.homeworkId }}</el-descriptions-item>
+        <el-descriptions-item label="作业名称">{{ currentDetailRow.homeworkTitle }}</el-descriptions-item>
+        <el-descriptions-item label="课程名称">{{ currentDetailRow.courseName }}</el-descriptions-item>
+        <el-descriptions-item label="课堂名称">{{ currentDetailRow.className }}</el-descriptions-item>
+        <el-descriptions-item label="发布时间">{{ formatDate(currentDetailRow.createTime) }}</el-descriptions-item>
+        <el-descriptions-item label="截止时间">{{ formatDate(currentDetailRow.deadline) }}</el-descriptions-item>
+        <el-descriptions-item label="作业状态">
+          <el-tag :type="isExpired(currentDetailRow.deadline) ? 'danger' : 'success'" size="small">
+            {{ isExpired(currentDetailRow.deadline) ? '已过期' : '进行中' }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="发布者">{{ currentDetailRow.createBy }}</el-descriptions-item>
+        <el-descriptions-item label="已提交人数">{{ currentDetailRow.submittedCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="未提交人数">{{ currentDetailRow.notSubmittedCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="逾期提交人数">{{ currentDetailRow.overdueCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="提交率">
+          <el-tag :type="getSubmissionRateType(currentDetailRow.submissionRate)">
+            {{ currentDetailRow.submissionRate || 0 }}%
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="已批改人数">{{ currentDetailRow.gradedCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="批改率">
+          {{ currentDetailRow.submittedCount > 0 ?
+            Math.round((currentDetailRow.gradedCount || 0) / currentDetailRow.submittedCount * 100) : 0 }}%
+        </el-descriptions-item>
+        <el-descriptions-item label="平均分">
+          <span v-if="currentDetailRow.averageScore">{{ currentDetailRow.averageScore.toFixed(1) }}</span>
+          <span v-else style="color: #909399;">未批改</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="最高分">
+          <span v-if="currentDetailRow.maxScore">{{ currentDetailRow.maxScore }}</span>
+          <span v-else style="color: #909399;">-</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="最低分">
+          <span v-if="currentDetailRow.minScore">{{ currentDetailRow.minScore }}</span>
+          <span v-else style="color: #909399;">-</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="及格率">
+          <span v-if="currentDetailRow.passRate !== undefined">{{ currentDetailRow.passRate }}%</span>
+          <span v-else style="color: #909399;">-</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="作业内容" :span="2">
+          <div style="max-height: 200px; overflow-y: auto;">
+            {{ currentDetailRow.homeworkContent || '无' }}
+          </div>
+        </el-descriptions-item>
+        <el-descriptions-item label="附件" :span="2">
+          <div v-if="currentDetailRow.attachments && currentDetailRow.attachments.length > 0">
+            <el-tag v-for="(file, index) in currentDetailRow.attachments" :key="index" style="margin-right: 5px;">
+              {{ file.fileName }}
+            </el-tag>
+          </div>
+          <span v-else>无附件</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="备注" :span="2">{{ currentDetailRow.remark || '无' }}</el-descriptions-item>
+      </el-descriptions>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleDetailNavigation('first')" :disabled="currentDetailIndex <= 0">首条</el-button>
+        <el-button @click="handleDetailNavigation('prev')" :disabled="currentDetailIndex <= 0">上一条</el-button>
+        <el-button @click="handleDetailNavigation('next')" :disabled="currentDetailIndex >= homeworkList.length - 1">下一条</el-button>
+        <el-button @click="handleDetailNavigation('last')" :disabled="currentDetailIndex >= homeworkList.length - 1">末尾</el-button>
+        <el-button type="primary" @click="handlePrintDetail">打印</el-button>
+        <el-button type="success" @click="handleExportDetail">导出</el-button>
+        <el-button @click="detailDialogVisible = false">关闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -463,7 +543,13 @@ export default {
           icon: 'el-icon-check',
           color: '#F56C6C'
         }
-      ]
+      ],
+
+      // 详情对话框相关
+      detailDialogVisible: false,
+      detailDialogTitle: '作业详情',
+      currentDetailRow: null,
+      currentDetailIndex: 0
     }
   },
   mounted() {
@@ -929,6 +1015,139 @@ export default {
         console.error('日期格式化错误:', error)
         return '-'
       }
+    },
+
+    // 详情相关方法
+    handleViewDetail(row) {
+      this.currentDetailRow = row
+      this.currentDetailIndex = this.homeworkList.indexOf(row)
+      this.detailDialogTitle = `作业详情 - ${row.homeworkTitle}`
+      this.detailDialogVisible = true
+    },
+
+    handleDetailNavigation(action) {
+      let newIndex = this.currentDetailIndex
+      switch (action) {
+        case 'first':
+          newIndex = 0
+          break
+        case 'prev':
+          newIndex = Math.max(0, this.currentDetailIndex - 1)
+          break
+        case 'next':
+          newIndex = Math.min(this.homeworkList.length - 1, this.currentDetailIndex + 1)
+          break
+        case 'last':
+          newIndex = this.homeworkList.length - 1
+          break
+      }
+
+      if (newIndex !== this.currentDetailIndex) {
+        this.currentDetailIndex = newIndex
+        this.currentDetailRow = this.homeworkList[newIndex]
+        this.detailDialogTitle = `作业详情 - ${this.currentDetailRow.homeworkTitle}`
+      }
+    },
+
+    handlePrintDetail() {
+      this.$nextTick(() => {
+        const printWindow = window.open('', '_blank')
+        const detailContent = `
+          <html>
+            <head>
+              <title>作业详情 - ${this.currentDetailRow.homeworkTitle}</title>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+                .print-header h1 { margin: 0; color: #333; }
+                .print-time { color: #666; font-size: 14px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                th { background-color: #f5f5f5; font-weight: bold; width: 150px; }
+                @media print {
+                  body { margin: 0; }
+                  .no-print { display: none; }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="print-header">
+                <h1>作业详情</h1>
+                <div class="print-time">打印时间: ${new Date().toLocaleString()}</div>
+              </div>
+              <table>
+                <tr><th>作业ID</th><td>${this.currentDetailRow.homeworkId}</td></tr>
+                <tr><th>作业名称</th><td>${this.currentDetailRow.homeworkTitle}</td></tr>
+                <tr><th>课程名称</th><td>${this.currentDetailRow.courseName}</td></tr>
+                <tr><th>课堂名称</th><td>${this.currentDetailRow.className}</td></tr>
+                <tr><th>发布时间</th><td>${this.formatDate(this.currentDetailRow.createTime)}</td></tr>
+                <tr><th>截止时间</th><td>${this.formatDate(this.currentDetailRow.deadline)}</td></tr>
+                <tr><th>发布者</th><td>${this.currentDetailRow.createBy}</td></tr>
+                <tr><th>已提交人数</th><td>${this.currentDetailRow.submittedCount || 0}</td></tr>
+                <tr><th>未提交人数</th><td>${this.currentDetailRow.notSubmittedCount || 0}</td></tr>
+                <tr><th>逾期提交人数</th><td>${this.currentDetailRow.overdueCount || 0}</td></tr>
+                <tr><th>提交率</th><td>${this.currentDetailRow.submissionRate || 0}%</td></tr>
+                <tr><th>已批改人数</th><td>${this.currentDetailRow.gradedCount || 0}</td></tr>
+                <tr><th>平均分</th><td>${this.currentDetailRow.averageScore ? this.currentDetailRow.averageScore.toFixed(1) : '未批改'}</td></tr>
+                <tr><th>作业内容</th><td>${this.currentDetailRow.homeworkContent || '无'}</td></tr>
+                <tr><th>备注</th><td>${this.currentDetailRow.remark || '无'}</td></tr>
+              </table>
+            </body>
+          </html>
+        `
+        printWindow.document.write(detailContent)
+        printWindow.document.close()
+        printWindow.onload = function() {
+          printWindow.print()
+          printWindow.onafterprint = function() {
+            printWindow.close()
+          }
+        }
+      })
+    },
+
+    handleExportDetail() {
+      try {
+        const row = this.currentDetailRow
+        const csvContent = [
+          ['作业ID', row.homeworkId],
+          ['作业名称', row.homeworkTitle],
+          ['课程名称', row.courseName],
+          ['课堂名称', row.className],
+          ['发布时间', this.formatDate(row.createTime)],
+          ['截止时间', this.formatDate(row.deadline)],
+          ['发布者', row.createBy],
+          ['已提交人数', row.submittedCount || 0],
+          ['未提交人数', row.notSubmittedCount || 0],
+          ['逾期提交人数', row.overdueCount || 0],
+          ['提交率', `${row.submissionRate || 0}%`],
+          ['已批改人数', row.gradedCount || 0],
+          ['平均分', row.averageScore ? row.averageScore.toFixed(1) : '未批改'],
+          ['作业内容', row.homeworkContent || '无'],
+          ['备注', row.remark || '无']
+        ].map(e => e.join(',')).join('\n')
+
+        const BOM = '\uFEFF'
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `作业详情_${row.homeworkTitle}_${new Date().getTime()}.csv`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        this.$message.success('导出成功')
+      } catch (error) {
+        console.error('导出失败:', error)
+        this.$message.error('导出失败')
+      }
+    },
+
+    isExpired(deadline) {
+      if (!deadline) return false
+      return new Date(deadline) < new Date()
     }
   }
 }
