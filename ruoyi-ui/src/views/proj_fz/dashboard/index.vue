@@ -80,10 +80,6 @@
               <div class="metric-value">{{ metric.value }}</div>
               <div class="metric-title">{{ metric.title }}</div>
               <div v-if="metric.subTitle" class="metric-subtitle">{{ metric.subTitle }}</div>
-              <div class="metric-trend" :class="getTrendClass(metric.trend)">
-                <i :class="getTrendIcon(metric.trend)"></i>
-                {{ Math.abs(metric.trend) }}%
-              </div>
             </div>
           </div>
         </el-card>
@@ -303,7 +299,6 @@
                 <el-button size="small" icon="el-icon-refresh" @click="loadHomeworkDetails">刷新</el-button>
                 <el-button size="small" icon="el-icon-download" @click="exportHomework">导出</el-button>
                 <el-button size="small" icon="el-icon-printer" @click="printHomework">打印</el-button>
-                <el-button size="small" icon="el-icon-document-add" @click="showHomeworkDetail">详情</el-button>
               </div>
             </div>
           </template>
@@ -396,9 +391,9 @@
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" width="80">
+              <el-table-column label="操作" width="160" fixed="right">
                 <template #default="scope">
-                  <el-button type="text" @click="showHomeworkItemDetail(scope.row)">详情</el-button>
+                  <el-button type="primary" size="mini" icon="el-icon-view" @click="showHomeworkItemDetail(scope.row)">查看详情</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -600,7 +595,7 @@
         <el-descriptions-item label="批改人数">{{ currentHomeworkDetail.gradedCount || 0 }}</el-descriptions-item>
         <el-descriptions-item label="批改率">
           {{ currentHomeworkDetail.submittedCount > 0 ?
-             Math.round((currentHomeworkDetail.gradedCount || 0) / currentHomeworkDetail.submittedCount * 100) : 0 }}%
+          Math.round((currentHomeworkDetail.gradedCount || 0) / currentHomeworkDetail.submittedCount * 100) : 0 }}%
         </el-descriptions-item>
         <el-descriptions-item label="平均分">{{ currentHomeworkDetail.averageScore || '-' }}</el-descriptions-item>
         <el-descriptions-item label="最高分">{{ currentHomeworkDetail.maxScore || '-' }}</el-descriptions-item>
@@ -670,7 +665,6 @@ import {
   getHomeworkDetails,
   getNotices,
   getOperationLogs,
-  getHomeworkByStatus,
   exportHomeworkDetails,
   exportNotices,
   exportOperationLogs,
@@ -1086,7 +1080,7 @@ export default {
       this.loadOperationLogs()
     },
 
-    handleHomeworkSort({ column, prop, order }) {
+    handleHomeworkSort({ prop, order }) {
       if (prop && order) {
         this.homeworkFilter.sortField = prop
         this.homeworkFilter.sortOrder = order === 'ascending' ? 'asc' : 'desc'
@@ -1199,52 +1193,126 @@ export default {
         { name: '已批改', value: this.chartData.submissionStatus.graded }
       ]
 
-      const option = {
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
-        },
-        legend: {
-          orient: 'vertical',
-          left: 'left',
-          top: 'center',
-          textStyle: {
-            color: '#606266'
-          }
-        },
-        series: [
-          {
-            name: '提交状态',
-            type: this.statusChartType,
-            radius: this.statusChartType === 'ring' ? ['40%', '70%'] : '70%',
-            avoidLabelOverlap: false,
-            itemStyle: {
-              borderRadius: 10,
-              borderColor: '#fff',
-              borderWidth: 2
-            },
-            label: {
-              show: false,
-              position: 'center'
-            },
-            emphasis: {
-              label: {
-                show: true,
-                fontSize: '12',
-                fontWeight: 'bold'
+      let option = {}
+
+      if (this.statusChartType === 'bar') {
+        // 柱状图配置
+        option = {
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'shadow'
+            }
+          },
+          legend: {
+            orient: 'horizontal',
+            left: 'center',
+            top: 'top',
+            textStyle: {
+              color: '#606266'
+            }
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            top: '15%',
+            containLabel: true
+          },
+          xAxis: {
+            type: 'category',
+            data: data.map(item => item.name),
+            axisLine: {
+              lineStyle: {
+                color: '#E4E7ED'
               }
             },
-            labelLine: {
-              show: false
+            axisLabel: {
+              color: '#606266'
+            }
+          },
+          yAxis: {
+            type: 'value',
+            axisLine: {
+              lineStyle: {
+                color: '#E4E7ED'
+              }
             },
-            data: data
-          }
-        ]
+            axisLabel: {
+              color: '#606266'
+            },
+            splitLine: {
+              lineStyle: {
+                color: '#F0F2F5'
+              }
+            }
+          },
+          series: [
+            {
+              name: '提交状态',
+              type: 'bar',
+              data: data.map(item => item.value),
+              itemStyle: {
+                color: function(params) {
+                  const colors = ['#409EFF', '#F56C6C', '#67C23A']
+                  return colors[params.dataIndex]
+                },
+                borderRadius: [8, 8, 0, 0]
+              },
+              barWidth: '40%'
+            }
+          ]
+        }
+      } else {
+        // 饼图/环形图配置
+        option = {
+          tooltip: {
+            trigger: 'item',
+            formatter: '{a} <br/>{b}: {c} ({d}%)'
+          },
+          legend: {
+            orient: 'vertical',
+            left: 'left',
+            top: 'center',
+            textStyle: {
+              color: '#606266'
+            }
+          },
+          series: [
+            {
+              name: '提交状态',
+              type: 'pie',
+              radius: this.statusChartType === 'ring' ? ['40%', '70%'] : '70%',
+              avoidLabelOverlap: false,
+              itemStyle: {
+                borderRadius: 10,
+                borderColor: '#fff',
+                borderWidth: 2
+              },
+              label: {
+                show: false,
+                position: 'center'
+              },
+              emphasis: {
+                label: {
+                  show: true,
+                  fontSize: '12',
+                  fontWeight: 'bold'
+                }
+              },
+              labelLine: {
+                show: false
+              },
+              data: data
+            }
+          ]
+        }
       }
 
       chart.setOption(option)
 
       // 添加点击事件
+      chart.off('click') // 先移除旧的事件监听
       chart.on('click', (params) => {
         this.handleChartClick('status', params.name)
       })
@@ -1532,6 +1600,7 @@ export default {
       this.$nextTick(() => {
         this.initStatusChart()
       })
+      this.$message.success(`已切换为${command === 'pie' ? '饼图' : command === 'ring' ? '环形图' : '柱状图'}`)
     },
 
     handleChartAction(command) {
@@ -1565,14 +1634,6 @@ export default {
         }
       }
       return 'el-icon-sunny';
-    },
-
-    getTrendClass(trend) {
-      return trend > 0 ? 'positive' : trend < 0 ? 'negative' : 'neutral'
-    },
-
-    getTrendIcon(trend) {
-      return trend > 0 ? 'el-icon-top' : trend < 0 ? 'el-icon-bottom' : 'el-icon-minus'
     },
 
     getSubmissionPercentage(row) {
@@ -1834,9 +1895,6 @@ export default {
       })
     },
 
-    showHomeworkDetail() {
-      this.$message.info('作业详情功能开发中')
-    },
 
     showHomeworkItemDetail(item) {
       // 获取作业ID，兼容不同的字段名
@@ -1855,7 +1913,7 @@ export default {
         }
         this.homeworkDetailDialogVisible = true
         this.homeworkDetailTitle = '作业详情'
-      }).catch(error => {
+      }).catch(() => {
         // 如果后端API还没实现，使用列表数据
         this.currentHomeworkDetail = { ...item }
         // 确保homeworkId字段存在
@@ -1891,7 +1949,7 @@ export default {
           if (!this.currentHomeworkDetail.homeworkId && this.currentHomeworkDetail.id) {
             this.currentHomeworkDetail.homeworkId = this.currentHomeworkDetail.id
           }
-        }).catch(error => {
+        }).catch(() => {
           // 如果后端API还没实现，使用列表数据
           this.currentHomeworkDetail = { ...row }
           // 确保homeworkId字段存在
@@ -2414,38 +2472,6 @@ export default {
   margin-bottom: 8px;
 }
 
-.metric-trend {
-  display: inline-flex;
-  align-items: center;
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.metric-trend.positive {
-  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
-  color: #409EFF;
-  border: 1px solid #d9ecff;
-}
-
-.metric-trend.negative {
-  background: linear-gradient(135deg, #fef0f0 0%, #fde2e2 100%);
-  color: #F56C6C;
-  border: 1px solid #fcd3d3;
-}
-
-.metric-trend.neutral {
-  background: linear-gradient(135deg, #f4f4f5 0%, #f0f0f1 100%);
-  color: #909399;
-  border: 1px solid #e4e7ed;
-}
-
-.metric-trend i {
-  margin-right: 2px;
-  font-size: 10px;
-}
 
 /* 主要图表区域样式 */
 .main-chart-section {
@@ -3030,8 +3056,8 @@ export default {
     width: 100%;
   }
 
-  .filter-form .el-form-item :deep(.el-input),
-  .filter-form .el-form-item :deep(.el-select) {
+  .filter-form .el-form-item >>> .el-input,
+  .filter-form .el-form-item >>> .el-select {
     width: 100% !important;
   }
 }
