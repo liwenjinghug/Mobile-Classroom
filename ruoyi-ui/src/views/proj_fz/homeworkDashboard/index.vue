@@ -264,7 +264,7 @@
             </div>
 
             <div class="filter-item">
-              <el-button @click="resetFilter" type="default" icon="el-icon-refresh">
+              <el-button @click="resetFilter" icon="el-icon-refresh">
                 重置
               </el-button>
             </div>
@@ -897,7 +897,7 @@ export default {
 
     handlePrint() {
       this.$nextTick(() => {
-        const printContent = document.getElementById('printTable').outerHTML
+        // 收集图表数据
         const charts = []
 
         if (this.submissionChart) {
@@ -919,6 +919,24 @@ export default {
           })
         }
 
+        // 手动构建表格内容
+        const tableRows = this.homeworkList.map((row, index) => `
+          <tr>
+            <td style="text-align: center;">${row.homeworkId}</td>
+            <td>${row.homeworkTitle || '-'}</td>
+            <td>${row.courseName || '-'}</td>
+            <td>${row.className || '-'}</td>
+            <td>${this.formatDate(row.createTime)}</td>
+            <td>${this.formatDate(row.deadline)}</td>
+            <td style="text-align: center;">${row.submissionRate || 0}%</td>
+            <td style="text-align: center;">${row.submittedCount || 0}</td>
+            <td style="text-align: center;">${row.notSubmittedCount || 0}</td>
+            <td style="text-align: center;">${row.overdueCount || 0}</td>
+            <td style="text-align: center;">${row.averageScore ? row.averageScore.toFixed(1) : '未批改'}</td>
+            <td>${row.createBy || '-'}</td>
+          </tr>
+        `).join('')
+
         const printWindow = window.open('', '_blank')
         printWindow.document.write(`
           <html>
@@ -929,22 +947,25 @@ export default {
                 .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
                 .print-header h1 { margin: 0; color: #333; }
                 .print-time { color: #666; font-size: 14px; }
-                .chart-container { margin: 20px 0; text-align: center; }
+                .chart-container { margin: 20px 0; text-align: center; page-break-inside: avoid; }
                 .chart-container img { max-width: 100%; height: auto; }
                 .chart-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
-                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                .table-container { margin-top: 30px; }
+                .table-container h3 { margin-bottom: 10px; color: #333; }
+                table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
                 th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #f5f5f5; font-weight: bold; }
+                th { background-color: #f5f5f5; font-weight: bold; white-space: nowrap; }
                 @media print {
                   body { margin: 0; }
                   .no-print { display: none; }
+                  .chart-container { page-break-inside: avoid; }
                 }
               </style>
             </head>
             <body>
               <div class="print-header">
                 <h1>作业统计报表</h1>
-                <div class="print-time">打印时间: ${new Date().toLocaleString()}</div>
+                <div class="print-time">打印时间: ${new Date().toLocaleString('zh-CN')}</div>
               </div>
 
               ${charts.map(chart => `
@@ -956,7 +977,27 @@ export default {
 
               <div class="table-container">
                 <h3>作业数据列表 (${this.homeworkList.length} 条记录)</h3>
-                ${printContent}
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="text-align: center;">作业ID</th>
+                      <th>作业名称</th>
+                      <th>课程</th>
+                      <th>课堂</th>
+                      <th>发布时间</th>
+                      <th>截止时间</th>
+                      <th style="text-align: center;">提交率</th>
+                      <th style="text-align: center;">已提交</th>
+                      <th style="text-align: center;">未提交</th>
+                      <th style="text-align: center;">逾期</th>
+                      <th style="text-align: center;">平均分</th>
+                      <th>发布者</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${tableRows}
+                  </tbody>
+                </table>
               </div>
             </body>
           </html>
@@ -1363,6 +1404,17 @@ export default {
   text-align: right;
 }
 
+.date-separator {
+  margin: 0 8px;
+  color: #86868b;
+  font-size: 14px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
 /* Form Elements */
 .app-container >>> .el-input__inner {
   border-radius: 10px;
@@ -1374,6 +1426,18 @@ export default {
 .app-container >>> .el-input__inner:focus {
   border-color: #0071e3;
   box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+.app-container >>> .el-select {
+  width: 100%;
+}
+
+.app-container >>> .el-date-editor {
+  width: 100%;
+}
+
+.app-container >>> .el-date-editor .el-input__inner {
+  padding-left: 30px;
 }
 
 .app-container >>> .el-button {
@@ -1392,6 +1456,28 @@ export default {
 .app-container >>> .el-button--primary:hover {
   background-color: #0077ed;
   transform: translateY(-1px);
+}
+
+.app-container >>> .el-button--success {
+  background-color: #67C23A;
+  color: white;
+  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.2);
+}
+
+.app-container >>> .el-button--success:hover {
+  background-color: #85ce61;
+  transform: translateY(-1px);
+}
+
+.app-container >>> .el-button--default {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+}
+
+.app-container >>> .el-button--default:hover {
+  background-color: #e8e8ed;
+  border-color: #b8b8bd;
 }
 
 /* Table Styling */
