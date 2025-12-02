@@ -1,6 +1,24 @@
 <template>
   <div class="app-container">
-    <el-alert :title="'题目配置（课程：' + (courseName || '—') + (courseId ? '，ID：' + courseId : '') + '） - 考试总分：' + ((examInfo && examInfo.totalScore != null) ? examInfo.totalScore : '—') + '（当前配置总分：' + currentExamTotalScore + '）'" type="info" show-icon style="margin-bottom:12px" />
+    <!-- 考试信息和分数状态提示 -->
+    <el-alert
+      :title="'题目配置（课程：' + (courseName || '—') + (courseId ? '，ID：' + courseId : '') + '）'"
+      type="info"
+      show-icon
+      style="margin-bottom:12px"
+    >
+      <div slot="default" style="line-height: 1.8;">
+        <div><strong>考试设定总分：</strong>{{ (examInfo && examInfo.totalScore != null) ? examInfo.totalScore : '未设置' }}分</div>
+        <div><strong>当前题目总分：</strong>{{ currentExamTotalScore }}分</div>
+        <div v-if="examInfo && examInfo.totalScore != null && currentExamTotalScore !== examInfo.totalScore" style="color: #E6A23C; font-weight: bold;">
+          ⚠️ 分数不匹配！发布前需调整题目分值，使总分等于{{ examInfo.totalScore }}分
+        </div>
+        <div v-else-if="examInfo && examInfo.totalScore != null && currentExamTotalScore === examInfo.totalScore" style="color: #67C23A; font-weight: bold;">
+          ✓ 分数匹配，可以发布
+        </div>
+      </div>
+    </el-alert>
+
     <div style="margin-bottom:12px; display:flex; gap:8px; align-items:center; flex-wrap: wrap;">
       <el-select v-model="filter.type" placeholder="题型" clearable style="width:140px" @change="onFilterChange">
         <el-option :value="1" label="单选题"/>
@@ -13,9 +31,11 @@
       <el-button type="danger" @click="removeSelected" :disabled="!selection.length">批量删除</el-button>
       <el-button @click="reload">刷新</el-button>
       <el-button type="success" @click="saveDraft" :disabled="!realExamId || savingMeta">保存草稿</el-button>
-      <el-button type="warning" @click="doPublish" :disabled="!canPublish" :loading="publishing">发布考试</el-button>
+      <el-button type="warning" @click="doPublish" :disabled="!canPublish" :loading="publishing">
+        <i class="el-icon-upload2"></i> 发布考试
+      </el-button>
       <el-button type="info" @click="goBackPublish">返回发布页面</el-button>
-      <span style="color:#909399" v-if="!canPublish">（需至少1题、考试ID有效，且当前配置总分须等于考试总分）</span>
+      <span style="color:#909399" v-if="!canPublish">（{{ publishReason }}）</span>
       <span style="color:#909399" v-if="filter.type">（已按题型筛选，已临时禁用拖拽排序）</span>
     </div>
 
@@ -822,7 +842,30 @@ export default {
     },
 
     async doPublish() {
-      if (!this.canPublish) { this.$message.error(this.publishReason || '发布条件不满足'); return }
+      // 前置验证
+      if (!this.canPublish) {
+        this.$message.error(this.publishReason || '发布条件不满足')
+        return
+      }
+
+      // 二次确认（特别是当分数刚好匹配时）
+      const expected = Number(this.examInfo && this.examInfo.totalScore)
+      const configured = Number(this.currentExamTotalScore)
+
+      try {
+        await this.$confirm(
+          `确认发布考试？\n考试总分: ${expected}分\n题目总分: ${configured}分`,
+          '发布确认',
+          {
+            confirmButtonText: '确定发布',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+      } catch {
+        return // 用户取消
+      }
+
       this.publishing = true
       try {
         // 先更新题目数量再发布
@@ -853,11 +896,35 @@ export default {
         }
         await updateExam(payload)
         await publishExam(this.realExamId)
-        this.$message.success('考试已发布')
+        this.$message.success('考试已发布成功！')
+        // 发布成功后可以选择跳转回发布页
+        setTimeout(() => {
+          this.$confirm('考试已发布，是否返回发布页面？', '提示', {
+            confirmButtonText: '返回',
+            cancelButtonText: '留在此页',
+            type: 'success'
+          }).then(() => {
+            this.goBackPublish()
+          }).catch(() => {})
+        }, 800)
       } catch (e) {
         console.error('publish error', e)
-        this.$message.error('发布失败')
-      } finally { this.publishing = false }
+        // 提取详细错误信息
+        let errorMsg = '发布失败'
+        if (e && e.response && e.response.data) {
+          const data = e.response.data
+          errorMsg = data.msg || data.message || errorMsg
+        } else if (e && e.message) {
+          errorMsg = e.message
+        }
+        // 使用 MessageBox 显示更详细的错误信息
+        this.$alert(errorMsg, '发布失败', {
+          type: 'error',
+          confirmButtonText: '知道了'
+        })
+      } finally {
+        this.publishing = false
+      }
     },
     goBackPublish(){
       this.$router.push({ path:'/proj_lwj_exam/exam_publish' }).catch(()=>{})

@@ -700,11 +700,27 @@ export default {
         this.btnLoading = false
         if (res && (res.code === 200 || res.code === 0)) {
           if (publishNow && payload.id) {
-            publishExam(payload.id).then(() => this.loadList())
+            publishExam(payload.id)
+              .then(() => {
+                this.loadList()
+                this.$message.success('发布成功')
+              })
+              .catch(err => {
+                console.error('发布失败:', err)
+                let errorMsg = '发布失败'
+                if (err && err.response && err.response.data) {
+                  const data = err.response.data
+                  errorMsg = data.msg || data.message || errorMsg
+                } else if (err && err.message) {
+                  errorMsg = err.message
+                }
+                this.$message.error(errorMsg)
+                this.loadList()
+              })
           } else {
             this.loadList()
+            this.$message.success('保存成功')
           }
-          this.$message.success(publishNow ? '发布成功' : '保存成功')
           if (!payload.id) this.resetForm()
         } else {
           this.$message.error((res && (res.msg || res.message)) || '保存失败')
@@ -872,9 +888,22 @@ export default {
           this.$message.success('已发布')
           this.loadList()
         } else {
-          this.$message.error((res && (res.msg || res.message)) || '发布失败')
+          // 显示后端返回的详细错误信息
+          const errorMsg = (res && (res.msg || res.message)) || '发布失败'
+          this.$message.error(errorMsg)
         }
-      }).catch(e => { console.error(e); this.$message.error('发布失败') })
+      }).catch(e => {
+        console.error('发布考试失败:', e)
+        // 提取详细错误信息
+        let errorMsg = '发布失败'
+        if (e && e.response && e.response.data) {
+          const data = e.response.data
+          errorMsg = data.msg || data.message || errorMsg
+        } else if (e && e.message) {
+          errorMsg = e.message
+        }
+        this.$message.error(errorMsg)
+      })
     },
     // 删除考试（草稿或已发布但未开始）
     remove(row) {
