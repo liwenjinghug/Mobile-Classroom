@@ -47,7 +47,15 @@ Page({
   },
 
   goToHomework() {
-    wx.showToast({ title: '进入作业（后续实现）', icon: 'none' });
+    const id = this.sessionId || (this.data.course && this.data.course.id);
+    const name = this.data.course && (this.data.course.className || this.data.course.title) || '课堂';
+    if (!id) {
+      wx.showToast({ title: '课堂ID缺失', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/proj_fz/homework/homework-list?sessionId=${id}&sessionName=${encodeURIComponent(name)}`
+    });
   },
 
   goToExam() {
