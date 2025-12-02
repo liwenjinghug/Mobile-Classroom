@@ -60,7 +60,7 @@
           </el-col>
           <el-col :span="12">
             <div class="chart-wrapper">
-              <div class="chart-title">考勤状态分布</div>
+              <div class="chart-title">平均考勤状态分布</div>
               <div ref="distributionChart" style="height: 400px;"></div>
             </div>
           </el-col>
@@ -113,33 +113,33 @@
           prop="totalStudents"
         />
         <el-table-column
-          label="平均已签到"
+          label="平均已签到人数"
           align="center"
-          width="100"
+          width="120"
           prop="signedCount"
         />
         <el-table-column
-          label="平均缺勤"
+          label="平均缺勤人数"
           align="center"
-          width="100"
+          width="120"
           prop="absentCount"
         />
         <el-table-column
-          label="平均迟到"
+          label="平均迟到人数"
           align="center"
-          width="100"
+          width="120"
           prop="lateCount"
         />
         <el-table-column
-          label="平均请假"
+          label="平均请假人数"
           align="center"
-          width="100"
+          width="120"
           prop="leaveCount"
         />
         <el-table-column
-          label="平均早退"
+          label="平均早退人数"
           align="center"
-          width="100"
+          width="120"
           prop="earlyLeaveCount"
         />
         <el-table-column
@@ -536,8 +536,8 @@ export default {
               return `
                 <div style="font-weight: bold; margin-bottom: 5px;">${data.name}</div>
                 <div>平均签到率: <span style="color: #5470c6; font-weight: bold">${data.value}%</span></div>
-                <div>总人数: ${session.totalStudents || 0}</div>
-                <div>平均已签到: ${session.signedCount || 0}</div>
+                <div>平均总人数: ${session.totalStudents || 0}</div>
+                <div>平均已签到人数: ${session.signedCount || 0}</div>
               `;
             }
           },
@@ -618,7 +618,9 @@ export default {
             borderColor: '#ddd',
             borderWidth: 1,
             textStyle: { color: '#333' },
-            formatter: '{a} <br/>{b}: {c} ({d}%)'
+            formatter: (params) => {
+              return `${params.seriesName}<br/>${params.name}: ${params.value}人 (${params.percent}%)`;
+            }
           },
           legend: {
             orient: 'vertical',
@@ -1091,12 +1093,12 @@ export default {
           <thead>
             <tr>
               <th>课堂名称</th>
-              <th>总人数</th>
-              <th>平均已签到</th>
-              <th>平均缺勤</th>
-              <th>平均迟到</th>
-              <th>平均请假</th>
-              <th>平均早退</th>
+              <th>平均总人数</th>
+              <th>平均已签到人数</th>
+              <th>平均缺勤人数</th>
+              <th>平均迟到人数</th>
+              <th>平均请假人数</th>
+              <th>平均早退人数</th>
               <th>平均签到率</th>
             </tr>
           </thead>
