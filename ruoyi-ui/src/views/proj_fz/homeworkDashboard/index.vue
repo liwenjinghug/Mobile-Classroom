@@ -897,25 +897,37 @@ export default {
 
     handlePrint() {
       this.$nextTick(() => {
-        // 收集图表数据
+        // 收集图表数据 - 使用较小的图片尺寸和缩放比例
         const charts = []
 
         if (this.submissionChart) {
           charts.push({
             title: '提交状态分布',
-            dataUrl: this.submissionChart.getDataURL({ type: 'png', pixelRatio: 2 })
+            dataUrl: this.submissionChart.getDataURL({
+              type: 'png',
+              pixelRatio: 1.5,
+              backgroundColor: '#fff'
+            })
           })
         }
         if (this.scoreChart) {
           charts.push({
             title: '成绩分布',
-            dataUrl: this.scoreChart.getDataURL({ type: 'png', pixelRatio: 2 })
+            dataUrl: this.scoreChart.getDataURL({
+              type: 'png',
+              pixelRatio: 1.5,
+              backgroundColor: '#fff'
+            })
           })
         }
         if (this.trendChart) {
           charts.push({
             title: '提交趋势',
-            dataUrl: this.trendChart.getDataURL({ type: 'png', pixelRatio: 2 })
+            dataUrl: this.trendChart.getDataURL({
+              type: 'png',
+              pixelRatio: 1.5,
+              backgroundColor: '#fff'
+            })
           })
         }
 
@@ -942,23 +954,96 @@ export default {
           <html>
             <head>
               <title>作业统计报表</title>
+              <meta charset="utf-8">
               <style>
-                body { font-family: Arial, sans-serif; margin: 20px; }
-                .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-                .print-header h1 { margin: 0; color: #333; }
-                .print-time { color: #666; font-size: 14px; }
-                .chart-container { margin: 20px 0; text-align: center; page-break-inside: avoid; }
-                .chart-container img { max-width: 100%; height: auto; }
-                .chart-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
-                .table-container { margin-top: 30px; }
-                .table-container h3 { margin-bottom: 10px; color: #333; }
-                table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #f5f5f5; font-weight: bold; white-space: nowrap; }
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                body {
+                  font-family: "Microsoft YaHei", Arial, sans-serif;
+                  padding: 15px;
+                  background: #fff;
+                }
+                .print-header {
+                  text-align: center;
+                  margin-bottom: 15px;
+                  border-bottom: 2px solid #333;
+                  padding-bottom: 8px;
+                }
+                .print-header h1 {
+                  margin: 0;
+                  color: #333;
+                  font-size: 22px;
+                  line-height: 1.4;
+                }
+                .print-time {
+                  color: #666;
+                  font-size: 12px;
+                  margin-top: 5px;
+                }
+                .charts-section {
+                  margin-bottom: 20px;
+                }
+                .chart-container {
+                  margin: 15px 0;
+                  text-align: center;
+                  page-break-inside: avoid;
+                }
+                .chart-title {
+                  font-size: 14px;
+                  font-weight: bold;
+                  margin-bottom: 8px;
+                  color: #333;
+                }
+                .chart-container img {
+                  max-width: 90%;
+                  width: 600px;
+                  height: auto;
+                  display: block;
+                  margin: 0 auto;
+                }
+                .table-container {
+                  margin-top: 20px;
+                  page-break-before: auto;
+                }
+                .table-container h3 {
+                  margin-bottom: 8px;
+                  color: #333;
+                  font-size: 16px;
+                }
+                table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin: 10px 0;
+                  font-size: 11px;
+                  page-break-inside: auto;
+                }
+                th, td {
+                  border: 1px solid #ddd;
+                  padding: 6px 4px;
+                  text-align: left;
+                }
+                th {
+                  background-color: #f5f5f5;
+                  font-weight: bold;
+                  white-space: nowrap;
+                  font-size: 11px;
+                }
+                tr { page-break-inside: avoid; }
                 @media print {
-                  body { margin: 0; }
-                  .no-print { display: none; }
-                  .chart-container { page-break-inside: avoid; }
+                  body {
+                    margin: 0;
+                    padding: 10px;
+                  }
+                  .chart-container {
+                    page-break-inside: avoid;
+                    margin: 10px 0;
+                  }
+                  .chart-container img {
+                    max-width: 85%;
+                    width: 550px;
+                  }
+                  .table-container {
+                    page-break-before: auto;
+                  }
                 }
               </style>
             </head>
@@ -968,12 +1053,14 @@ export default {
                 <div class="print-time">打印时间: ${new Date().toLocaleString('zh-CN')}</div>
               </div>
 
-              ${charts.map(chart => `
-                <div class="chart-container">
-                  <div class="chart-title">${chart.title}</div>
-                  <img src="${chart.dataUrl}" alt="${chart.title}">
-                </div>
-              `).join('')}
+              <div class="charts-section">
+                ${charts.map(chart => `
+                  <div class="chart-container">
+                    <div class="chart-title">${chart.title}</div>
+                    <img src="${chart.dataUrl}" alt="${chart.title}" />
+                  </div>
+                `).join('')}
+              </div>
 
               <div class="table-container">
                 <h3>作业数据列表 (${this.homeworkList.length} 条记录)</h3>
@@ -1004,10 +1091,34 @@ export default {
         `)
         printWindow.document.close()
 
-        printWindow.onload = function() {
-          printWindow.print()
-          printWindow.onafterprint = function() {
-            printWindow.close()
+        // 等待图片加载完成后再打印
+        const images = printWindow.document.getElementsByTagName('img')
+        let loadedCount = 0
+        const totalImages = images.length
+
+        if (totalImages === 0) {
+          // 如果没有图片,直接打印
+          setTimeout(() => {
+            printWindow.print()
+          }, 500)
+        } else {
+          // 等待所有图片加载完成
+          const checkAllImagesLoaded = () => {
+            loadedCount++
+            if (loadedCount === totalImages) {
+              setTimeout(() => {
+                printWindow.print()
+              }, 300)
+            }
+          }
+
+          for (let i = 0; i < images.length; i++) {
+            if (images[i].complete) {
+              checkAllImagesLoaded()
+            } else {
+              images[i].onload = checkAllImagesLoaded
+              images[i].onerror = checkAllImagesLoaded
+            }
           }
         }
       })
