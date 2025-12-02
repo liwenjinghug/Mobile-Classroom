@@ -322,7 +322,7 @@ export const constantRoutes = [
         path: 'participationHeat',
         component: () => import('@/views/proj_fz/participationHeat/index'),
         name: 'ProjFz_ParticipationHeat',
-        meta: { title: '参与热力', icon: 'heatmap' }
+        meta: { title: '参与热力', icon: 'heatmap',permissions: ['proj_fz:participationHeat:list'] }
       }
     ]
   },
@@ -339,25 +339,25 @@ export const constantRoutes = [
         path: 'statistics',
         component: () => import('@/views/proj_fz/systemMonitor/statistics'),
         name: 'MonitorStatistics',
-        meta: { title: '监控统计', icon: 'chart' }
+        meta: { title: '监控统计', icon: 'chart', roles: ['admin','teacher','student'] }
       },
       {
         path: 'server',
         component: () => import('@/views/proj_fz/systemMonitor/server'),
         name: 'ServerMonitor',
-        meta: { title: '服务器监控', icon: 'server' }
+        meta: { title: '服务器监控', icon: 'server', roles: ['admin','teacher','student'] }
       },
       {
         path: 'database',
         component: () => import('@/views/proj_fz/systemMonitor/database'),
         name: 'DatabaseMonitor',
-        meta: { title: '数据库监控', icon: 'database' }
+        meta: { title: '数据库监控', icon: 'database', roles: ['admin','teacher','student'] }
       },
       {
         path: 'record',
         component: () => import('@/views/proj_fz/systemMonitor/record'),
         name: 'MonitorRecord',
-        meta: { title: '监控记录', icon: 'documentation' }
+        meta: { title: '监控记录', icon: 'documentation', roles: ['admin','teacher','student'] }
       }
     ]
   },

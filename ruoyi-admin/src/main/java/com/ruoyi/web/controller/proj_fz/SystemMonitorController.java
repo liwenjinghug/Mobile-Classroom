@@ -33,7 +33,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 查询系统监控列表
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:list')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:list') or @ss.hasAnyRoles('teacher,student')")
     @GetMapping("/list")
     public TableDataInfo list(SystemMonitor systemMonitor) {
         startPage();
@@ -44,7 +44,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 获取系统监控详细信息
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
     @GetMapping(value = "/{monitorId}")
     public AjaxResult getInfo(@PathVariable("monitorId") Long monitorId) {
         return success(systemMonitorService.selectSystemMonitorById(monitorId));
@@ -53,7 +53,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 新增系统监控
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:add')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:add') or @ss.hasAnyRoles('teacher,student')")
     @Log(title = "系统监控", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody SystemMonitor systemMonitor) {
@@ -63,7 +63,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 删除系统监控
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:remove')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:remove') or @ss.hasAnyRoles('teacher,student')")
     @Log(title = "系统监控", businessType = BusinessType.DELETE)
     @DeleteMapping("/{monitorIds}")
     public AjaxResult remove(@PathVariable Long[] monitorIds) {
@@ -73,7 +73,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 处理告警
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:edit')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:edit') or @ss.hasAnyRoles('teacher,student')")
     @Log(title = "系统监控", businessType = BusinessType.UPDATE)
     @PutMapping("/handle")
     public AjaxResult handleAlert(@RequestBody SystemMonitor systemMonitor) {
@@ -85,7 +85,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 导出系统监控列表
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:export')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:export') or @ss.hasAnyRoles('teacher,student')")
     @Log(title = "系统监控", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, SystemMonitor systemMonitor) {
@@ -97,7 +97,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 获取实时服务器指标
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
     @GetMapping("/server/realtime")
     public AjaxResult getServerMetrics() {
         ServerMetrics metrics = systemMonitorService.getRealTimeServerMetrics();
@@ -107,7 +107,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 获取服务器历史指标
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
     @GetMapping("/server/history")
     public AjaxResult getServerHistory(@RequestParam(defaultValue = "24") Integer hours) {
         List<ServerMetrics> list = systemMonitorService.getServerMetricsHistory(hours);
@@ -117,7 +117,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 获取实时数据库指标
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
     @GetMapping("/database/realtime")
     public AjaxResult getDatabaseMetrics() {
         DatabaseMetrics metrics = systemMonitorService.getRealTimeDatabaseMetrics();
@@ -127,7 +127,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 获取数据库历史指标
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
     @GetMapping("/database/history")
     public AjaxResult getDatabaseHistory(@RequestParam(defaultValue = "24") Integer hours) {
         List<DatabaseMetrics> list = systemMonitorService.getDatabaseMetricsHistory(hours);
@@ -137,7 +137,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 获取监控统计数据
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
     @GetMapping("/statistics")
     public AjaxResult getStatistics(@RequestParam(defaultValue = "7") Integer days) {
         Map<String, Object> stats = systemMonitorService.getMonitorStatistics(days);
@@ -147,7 +147,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 获取未处理告警数量
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
     @GetMapping("/alert/count")
     public AjaxResult getUnhandledAlertCount() {
         int count = systemMonitorService.getUnhandledAlertCount();
@@ -157,7 +157,7 @@ public class SystemMonitorController extends BaseController {
     /**
      * 手动执行监控采集
      */
-    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:collect')")
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:collect') or @ss.hasAnyRoles('teacher,student')")
     @Log(title = "系统监控", businessType = BusinessType.OTHER)
     @PostMapping("/collect")
     public AjaxResult collectMetrics() {
@@ -165,4 +165,3 @@ public class SystemMonitorController extends BaseController {
         return success();
     }
 }
-

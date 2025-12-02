@@ -64,7 +64,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['proj_fz:monitor:remove']"
+          v-if="hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:remove'])"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -74,7 +74,7 @@
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['proj_fz:monitor:export']"
+          v-if="hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:export'])"
         >导出</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -84,7 +84,7 @@
           icon="el-icon-refresh"
           size="mini"
           @click="handleCollect"
-          v-hasPermi="['proj_fz:monitor:collect']"
+          v-if="hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:collect'])"
         >立即采集</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
@@ -136,22 +136,21 @@
             type="text"
             icon="el-icon-view"
             @click="handleView(scope.row)"
-            v-hasPermi="['proj_fz:monitor:query']"
+            v-if="hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:query'])"
           >详情</el-button>
           <el-button
-            v-if="scope.row.handled == 0 && scope.row.alertLevel > 0"
+            v-if="(scope.row.handled == 0 && scope.row.alertLevel > 0) && (hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:edit']))"
             size="mini"
             type="text"
             icon="el-icon-edit"
             @click="handleHandle(scope.row)"
-            v-hasPermi="['proj_fz:monitor:edit']"
           >处理</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['proj_fz:monitor:remove']"
+            v-if="hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:remove'])"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -375,8 +374,29 @@ export default {
       } catch (e) {
         return metrics
       }
+    },
+    // 判断用户角色（返回 true 如果包含 admin 或 传入列表内任一角色）
+    hasRole(roleArr) {
+      try {
+        const roles = this.$store.getters && this.$store.getters.roles ? this.$store.getters.roles : []
+        if (!Array.isArray(roles)) return false
+        if (roles.includes('admin')) return true
+        return roleArr.some(r => roles.includes(r))
+      } catch (e) {
+        return false
+      }
+    },
+    // 判断用户权限（返回 true 如果包含 *:*:* 或 传入列表内任一权限）
+    hasPermi(perms) {
+      try {
+        const permissions = this.$store.getters && this.$store.getters.permissions ? this.$store.getters.permissions : []
+        if (!Array.isArray(permissions)) return false
+        if (permissions.includes('*:*:*')) return true
+        return perms.some(p => permissions.includes(p))
+      } catch (e) {
+        return false
+      }
     }
   }
 }
 </script>
-
