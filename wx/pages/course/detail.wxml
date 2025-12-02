@@ -31,11 +31,6 @@
       <text class="function-label">签到</text>
     </view>
 
-    <view class="function-item" bindtap="goToForum">
-      <view class="function-icon forum-icon">
-        <text class="icon-text">💬</text>
-      </view>
-      <text class="function-label">讨论</text>
-    </view>
+    
   </view>
 </view>

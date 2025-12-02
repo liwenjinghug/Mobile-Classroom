@@ -955,12 +955,13 @@ export default {
 
         const lastCourseId = localStorage.getItem('hwUploadLastCourseId')
         const lastSessionId = localStorage.getItem('hwUploadLastSessionId')
-        const lastHomeworkId = localStorage.getItem('hwUploadLastHomeworkId')
+        // 不再自动恢复作业选择，让用户手动选择
+        // const lastHomeworkId = localStorage.getItem('hwUploadLastHomeworkId')
 
         this.selectionForm = {
           courseId: lastCourseId ? Number(lastCourseId) : null,
           sessionId: lastSessionId ? Number(lastSessionId) : null,
-          homeworkId: lastHomeworkId ? Number(lastHomeworkId) : null
+          homeworkId: null  // 不自动选择作业
         }
 
         const confirmedData = localStorage.getItem('hwUploadConfirmedData')
@@ -1737,17 +1738,345 @@ export default {
 </script>
 
 <style scoped>
-/* 原有样式保持不变，只添加新的加载样式 */
-
-.loading-homework {
+/* ============ 页面整体布局 ============ */
+.homework-upload-page {
   padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* ============ 卡片样式 ============ */
+.selection-card,
+.identity-card,
+.work-card,
+.submissions-card {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.selection-card:hover,
+.identity-card:hover,
+.work-card:hover,
+.submissions-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* 卡片头部图标 */
+.card-header-with-icon {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.card-header-with-icon i {
+  font-size: 22px;
+  margin-right: 10px;
+  color: #409EFF;
+}
+
+/* ============ 提示框样式 ============ */
+.hint-box {
+  padding: 16px;
+  background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%);
+  border-left: 4px solid #409EFF;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.hint-box i {
+  font-size: 20px;
+  color: #409EFF;
+  margin-right: 12px;
+}
+
+.hint-box span {
+  color: #606266;
+  font-size: 14px;
+}
+
+/* ============ 身份确认区域 ============ */
+.identity-content {
+  padding: 12px 0;
+}
+
+.identity-input-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.identity-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.confirm-btn,
+.reset-btn {
+  min-width: 100px;
+  font-weight: 500;
+}
+
+.identity-status-indicator {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-badge.success {
+  background: linear-gradient(135deg, #e7f9f0 0%, #d4f4e3 100%);
+  color: #67C23A;
+  border: 1px solid #c2e7b0;
+}
+
+.status-badge.warning {
+  background: linear-gradient(135deg, #fff4e6 0%, #ffe7cc 100%);
+  color: #E6A23C;
+  border: 1px solid #f5d9a8;
+}
+
+.status-badge i {
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+.identity-hint {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #909399;
+}
+
+.identity-alert {
+  margin-top: 16px;
+}
+
+/* ============ 作业详情区域 ============ */
+.work-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
+}
+
+.homework-info-section {
+  padding: 16px 0;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  background: #fafbfc;
+  border-radius: 8px;
+  border-left: 3px solid #409EFF;
+}
+
+.info-item strong {
+  min-width: 100px;
+  color: #606266;
+  font-weight: 600;
+}
+
+.info-item span {
+  color: #303133;
+  flex: 1;
+  word-break: break-word;
+}
+
+/* ============ 上传区域样式 ============ */
+.homework-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.refresh-btn {
+  padding: 8px 12px;
+  color: #409EFF;
+  transition: all 0.3s;
+}
+
+.refresh-btn:hover {
+  background: #ecf5ff;
+  color: #66b1ff;
+}
+
+.upload-section {
+  padding: 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e8f4fd 100%);
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.upload-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.upload-title i {
+  margin-right: 8px;
+  color: #409EFF;
+}
+
+/* ============ 文件列表美化 ============ */
+.files-display {
+  margin-top: 12px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+}
+
+.file-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateX(4px);
+}
+
+.file-item i {
+  font-size: 20px;
+  margin-right: 12px;
+  color: #409EFF;
+}
+
+/* ============ 提交记录区域 ============ */
+.submissions-card {
+  background: white;
+}
+
+.submission-stats {
+  padding: 16px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e8f4fd 100%);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #409EFF;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #909399;
+}
+
+/* ============ 按钮美化 ============ */
+.el-button {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.el-button--primary {
+  background: linear-gradient(135deg, #409EFF 0%, #66b1ff 100%);
+  border: none;
+}
+
+.el-button--primary:hover {
+  background: linear-gradient(135deg, #66b1ff 0%, #409EFF 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
+}
+
+.el-button--success {
+  background: linear-gradient(135deg, #67C23A 0%, #85ce61 100%);
+  border: none;
+}
+
+.el-button--success:hover {
+  background: linear-gradient(135deg, #85ce61 0%, #67C23A 100%);
+}
+
+.el-button--danger {
+  background: linear-gradient(135deg, #F56C6C 0%, #f78989 100%);
+  border: none;
+}
+
+.el-button--danger:hover {
+  background: linear-gradient(135deg, #f78989 0%, #F56C6C 100%);
+}
+
+/* ============ 加载样式 ============ */
+.loading-homework {
+  padding: 40px 20px;
+  text-align: center;
 }
 
 .loading-homework .el-alert {
   margin-bottom: 20px;
+  border-radius: 8px;
 }
 
-/* 其他样式保持不变 */
+/* ============ 响应式设计 ============ */
+@media (max-width: 768px) {
+  .homework-upload-page {
+    padding: 12px;
+  }
+
+  .identity-input-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 </style>
 
 <style>
@@ -1769,6 +2098,36 @@ export default {
   margin: 0 !important;
   max-height: 90vh;
   max-width: 95vw;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.centered-homework-dialog .el-dialog__header {
+  background: linear-gradient(135deg, #409EFF 0%, #66b1ff 100%);
+  color: white;
+  padding: 20px 24px;
+  border-radius: 12px 12px 0 0;
+}
+
+.centered-homework-dialog .el-dialog__title {
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.centered-homework-dialog .el-dialog__headerbtn .el-dialog__close {
+  color: white;
+  font-size: 20px;
+}
+
+.centered-homework-dialog .el-dialog__body {
+  padding: 24px;
+}
+
+.centered-homework-dialog .el-dialog__footer {
+  padding: 16px 24px;
+  background: #f5f7fa;
+  border-radius: 0 0 12px 12px;
 }
 </style>
 

@@ -302,7 +302,8 @@ public class ClassExamController extends BaseController {
                     if (qList != null) {
                         for (ClassExamQuestion q : qList) {
                             Integer t = q.getQuestionType();
-                            if (t != null && (t == 4 || t == 5 || t == 6)) { hasSubjective = true; break; }
+                            // 新编码：3=简答题（主观题）
+                            if (t != null && t == 3) { hasSubjective = true; break; }
                         }
                         row.put("questionCount", qList.size());
                     } else {
@@ -367,6 +368,11 @@ public class ClassExamController extends BaseController {
 
             List<Map<String, Object>> result = new ArrayList<>();
             for (ClassExamParticipant participant : participants) {
+                // 只显示已提交的考试记录（participantStatus=2），未完成的不显示
+                if (participant.getParticipantStatus() == null || participant.getParticipantStatus() != 2) {
+                    continue;
+                }
+
                 // 检查考试是否还存在（避免显示已删除考试的记录）
                 ClassExam examRef = participant.getExamId() != null ? examService.selectExamById(participant.getExamId()) : null;
                 if (examRef == null) continue;
@@ -589,9 +595,9 @@ public class ClassExamController extends BaseController {
                 if (question != null) {
                     existingAnswer.setCorrectAnswer(question.getCorrectAnswer());
 
-                    // 自动判分（仅客观题）
+                    // 自动判分（仅客观题：1=判断 2=选择）
                     Integer qType = question.getQuestionType();
-                    if (qType != null && (qType == 1 || qType == 2 || qType == 3)) {
+                    if (qType != null && (qType == 1 || qType == 2)) {
                         // 客观题自动判分
                         autoJudgeObjective(existingAnswer);
                     }
@@ -628,7 +634,8 @@ public class ClassExamController extends BaseController {
         for (ClassExamQuestion q : questions) {
             qMap.put(q.getId(), q);
             Integer t = q.getQuestionType();
-            if (t != null && (t == 5 || t == 6)) hasSubjectiveQuestions = true;
+            // 新编码：3=简答题（主观题）
+            if (t != null && t == 3) hasSubjectiveQuestions = true;
         }
 
         BigDecimal objectiveScore = BigDecimal.ZERO;  // 客观题得分
@@ -643,10 +650,10 @@ public class ClassExamController extends BaseController {
             BigDecimal ansScore = ans.getScore();
             if (ansScore == null) ansScore = BigDecimal.ZERO;
 
-            // 判断题型：1单选 2多选 3判断 -> 客观题；5简答 6文件 -> 主观题
-            if (qType != null && (qType == 1 || qType == 2 || qType == 3)) {
+            // 新编码：1=判断 2=选择 -> 客观题；3=简答 -> 主观题
+            if (qType != null && (qType == 1 || qType == 2)) {
                 objectiveScore = objectiveScore.add(ansScore);
-            } else if (qType != null && (qType == 5 || qType == 6)) {
+            } else if (qType != null && qType == 3) {
                 if (ans.getCorrectorId() == null) {
                     hasUnscoredSubjective = true; // 未批改
                 } else {
@@ -751,8 +758,9 @@ public class ClassExamController extends BaseController {
                     if (q != null) { qType = q.getQuestionType(); qScore = q.getScore(); }
                 }
             } catch (Exception ignore) {}
-            // 仅客观题自动判分与设置得分；主观题(4,5,6)不做自动判定，保持 score / isCorrect 为空或默认
-            if (qType != null && (qType == 1 || qType == 2 || qType == 3)) {
+            // 新编码：1=判断 2=选择(客观题) 3=简答(主观题)
+            // 仅客观题自动判分；简答题(3)不做自动判定，保持 score / isCorrect 为空，等待教师批改
+            if (qType != null && (qType == 1 || qType == 2)) {
                 String canonCorrect = canonicalAnswerForCompare(qType, a.getCorrectAnswer());
                 String canonStudent = canonicalAnswerForCompare(qType, a.getStudentAnswer());
                 boolean correct = canonCorrect != null && canonCorrect.equalsIgnoreCase(canonStudent);
@@ -841,7 +849,8 @@ public class ClassExamController extends BaseController {
         for (ClassExamQuestion q : qList) {
             qMap.put(q.getId(), q);
             Integer t = q.getQuestionType();
-            if (t != null && (t == 5 || t == 6)) hasSubjectiveQuestions = true; // 仅 5/6 为主观题
+            // 新编码：3=简答题（主观题）
+            if (t != null && t == 3) hasSubjectiveQuestions = true;
         }
         java.math.BigDecimal obj = java.math.BigDecimal.ZERO;
         java.math.BigDecimal subj = java.math.BigDecimal.ZERO;
@@ -851,10 +860,11 @@ public class ClassExamController extends BaseController {
             java.math.BigDecimal s = ans.getScore() == null ? java.math.BigDecimal.ZERO : ans.getScore();
             if (q != null) {
                 Integer t = q.getQuestionType();
-                if (t != null && (t == 1 || t == 2 || t == 3)) {
+                // 新编码：1=判断 2=选择（客观题）
+                if (t != null && (t == 1 || t == 2)) {
                     obj = obj.add(s);
-                } else if (t != null && (t == 5 || t == 6)) {
-                    // 主观题：correctorId 为空即视为未批改（不论分数是否被误写）
+                } else if (t != null && t == 3) {
+                    // 简答题（主观题）：correctorId 为空即视为未批改
                     if (ans.getCorrectorId() == null) {
                         hasUnscoredSubjective = true;
                     } else {
@@ -910,8 +920,9 @@ public class ClassExamController extends BaseController {
                 if (payload.getQuestionOptions() == null) payload.setQuestionOptions(q.getQuestionOptions());
                 if (payload.getCorrectAnswer() == null) payload.setCorrectAnswer(q.getCorrectAnswer());
                 Integer t = q.getQuestionType();
+                // 新编码：1=判断 2=选择(客观题) 3=简答(主观题)
                 // 仅客观题自动判分；主观题强制不保存分数，避免误判满分
-                if (t != null && (t == 1 || t == 2 || t == 3)) {
+                if (t != null && (t == 1 || t == 2)) {
                     if (payload.getScore() == null && payload.getStudentAnswer() != null && payload.getCorrectAnswer() != null) {
                         String canonStd = canonicalAnswerForCompare(t, payload.getCorrectAnswer());
                         String canonStu = canonicalAnswerForCompare(t, payload.getStudentAnswer());
@@ -923,8 +934,8 @@ public class ClassExamController extends BaseController {
                             payload.setIsCorrect(0);
                         }
                     }
-                } else if (t != null && (t == 5 || t == 6)) {
-                    // 主观题：如果前端误传了分数，清除，等待教师批改
+                } else if (t != null && t == 3) {
+                    // 简答题（主观题）：如果前端误传了分数，清除，等待教师批改
                     payload.setScore(null);
                     payload.setIsCorrect(null);
                 }
@@ -935,7 +946,8 @@ public class ClassExamController extends BaseController {
                 ClassExamQuestion qTypeCheck = questionService.selectById(payload.getQuestionId());
                 if (qTypeCheck != null) {
                     Integer t2 = qTypeCheck.getQuestionType();
-                    if (t2 != null && (t2 == 5 || t2 == 6) && payload.getCorrectorId() == null) {
+                    // 简答题且未批改时，清除分数
+                    if (t2 != null && t2 == 3 && payload.getCorrectorId() == null) {
                         payload.setScore(null);
                         payload.setIsCorrect(null);
                     }
@@ -975,17 +987,18 @@ public class ClassExamController extends BaseController {
         exist.setCorrectorId(getUserId());
         exist.setCorrectTime(new Date());
         exist.setUpdateBy(getUsername());
-        // 根据题型重新判定是否正确（主观题：满分视为正确；客观题：分数==题目分值视为正确）
+        // 根据题型重新判定是否正确（新编码：1=判断 2=选择 3=简答）
+        // 主观题：满分视为正确；客观题：分数==题目分值视为正确
         try {
             if (exist.getQuestionId() != null) {
                 ClassExamQuestion q = questionService.selectById(exist.getQuestionId());
                 if (q != null && q.getScore() != null && exist.getScore() != null) {
                     Integer t = q.getQuestionType();
-                    boolean subjective = (t != null) && (t == 4 || t == 5 || t == 6);
+                    boolean subjective = (t != null) && (t == 3); // 简答题是主观题
                     boolean fullScore = exist.getScore().compareTo(q.getScore()) == 0;
                     if (subjective) {
                         exist.setIsCorrect(fullScore ? 1 : 0);
-                    } else if (t != null && (t == 1 || t == 2 || t == 3)) {
+                    } else if (t != null && (t == 1 || t == 2)) { // 判断和选择是客观题
                         exist.setIsCorrect(fullScore ? 1 : 0);
                     }
                 }
@@ -1158,7 +1171,8 @@ public class ClassExamController extends BaseController {
             row.put("score", q.getScore());
             row.put("correctAnswer", q.getCorrectAnswer());
             Integer qt = q.getQuestionType();
-            boolean subjective = qt != null && (qt == 4 || qt == 5 || qt == 6);
+            // 新编码：3=简答题（主观题）
+            boolean subjective = qt != null && qt == 3;
             if (subjective) hasSubjective = true;
             List<ClassExamAnswer> list = answerGroup.getOrDefault(q.getId(), Collections.emptyList());
             List<Map<String, Object>> correctStudents = new ArrayList<>();
@@ -1253,14 +1267,14 @@ public class ClassExamController extends BaseController {
 
     @GetMapping("/{examId}/ungraded")
     public AjaxResult ungraded(@PathVariable Long examId) {
-        // 获取考试题目，筛选出主观题ID集合
+        // 获取考试题目，筛选出主观题ID集合（新编码：3=简答）
         ClassExamQuestion qFilter = new ClassExamQuestion();
         qFilter.setExamId(examId);
         List<ClassExamQuestion> questions = questionService.selectQuestionList(qFilter);
         Set<Long> subjectiveIds = new HashSet<>();
         for (ClassExamQuestion q : questions) {
             Integer t = q.getQuestionType();
-            if (t != null && (t == 4 || t == 5 || t == 6)) { // 填空/简答/文件 视为主观题
+            if (t != null && t == 3) { // 3=简答题（主观题）
                 subjectiveIds.add(q.getId());
             }
         }

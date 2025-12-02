@@ -258,7 +258,21 @@ export default {
   },
   created() {
     console.log('作业批改页面初始化')
-    this.fetchCourses()
+    this.fetchCourses().then(() => {
+      // 尝试恢复上次选择的课程和课堂
+      const lastCourseId = localStorage.getItem('homework_grading_last_courseId')
+      const lastSessionId = localStorage.getItem('homework_grading_last_sessionId')
+
+      if (lastCourseId && this.courses.some(c => c.courseId == lastCourseId)) {
+        this.form.courseId = isNaN(Number(lastCourseId)) ? lastCourseId : Number(lastCourseId)
+        this.onCourseChange().then(() => {
+          if (lastSessionId && this.sessions.some(s => s.sessionId == lastSessionId)) {
+            this.form.sessionId = isNaN(Number(lastSessionId)) ? lastSessionId : Number(lastSessionId)
+            this.loadHomeworks()
+          }
+        })
+      }
+    })
   },
   methods: {
     async fetchCourses() {
@@ -282,6 +296,9 @@ export default {
         return
       }
 
+      // 保存用户选择的课程
+      localStorage.setItem('homework_grading_last_courseId', this.form.courseId)
+
       try {
         const api = require('@/api/proj_lw/session')
         const res = await api.getSessionsByCourseId(this.form.courseId)
@@ -301,6 +318,9 @@ export default {
         this.homeworkList = []
         return
       }
+
+      // 保存用户选择的课堂
+      localStorage.setItem('homework_grading_last_sessionId', this.form.sessionId)
 
       this.loading = true
       try {

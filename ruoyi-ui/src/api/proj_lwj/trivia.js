@@ -3,10 +3,10 @@ import request from '@/utils/request'
 // Open Trivia Database API - 免费公开题库
 const TRIVIA_API_BASE = 'https://opentdb.com/api.php'
 
-// 题目类型映射
+// 题目类型映射：新编码 1=判断 2=选择 3=简答
 export const QUESTION_TYPE_MAP = {
-  'multiple': 1, // 单选题
-  'boolean': 3   // 判断题
+  'multiple': 2, // 选择题
+  'boolean': 1   // 判断题
 }
 
 // 难度映射
@@ -64,15 +64,15 @@ export function getTriviaQuestions(params = {}) {
             id: null, // 新题目ID为空
             examId: null,
             questionContent: decodeHtml(item.question),
-            questionType: QUESTION_TYPE_MAP[item.type] || 1,
+            questionType: QUESTION_TYPE_MAP[item.type] || 2,
             difficulty: DIFFICULTY_MAP[item.difficulty] || 1,
-            score: getDefaultScore(QUESTION_TYPE_MAP[item.type] || 1),
+            score: getDefaultScore(QUESTION_TYPE_MAP[item.type] || 2),
             sortOrder: index + 1,
             questionOptions: item.type === 'boolean' ?
-              JSON.stringify(['True', 'False']) :
+              JSON.stringify(['正确', '错误']) :
               JSON.stringify(shuffleArray([item.correct_answer, ...item.incorrect_answers]).map(decodeHtml)),
             correctAnswer: item.type === 'boolean' ?
-              (item.correct_answer === 'True' ? 'True' : 'False') :
+              (item.correct_answer === 'True' ? '正确' : '错误') :
               decodeHtml(item.correct_answer),
             analysis: '', // 题目解析为空，可后续添加
             category: item.category,
@@ -111,18 +111,14 @@ function shuffleArray(array) {
   return newArray
 }
 
-// 获取默认分数
+// 获取默认分数：新编码 1=判断 2=选择 3=简答
 function getDefaultScore(questionType) {
   switch (questionType) {
-    case 1: // 单选
-      return 2
-    case 2: // 多选
-      return 3
-    case 3: // 判断
+    case 1: // 判断
       return 1
-    case 4: // 填空
+    case 2: // 选择
       return 2
-    case 5: // 简答
+    case 3: // 简答
       return 5
     default:
       return 2

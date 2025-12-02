@@ -71,23 +71,21 @@ Page({
         const normalized = questions.map(q => {
           const id = q.id || q.questionId || q.question_id;
           const rawType = q.questionType || q.question_type || q.type;
-          // map backend numeric types to front-end strings
+          // 新编码映射：1=判断 2=选择 3=简答
           let typeStr = '';
-          if (rawType === 1 || String(rawType) === '1') typeStr = 'single';
-          else if (rawType === 2 || String(rawType) === '2') typeStr = 'multiple';
-          else if (rawType === 3 || String(rawType) === '3') typeStr = 'judge'; // 判断题
-          else if (rawType === 4 || String(rawType) === '4') typeStr = 'text'; // 填空题
-          else if (rawType === 5 || rawType === 6 || String(rawType) === '5' || String(rawType) === '6') typeStr = 'text';
+          if (rawType === 1 || String(rawType) === '1') typeStr = 'judge'; // 判断题
+          else if (rawType === 2 || String(rawType) === '2') typeStr = 'single'; // 选择题
+          else if (rawType === 3 || String(rawType) === '3') typeStr = 'text'; // 简答题
           else typeStr = (typeof rawType === 'string' ? rawType : String(rawType)) || 'text';
 
           // normalize options into objects {id, text}
           let options = [];
           try {
-            // 判断题特殊处理：自动添加"对/错"选项
+            // 判断题特殊处理：自动添加"正确/错误"选项
             if (typeStr === 'judge') {
               options = [
-                { id: '1', text: '对' },
-                { id: '0', text: '错' }
+                { id: '正确', text: '正确' },
+                { id: '错误', text: '错误' }
               ];
             } else {
               let rawOptions = [];
@@ -110,7 +108,7 @@ Page({
           } catch (e) {
             console.error('parse options error', e);
             if (typeStr === 'judge') {
-              options = [{ id: '1', text: '对' }, { id: '0', text: '错' }];
+              options = [{ id: '正确', text: '正确' }, { id: '错误', text: '错误' }];
             } else {
               options = [];
             }

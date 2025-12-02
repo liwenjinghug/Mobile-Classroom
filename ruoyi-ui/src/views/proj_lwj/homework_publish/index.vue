@@ -263,27 +263,41 @@ export default {
     // fetch courses and then apply any route query preselection (courseId/sessionId)
     this.fetchCourses().then(() => {
       const q = (this.$route && this.$route.query) ? this.$route.query : {}
+
+      // 优先使用路由参数
       if (q.courseId) {
-        // prefer number when possible
         this.form.courseId = isNaN(Number(q.courseId)) ? q.courseId : Number(q.courseId)
-        // load sessions for the course then optionally set sessionId
         this.fetchSessionsByCourseId(this.form.courseId).then(() => {
           if (q.sessionId) {
             this.form.sessionId = isNaN(Number(q.sessionId)) ? q.sessionId : Number(q.sessionId)
-            // load homeworks for that session
             this.loadHomeworks(this.form.sessionId)
           }
         })
       } else if (q.sessionId) {
-        // if only sessionId provided, try to set it and load homeworks (course will be empty)
         this.form.sessionId = isNaN(Number(q.sessionId)) ? q.sessionId : Number(q.sessionId)
         this.loadHomeworks(this.form.sessionId)
+      } else {
+        // 如果没有路由参数，尝试恢复上次选择的课程和课堂
+        const lastCourseId = localStorage.getItem('homework_publish_last_courseId')
+        const lastSessionId = localStorage.getItem('homework_publish_last_sessionId')
+
+        if (lastCourseId) {
+          this.form.courseId = isNaN(Number(lastCourseId)) ? lastCourseId : Number(lastCourseId)
+          this.fetchSessionsByCourseId(this.form.courseId).then(() => {
+            if (lastSessionId && this.sessions.some(s => s.sessionId == lastSessionId)) {
+              this.form.sessionId = isNaN(Number(lastSessionId)) ? lastSessionId : Number(lastSessionId)
+              this.loadHomeworks(this.form.sessionId)
+            }
+          })
+        }
       }
     }).catch(() => {})
   },
   watch: {
     'form.courseId'(val) {
       if (val) {
+        // 保存用户选择的课程
+        localStorage.setItem('homework_publish_last_courseId', val)
         this.fetchSessionsByCourseId(val)
       } else {
         this.sessions = []
@@ -292,6 +306,8 @@ export default {
     },
     'form.sessionId'(val) {
       if (val) {
+        // 保存用户选择的课堂
+        localStorage.setItem('homework_publish_last_sessionId', val)
         this.loadHomeworks(val)
       } else {
         this.homeworkList = []

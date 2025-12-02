@@ -595,14 +595,9 @@ export default {
     // 判断是否处于实际进行中（基于时间窗口 + 已发布或后端标记进行中）
     isRunning(row) {
       if (!row) return false
-      const status = Number(row.status)
-      // 草稿不算进行中
-      if (status === 0) return false
-      const start = this.parseDateTime(row.startTime)
-      const end = this.parseDateTime(row.endTime)
-      if (!start || !end) return false
-      const now = Date.now()
-      return now >= start && now < end && status !== 3
+      // 只检查status是否为2（进行中），与后端删除逻辑保持一致
+      // 只要不是进行中状态，都可以删除（草稿/已发布/已结束均可删除）
+      return Number(row.status) === 2
     },
     buildPayload(publishNow) {
       const payload = Object.assign({}, this.form)

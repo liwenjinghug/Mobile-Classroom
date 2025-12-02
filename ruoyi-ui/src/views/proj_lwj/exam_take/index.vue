@@ -41,18 +41,21 @@
           </div>
           <div class="q-content" v-html="currentQuestion.questionContent"></div>
 
-          <div v-if="currentQuestion.questionType===1" class="single-choice">
+          <!-- 判断题：新编码 type=1 -->
+          <div v-if="currentQuestion.questionType===1" class="judge-choice">
+            <el-radio-group v-model="workingAnswer" @change="onAnswerChanged">
+              <el-radio label="正确">正确</el-radio>
+              <el-radio label="错误">错误</el-radio>
+            </el-radio-group>
+          </div>
+          <!-- 选择题：新编码 type=2 -->
+          <div v-else-if="currentQuestion.questionType===2" class="single-choice">
             <el-radio-group v-model="workingAnswer" @change="onAnswerChanged">
               <el-radio v-for="opt in parsedOptions" :label="opt" :key="opt">{{ opt }}</el-radio>
             </el-radio-group>
           </div>
-          <div v-else-if="currentQuestion.questionType===3" class="judge-choice">
-            <el-radio-group v-model="workingAnswer" @change="onAnswerChanged">
-              <el-radio label="true">正确</el-radio>
-              <el-radio label="false">错误</el-radio>
-            </el-radio-group>
-          </div>
-          <div v-else-if="currentQuestion.questionType===5" class="short-answer">
+          <!-- 简答题：新编码 type=3 -->
+          <div v-else-if="currentQuestion.questionType===3" class="short-answer">
             <el-input type="textarea" :rows="6" v-model="workingAnswer" placeholder="请输入答案" @input="onAnswerInput"></el-input>
           </div>
           <div v-else>
@@ -87,7 +90,7 @@
     </div>
 
     <!-- 成绩汇总弹窗 -->
-    <el-dialog title="考试成绩" :visible.sync="summaryVisible" width="800px" v-if="exam">
+    <el-dialog title="考试成绩" :visible.sync="summaryVisible" width="800px" :modal="false" :lock-scroll="false" :append-to-body="true" v-if="exam">
       <div v-if="submitted">
         <!-- 未批改完主观题前，不显示及格与否，仅提示客观题得分 -->
         <el-alert v-if="canJudgePass"
@@ -241,7 +244,33 @@ export default {
     },
     finalScoreDisplay(){ return this.hideTotalScore ? '待批改' : this.formatScore(this.finalScoreNumeric) },
     scoreLabel(){ return this.hideTotalScore ? '客观题得分' : (this.canJudgePass ? '我的得分' : '客观题得分') },
-    summaryRows(){ return this.questions.map((q,i)=>{ const res=this.answerResultMap[q.id]||{}; const sc=res.score; const subj=this.isSubjective(q.questionType); let correct=res.correct; if(subj && (sc===undefined || sc===null)) { correct=undefined } return { index:i+1, type:this.typeLabel(q.questionType), score:sc, maxScore:q.score, correct, answer:this.answerMap[q.id]||'', correctAnswer:this.allowShowCorrect?(q.correctAnswer||''):'', scoreDisplay: sc===undefined? (subj? '待批改':(res.correct===undefined?'—':(res.correct? this.formatScore(q.score):'0'))): this.formatScore(sc) } }) },
+    summaryRows(){
+      return this.questions.map((q,i)=>{
+        const res = this.answerResultMap[q.id] || {};
+        const sc = res.score;
+        const subj = this.isSubjective(q.questionType);
+        let correct = res.correct;
+
+        // 主观题：如果分数为空或为0（未批改），则显示"待批改"
+        // 注意：即使后端错误地给了score=0和correct=false，也要显示待批改
+        if(subj && (sc === undefined || sc === null || sc === 0)) {
+          correct = undefined
+        }
+
+        return {
+          index: i+1,
+          type: this.typeLabel(q.questionType),
+          score: sc,
+          maxScore: q.score,
+          correct,
+          answer: this.answerMap[q.id] || '',
+          correctAnswer: this.allowShowCorrect ? (q.correctAnswer || '') : '',
+          scoreDisplay: sc === undefined || sc === null ?
+            (subj ? '待批改' : (res.correct === undefined ? '—' : (res.correct ? this.formatScore(q.score) : '0')))
+            : (subj && sc === 0 ? '待批改' : this.formatScore(sc))
+        }
+      })
+    },
     // 新增：结果列是否显示（提交后且允许显示答案才展示）
     showResultColumn(){
       if(!this.exam) return true
@@ -326,22 +355,24 @@ export default {
         default: return '其它';
       }
     },
-    // 题型判断
-    isObjective(t){ return [1,2,3].includes(Number(t)) },
-    isSubjective(t){ return [4,5,6].includes(Number(t)) },
+    // 题型判断：新编码 1=判断 2=选择 3=简答
+    isObjective(t){ return [1,2].includes(Number(t)) },
+    isSubjective(t){ return Number(t) === 3 },
     hasSubjectiveQuestions(){ return this.questions.some(q => this.isSubjective(q.questionType)) },
-    // 简单兜底判分：仅支持单选(1)/判断(3)
+    // 简单兜底判分：新编码 1=判断 2=选择
     quickJudge(t, ans, correct){
       const tp=Number(t)
       if (tp===1) {
-        return String(ans||'').trim() === String(correct||'').trim()
-      }
-      if (tp===3) {
+        // 判断题：标准化比较
         const norm = v => String(v||'').toString().trim().toLowerCase()
-        const mapTrue = ['true','1','t','y','yes','对','正确']
-        const mapFalse = ['false','0','f','n','no','错','错误']
+        const mapTrue = ['true','1','t','y','yes','对','正确','是']
+        const mapFalse = ['false','0','f','n','no','错','错误','否']
         const a = norm(ans), c = norm(correct)
         return (mapTrue.includes(a) && mapTrue.includes(c)) || (mapFalse.includes(a) && mapFalse.includes(c))
+      }
+      if (tp===2) {
+        // 选择题：字符串比较
+        return String(ans||'').trim() === String(correct||'').trim()
       }
       return false
     },
@@ -378,7 +409,8 @@ export default {
       this.cheatGraceUntil = Date.now() + 800; },
     prev(){ if(this.currentIndex>0) this.selectIndex(this.currentIndex-1) },
     next(){ if(this.currentIndex < this.questions.length-1) this.selectIndex(this.currentIndex+1) },
-    typeLabel(t){ return t===1?'单选':t===3?'判断':t===5?'简答':t===4?'填空':'其它' },
+    // 题型标签：新编码 1=判断 2=选择 3=简答
+    typeLabel(t){ return t===1?'判断':t===2?'选择':t===3?'简答':'其它' },
     async start(){ if(!this.canStart) return this.$message.error('尚未到可开始时间或考试未发布'); try { const res=await startExamParticipant({ examId:Number(this.examId), studentNo:this.studentNo }); this.participant=res.data; this.started=true; this.computeRemaining(); this.$message.success('考试已开始')
       if (this.antiCheatEnabled) { this.bindAntiCheat(); this.cheatGraceUntil = Date.now() + 2000; }
      } catch(e){ console.error(e); this.$message.error('开始考试失败') } },

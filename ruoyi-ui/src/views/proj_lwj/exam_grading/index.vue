@@ -831,10 +831,12 @@ export default {
       return (this.ungradedMap[questionId] || []).length
     },
     isSubjective(type) {
-      return [5, 6].includes(Number(type))
+      // 新编码：3=简答（主观题）
+      return Number(type) === 3
     },
     typeLabel(t) {
-      return { 1: '单选', 2: '多选', 3: '判断', 4: '填空', 5: '简答', 6: '文件' }[t] || t
+      // 新编码：1=判断 2=选择 3=简答
+      return { 1: '判断', 2: '选择', 3: '简答' }[t] || t
     },
     statusText(s) {
       return { 0: '草稿', 1: '已发布', 2: '进行中', 3: '已结束' }[Number(s)] || '未知'

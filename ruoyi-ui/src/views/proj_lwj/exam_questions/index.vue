@@ -48,17 +48,17 @@
         </el-form-item>
         <el-form-item label="题型">
           <el-select v-model="form.questionType" style="width: 200px" @change="onTypeChange">
-            <el-option :value="1" label="单选题"/>
-            <el-option :value="3" label="判断题"/>
-            <el-option :value="5" label="简答题"/>
+            <el-option :value="1" label="判断题"/>
+            <el-option :value="2" label="选择题"/>
+            <el-option :value="3" label="简答题"/>
           </el-select>
         </el-form-item>
         <el-form-item label="题目内容">
           <el-input type="textarea" :rows="3" v-model="form.questionContent" />
         </el-form-item>
 
-        <!-- 单选题 选项编辑器 -->
-        <div v-if="form.questionType === 1">
+        <!-- 选择题 选项编辑器 -->
+        <div v-if="form.questionType === 2">
           <el-form-item label="选项">
             <div v-for="(opt, idx) in optionList" :key="idx" style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
               <el-radio v-model="singleCorrect" :label="idx">正确</el-radio>
@@ -70,7 +70,7 @@
         </div>
 
         <!-- 判断题 答案选择 -->
-        <div v-if="form.questionType === 3">
+        <div v-if="form.questionType === 1">
           <el-form-item label="正确答案">
             <el-radio-group v-model="judgeAnswer">
               <el-radio :label="true">正确</el-radio>
@@ -80,7 +80,7 @@
         </div>
 
         <!-- 简答题 参考答案（可选） -->
-        <div v-if="form.questionType === 5">
+        <div v-if="form.questionType === 3">
           <el-form-item label="参考答案">
             <el-input type="textarea" :rows="3" v-model="shortAnswer" placeholder="可不填，供教师参考" />
           </el-form-item>
@@ -323,7 +323,7 @@ export default {
         }
       } catch(e) { console.warn('fetch course info failed', e) }
     },
-    typeText(t){ return {1:'单选',3:'判断',5:'简答'}[Number(t)||0] || t },
+    typeText(t){ return {1:'判断',2:'选择',3:'简答'}[Number(t)||0] || t },
     difficultyText(d){ const map = {1:'简单', 2:'一般', 3:'困难'}; const n = Number(d); return map[n] || '未知' },
     reload(){
       this.loading = true
@@ -373,12 +373,12 @@ export default {
       })
     },
     onTypeChange(){
-      if (this.form.questionType === 1) { // 单选初始化
+      if (this.form.questionType === 2) { // 选择题初始化
         if (!this.optionList || this.optionList.length < 2) this.optionList = [{ text: '' }, { text: '' }]
         this.singleCorrect = 0
-      } else if (this.form.questionType === 3) {
+      } else if (this.form.questionType === 1) {
         this.judgeAnswer = true
-      } else if (this.form.questionType === 5) {
+      } else if (this.form.questionType === 3) {
         this.shortAnswer = ''
       }
     },
@@ -392,7 +392,8 @@ export default {
           score: row.score || 1, difficulty: row.difficulty || 1, sortOrder: row.sortOrder || 1, analysis: row.analysis || ''
         }
         // 解析不同题型的数据
-        if (this.form.questionType === 1) {
+        if (this.form.questionType === 2) {
+          // 选择题
           try {
             const opts = Array.isArray(row.questionOptions) ? row.questionOptions : JSON.parse(row.questionOptions || '[]')
             this.optionList = (opts || []).map(x => ({ text: String(x) }))
@@ -401,14 +402,15 @@ export default {
           const ans = String(row.correctAnswer || '')
           let found = this.optionList.findIndex(o => o.text === ans)
           this.singleCorrect = found >= 0 ? found : 0
-        } else if (this.form.questionType === 3) {
+        } else if (this.form.questionType === 1) {
+          // 判断题：支持多种格式转换为布尔值
           const v = String(row.correctAnswer||'').toLowerCase()
-          this.judgeAnswer = (v === 'true' || v === '1')
-        } else if (this.form.questionType === 5) {
+          this.judgeAnswer = (v === '正确' || v === 'true' || v === '1' || v === 't' || v === 'yes')
+        } else if (this.form.questionType === 3) {
           this.shortAnswer = row.correctAnswer || ''
         }
       } else {
-        // 新建
+        // 新建：默认判断题
         this.form = { id:null, examId: Number(this.realExamId), questionType: 1, questionContent: '', score: 1, difficulty: 1, sortOrder: (this.list.length+1), analysis: '' }
         this.optionList = [ { text: '' }, { text: '' } ]
         this.singleCorrect = 0
@@ -421,26 +423,31 @@ export default {
       if (!this.form.questionContent || !String(this.form.questionContent).trim()) { this.$message.error('题目内容必填'); return false }
       if (!this.form.score || Number(this.form.score) <= 0) { this.$message.error('分值需大于0'); return false }
       const t = Number(this.form.questionType)
-      if (![1,3,5].includes(t)) { this.$message.error('题型仅支持：单选、判断、简答'); return false }
-      if (t === 1) {
+      if (![1,2,3].includes(t)) { this.$message.error('题型仅支持：判断、选择、简答'); return false }
+      // 选择题需要验证选项
+      if (t === 2) {
         const texts = (this.optionList || []).map(x => (x.text||'').trim()).filter(Boolean)
-        if (texts.length < 2) { this.$message.error('单选题至少2个非空选项'); return false }
+        if (texts.length < 2) { this.$message.error('选择题至少2个非空选项'); return false }
         if (this.singleCorrect < 0 || this.singleCorrect >= texts.length) { this.$message.error('请选择正确答案'); return false }
       }
+      // 判断题和简答题不需要额外验证
       return true
     },
     buildPayload(){
       const t = Number(this.form.questionType)
       const payload = Object.assign({}, this.form)
       if (t === 1) {
+        // 判断题：标准化答案为"正确"或"错误"
+        payload.questionOptions = JSON.stringify(['正确', '错误'])
+        payload.correctAnswer = this.judgeAnswer ? '正确' : '错误'
+      } else if (t === 2) {
+        // 选择题
         const texts = (this.optionList || []).map(x => (x.text||'').trim()).filter(Boolean)
         payload.questionOptions = JSON.stringify(texts)
         const idx = this.singleCorrect
         payload.correctAnswer = texts[idx] || ''
       } else if (t === 3) {
-        payload.questionOptions = ''
-        payload.correctAnswer = this.judgeAnswer ? 'true' : 'false'
-      } else if (t === 5) {
+        // 简答题
         payload.questionOptions = ''
         payload.correctAnswer = this.shortAnswer || ''
       }
@@ -855,22 +862,14 @@ export default {
     goBackPublish(){
       this.$router.push({ path:'/proj_lwj_exam/exam_publish' }).catch(()=>{})
     },
-    // 将考试题型(1单选/3判断/5简答)映射为本地题库题型(1单选/2判断/3简答)
+    // 数据库已统一：1=判断 2=选择 3=简答
+    // 考试题型和本地题库题型使用相同编码，无需转换
     examTypeToLocalType(examType) {
-      const t = Number(examType)
-      if (t === 1) return 1
-      if (t === 3) return 2
-      if (t === 5) return 3
-      return undefined
+      return examType
     },
-    // 将本地题库题型映射为考试题型
+    // 将本地题库题型映射为考试题型（已统一，直接返回）
     localTypeToExamType(localType) {
-      const t = Number(localType)
-      if (t === 1) return 1
-      if (t === 2) return 3
-      if (t === 3) return 5
-      // 默认按简答归类
-      return 5
+      return localType
     },
   }
 }

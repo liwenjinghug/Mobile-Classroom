@@ -12,7 +12,7 @@ public class ClassExamQuestion extends BaseEntity {
 
     private Long id; // question id
     private Long examId;
-    private Integer questionType; // 1单选 2多选 3判断 4填空 5简答 6文件
+    private Integer questionType; // 1=判断 2=选择 3=简答
     private String questionContent; // 题目内容
     private String questionOptions; // 选项 JSON
     private String correctAnswer; // 正确答案
