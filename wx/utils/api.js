@@ -140,10 +140,10 @@ getJoinedClasses(query = {}) {
   })
 },
 
-// 获取课堂详情（单个）
+// 获取课堂详情（单个）- 使用proj_fz无权限接口
 getClassDetail(sessionId) {
   return request({
-    url: `/proj_lw/student/class/${sessionId}`,
+    url: `/proj_fz/class/${sessionId}`,
     method: 'GET'
   })
 },
@@ -299,6 +299,54 @@ getNoticeDetail(noticeId) {
       });
     });
   },
+
+  // ================== proj_fz: 学生作业相关接口（无权限限制）==================
+
+  // 获取作业列表
+  getHomeworkList(sessionId, status) {
+    const query = {};
+    if (sessionId) query.sessionId = sessionId;
+    return request({
+      url: '/proj_fz/homework/list',
+      method: 'GET',
+      data: query
+    });
+  },
+
+  // 获取作业详情
+  getHomeworkDetail(homeworkId) {
+    return request({
+      url: `/proj_fz/homework/${homeworkId}`,
+      method: 'GET'
+    });
+  },
+
+  // 提交作业
+  submitHomework(data) {
+    return request({
+      url: '/proj_fz/homework/submit',
+      method: 'POST',
+      data: data
+    });
+  },
+
+  // 获取学生的作业提交记录
+  getMyHomeworkSubmissions() {
+    return request({
+      url: '/proj_fz/homework/my-submissions',
+      method: 'GET'
+    });
+  },
+
+  // 下载文件到服务器
+  downloadFileToServer(fileUrl, fileName) {
+    return request({
+      url: '/proj_fz/file/download',
+      method: 'POST',
+      data: { fileUrl, fileName }
+    });
+  },
+
 // --- 考试相关 ---
 getExamSessions(sessionId) {
   // If dev mock mode enabled, return sample exams immediately
