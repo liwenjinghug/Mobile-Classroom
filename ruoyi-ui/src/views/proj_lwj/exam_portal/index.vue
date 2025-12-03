@@ -312,17 +312,13 @@ export default {
       this.myLoading = true
       this.myLoaded = true
       try {
-        // 同时获取新版与旧版数据，合并去重，避免任一接口结构变化导致列表空白
-        const [newRes, oldRes] = await Promise.all([
-          listMyExams(this.studentNo).catch(()=>({})),
-          listMyParticipants(this.studentNo).catch(()=>({}))
-        ])
-        const newListRaw = newRes && (newRes.data || newRes.rows || newRes.list)
-        const oldListRaw = oldRes && (oldRes.data || oldRes.rows || oldRes.list)
-        let newList = Array.isArray(newListRaw) ? newListRaw.slice() : []
-        let oldList = Array.isArray(oldListRaw) ? oldListRaw.slice() : []
+        // 只查询实际参与记录（从 class_exam_participant 表），不显示未参与的考试
+        const res = await listMyParticipants(this.studentNo)
+        const listRaw = res && (res.data || res.rows || res.list)
+        let list = Array.isArray(listRaw) ? listRaw.slice() : []
+
         // 标准化字段: examId 兼容 id
-        const normalize = (arr) => arr.map(r => ({
+        list = list.map(r => ({
           ...r,
           examId: r.examId != null ? r.examId : (r.id != null ? r.id : r.exam_id),
           totalScore: r.totalScore != null ? r.totalScore : r.total_score,
@@ -331,32 +327,18 @@ export default {
           correctStatus: r.correctStatus != null ? r.correctStatus : r.correct_status,
           hasSubjective: r.hasSubjective != null ? r.hasSubjective : r.has_subjective
         }))
-        newList = normalize(newList)
-        oldList = normalize(oldList)
-        // 合并：以 examId+studentNo 为主键，新接口优先
-        const map = new Map()
-        for (const item of oldList) {
-          if (!item.examId) continue
-          const key = item.examId + ':' + (item.studentNo || item.student_no || '')
-          map.set(key, item)
-        }
-        for (const item of newList) {
-          if (!item.examId) continue
-          const key = item.examId + ':' + (item.studentNo || item.student_no || '')
-          map.set(key, { ...map.get(key), ...item })
-        }
-        let merged = Array.from(map.values())
+
         // 推断主观题及 correctStatus 缺失的记录（仅缺失时）
-        const needInfer = merged.filter(r => r.examId && (r.hasSubjective === undefined || r.correctStatus === undefined))
+        const needInfer = list.filter(r => r.examId && (r.hasSubjective === undefined || r.correctStatus === undefined))
         if (needInfer.length) await this.inferSubjectiveFlags(needInfer)
         // 填充考试基本信息
-        await this.enrichExamInfo(merged)
+        await this.enrichExamInfo(list)
         // 排序：提交时间优先，其次开始时间
-        merged.sort((a,b)=> new Date(b.submitTime||0)-new Date(a.submitTime||0) || new Date(b.startTime||0)-new Date(a.startTime||0))
-        this.myList = merged
+        list.sort((a,b)=> new Date(b.submitTime||0)-new Date(a.submitTime||0) || new Date(b.startTime||0)-new Date(a.startTime||0))
+        this.myList = list
         this.calcStats()
-        if (!merged.length) {
-          this.$message.info('未获取到考试记录：可能尚无参与记录或接口数据为空')
+        if (!list.length) {
+          this.$message.info('未获取到考试记录：可能尚无参与记录')
         }
       } catch(e){
         console.error(e); this.$message.error('加载考试记录失败'); this.myList=[]; this.calcStats()

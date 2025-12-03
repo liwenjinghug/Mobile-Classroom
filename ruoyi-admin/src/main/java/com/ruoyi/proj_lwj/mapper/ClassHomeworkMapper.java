@@ -58,4 +58,10 @@ public interface ClassHomeworkMapper {
 
     @Delete("<script>DELETE FROM class_homework WHERE homework_id IN <foreach item='id' collection='array' open='(' separator=',' close=')'> #{id} </foreach></script>")
     int deleteHomeworkByIds(Long[] homeworkIds);
+
+    // Check if a homework with the same title exists in the same session (excluding a specific homework ID if provided)
+    @Select("<script>SELECT COUNT(*) FROM class_homework WHERE session_id = #{sessionId} AND title = #{title} " +
+            "<if test='excludeHomeworkId != null'> AND homework_id != #{excludeHomeworkId}</if>" +
+            "</script>")
+    int countBySessionAndTitle(@Param("sessionId") Long sessionId, @Param("title") String title, @Param("excludeHomeworkId") Long excludeHomeworkId);
 }

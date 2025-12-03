@@ -264,7 +264,7 @@
             </div>
 
             <div class="filter-item">
-              <el-button @click="resetFilter" type="default" icon="el-icon-refresh">
+              <el-button @click="resetFilter" icon="el-icon-refresh">
                 重置
               </el-button>
             </div>
@@ -281,31 +281,35 @@
         <el-table-column
           prop="homeworkId"
           label="作业ID"
-          width="80"
-          sortable>
+          width="70"
+          sortable
+          align="center">
         </el-table-column>
         <el-table-column
           prop="homeworkTitle"
           label="作业名称"
-          min-width="200"
-          show-overflow-tooltip>
+          width="180"
+          show-overflow-tooltip
+          sortable>
         </el-table-column>
         <el-table-column
           prop="courseName"
           label="课程"
-          width="120"
-          sortable>
+          width="100"
+          sortable
+          show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           prop="className"
           label="课堂"
-          width="120"
-          sortable>
+          width="100"
+          sortable
+          show-overflow-tooltip>
         </el-table-column>
         <el-table-column
           prop="createTime"
           label="发布时间"
-          width="160"
+          width="140"
           sortable>
           <template #default="scope">
             <span>{{ formatDate(scope.row.createTime) }}</span>
@@ -314,7 +318,7 @@
         <el-table-column
           prop="deadline"
           label="截止时间"
-          width="160"
+          width="140"
           sortable>
           <template #default="scope">
             <span>{{ formatDate(scope.row.deadline) }}</span>
@@ -323,10 +327,11 @@
         <el-table-column
           prop="submissionRate"
           label="提交率"
-          width="100"
-          sortable>
+          width="80"
+          sortable
+          align="center">
           <template #default="scope">
-            <el-tag :type="getSubmissionRateType(scope.row.submissionRate)">
+            <el-tag :type="getSubmissionRateType(scope.row.submissionRate)" size="small">
               {{ scope.row.submissionRate || 0 }}%
             </el-tag>
           </template>
@@ -334,26 +339,30 @@
         <el-table-column
           prop="submittedCount"
           label="已提交"
-          width="80"
-          sortable>
+          width="70"
+          sortable
+          align="center">
         </el-table-column>
         <el-table-column
           prop="notSubmittedCount"
           label="未提交"
-          width="80"
-          sortable>
+          width="70"
+          sortable
+          align="center">
         </el-table-column>
         <el-table-column
           prop="overdueCount"
           label="逾期"
-          width="80"
-          sortable>
+          width="60"
+          sortable
+          align="center">
         </el-table-column>
         <el-table-column
           prop="averageScore"
           label="平均分"
-          width="100"
-          sortable>
+          width="80"
+          sortable
+          align="center">
           <template #default="scope">
             <span v-if="scope.row.averageScore">{{ scope.row.averageScore.toFixed(1) }}</span>
             <span v-else style="color: #909399;">未批改</span>
@@ -362,10 +371,91 @@
         <el-table-column
           prop="createBy"
           label="发布者"
-          width="100">
+          width="90"
+          show-overflow-tooltip>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="60" fixed="right">
+          <template #default="scope">
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-view"
+              @click="handleViewDetail(scope.row)"
+            >详情</el-button>
+          </template>
         </el-table-column>
       </el-table>
     </el-card>
+
+    <!-- 作业详情对话框 -->
+    <el-dialog :title="detailDialogTitle" :visible.sync="detailDialogVisible" width="900px" append-to-body>
+      <el-descriptions v-if="currentDetailRow" :column="2" border>
+        <el-descriptions-item label="作业ID">{{ currentDetailRow.homeworkId }}</el-descriptions-item>
+        <el-descriptions-item label="作业名称">{{ currentDetailRow.homeworkTitle }}</el-descriptions-item>
+        <el-descriptions-item label="课程名称">{{ currentDetailRow.courseName }}</el-descriptions-item>
+        <el-descriptions-item label="课堂名称">{{ currentDetailRow.className }}</el-descriptions-item>
+        <el-descriptions-item label="发布时间">{{ formatDate(currentDetailRow.createTime) }}</el-descriptions-item>
+        <el-descriptions-item label="截止时间">{{ formatDate(currentDetailRow.deadline) }}</el-descriptions-item>
+        <el-descriptions-item label="作业状态">
+          <el-tag :type="isExpired(currentDetailRow.deadline) ? 'danger' : 'success'" size="small">
+            {{ isExpired(currentDetailRow.deadline) ? '已过期' : '进行中' }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="发布者">{{ currentDetailRow.createBy }}</el-descriptions-item>
+        <el-descriptions-item label="已提交人数">{{ currentDetailRow.submittedCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="未提交人数">{{ currentDetailRow.notSubmittedCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="逾期提交人数">{{ currentDetailRow.overdueCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="提交率">
+          <el-tag :type="getSubmissionRateType(currentDetailRow.submissionRate)">
+            {{ currentDetailRow.submissionRate || 0 }}%
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="已批改人数">{{ currentDetailRow.gradedCount || 0 }}</el-descriptions-item>
+        <el-descriptions-item label="批改率">
+          {{ currentDetailRow.submittedCount > 0 ?
+            Math.round((currentDetailRow.gradedCount || 0) / currentDetailRow.submittedCount * 100) : 0 }}%
+        </el-descriptions-item>
+        <el-descriptions-item label="平均分">
+          <span v-if="currentDetailRow.averageScore">{{ currentDetailRow.averageScore.toFixed(1) }}</span>
+          <span v-else style="color: #909399;">未批改</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="最高分">
+          <span v-if="currentDetailRow.maxScore">{{ currentDetailRow.maxScore }}</span>
+          <span v-else style="color: #909399;">-</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="最低分">
+          <span v-if="currentDetailRow.minScore">{{ currentDetailRow.minScore }}</span>
+          <span v-else style="color: #909399;">-</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="及格率">
+          <span v-if="currentDetailRow.passRate !== undefined">{{ currentDetailRow.passRate }}%</span>
+          <span v-else style="color: #909399;">-</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="作业内容" :span="2">
+          <div style="max-height: 200px; overflow-y: auto;">
+            {{ currentDetailRow.homeworkContent || '无' }}
+          </div>
+        </el-descriptions-item>
+        <el-descriptions-item label="附件" :span="2">
+          <div v-if="currentDetailRow.attachments && currentDetailRow.attachments.length > 0">
+            <el-tag v-for="(file, index) in currentDetailRow.attachments" :key="index" style="margin-right: 5px;">
+              {{ file.fileName }}
+            </el-tag>
+          </div>
+          <span v-else>无附件</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="备注" :span="2">{{ currentDetailRow.remark || '无' }}</el-descriptions-item>
+      </el-descriptions>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleDetailNavigation('first')" :disabled="currentDetailIndex <= 0">首条</el-button>
+        <el-button @click="handleDetailNavigation('prev')" :disabled="currentDetailIndex <= 0">上一条</el-button>
+        <el-button @click="handleDetailNavigation('next')" :disabled="currentDetailIndex >= homeworkList.length - 1">下一条</el-button>
+        <el-button @click="handleDetailNavigation('last')" :disabled="currentDetailIndex >= homeworkList.length - 1">末尾</el-button>
+        <el-button type="primary" @click="handlePrintDetail">打印</el-button>
+        <el-button type="success" @click="handleExportDetail">导出</el-button>
+        <el-button @click="detailDialogVisible = false">关闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -463,7 +553,13 @@ export default {
           icon: 'el-icon-check',
           color: '#F56C6C'
         }
-      ]
+      ],
+
+      // 详情对话框相关
+      detailDialogVisible: false,
+      detailDialogTitle: '作业详情',
+      currentDetailRow: null,
+      currentDetailIndex: 0
     }
   },
   mounted() {
@@ -801,76 +897,228 @@ export default {
 
     handlePrint() {
       this.$nextTick(() => {
-        const printContent = document.getElementById('printTable').outerHTML
+        // 收集图表数据 - 使用较小的图片尺寸和缩放比例
         const charts = []
 
         if (this.submissionChart) {
           charts.push({
             title: '提交状态分布',
-            dataUrl: this.submissionChart.getDataURL({ type: 'png', pixelRatio: 2 })
+            dataUrl: this.submissionChart.getDataURL({
+              type: 'png',
+              pixelRatio: 1.5,
+              backgroundColor: '#fff'
+            })
           })
         }
         if (this.scoreChart) {
           charts.push({
             title: '成绩分布',
-            dataUrl: this.scoreChart.getDataURL({ type: 'png', pixelRatio: 2 })
+            dataUrl: this.scoreChart.getDataURL({
+              type: 'png',
+              pixelRatio: 1.5,
+              backgroundColor: '#fff'
+            })
           })
         }
         if (this.trendChart) {
           charts.push({
             title: '提交趋势',
-            dataUrl: this.trendChart.getDataURL({ type: 'png', pixelRatio: 2 })
+            dataUrl: this.trendChart.getDataURL({
+              type: 'png',
+              pixelRatio: 1.5,
+              backgroundColor: '#fff'
+            })
           })
         }
+
+        // 手动构建表格内容
+        const tableRows = this.homeworkList.map((row, index) => `
+          <tr>
+            <td style="text-align: center;">${row.homeworkId}</td>
+            <td>${row.homeworkTitle || '-'}</td>
+            <td>${row.courseName || '-'}</td>
+            <td>${row.className || '-'}</td>
+            <td>${this.formatDate(row.createTime)}</td>
+            <td>${this.formatDate(row.deadline)}</td>
+            <td style="text-align: center;">${row.submissionRate || 0}%</td>
+            <td style="text-align: center;">${row.submittedCount || 0}</td>
+            <td style="text-align: center;">${row.notSubmittedCount || 0}</td>
+            <td style="text-align: center;">${row.overdueCount || 0}</td>
+            <td style="text-align: center;">${row.averageScore ? row.averageScore.toFixed(1) : '未批改'}</td>
+            <td>${row.createBy || '-'}</td>
+          </tr>
+        `).join('')
 
         const printWindow = window.open('', '_blank')
         printWindow.document.write(`
           <html>
             <head>
               <title>作业统计报表</title>
+              <meta charset="utf-8">
               <style>
-                body { font-family: Arial, sans-serif; margin: 20px; }
-                .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-                .print-header h1 { margin: 0; color: #333; }
-                .print-time { color: #666; font-size: 14px; }
-                .chart-container { margin: 20px 0; text-align: center; }
-                .chart-container img { max-width: 100%; height: auto; }
-                .chart-title { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
-                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #f5f5f5; font-weight: bold; }
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                body {
+                  font-family: "Microsoft YaHei", Arial, sans-serif;
+                  padding: 15px;
+                  background: #fff;
+                }
+                .print-header {
+                  text-align: center;
+                  margin-bottom: 15px;
+                  border-bottom: 2px solid #333;
+                  padding-bottom: 8px;
+                }
+                .print-header h1 {
+                  margin: 0;
+                  color: #333;
+                  font-size: 22px;
+                  line-height: 1.4;
+                }
+                .print-time {
+                  color: #666;
+                  font-size: 12px;
+                  margin-top: 5px;
+                }
+                .charts-section {
+                  margin-bottom: 20px;
+                }
+                .chart-container {
+                  margin: 15px 0;
+                  text-align: center;
+                  page-break-inside: avoid;
+                }
+                .chart-title {
+                  font-size: 14px;
+                  font-weight: bold;
+                  margin-bottom: 8px;
+                  color: #333;
+                }
+                .chart-container img {
+                  max-width: 90%;
+                  width: 600px;
+                  height: auto;
+                  display: block;
+                  margin: 0 auto;
+                }
+                .table-container {
+                  margin-top: 20px;
+                  page-break-before: auto;
+                }
+                .table-container h3 {
+                  margin-bottom: 8px;
+                  color: #333;
+                  font-size: 16px;
+                }
+                table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin: 10px 0;
+                  font-size: 11px;
+                  page-break-inside: auto;
+                }
+                th, td {
+                  border: 1px solid #ddd;
+                  padding: 6px 4px;
+                  text-align: left;
+                }
+                th {
+                  background-color: #f5f5f5;
+                  font-weight: bold;
+                  white-space: nowrap;
+                  font-size: 11px;
+                }
+                tr { page-break-inside: avoid; }
                 @media print {
-                  body { margin: 0; }
-                  .no-print { display: none; }
+                  body {
+                    margin: 0;
+                    padding: 10px;
+                  }
+                  .chart-container {
+                    page-break-inside: avoid;
+                    margin: 10px 0;
+                  }
+                  .chart-container img {
+                    max-width: 85%;
+                    width: 550px;
+                  }
+                  .table-container {
+                    page-break-before: auto;
+                  }
                 }
               </style>
             </head>
             <body>
               <div class="print-header">
                 <h1>作业统计报表</h1>
-                <div class="print-time">打印时间: ${new Date().toLocaleString()}</div>
+                <div class="print-time">打印时间: ${new Date().toLocaleString('zh-CN')}</div>
               </div>
 
-              ${charts.map(chart => `
-                <div class="chart-container">
-                  <div class="chart-title">${chart.title}</div>
-                  <img src="${chart.dataUrl}" alt="${chart.title}">
-                </div>
-              `).join('')}
+              <div class="charts-section">
+                ${charts.map(chart => `
+                  <div class="chart-container">
+                    <div class="chart-title">${chart.title}</div>
+                    <img src="${chart.dataUrl}" alt="${chart.title}" />
+                  </div>
+                `).join('')}
+              </div>
 
               <div class="table-container">
                 <h3>作业数据列表 (${this.homeworkList.length} 条记录)</h3>
-                ${printContent}
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="text-align: center;">作业ID</th>
+                      <th>作业名称</th>
+                      <th>课程</th>
+                      <th>课堂</th>
+                      <th>发布时间</th>
+                      <th>截止时间</th>
+                      <th style="text-align: center;">提交率</th>
+                      <th style="text-align: center;">已提交</th>
+                      <th style="text-align: center;">未提交</th>
+                      <th style="text-align: center;">逾期</th>
+                      <th style="text-align: center;">平均分</th>
+                      <th>发布者</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${tableRows}
+                  </tbody>
+                </table>
               </div>
             </body>
           </html>
         `)
         printWindow.document.close()
 
-        printWindow.onload = function() {
-          printWindow.print()
-          printWindow.onafterprint = function() {
-            printWindow.close()
+        // 等待图片加载完成后再打印
+        const images = printWindow.document.getElementsByTagName('img')
+        let loadedCount = 0
+        const totalImages = images.length
+
+        if (totalImages === 0) {
+          // 如果没有图片,直接打印
+          setTimeout(() => {
+            printWindow.print()
+          }, 500)
+        } else {
+          // 等待所有图片加载完成
+          const checkAllImagesLoaded = () => {
+            loadedCount++
+            if (loadedCount === totalImages) {
+              setTimeout(() => {
+                printWindow.print()
+              }, 300)
+            }
+          }
+
+          for (let i = 0; i < images.length; i++) {
+            if (images[i].complete) {
+              checkAllImagesLoaded()
+            } else {
+              images[i].onload = checkAllImagesLoaded
+              images[i].onerror = checkAllImagesLoaded
+            }
           }
         }
       })
@@ -929,6 +1177,139 @@ export default {
         console.error('日期格式化错误:', error)
         return '-'
       }
+    },
+
+    // 详情相关方法
+    handleViewDetail(row) {
+      this.currentDetailRow = row
+      this.currentDetailIndex = this.homeworkList.indexOf(row)
+      this.detailDialogTitle = `作业详情 - ${row.homeworkTitle}`
+      this.detailDialogVisible = true
+    },
+
+    handleDetailNavigation(action) {
+      let newIndex = this.currentDetailIndex
+      switch (action) {
+        case 'first':
+          newIndex = 0
+          break
+        case 'prev':
+          newIndex = Math.max(0, this.currentDetailIndex - 1)
+          break
+        case 'next':
+          newIndex = Math.min(this.homeworkList.length - 1, this.currentDetailIndex + 1)
+          break
+        case 'last':
+          newIndex = this.homeworkList.length - 1
+          break
+      }
+
+      if (newIndex !== this.currentDetailIndex) {
+        this.currentDetailIndex = newIndex
+        this.currentDetailRow = this.homeworkList[newIndex]
+        this.detailDialogTitle = `作业详情 - ${this.currentDetailRow.homeworkTitle}`
+      }
+    },
+
+    handlePrintDetail() {
+      this.$nextTick(() => {
+        const printWindow = window.open('', '_blank')
+        const detailContent = `
+          <html>
+            <head>
+              <title>作业详情 - ${this.currentDetailRow.homeworkTitle}</title>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+                .print-header h1 { margin: 0; color: #333; }
+                .print-time { color: #666; font-size: 14px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                th { background-color: #f5f5f5; font-weight: bold; width: 150px; }
+                @media print {
+                  body { margin: 0; }
+                  .no-print { display: none; }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="print-header">
+                <h1>作业详情</h1>
+                <div class="print-time">打印时间: ${new Date().toLocaleString()}</div>
+              </div>
+              <table>
+                <tr><th>作业ID</th><td>${this.currentDetailRow.homeworkId}</td></tr>
+                <tr><th>作业名称</th><td>${this.currentDetailRow.homeworkTitle}</td></tr>
+                <tr><th>课程名称</th><td>${this.currentDetailRow.courseName}</td></tr>
+                <tr><th>课堂名称</th><td>${this.currentDetailRow.className}</td></tr>
+                <tr><th>发布时间</th><td>${this.formatDate(this.currentDetailRow.createTime)}</td></tr>
+                <tr><th>截止时间</th><td>${this.formatDate(this.currentDetailRow.deadline)}</td></tr>
+                <tr><th>发布者</th><td>${this.currentDetailRow.createBy}</td></tr>
+                <tr><th>已提交人数</th><td>${this.currentDetailRow.submittedCount || 0}</td></tr>
+                <tr><th>未提交人数</th><td>${this.currentDetailRow.notSubmittedCount || 0}</td></tr>
+                <tr><th>逾期提交人数</th><td>${this.currentDetailRow.overdueCount || 0}</td></tr>
+                <tr><th>提交率</th><td>${this.currentDetailRow.submissionRate || 0}%</td></tr>
+                <tr><th>已批改人数</th><td>${this.currentDetailRow.gradedCount || 0}</td></tr>
+                <tr><th>平均分</th><td>${this.currentDetailRow.averageScore ? this.currentDetailRow.averageScore.toFixed(1) : '未批改'}</td></tr>
+                <tr><th>作业内容</th><td>${this.currentDetailRow.homeworkContent || '无'}</td></tr>
+                <tr><th>备注</th><td>${this.currentDetailRow.remark || '无'}</td></tr>
+              </table>
+            </body>
+          </html>
+        `
+        printWindow.document.write(detailContent)
+        printWindow.document.close()
+        printWindow.onload = function() {
+          printWindow.print()
+          printWindow.onafterprint = function() {
+            printWindow.close()
+          }
+        }
+      })
+    },
+
+    handleExportDetail() {
+      try {
+        const row = this.currentDetailRow
+        const csvContent = [
+          ['作业ID', row.homeworkId],
+          ['作业名称', row.homeworkTitle],
+          ['课程名称', row.courseName],
+          ['课堂名称', row.className],
+          ['发布时间', this.formatDate(row.createTime)],
+          ['截止时间', this.formatDate(row.deadline)],
+          ['发布者', row.createBy],
+          ['已提交人数', row.submittedCount || 0],
+          ['未提交人数', row.notSubmittedCount || 0],
+          ['逾期提交人数', row.overdueCount || 0],
+          ['提交率', `${row.submissionRate || 0}%`],
+          ['已批改人数', row.gradedCount || 0],
+          ['平均分', row.averageScore ? row.averageScore.toFixed(1) : '未批改'],
+          ['作业内容', row.homeworkContent || '无'],
+          ['备注', row.remark || '无']
+        ].map(e => e.join(',')).join('\n')
+
+        const BOM = '\uFEFF'
+        const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `作业详情_${row.homeworkTitle}_${new Date().getTime()}.csv`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        this.$message.success('导出成功')
+      } catch (error) {
+        console.error('导出失败:', error)
+        this.$message.error('导出失败')
+      }
+    },
+
+    isExpired(deadline) {
+      if (!deadline) return false
+      return new Date(deadline) < new Date()
     }
   }
 }
@@ -1134,6 +1515,17 @@ export default {
   text-align: right;
 }
 
+.date-separator {
+  margin: 0 8px;
+  color: #86868b;
+  font-size: 14px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
 /* Form Elements */
 .app-container >>> .el-input__inner {
   border-radius: 10px;
@@ -1145,6 +1537,18 @@ export default {
 .app-container >>> .el-input__inner:focus {
   border-color: #0071e3;
   box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+}
+
+.app-container >>> .el-select {
+  width: 100%;
+}
+
+.app-container >>> .el-date-editor {
+  width: 100%;
+}
+
+.app-container >>> .el-date-editor .el-input__inner {
+  padding-left: 30px;
 }
 
 .app-container >>> .el-button {
@@ -1165,6 +1569,28 @@ export default {
   transform: translateY(-1px);
 }
 
+.app-container >>> .el-button--success {
+  background-color: #67C23A;
+  color: white;
+  box-shadow: 0 2px 8px rgba(103, 194, 58, 0.2);
+}
+
+.app-container >>> .el-button--success:hover {
+  background-color: #85ce61;
+  transform: translateY(-1px);
+}
+
+.app-container >>> .el-button--default {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  border: 1px solid #d2d2d7;
+}
+
+.app-container >>> .el-button--default:hover {
+  background-color: #e8e8ed;
+  border-color: #b8b8bd;
+}
+
 /* Table Styling */
 .app-container >>> .el-table {
   border-radius: 12px;
@@ -1178,6 +1604,17 @@ export default {
   font-weight: 600;
   border-bottom: 1px solid #f5f5f7;
   padding: 12px 0;
+}
+
+/* 确保详情按钮不会出现省略号 */
+.app-container >>> .el-table .el-button--mini {
+  padding: 5px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.app-container >>> .el-table .el-button--text {
+  padding: 5px 0;
 }
 
 .app-container >>> .el-table td {

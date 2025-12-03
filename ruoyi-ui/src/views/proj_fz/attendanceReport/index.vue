@@ -55,13 +55,13 @@
           <el-col :span="12">
             <div class="chart-wrapper">
               <div class="chart-title">课堂签到率对比</div>
-              <div ref="summaryChart" style="height: 400px;"></div>
+              <div ref="summaryChart" style="height: 300px;"></div>
             </div>
           </el-col>
           <el-col :span="12">
             <div class="chart-wrapper">
-              <div class="chart-title">考勤状态分布</div>
-              <div ref="distributionChart" style="height: 400px;"></div>
+              <div class="chart-title">平均考勤状态分布</div>
+              <div ref="distributionChart" style="height: 300px;"></div>
             </div>
           </el-col>
         </el-row>
@@ -73,7 +73,7 @@
           <el-col :span="24">
             <div class="chart-wrapper">
               <div class="chart-title">签到率趋势分析</div>
-              <div ref="trendChart" style="height: 400px;"></div>
+              <div ref="trendChart" style="height: 280px;"></div>
             </div>
           </el-col>
         </el-row>
@@ -81,7 +81,7 @@
           <el-col :span="24">
             <div class="chart-wrapper">
               <div class="chart-title">每次签到统计</div>
-              <div ref="dailyChart" style="height: 400px;"></div>
+              <div ref="dailyChart" style="height: 280px;"></div>
             </div>
           </el-col>
         </el-row>
@@ -113,33 +113,33 @@
           prop="totalStudents"
         />
         <el-table-column
-          label="平均已签到"
+          label="平均已签到人数"
           align="center"
-          width="100"
+          width="120"
           prop="signedCount"
         />
         <el-table-column
-          label="平均缺勤"
+          label="平均缺勤人数"
           align="center"
-          width="100"
+          width="120"
           prop="absentCount"
         />
         <el-table-column
-          label="平均迟到"
+          label="平均迟到人数"
           align="center"
-          width="100"
+          width="120"
           prop="lateCount"
         />
         <el-table-column
-          label="平均请假"
+          label="平均请假人数"
           align="center"
-          width="100"
+          width="120"
           prop="leaveCount"
         />
         <el-table-column
-          label="平均早退"
+          label="平均早退人数"
           align="center"
-          width="100"
+          width="120"
           prop="earlyLeaveCount"
         />
         <el-table-column
@@ -536,8 +536,8 @@ export default {
               return `
                 <div style="font-weight: bold; margin-bottom: 5px;">${data.name}</div>
                 <div>平均签到率: <span style="color: #5470c6; font-weight: bold">${data.value}%</span></div>
-                <div>总人数: ${session.totalStudents || 0}</div>
-                <div>平均已签到: ${session.signedCount || 0}</div>
+                <div>平均总人数: ${session.totalStudents || 0}</div>
+                <div>平均已签到人数: ${session.signedCount || 0}</div>
               `;
             }
           },
@@ -618,7 +618,9 @@ export default {
             borderColor: '#ddd',
             borderWidth: 1,
             textStyle: { color: '#333' },
-            formatter: '{a} <br/>{b}: {c} ({d}%)'
+            formatter: (params) => {
+              return `${params.seriesName}<br/>${params.name}: ${params.value}人 (${params.percent}%)`;
+            }
           },
           legend: {
             orient: 'vertical',
@@ -944,19 +946,77 @@ export default {
         return;
       }
 
+      // 显示加载提示
+      const loadingMsg = this.$message({
+        message: '正在准备打印内容，请稍候...',
+        type: 'info',
+        duration: 0
+      });
+
+      // 先生成图表图片
       this.generateChartImages();
 
+      // 等待图表图片生成完成
       setTimeout(() => {
         const printContent = this.generatePrintContent();
         const printWindow = window.open('', '_blank');
+
         if (printWindow) {
           printWindow.document.write(printContent);
           printWindow.document.close();
+
+          // 等待打印窗口的内容完全加载
           printWindow.onload = () => {
-            printWindow.print();
+            // 查找所有图片元素
+            const images = printWindow.document.querySelectorAll('img');
+            let loadedCount = 0;
+            const totalImages = images.length;
+
+            if (totalImages === 0) {
+              // 没有图片，直接打印
+              loadingMsg.close();
+              setTimeout(() => {
+                printWindow.print();
+              }, 300);
+              return;
+            }
+
+            // 检查所有图片是否加载完成
+            const checkAllImagesLoaded = () => {
+              loadedCount++;
+              if (loadedCount >= totalImages) {
+                // 所有图片加载完成，关闭提示并打印
+                loadingMsg.close();
+                setTimeout(() => {
+                  printWindow.print();
+                }, 500);
+              }
+            };
+
+            // 为每个图片添加加载事件监听
+            images.forEach(img => {
+              if (img.complete) {
+                checkAllImagesLoaded();
+              } else {
+                img.onload = checkAllImagesLoaded;
+                img.onerror = checkAllImagesLoaded; // 即使加载失败也继续
+              }
+            });
+
+            // 设置超时保护，避免一直等待
+            setTimeout(() => {
+              if (loadedCount < totalImages) {
+                console.warn('部分图片加载超时，强制打印');
+                loadingMsg.close();
+                printWindow.print();
+              }
+            }, 5000);
           };
+        } else {
+          loadingMsg.close();
+          this.$message.error('无法打开打印窗口，请检查浏览器弹窗设置');
         }
-      }, 1000);
+      }, 1500);
     },
 
     /** 生成打印内容 */
@@ -985,33 +1045,64 @@ export default {
           <title>${title}</title>
           <meta charset="UTF-8">
           <style>
-            body { font-family: "Microsoft YaHei", Arial, sans-serif; margin: 20px; line-height: 1.6; }
-            .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-            .meta { margin-bottom: 20px; color: #666; background: #f9f9f9; padding: 10px; border-radius: 4px; }
-            .chart-section { margin: 25px 0; }
-            .chart-container { text-align: center; margin: 20px 0; page-break-inside: avoid; }
-            .chart-title { font-weight: bold; margin-bottom: 15px; font-size: 16px; color: #333; }
-            .chart-image { max-width: 90%; height: auto; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-            .table-section { margin-top: 25px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            html, body {
+              font-family: "Microsoft YaHei", Arial, sans-serif;
+              line-height: 1.3;
+              font-size: 11px;
+              height: auto;
+              overflow: visible;
+            }
+            body {
+              margin: 8px;
+              padding: 0;
+            }
+            .header { text-align: center; margin-bottom: 6px; border-bottom: 2px solid #333; padding-bottom: 4px; }
+            .header h1 { margin: 0; color: #333; font-size: 16px; }
+            .meta { margin-bottom: 6px; color: #666; background: #f9f9f9; padding: 5px 6px; border-radius: 3px; font-size: 10px; }
+            .print-info { margin: 1px 0; line-height: 1.4; }
+            .chart-section { margin: 3px 0 6px 0; page-break-inside: avoid; }
+            .chart-section h2 { font-size: 14px; margin: 0 0 6px 0; padding-bottom: 4px; border-bottom: 1px solid #eee; color: #333; }
+            .table-section { margin-top: 8px; }
+            .table-section h2 { font-size: 14px; margin: 0 0 6px 0; padding-bottom: 4px; border-bottom: 1px solid #eee; color: #333; }
+            table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 10px; }
             table, th, td { border: 1px solid #ddd; }
-            th, td { padding: 8px 12px; text-align: center; }
+            th, td { padding: 4px 5px; text-align: center; }
             th { background-color: #f5f7fa; font-weight: bold; color: #333; }
-            .no-data { text-align: center; color: #999; padding: 40px; font-size: 14px; }
-            .print-info { background: #e8f4ff; padding: 10px; margin: 10px 0; border-radius: 4px; font-size: 12px; }
+            .no-data { text-align: center; color: #999; padding: 20px; font-size: 12px; }
+            img { max-width: 100%; height: auto; display: block; }
             @media print {
-              body { margin: 0.5cm; font-size: 12pt; }
-              .no-print { display: none; }
-              .chart-image { max-width: 95% !important; }
-              .chart-container { page-break-inside: avoid; }
-              table { page-break-inside: auto; }
+              html, body {
+                margin: 0;
+                padding: 0;
+                height: auto;
+              }
+              body {
+                margin: 0.25cm;
+                font-size: 9pt;
+              }
+              .header { margin-bottom: 4px; padding-bottom: 3px; page-break-after: avoid; }
+              .header h1 { font-size: 14px; }
+              .meta { margin-bottom: 4px; padding: 4px 5px; page-break-after: avoid; font-size: 8pt; }
+              .print-info { line-height: 1.3; }
+              .chart-section { page-break-inside: avoid; margin: 2px 0 4px 0; }
+              .chart-section h2 { font-size: 12px; margin-bottom: 4px; page-break-after: avoid; }
+              .table-section { margin-top: 6px; }
+              .table-section h2 { font-size: 12px; margin-bottom: 4px; page-break-after: avoid; }
+              table { page-break-inside: auto; font-size: 8pt; margin-top: 4px; }
               tr { page-break-inside: avoid; page-break-after: auto; }
+              th, td { padding: 2px 4px; }
+              img {
+                max-width: 100% !important;
+                height: auto !important;
+                page-break-inside: avoid;
+              }
             }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1 style="margin: 0; color: #333;">${title}</h1>
+            <h1>${title}</h1>
           </div>
 
           <div class="meta">
@@ -1030,7 +1121,7 @@ export default {
           ${chartContent}
 
           <div class="table-section">
-            <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 8px;">数据明细</h2>
+            <h2>数据明细</h2>
             ${tableContent}
           </div>
         </body>
@@ -1045,15 +1136,21 @@ export default {
       }
 
       return `
-        <div class="chart-section">
-          <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 8px;">统计图表</h2>
-          <div class="chart-container">
-            <div class="chart-title">课堂签到率对比</div>
-            <img src="${this.chartImages.summary}" class="chart-image" alt="课堂签到率对比图" onerror="this.style.display='none'">
-          </div>
-          <div class="chart-container">
-            <div class="chart-title">平均考勤状态分布</div>
-            <img src="${this.chartImages.distribution}" class="chart-image" alt="考勤状态分布图" onerror="this.style.display='none'">
+        <div class="chart-section" style="margin-top: 5px; margin-bottom: 8px;">
+          <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 6px; margin-top: 0; margin-bottom: 8px; font-size: 15px;">统计图表</h2>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px;">
+            <div style="flex: 1; min-width: 45%; max-width: 48%;">
+              <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #333; text-align: center;">课堂签到率对比</div>
+              <div style="width: 100%; overflow: hidden;">
+                <img src="${this.chartImages.summary}" style="width: 100%; height: auto; display: block; border: 1px solid #ddd; box-shadow: 0 1px 3px rgba(0,0,0,0.08);" alt="课堂签到率对比图" onerror="this.style.display='none'">
+              </div>
+            </div>
+            <div style="flex: 1; min-width: 45%; max-width: 48%;">
+              <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #333; text-align: center;">平均考勤状态分布</div>
+              <div style="width: 100%; overflow: hidden;">
+                <img src="${this.chartImages.distribution}" style="width: 100%; height: auto; display: block; border: 1px solid #ddd; box-shadow: 0 1px 3px rgba(0,0,0,0.08);" alt="考勤状态分布图" onerror="this.style.display='none'">
+              </div>
+            </div>
           </div>
         </div>
       `;
@@ -1066,15 +1163,21 @@ export default {
       }
 
       return `
-        <div class="chart-section">
-          <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 8px;">统计图表</h2>
-          <div class="chart-container">
-            <div class="chart-title">签到率趋势分析</div>
-            <img src="${this.chartImages.trend}" class="chart-image" alt="签到率趋势分析图" onerror="this.style.display='none'">
-          </div>
-          <div class="chart-container">
-            <div class="chart-title">每次签到统计</div>
-            <img src="${this.chartImages.daily}" class="chart-image" alt="每次签到统计图" onerror="this.style.display='none'">
+        <div class="chart-section" style="margin-top: 5px; margin-bottom: 8px;">
+          <h2 style="color: #333; border-bottom: 1px solid #eee; padding-bottom: 6px; margin-top: 0; margin-bottom: 8px; font-size: 15px;">统计图表</h2>
+          <div style="margin-top: 8px;">
+            <div style="margin-bottom: 8px;">
+              <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #333; text-align: center;">签到率趋势分析</div>
+              <div style="width: 100%; overflow: hidden;">
+                <img src="${this.chartImages.trend}" style="width: 100%; height: auto; display: block; border: 1px solid #ddd; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transform-origin: top center;" alt="签到率趋势分析图" onerror="this.style.display='none'">
+              </div>
+            </div>
+            <div style="margin-top: 8px; margin-bottom: 0;">
+              <div style="font-weight: bold; margin-bottom: 5px; font-size: 12px; color: #333; text-align: center;">每次签到统计</div>
+              <div style="width: 100%; overflow: hidden;">
+                <img src="${this.chartImages.daily}" style="width: 100%; height: auto; display: block; border: 1px solid #ddd; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transform-origin: top center;" alt="每次签到统计图" onerror="this.style.display='none'">
+              </div>
+            </div>
           </div>
         </div>
       `;
@@ -1091,12 +1194,12 @@ export default {
           <thead>
             <tr>
               <th>课堂名称</th>
-              <th>总人数</th>
-              <th>平均已签到</th>
-              <th>平均缺勤</th>
-              <th>平均迟到</th>
-              <th>平均请假</th>
-              <th>平均早退</th>
+              <th>平均总人数</th>
+              <th>平均已签到人数</th>
+              <th>平均缺勤人数</th>
+              <th>平均迟到人数</th>
+              <th>平均请假人数</th>
+              <th>平均早退人数</th>
               <th>平均签到率</th>
             </tr>
           </thead>

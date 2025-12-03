@@ -5,12 +5,17 @@
     </div>
 
     <div class="article-content" v-loading="loading">
+      <!-- 文章头部信息 -->
       <div class="article-meta">
         <h1 class="article-title">{{ article.title }}</h1>
 
         <div class="article-info">
           <div class="author-info">
-            <el-avatar :size="40" :src="authorAvatar" class="author-avatar"></el-avatar>
+            <el-avatar
+              :size="40"
+              :src="getFullImageUrl(article.authorAvatar) || defaultAvatar"
+              class="author-avatar"
+            ></el-avatar>
             <div class="author-details">
               <span class="author-name">{{ article.author || '未知作者' }}</span>
               <div class="publish-info">
@@ -37,6 +42,7 @@
         </div>
       </div>
 
+      <!-- 封面图片 -->
       <div class="article-cover" v-if="article.cover">
         <el-image
           :src="getFullImageUrl(article.cover)"
@@ -50,6 +56,7 @@
         </el-image>
       </div>
 
+      <!-- 文章摘要 -->
       <div class="article-digest" v-if="article.digest">
         <el-card shadow="never" class="digest-card">
           <div class="digest-content">
@@ -59,12 +66,14 @@
         </el-card>
       </div>
 
+      <!-- 文章内容 -->
       <div class="article-body">
         <el-card shadow="never" class="content-card">
           <div class="content-html" v-html="article.content"></div>
         </el-card>
       </div>
 
+      <!-- 互动操作区域 -->
       <div class="article-actions">
         <el-card shadow="never" class="actions-card">
           <div class="action-buttons">
@@ -102,6 +111,7 @@
       </div>
     </div>
 
+    <!-- 分享到小组弹窗 -->
     <el-dialog
       title="分享到小组"
       :visible.sync="shareModalVisible"
@@ -132,7 +142,7 @@
 
 <script>
 import { getArticle, increaseViewCount, likeArticle, hateArticle } from "@/api/proj_qhy/article";
-import groupApi from '@/api/proj_qhy/group' // <-- (引入 groupApi)
+import groupApi from '@/api/proj_qhy/group'
 
 export default {
   name: "ArticleDetail",
@@ -142,9 +152,7 @@ export default {
       article: {},
       likeLoading: false,
       hateLoading: false,
-      authorAvatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-
-      // (分享弹窗所需数据)
+      defaultAvatar: '[https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png](https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png)',
       shareModalVisible: false,
       shareLoading: false,
       groupList: [],
@@ -160,21 +168,13 @@ export default {
     this.loadArticle();
   },
   methods: {
-    // 加载文章详情
     async loadArticle() {
       this.loading = true;
       try {
         const response = await getArticle(this.articleId);
         this.article = response.data;
-        console.log('文章详情数据:', this.article);
-
-        // 增加阅读数
         await increaseViewCount(this.articleId);
-
-        // 更新阅读数显示
         this.article.viewCount = (this.article.viewCount || 0) + 1;
-
-        // 设置页面标题
         document.title = `${this.article.title} - 学习社区`;
       } catch (error) {
         console.error('加载文章失败:', error);
@@ -183,41 +183,68 @@ export default {
         this.loading = false;
       }
     },
-
-    // 获取完整图片URL
     getFullImageUrl(url) {
       if (!url) return '';
       if (url.startsWith('http')) return url;
-      // 如果是相对路径，添加基础URL
       return process.env.VUE_APP_BASE_API + url;
     },
-
-    // 返回文章列表
     goBack() {
       this.$router.push({
         path: '/proj_qhy/article',
         query: { refresh: true }
       });
     },
-
-    // 点赞处理
     async handleLike() {
-      // ... (点赞逻辑不变)
+      this.likeLoading = true;
+      try {
+        const response = await likeArticle(this.articleId);
+        if (response.code === 200) {
+          const oldStatus = this.article.userLikeStatus || 0;
+          if (oldStatus === 1) {
+            this.article.userLikeStatus = 0;
+            this.article.likeCount = Math.max(0, (this.article.likeCount || 0) - 1);
+          } else {
+            this.article.userLikeStatus = 1;
+            this.article.likeCount = (this.article.likeCount || 0) + 1;
+            if (oldStatus === -1) {
+              this.article.hateCount = Math.max(0, (this.article.hateCount || 0) - 1);
+            }
+          }
+        }
+      } catch (error) {
+      } finally {
+        this.likeLoading = false;
+      }
     },
-
-    // 点踩处理
     async handleHate() {
-      // ... (点踩逻辑不变)
+      this.hateLoading = true;
+      try {
+        const response = await hateArticle(this.articleId);
+        if (response.code === 200) {
+          const oldStatus = this.article.userLikeStatus || 0;
+          if (oldStatus === -1) {
+            this.article.userLikeStatus = 0;
+            this.article.hateCount = Math.max(0, (this.article.hateCount || 0) - 1);
+          } else {
+            this.article.userLikeStatus = -1;
+            this.article.hateCount = (this.article.hateCount || 0) + 1;
+            if (oldStatus === 1) {
+              this.article.likeCount = Math.max(0, (this.article.likeCount || 0) - 1);
+            }
+          }
+        }
+      } catch (error) {
+      } finally {
+        this.hateLoading = false;
+      }
     },
-
-    // (修改) 分享处理
     async handleShare() {
       this.shareLoading = true;
       this.groupList = [];
       this.selectedGroupIds = [];
       try {
         const res = await groupApi.getGroupList();
-        this.groupList = res.data.filter(g => g.memberStatus === '0'); // 只显示活跃的小组
+        this.groupList = res.data.filter(g => g.memberStatus === '0');
         if (this.groupList.length === 0) {
           this.$modal.msgWarning("您还没有加入任何活跃的小组");
           return;
@@ -229,33 +256,26 @@ export default {
         this.shareLoading = false;
       }
     },
-
-    // (新增) 提交分享
     async handleSubmitShare() {
       if (this.selectedGroupIds.length === 0) {
         this.$modal.msgWarning("请至少选择一个小组");
         return;
       }
-
       const payload = {
         articleId: this.articleId,
         groupIds: this.selectedGroupIds
       };
-
       try {
         await groupApi.shareArticle(payload);
         this.shareModalVisible = false;
-
-        // 跳转到第一个选择的小组，并带上 "分享成功" 的标记
         const firstGroupId = this.selectedGroupIds[0];
         this.$router.push({
           path: `/proj_qhy/group/chat/${firstGroupId}`,
           query: {
             shareSuccess: 'true',
-            returnToPath: this.$route.path // 告诉聊天室返回到哪
+            returnToPath: this.$route.path
           }
         });
-
       } catch (error) {
         this.$modal.msgError("分享失败");
       }
@@ -265,40 +285,34 @@ export default {
 </script>
 
 <style scoped>
-/* Mac Style for Article Detail */
 .article-detail-container {
-  padding: 40px 20px;
-  max-width: 900px;
+  padding: 20px;
+  max-width: 1200px;
   margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #1d1d1f;
-  background-color: #f5f5f7;
-  min-height: 100vh;
 }
 
 .article-header {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .article-content {
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-  overflow: hidden;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
 .article-meta {
-  padding: 40px 40px 24px;
-  border-bottom: 1px solid #f5f5f7;
+  padding: 30px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .article-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: #1d1d1f;
-  margin-bottom: 24px;
-  line-height: 1.2;
-  text-align: left;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1f2d3d;
+  margin-bottom: 20px;
+  line-height: 1.4;
+  text-align: center;
 }
 
 .article-info {
@@ -314,290 +328,204 @@ export default {
 }
 
 .author-avatar {
-  background: #f5f5f7;
-  border: 1px solid #e5e5ea;
+  background: #409eff;
 }
 
 .author-details {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .author-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1d1d1f;
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f2d3d;
+  margin-bottom: 4px;
 }
 
 .publish-info {
   display: flex;
-  gap: 12px;
+  gap: 20px;
   font-size: 13px;
-  color: #86868b;
+  color: #909399;
 }
 
 .article-type {
-  color: #0071e3;
-  font-weight: 500;
+  color: #409eff;
 }
 
 .article-stats {
   display: flex;
-  gap: 24px;
+  gap: 30px;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  color: #86868b;
+  font-size: 14px;
+  color: #606266;
 }
 
 .article-cover {
-  padding: 0;
+  padding: 20px 30px;
 }
 
 .cover-image {
   width: 100%;
-  max-height: 500px;
-  object-fit: cover;
+  max-height: 400px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .image-slot {
   width: 100%;
-  height: 300px;
-  background: #f5f5f7;
+  height: 200px;
+  background: #f5f7fa;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #86868b;
+  color: #909399;
   font-size: 32px;
 }
 
 .article-digest {
-  padding: 24px 40px;
+  padding: 0 30px 20px;
 }
 
 .digest-card {
-  border: none;
-  background: #f5f5f7;
-  border-radius: 12px;
-  padding: 16px;
+  border-left: 4px solid #409eff;
+  background: #f8f9fa;
 }
 
 .digest-content {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  color: #1d1d1f;
-  font-size: 15px;
-  line-height: 1.6;
+  gap: 8px;
 }
 
 .digest-icon {
-  color: #0071e3;
-  font-size: 18px;
-  margin-top: 3px;
+  color: #409eff;
+  font-size: 16px;
+  margin-top: 2px;
   flex-shrink: 0;
 }
 
 .article-body {
-  padding: 24px 40px 40px;
+  padding: 0 30px 30px;
 }
 
 .content-card {
+  min-height: 200px;
   border: none;
-  box-shadow: none;
 }
 
 .content-html {
   line-height: 1.8;
-  font-size: 17px;
-  color: #1d1d1f;
+  font-size: 16px;
+  color: #2c3e50;
+  padding: 10px;
 }
 
-/* v-html styles */
-.content-html ::v-deep h1,
-.content-html ::v-deep h2,
-.content-html ::v-deep h3 {
-  color: #1d1d1f;
+/* --- (新增) 字体样式支持 --- */
+.content-html ::v-deep .ql-font-SimSun {
+  font-family: "SimSun";
+}
+.content-html ::v-deep .ql-font-SimHei {
+  font-family: "SimHei";
+}
+.content-html ::v-deep .ql-font-Microsoft-YaHei {
+  font-family: "Microsoft YaHei";
+}
+.content-html ::v-deep .ql-font-KaiTi {
+  font-family: "KaiTi";
+}
+.content-html ::v-deep .ql-font-FangSong {
+  font-family: "FangSong";
+}
+
+/* (原有) 字号样式 */
+.content-html ::v-deep .ql-size-small {
+  font-size: 0.75em;
+}
+.content-html ::v-deep .ql-size-large {
+  font-size: 1.5em;
+}
+.content-html ::v-deep .ql-size-huge {
+  font-size: 2.5em;
+}
+
+/* (原有) 对齐样式 */
+.content-html ::v-deep .ql-align-center {
+  text-align: center;
+}
+.content-html ::v-deep .ql-align-right {
+  text-align: right;
+}
+.content-html ::v-deep .ql-align-justify {
+  text-align: justify;
+}
+
+/* (原有) 链接样式 */
+.content-html ::v-deep a {
+  color: #409EFF;
+  text-decoration: underline;
   font-weight: 600;
-  margin-top: 24px;
+  cursor: pointer;
+}
+.content-html ::v-deep a:hover {
+  color: #66b1ff;
+}
+
+/* (原有) 代码块样式 */
+/* --- (修改) 代码块样式 --- */
+.content-html ::v-deep .ql-code-block-container {
+  background-color: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  padding: 10px 15px; /* 容器内边距 */
   margin-bottom: 16px;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow: auto;
+  color: #24292e;
 }
 
-.content-html ::v-deep p {
-  margin-bottom: 16px;
+/* 关键修复：强制去除每一行代码块的默认间距 */
+.content-html ::v-deep .ql-code-block {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background-color: transparent !important;
 }
 
-.content-html ::v-deep img {
-  max-width: 100%;
-  border-radius: 12px;
-  margin: 16px 0;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
+/* ... (保留其他样式) */
+.content-html ::v-deep h1 { font-size: 24px; margin: 24px 0 16px; border-bottom: 1px solid #eaecef; padding-bottom: 8px; }
+.content-html ::v-deep h2 { font-size: 20px; margin: 20px 0 12px; }
+.content-html ::v-deep h3 { font-size: 18px; margin: 16px 0 8px; }
+.content-html ::v-deep p { margin-bottom: 16px; }
+.content-html ::v-deep img { max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
 
-.article-actions {
-  padding: 24px 40px 40px;
-  border-top: 1px solid #f5f5f7;
-}
+.article-actions { padding: 0 30px 30px; }
+.actions-card { text-align: center; border: none; }
+.action-buttons { display: flex; justify-content: center; gap: 30px; }
+.action-buttons .el-button { min-width: 120px; height: 44px; font-size: 16px; }
+.liked { background-color: #f56c6c; border-color: #f56c6c; color: white; }
+.hated { background-color: #909399; border-color: #909399; color: white; }
+.group-share-list { max-height: 300px; overflow-y: auto; }
+.group-share-item { display: flex; align-items: center; width: 100%; padding: 8px 0; }
+.group-share-name { margin-left: 10px; }
+.group-share-item ::v-deep .el-checkbox__label { display: flex; align-items: center; }
 
-.actions-card {
-  border: none;
-  box-shadow: none;
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-}
-
-.action-buttons .el-button {
-  min-width: 120px;
-  height: 44px;
-  font-size: 15px;
-  border-radius: 980px;
-  font-weight: 500;
-  border: none;
-  transition: all 0.2s ease;
-}
-
-.action-buttons .el-button--primary {
-  background-color: #f5f5f7;
-  color: #1d1d1f;
-}
-
-.action-buttons .el-button--primary:hover,
-.action-buttons .el-button--primary.liked {
-  background-color: #ff2d55;
-  color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 45, 85, 0.3);
-}
-
-.action-buttons .el-button--info {
-  background-color: #f5f5f7;
-  color: #1d1d1f;
-}
-
-.action-buttons .el-button--info:hover,
-.action-buttons .el-button--info.hated {
-  background-color: #86868b;
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-.action-buttons .el-button--success {
-  background-color: #f5f5f7;
-  color: #1d1d1f;
-}
-
-.action-buttons .el-button--success:hover {
-  background-color: #34c759;
-  color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
-}
-
-/* Dialog Styling */
-.article-detail-container >>> .el-dialog {
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-}
-
-.article-detail-container >>> .el-dialog__header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #f5f5f7;
-}
-
-.article-detail-container >>> .el-dialog__title {
-  font-weight: 600;
-  font-size: 18px;
-  color: #1d1d1f;
-}
-
-.article-detail-container >>> .el-dialog__body {
-  padding: 24px;
-}
-
-.article-detail-container >>> .el-dialog__footer {
-  padding: 16px 24px;
-  border-top: 1px solid #f5f5f7;
-}
-
-/* Share List */
-.group-share-list {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.group-share-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  transition: background-color 0.2s;
-}
-
-.group-share-item:hover {
-  background-color: #f5f5f7;
-}
-
-.group-share-name {
-  margin-left: 12px;
-  font-weight: 500;
-  color: #1d1d1f;
-}
-
-.group-share-item >>> .el-checkbox__label {
-  display: flex;
-  align-items: center;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
-  .article-detail-container {
-    padding: 20px 16px;
-  }
-
-  .article-meta {
-    padding: 24px 20px;
-  }
-
-  .article-title {
-    font-size: 24px;
-  }
-
-  .article-info {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .article-stats {
-    width: 100%;
-    justify-content: flex-start;
-    padding-top: 16px;
-    border-top: 1px solid #f5f5f7;
-  }
-
-  .article-digest,
-  .article-body,
-  .article-actions {
-    padding: 24px 20px;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .action-buttons .el-button {
-    width: 100%;
-  }
+  .article-detail-container { padding: 10px; }
+  .article-meta { padding: 20px; }
+  .article-title { font-size: 22px; }
+  .article-info { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .article-stats { width: 100%; justify-content: space-around; }
+  .action-buttons { flex-wrap: wrap; gap: 16px; }
+  .publish-info { flex-direction: column; gap: 4px; }
+  .article-cover, .article-digest, .article-body, .article-actions { padding-left: 20px; padding-right: 20px; }
 }
 </style>

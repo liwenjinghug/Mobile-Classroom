@@ -163,24 +163,24 @@ public class QuestionBankController extends BaseController
     }
 
     /**
-     * 映射本地题型到API题型
+     * 映射本地题型到API题型：新编码 1=判断 2=选择 3=简答
      */
     private String mapQuestionType(Integer type) {
         switch (type) {
-            case 1: return "multiple"; // 单选题
-            case 3: return "boolean";  // 判断题
+            case 1: return "boolean";  // 判断题
+            case 2: return "multiple"; // 选择题
             default: return null; // 其他题型API不支持
         }
     }
 
     /**
-     * 映射API题型到本地题型
+     * 映射API题型到本地题型：新编码 1=判断 2=选择 3=简答
      */
     private Integer mapApiTypeToLocal(String apiType) {
         switch (apiType) {
-            case "multiple": return 1; // 单选题
-            case "boolean": return 3;  // 判断题
-            default: return 1; // 默认单选题
+            case "multiple": return 2; // 选择题
+            case "boolean": return 1;  // 判断题
+            default: return 2; // 默认选择题
         }
     }
 

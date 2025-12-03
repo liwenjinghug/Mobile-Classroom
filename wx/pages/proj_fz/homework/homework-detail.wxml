@@ -1,0 +1,161 @@
+<view class="container">
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading-box">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view wx:else>
+    <!-- 作业信息卡片 -->
+    <view class="homework-info">
+      <view class="info-header">
+        <text class="title">{{homework.title}}</text>
+        <view class="status-tag {{isExpired ? 'expired' : 'ongoing'}}">
+          {{status}}
+        </view>
+      </view>
+
+      <view class="info-item">
+        <text class="label">课程：</text>
+        <text class="value">{{homework.courseName}}</text>
+      </view>
+
+      <view class="info-item">
+        <text class="label">课堂：</text>
+        <text class="value">{{homework.className}}</text>
+      </view>
+
+      <view class="info-item">
+        <text class="label">截止时间：</text>
+        <text class="value {{isExpired ? 'expired-text' : ''}}">{{homework.deadline}}</text>
+      </view>
+
+      <view class="info-item">
+        <text class="label">总分：</text>
+        <text class="value score">{{homework.totalScore}}分</text>
+      </view>
+    </view>
+
+    <!-- 作业内容 -->
+    <view class="homework-content">
+      <view class="content-title">作业内容</view>
+      <view class="content-text">{{homework.content || '暂无描述'}}</view>
+
+      <!-- 附件 -->
+      <view wx:if="{{homework.attachments}}" class="attachments">
+        <view class="attachment-title">📎 附件</view>
+        <text class="attachment-text">{{homework.attachments}}</text>
+      </view>
+    </view>
+
+    <!-- 答题区域 -->
+    <view class="answer-section" wx:if="{{status !== '已批改'}}">
+      <view class="section-title">我的答案</view>
+
+      <textarea
+        class="answer-input"
+        placeholder="请输入你的答案..."
+        value="{{answer}}"
+        bindinput="onAnswerInput"
+        disabled="{{isExpired && !submission}}"
+        maxlength="5000"
+      />
+
+      <view class="answer-footer">
+        <text class="char-count">{{answer.length}}/5000</text>
+      </view>
+
+      <!-- 文件上传区域 -->
+      <view class="file-section">
+        <view class="file-header">
+          <text class="file-title">📎 附件</text>
+          <button
+            wx:if="{{status !== '已批改' && uploadedFiles.length < 5}}"
+            class="upload-btn"
+            size="mini"
+            bindtap="chooseFile"
+            disabled="{{isExpired}}">
+            选择文件
+          </button>
+        </view>
+
+        <!-- 文件列表 -->
+        <view wx:if="{{uploadedFiles.length > 0}}" class="file-list">
+          <view
+            wx:for="{{uploadedFiles}}"
+            wx:key="index"
+            class="file-item">
+            <view class="file-info" data-url="{{item.url}}" bindtap="previewFile">
+              <text class="file-icon">📄</text>
+              <text class="file-name">{{item.name}}</text>
+              <text wx:if="{{item.sizeText}}" class="file-size">{{item.sizeText}}</text>
+            </view>
+            <view
+              wx:if="{{status !== '已批改'}}"
+              class="file-delete"
+              data-index="{{index}}"
+              bindtap="deleteFile">
+              ✕
+            </view>
+          </view>
+        </view>
+
+        <view wx:else class="file-empty">
+          <text class="empty-tip">暂无附件</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 已提交的答案（只读） -->
+    <view class="submitted-answer" wx:if="{{submission && status !== '已批改'}}">
+      <view class="section-title">已提交内容</view>
+
+      <!-- 答案文本 -->
+      <view wx:if="{{answer}}" class="submitted-section">
+        <text class="submitted-label">答案文本：</text>
+        <view class="submitted-text">{{answer}}</view>
+      </view>
+
+      <!-- 附件列表 -->
+      <view wx:if="{{uploadedFiles.length > 0}}" class="submitted-section">
+        <text class="submitted-label">已提交附件：</text>
+        <view class="file-list">
+          <view
+            wx:for="{{uploadedFiles}}"
+            wx:key="index"
+            class="file-item">
+            <view class="file-info" data-url="{{item.url}}" bindtap="previewFile">
+              <text class="file-icon">📄</text>
+              <text class="file-name">{{item.name}}</text>
+              <text wx:if="{{item.sizeText}}" class="file-size">{{item.sizeText}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="submit-time">提交时间：{{submission.submitTime}}</view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button
+        wx:if="{{status !== '已批改' && !isExpired}}"
+        class="btn-submit"
+        bindtap="submitHomework"
+        disabled="{{submitting}}">
+        {{submitting ? '提交中...' : (status === '已提交' ? '重新提交' : '提交作业')}}
+      </button>
+
+      <button
+        wx:if="{{status === '已批改'}}"
+        class="btn-view-grade"
+        bindtap="viewGrade">
+        查看成绩与评语
+      </button>
+
+      <view wx:if="{{isExpired && status === '未提交'}}" class="expired-tip">
+        ⚠️ 作业已截止，无法提交
+      </view>
+    </view>
+  </view>
+</view>
+

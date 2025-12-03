@@ -8,8 +8,6 @@ Page({
     articleList: [],
     loading: false,
     baseUrl: app.globalData.baseUrl || 'http://localhost:8080',
-    
-    // (新增) 通知相关
     showNotice: false,
     noticeList: []
   },
@@ -35,7 +33,6 @@ Page({
     }
   },
 
-  // --- (新增) 通知逻辑 ---
   openNotices() {
     this.setData({ showNotice: true });
     this.getNotices();
@@ -48,8 +45,10 @@ Page({
   getNotices() {
     wx.showLoading({ title: '加载通知...' });
     api.getUserNotices().then(res => {
-      const list = (res.data || []).map(item => {
-        // 处理头像
+      // 【兼容修改】自动判断 res.data 还是 res
+      const rawList = (res && res.data) ? res.data : res;
+      
+      const list = (rawList || []).map(item => {
         item.operatorAvatar = this.handleUrl(item.operatorAvatar);
         return item;
       });
@@ -65,7 +64,10 @@ Page({
   getForumPosts() {
     this.setData({ loading: true });
     api.getPostList().then(res => {
-      const list = (res.data || []).map(item => {
+      // 【兼容修改】自动判断 res.data 还是 res
+      const rawList = (res && res.data) ? res.data : res;
+
+      const list = (rawList || []).map(item => {
         item.avatar = this.handleUrl(item.avatar);
         if (item.imageUrls) {
           item.imageArray = item.imageUrls.split(',').map(url => this.handleUrl(url));
@@ -89,15 +91,21 @@ Page({
 
   getPostComments(postId, index) {
     api.getCommentsByPostId(postId).then(res => {
+      // 【兼容修改】自动判断 res.data 还是 res
+      const rawData = (res && res.data) ? res.data : res;
+      
       const key = `postList[${index}].comments`;
-      this.setData({ [key]: res.data || [] });
+      this.setData({ [key]: rawData || [] });
     });
   },
 
   getPostLikes(postId, index) {
     api.getLikesByPostId(postId).then(res => {
+      // 【兼容修改】自动判断 res.data 还是 res
+      const rawData = (res && res.data) ? res.data : res;
+      
       const key = `postList[${index}].likes`;
-      this.setData({ [key]: res.data || [] });
+      this.setData({ [key]: rawData || [] });
     });
   },
 
@@ -108,15 +116,29 @@ Page({
     }
   },
 
+  // (修改) 点赞/取消点赞处理
   handleLikePost(e) {
     const { id, index } = e.currentTarget.dataset;
-    api.likePost(id).then(res => {
-      const list = this.data.postList;
-      const isLiked = !list[index].isLiked;
-      list[index].isLiked = isLiked;
-      list[index].likeCount += isLiked ? 1 : -1;
-      this.setData({ postList: list });
+    const list = this.data.postList;
+    const post = list[index];
+    
+    // 判断是点赞还是取消
+    const action = post.isLiked ? api.cancelLikePost : api.likePost;
+
+    action(id).then(res => {
+      // 1. 本地更新状态
+      const isLiked = !post.isLiked;
+      post.isLiked = isLiked;
+      post.likeCount += isLiked ? 1 : -1;
+      
+      // 使用 key 更新，性能更好
+      this.setData({ 
+        [`postList[${index}]`]: post 
+      });
+      
+      // 2. 重新拉取点赞人列表（确保名字显示正确）
       this.getPostLikes(id, index);
+      
       wx.showToast({ title: isLiked ? '点赞成功' : '取消点赞', icon: 'none' });
     });
   },
@@ -176,8 +198,14 @@ Page({
   // --- 文章逻辑 ---
   getArticles() {
     this.setData({ loading: true });
-    api.listArticle({}).then(res => {
-      const list = (res.rows || []).map(item => {
+    // 加回过滤条件
+    api.listArticle({ status: 'published' }).then(res => {
+      // 【兼容修改】判断 rows 在哪。
+      // 若依分页通常是 { total: x, rows: [] }。
+      // 如果被解包了，res 就是 { rows: ... }。如果没解包，res.data.rows
+      const rows = res.rows || (res.data && res.data.rows) || [];
+      
+      const list = rows.map(item => {
         item.cover = this.handleUrl(item.cover);
         return item;
       });

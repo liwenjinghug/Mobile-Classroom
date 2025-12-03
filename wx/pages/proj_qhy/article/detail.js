@@ -20,25 +20,67 @@ Page({
 
   getDetail(id) {
     api.getArticle(id).then(res => {
-      const data = res.data;
-      data.cover = this.handleUrl(data.cover);
+      // --- 兼容逻辑：自动判断是 res.data 还是直接 res ---
+      const data = (res && res.data) ? res.data : res;
+
+      // 安全检查
+      if (!data) {
+        console.error('获取文章详情失败，返回数据为空', res);
+        return;
+      }
+
+      if (data.cover) {
+        data.cover = this.handleUrl(data.cover);
+      }
       
       const attachments = [];
 
       if (data.content) {
+        // 1. 替换路径
         data.content = data.content.replace(/src="\/dev-api\/profile/g, `src="${this.data.baseUrl}/profile`);
         data.content = data.content.replace(/src="\/profile/g, `src="${this.data.baseUrl}/profile`);
+        
+        // 2. 【修复点】优化图片样式
+        // 之前的代码里 < img 多了个空格，导致图片变成了文字链接
+        // 现已修复为 <img
         data.content = data.content.replace(/<img/g, '<img style="max-width:100%;height:auto;display:block;margin:10px 0;"');
 
+        // 3. 提取附件链接
         const linkRegex = /<a[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
         let match;
         while ((match = linkRegex.exec(data.content)) !== null) {
           const href = this.handleUrl(match[1]); 
-          const name = match[2].replace(/<[^>]+>/g, '').trim(); 
+          const innerHtml = match[2]; // a 标签内部的内容
+
+          // 如果链接内容包含 <img，说明这是点击图片放大，不是附件下载
+          // 注意：这里必须和上面替换后的标签一致（没有空格）
+          if (innerHtml.indexOf('<img') !== -1) {
+            continue;
+          }
+
+          const name = innerHtml.replace(/<[^>]+>/g, '').trim(); // 去除标签取纯文本文件名
+          
+          // 如果清洗后名字为空，也不显示
+          if (!name) continue;
+
           attachments.push({ url: href, name: name });
         }
 
+        // 4. 样式注入 (给附件链接加样式)
         data.content = data.content.replace(/<a /g, '<a style="color: #2d8cf0; text-decoration: underline; font-weight: bold;" ');
+
+        // 5. 代码块修复 (保留换行符)
+        data.content = data.content.replace(/<div class="ql-code-block-container"[\s\S]*?<\/div>\s*<\/div>/g, function(match) {
+          const lineRegex = /<div class="ql-code-block"[^>]*>([\s\S]*?)<\/div>/g;
+          let lines = [];
+          let item;
+          while ((item = lineRegex.exec(match)) !== null) {
+             lines.push(item[1].trimRight());
+          }
+          if (lines.length === 0) return match; 
+          const cleanCode = lines.join('\n');
+          return '<div class="ql-code-unified">' + cleanCode + '</div>';
+        });
       }
       
       this.setData({ 
@@ -52,7 +94,6 @@ Page({
     const url = e.currentTarget.dataset.url;
     const fileType = url.split('.').pop().toLowerCase();
     
-    // 拦截 TXT 文件
     if (fileType === 'txt') {
       this.previewTxt(url);
       return;
@@ -87,7 +128,6 @@ Page({
     })
   },
 
-  // (修改) 读取并预览 TXT，增加 GBK 兼容
   previewTxt(url) {
     wx.showLoading({ title: '加载文本...' });
     wx.downloadFile({
@@ -97,18 +137,14 @@ Page({
           const fs = wx.getFileSystemManager();
           fs.readFile({
             filePath: res.tempFilePath,
-            // 重点：不指定 encoding，直接获取 ArrayBuffer 二进制数据
             success: (data) => {
               let content = '';
               const buffer = data.data;
               
               try {
-                // 1. 优先尝试 UTF-8 (常用)
-                // fatal: true 表示如果发现不是有效的 UTF-8 序列则抛出异常，转入 catch
                 const decoder = new TextDecoder('utf-8', { fatal: true });
                 content = decoder.decode(buffer);
               } catch (e) {
-                // 2. 如果 UTF-8 失败，尝试 GB18030 (兼容 GBK/GB2312，Windows 记事本默认格式)
                 try {
                   const decoder = new TextDecoder('gb18030');
                   content = decoder.decode(buffer);

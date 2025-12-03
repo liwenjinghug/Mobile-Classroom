@@ -1,0 +1,18 @@
+<view class="container">
+  <view class="form-card">
+    <view class="form-item">
+      <view class="label">旧密码</view>
+      <input class="input" password type="text" placeholder="请输入旧密码" bindinput="bindInput" data-field="oldPassword" />
+    </view>
+    <view class="form-item">
+      <view class="label">新密码</view>
+      <input class="input" password type="text" placeholder="请输入新密码" bindinput="bindInput" data-field="newPassword" />
+    </view>
+    <view class="form-item">
+      <view class="label">确认密码</view>
+      <input class="input" password type="text" placeholder="请再次输入新密码" bindinput="bindInput" data-field="confirmPassword" />
+    </view>
+  </view>
+
+  <button class="submit-btn" type="primary" bindtap="submit">确认修改</button>
+</view>

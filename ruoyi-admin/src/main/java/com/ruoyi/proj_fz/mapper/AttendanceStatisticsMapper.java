@@ -16,7 +16,7 @@ public interface AttendanceStatisticsMapper {
             "SELECT " +
             "    cs.session_id as sessionId, " +
             "    cs.class_name as className, " +
-            "    COUNT(DISTINCT css.student_id) as totalStudents, " +
+            "    COALESCE(ROUND(AVG(total_count), 0), 0) as totalStudents, " +
             "    COALESCE(ROUND(AVG(signed_count), 0), 0) as signedCount, " +
             "    COALESCE(ROUND(AVG(absent_count), 0), 0) as absentCount, " +
             "    COALESCE(ROUND(AVG(late_count), 0), 0) as lateCount, " +
@@ -24,11 +24,11 @@ public interface AttendanceStatisticsMapper {
             "    COALESCE(ROUND(AVG(early_leave_count), 0), 0) as earlyLeaveCount, " +
             "    COALESCE(ROUND(AVG(attendance_rate), 2), 0) as attendanceRate " +
             "FROM class_session cs " +
-            "LEFT JOIN class_session_student css ON cs.session_id = css.session_id " +
             "LEFT JOIN (" +
             "    SELECT " +
             "        ca.session_id, " +
             "        ca.task_id, " +
+            "        COUNT(*) as total_count, " +
             "        COUNT(CASE WHEN ca.attendance_status = 1 THEN 1 END) as signed_count, " +
             "        COUNT(CASE WHEN ca.attendance_status = 0 THEN 1 END) as absent_count, " +
             "        COUNT(CASE WHEN ca.attendance_status = 2 THEN 1 END) as late_count, " +

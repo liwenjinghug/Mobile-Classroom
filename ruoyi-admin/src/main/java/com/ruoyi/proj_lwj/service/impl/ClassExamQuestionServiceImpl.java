@@ -127,17 +127,13 @@ public class ClassExamQuestionServiceImpl implements IClassExamQuestionService {
 
     /**
      * 本地题库题型到考试题型的统一映射（类级方法）
-     * 本地: 1=选择(单选) 2=判断 3=简答
-     * 考试: 1=单选 3=判断 5=简答
+     * 数据库已统一：1=判断 2=选择 3=简答
+     * 本地题库和考试题目表使用相同编码，直接返回
      */
     private int mapLocalToExamType(Integer srcType) {
-        if (srcType == null) return 1;
-        switch (srcType) {
-            case 1: return 1; // 选择->单选
-            case 2: return 3; // 判断->判断
-            case 3: return 5; // 简答->简答
-            default: return 1; // 兜底单选
-        }
+        if (srcType == null) return 2; // 默认选择题
+        // 数据库已统一：1=判断 2=选择 3=简答
+        return srcType;
     }
 
     @Override

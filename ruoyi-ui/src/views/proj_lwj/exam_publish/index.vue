@@ -238,7 +238,7 @@
     </el-card>
 
     <!-- 批量发布对话框 -->
-    <el-dialog title="批量发布考试" :visible.sync="batchVisible" width="680px" class="beautified-dialog">
+    <el-dialog title="批量发布考试" :visible.sync="batchVisible" width="680px" class="beautified-dialog" :modal="false" :lock-scroll="false" :close-on-click-modal="false">
       <div v-if="batchVisible" class="batch-dialog-body">
         <el-alert type="info" :closable="false" show-icon style="margin-bottom:16px"
           title="在左侧选择要发布到的课堂；右侧填写考试的基础信息与时间范围" />
@@ -327,7 +327,7 @@
     </el-dialog>
 
     <!-- 编辑考试配置弹窗 -->
-    <el-dialog title="编辑考试配置" :visible.sync="examEditVisible" width="760px" class="beautified-dialog">
+    <el-dialog title="编辑考试配置" :visible.sync="examEditVisible" width="760px" class="beautified-dialog" :modal="false" :lock-scroll="false" :close-on-click-modal="false">
       <el-form :model="examEditForm" label-width="100px" class="beautified-form" size="small">
         <el-form-item label="考试名称">
           <el-input v-model="examEditForm.examName" placeholder="请输入考试名称" />
@@ -595,14 +595,9 @@ export default {
     // 判断是否处于实际进行中（基于时间窗口 + 已发布或后端标记进行中）
     isRunning(row) {
       if (!row) return false
-      const status = Number(row.status)
-      // 草稿不算进行中
-      if (status === 0) return false
-      const start = this.parseDateTime(row.startTime)
-      const end = this.parseDateTime(row.endTime)
-      if (!start || !end) return false
-      const now = Date.now()
-      return now >= start && now < end && status !== 3
+      // 只检查status是否为2（进行中），与后端删除逻辑保持一致
+      // 只要不是进行中状态，都可以删除（草稿/已发布/已结束均可删除）
+      return Number(row.status) === 2
     },
     buildPayload(publishNow) {
       const payload = Object.assign({}, this.form)
@@ -705,11 +700,27 @@ export default {
         this.btnLoading = false
         if (res && (res.code === 200 || res.code === 0)) {
           if (publishNow && payload.id) {
-            publishExam(payload.id).then(() => this.loadList())
+            publishExam(payload.id)
+              .then(() => {
+                this.loadList()
+                this.$message.success('发布成功')
+              })
+              .catch(err => {
+                console.error('发布失败:', err)
+                let errorMsg = '发布失败'
+                if (err && err.response && err.response.data) {
+                  const data = err.response.data
+                  errorMsg = data.msg || data.message || errorMsg
+                } else if (err && err.message) {
+                  errorMsg = err.message
+                }
+                this.$message.error(errorMsg)
+                this.loadList()
+              })
           } else {
             this.loadList()
+            this.$message.success('保存成功')
           }
-          this.$message.success(publishNow ? '发布成功' : '保存成功')
           if (!payload.id) this.resetForm()
         } else {
           this.$message.error((res && (res.msg || res.message)) || '保存失败')
@@ -877,9 +888,22 @@ export default {
           this.$message.success('已发布')
           this.loadList()
         } else {
-          this.$message.error((res && (res.msg || res.message)) || '发布失败')
+          // 显示后端返回的详细错误信息
+          const errorMsg = (res && (res.msg || res.message)) || '发布失败'
+          this.$message.error(errorMsg)
         }
-      }).catch(e => { console.error(e); this.$message.error('发布失败') })
+      }).catch(e => {
+        console.error('发布考试失败:', e)
+        // 提取详细错误信息
+        let errorMsg = '发布失败'
+        if (e && e.response && e.response.data) {
+          const data = e.response.data
+          errorMsg = data.msg || data.message || errorMsg
+        } else if (e && e.message) {
+          errorMsg = e.message
+        }
+        this.$message.error(errorMsg)
+      })
     },
     // 删除考试（草稿或已发布但未开始）
     remove(row) {
@@ -1442,20 +1466,48 @@ export default {
 </style>
 
 <style>
-/* 美化对话框 */
+/* 美化对话框 - 使用 fixed + transform 完美居中 */
+.beautified-dialog .el-dialog__wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow: auto !important;
+}
+
 .beautified-dialog .el-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
   border-radius: 12px;
   overflow: hidden;
+  max-height: 90vh;
+  max-width: 95vw;
+  display: flex;
+  flex-direction: column;
 }
 
 .beautified-dialog .el-dialog__header {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   padding: 20px 24px;
   border-bottom: 1px solid #e1e5e9;
+  flex-shrink: 0;
 }
 
 .beautified-dialog .el-dialog__title {
   font-weight: 700;
   color: #1a1a1a;
+}
+
+.beautified-dialog .el-dialog__body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.beautified-dialog .el-dialog__footer {
+  flex-shrink: 0;
 }
 </style>

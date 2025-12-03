@@ -1,0 +1,279 @@
+/* 页面容器 */
+.page {
+  padding: 24rpx;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+  position: relative;
+}
+
+/* 装饰性背景 */
+.page::before {
+  content: '';
+  position: fixed;
+  top: -100rpx;
+  right: -100rpx;
+  width: 400rpx;
+  height: 400rpx;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 考试标题 */
+.header {
+  font-size: 36rpx;
+  margin-bottom: 16rpx;
+  font-weight: 800;
+  color: #1e293b;
+  text-align: center;
+  letter-spacing: 0.5rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 1;
+  padding: 20rpx 16rpx;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(59, 130, 246, 0.08);
+}
+
+.header::before {
+  content: '📝';
+  margin-right: 12rpx;
+  font-size: 38rpx;
+}
+
+/* 倒计时显示 */
+.meta {
+  color: #ef4444;
+  margin-bottom: 24rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  padding: 16rpx 24rpx;
+  background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
+  border-radius: 16rpx;
+  border: 2rpx solid #fca5a5;
+  box-shadow: 0 4rpx 12rpx rgba(239, 68, 68, 0.15);
+  animation: timePulse 2s ease-in-out infinite;
+}
+
+.meta::before {
+  content: '⏱️';
+  margin-right: 8rpx;
+  font-size: 32rpx;
+}
+
+@keyframes timePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* 题目卡片 */
+.question {
+  background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
+  padding: 28rpx 24rpx;
+  margin-bottom: 24rpx;
+  border-radius: 20rpx;
+  box-shadow:
+    0 8rpx 24rpx rgba(59, 130, 246, 0.08),
+    0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+  border: 2rpx solid rgba(255, 255, 255, 0.8);
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+/* 题目卡片顶部渐变条 */
+.question::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5rpx;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  opacity: 0.8;
+}
+
+/* 题目标题 */
+.q-title {
+  font-weight: 700;
+  margin-bottom: 20rpx;
+  font-size: 30rpx;
+  line-height: 1.7;
+  color: #1e293b;
+  padding-left: 8rpx;
+  border-left: 4rpx solid #3b82f6;
+  position: relative;
+}
+
+/* 选项样式 */
+.option {
+  display: block;
+  padding: 16rpx 20rpx;
+  font-size: 28rpx;
+  margin-bottom: 12rpx;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12rpx;
+  border: 2rpx solid #e2e8f0;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.option::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4rpx;
+  background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* 选项激活效果 */
+.option:active {
+  transform: translateX(4rpx);
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-color: #3b82f6;
+}
+
+.option:active::before {
+  opacity: 1;
+}
+
+/* Radio 和 Checkbox 美化 */
+radio, checkbox {
+  transform: scale(1.2);
+  margin-right: 12rpx;
+}
+
+/* 文本输入框 */
+textarea {
+  width: 100%;
+  min-height: 200rpx;
+  padding: 20rpx;
+  border: 2rpx solid #e2e8f0;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+  background: #fafbff;
+  color: #1e293b;
+  box-shadow: inset 0 2rpx 4rpx rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+textarea:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow:
+    inset 0 2rpx 4rpx rgba(0, 0, 0, 0.04),
+    0 0 0 4rpx rgba(59, 130, 246, 0.1);
+}
+
+/* 操作区域 */
+.actions {
+  text-align: center;
+  margin-top: 40rpx;
+  margin-bottom: 40rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.actions button {
+  width: 85%;
+  padding: 28rpx 0;
+  font-size: 32rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%);
+  color: #fff;
+  border-radius: 20rpx;
+  border: none;
+  box-shadow:
+    0 12rpx 28rpx rgba(59, 130, 246, 0.4),
+    0 4rpx 12rpx rgba(0, 0, 0, 0.15),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* 按钮波纹效果 */
+.actions button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.actions button:active::before {
+  width: 400rpx;
+  height: 400rpx;
+}
+
+.actions button:active {
+  transform: translateY(4rpx) scale(0.98);
+  box-shadow:
+    0 6rpx 16rpx rgba(59, 130, 246, 0.4),
+    0 2rpx 6rpx rgba(0, 0, 0, 0.2);
+}
+
+.actions button::after {
+  content: '✓';
+  margin-left: 8rpx;
+  font-size: 36rpx;
+}
+
+/* ===== 防作弊设置 ===== */
+/* 禁用选择和长按弹出菜单（除了输入框） */
+.page, .question, .q-title, .option {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 允许在输入区域正常选择和操作 */
+textarea {
+  -webkit-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* ===== 响应式设计 ===== */
+@media (max-width: 375px) {
+  .header {
+    font-size: 32rpx;
+    padding: 16rpx 12rpx;
+  }
+
+  .q-title {
+    font-size: 28rpx;
+  }
+
+  .option {
+    font-size: 26rpx;
+    padding: 14rpx 16rpx;
+  }
+
+  .actions button {
+    width: 90%;
+    font-size: 30rpx;
+  }
+}
+

@@ -1,0 +1,15 @@
+<view class="container">
+  <view class="header">
+    <view class="title">{{notice.title}}</view>
+    <view class="info">
+      <text>发布者：{{notice.createBy}}</text>
+      <text>{{notice.createTime}}</text>
+    </view>
+  </view>
+
+  <view class="divider"></view>
+
+  <view class="content">
+    <rich-text nodes="{{notice.content}}"></rich-text>
+  </view>
+</view>

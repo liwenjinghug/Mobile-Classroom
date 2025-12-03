@@ -9,4 +9,5 @@ public interface IClassHomeworkService {
     int addHomework(ClassHomework hw);
     int editHomework(ClassHomework hw);
     int removeHomeworkByIds(Long[] ids);
+    boolean existsBySessionAndTitle(Long sessionId, String title, Long excludeHomeworkId);
 }

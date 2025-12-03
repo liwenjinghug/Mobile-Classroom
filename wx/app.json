@@ -4,10 +4,20 @@
     "pages/login/webcaptcha",
     "pages/course/list",
     "pages/course/detail",
-    "pages/messages/messages",
+    "pages/proj_fz/homework/homework-list",
+    "pages/proj_fz/homework/homework-detail",
+    "pages/proj_fz/homework/homework-grade",
+    "pages/proj_lwj/exam/list",
+    "pages/proj_lwj/exam/attempt",
     "pages/proj_qhy/forum/forum",
     "pages/mine/mine",
-    "pages/proj_qhy/article/detail"
+    "pages/proj_qhy/article/detail",
+    "pages/proj_cyq/message/detail",
+    "pages/proj_cyq/message/index",
+    "pages/proj_cyq/todo/edit",
+    "pages/proj_cyq/notice/detail",
+    "pages/proj_cyq/mine/index",
+    "pages/proj_cyq/mine/pwd/index"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ffffff",
@@ -27,7 +37,7 @@
         "text": "课程"
       },
       {
-        "pagePath": "pages/messages/messages",
+        "pagePath": "pages/proj_cyq/message/index",
         "text": "消息"
       },
       {
@@ -35,9 +45,11 @@
         "text": "社区"
       },
       {
-        "pagePath": "pages/mine/mine",
+        "pagePath": "pages/proj_cyq/mine/index",
         "text": "我的"
       }
     ]
-  }
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
 }

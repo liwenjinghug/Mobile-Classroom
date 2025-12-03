@@ -1,0 +1,73 @@
+<view class="page">
+  <view class="header-row">
+    <view class="header">考试列表</view>
+    <view class="header-actions">
+      <button bindtap="onRefresh" size="mini">刷新</button>
+    </view>
+  </view>
+
+  <!-- 筛选器 -->
+  <view class="filter-bar">
+    <view class="filter-item {{currentFilter === 'all' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="all">全部</view>
+    <view class="filter-item {{currentFilter === 'pending' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="pending">待完成</view>
+    <view class="filter-item {{currentFilter === 'completed' ? 'active' : ''}}" bindtap="onFilterChange" data-filter="completed">已完成</view>
+  </view>
+
+  <view wx:if="{{errorMessage}}" class="error-box">
+    <text>获取考试失败：{{errorMessage}}</text>
+    <button bindtap="showErrorDetails" size="mini">查看详情</button>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <block wx:if="{{!loading}}" wx:for="{{filteredSessions}}" wx:key="id" wx:for-item="item">
+    <view class="exam-item {{(item.score !== null && item.score !== undefined && item.isGraded) ? 'has-score' : ''}}">
+      <view class="exam-header">
+        <view class="title">{{item.title}}</view>
+        <view wx:if="{{item.statusTag}}" class="status-tag status-{{item.statusTag}}">{{item.statusText}}</view>
+      </view>
+      <view class="exam-info">
+        <view class="info-row">
+          <text class="label">发布时间：</text>
+          <text class="value">{{item.startAtDisplay}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">截止时间：</text>
+          <text class="value">{{item.endAtDisplay}}</text>
+        </view>
+        <view class="info-row" wx:if="{{item.durationDisplay}}">
+          <text class="label">考试时长：</text>
+          <text class="value">{{item.durationDisplay}}</text>
+        </view>
+        <view class="info-row" wx:if="{{item.questionTypes}}">
+          <text class="label">题型：</text>
+          <text class="value">{{item.questionTypes}}</text>
+        </view>
+        <view class="info-row" wx:if="{{item.totalScore !== null && item.totalScore !== undefined}}">
+          <text class="label">总分：</text>
+          <text class="value">{{item.totalScore}}分</text>
+        </view>
+      </view>
+
+      <!-- 成绩显示区域（更明显） -->
+      <view wx:if="{{item.score !== null && item.score !== undefined && item.isGraded}}" class="score-section {{item.isPassed ? 'score-passed' : 'score-failed'}}">
+        <view class="score-label">考试成绩</view>
+        <view class="score-display">
+          <text class="score-main">{{item.score}}</text>
+          <text class="score-unit">分</text>
+          <text wx:if="{{item.totalScore}}" class="score-total">/ {{item.totalScore}}分</text>
+        </view>
+        <view class="score-status">{{item.isPassed ? '及格' : '不及格'}}</view>
+      </view>
+      <view class="actions" wx:if="{{!item.isGraded}}">
+        <button size="mini"
+                bindtap="openExam"
+                data-id="{{item.id}}"
+                disabled="{{item.buttonDisabled}}"
+                class="{{item.buttonDisabled ? 'pending-btn' : 'start-btn'}}">{{item.buttonLabel}}</button>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{!loading && filteredSessions.length === 0 && !errorMessage}}" class="empty">暂无考试</view>
+</view>

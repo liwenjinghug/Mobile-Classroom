@@ -1,0 +1,164 @@
+<view class="page">
+  <!-- 页面标题和操作栏 -->
+  <view class="header-row">
+    <view class="header">{{sessionName}} - 作业</view>
+    <view class="header-actions">
+      <button bindtap="toggleFilter" size="mini" type="{{showFilter ? 'warn' : 'default'}}">筛选</button>
+      <button bindtap="onPullDownRefresh" size="mini">刷新</button>
+    </view>
+  </view>
+
+  <!-- 高级筛选面板 -->
+  <view wx:if="{{showFilter}}" class="filter-panel">
+    <view class="filter-title">高级筛选</view>
+
+    <view class="filter-row">
+      <text class="filter-label">课程名称</text>
+      <picker mode="selector" range="{{['全部'].concat(courseOptions)}}"
+              value="{{filterForm.courseName ? courseOptions.indexOf(filterForm.courseName) + 1 : 0}}"
+              data-field="courseName" bindchange="onFilterInput">
+        <view class="filter-picker">{{filterForm.courseName || '全部'}}</view>
+      </picker>
+    </view>
+
+    <view class="filter-row">
+      <text class="filter-label">课堂名称</text>
+      <picker mode="selector" range="{{['全部'].concat(classOptions)}}"
+              value="{{filterForm.className ? classOptions.indexOf(filterForm.className) + 1 : 0}}"
+              data-field="className" bindchange="onFilterInput">
+        <view class="filter-picker">{{filterForm.className || '全部'}}</view>
+      </picker>
+    </view>
+
+    <view class="filter-row">
+      <text class="filter-label">作业名称</text>
+      <picker mode="selector" range="{{['全部'].concat(titleOptions)}}"
+              value="{{filterForm.title ? titleOptions.indexOf(filterForm.title) + 1 : 0}}"
+              data-field="title" bindchange="onFilterInput">
+        <view class="filter-picker">{{filterForm.title || '全部'}}</view>
+      </picker>
+    </view>
+
+    <view class="filter-row">
+      <text class="filter-label">发布时间</text>
+      <picker mode="date" value="{{filterForm.publishStartDate}}"
+              data-field="publishStartDate" bindchange="onFilterInput">
+        <view class="filter-picker">{{filterForm.publishStartDate || '开始日期'}}</view>
+      </picker>
+      <text class="filter-separator">至</text>
+      <picker mode="date" value="{{filterForm.publishEndDate}}"
+              data-field="publishEndDate" bindchange="onFilterInput">
+        <view class="filter-picker">{{filterForm.publishEndDate || '结束日期'}}</view>
+      </picker>
+    </view>
+
+    <view class="filter-row">
+      <text class="filter-label">截止时间</text>
+      <picker mode="date" value="{{filterForm.deadlineStartDate}}"
+              data-field="deadlineStartDate" bindchange="onFilterInput">
+        <view class="filter-picker">{{filterForm.deadlineStartDate || '开始日期'}}</view>
+      </picker>
+      <text class="filter-separator">至</text>
+      <picker mode="date" value="{{filterForm.deadlineEndDate}}"
+              data-field="deadlineEndDate" bindchange="onFilterInput">
+        <view class="filter-picker">{{filterForm.deadlineEndDate || '结束日期'}}</view>
+      </picker>
+    </view>
+
+    <view class="filter-row">
+      <text class="filter-label">过期状态</text>
+      <picker mode="selector" range="{{['全部', '已过期', '未过期']}}"
+              value="{{filterForm.isExpired === 'yes' ? 1 : (filterForm.isExpired === 'no' ? 2 : 0)}}"
+              data-field="isExpired" bindchange="onFilterInput">
+        <view class="filter-picker">
+          {{filterForm.isExpired === 'yes' ? '已过期' : (filterForm.isExpired === 'no' ? '未过期' : '全部')}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="filter-row">
+      <text class="filter-label">批改状态</text>
+      <picker mode="selector" range="{{['全部', '已批改', '未批改']}}"
+              value="{{filterForm.isGraded === 'yes' ? 1 : (filterForm.isGraded === 'no' ? 2 : 0)}}"
+              data-field="isGraded" bindchange="onFilterInput">
+        <view class="filter-picker">
+          {{filterForm.isGraded === 'yes' ? '已批改' : (filterForm.isGraded === 'no' ? '未批改' : '全部')}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="filter-row">
+      <text class="filter-label">完成状态</text>
+      <picker mode="selector" range="{{['全部', '已完成', '未完成']}}"
+              value="{{filterForm.isCompleted === 'yes' ? 1 : (filterForm.isCompleted === 'no' ? 2 : 0)}}"
+              data-field="isCompleted" bindchange="onFilterInput">
+        <view class="filter-picker">
+          {{filterForm.isCompleted === 'yes' ? '已完成' : (filterForm.isCompleted === 'no' ? '未完成' : '全部')}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="filter-buttons">
+      <button class="filter-btn reset-btn" size="mini" bindtap="resetFilter">重置</button>
+      <button class="filter-btn apply-btn" size="mini" type="primary" bindtap="applyFilter">应用</button>
+    </view>
+  </view>
+
+  <!-- 标签切换 -->
+  <view class="filter-bar">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="index"
+      class="filter-item {{tabIndex === index ? 'active' : ''}}"
+      data-index="{{index}}"
+      bindtap="onTabChange">
+      {{item}}
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading">加载中...</view>
+
+  <!-- 作业列表 -->
+  <block wx:elif="{{!isEmpty}}">
+    <view
+      wx:for="{{homeworkList}}"
+      wx:key="homeworkId"
+      class="homework-item"
+      data-id="{{item.homeworkId}}"
+      bindtap="goToDetail">
+
+      <!-- 作业标题和状态 -->
+      <view class="homework-header">
+        <view class="title">{{item.title}}</view>
+        <view wx:if="{{item.statusText === '已批改'}}" class="status-tag status-graded">已批改</view>
+        <view wx:elif="{{item.statusText === '已提交'}}" class="status-tag status-submitted">已提交</view>
+        <view wx:elif="{{item.isExpired}}" class="status-tag status-expired">已截止</view>
+        <view wx:else class="status-tag status-ongoing">进行中</view>
+      </view>
+
+      <!-- 作业信息 -->
+      <view class="homework-info">
+        <view class="info-row">
+          <text class="label">课程：</text>
+          <text class="value">{{item.courseName || '未知'}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">截止时间：</text>
+          <text class="value {{tabIndex === 1 ? 'expired' : ''}}">{{item.deadline}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">总分：</text>
+          <text class="value score">{{item.totalScore}}分</text>
+        </view>
+      </view>
+
+      <!-- 箭头指示 -->
+      <view class="arrow-icon">›</view>
+    </view>
+  </block>
+
+  <!-- 空状态 -->
+  <view wx:else class="empty">暂无{{tabs[tabIndex]}}的作业</view>
+</view>
+

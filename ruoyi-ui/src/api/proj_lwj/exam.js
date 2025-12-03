@@ -41,10 +41,10 @@ export function delExam(ids) {
   })
 }
 
-// 发布考试（状态流转）
+// 发布考试（状态流转，包含题目总分验证）
 export function publishExam(id) {
   return request({
-    url: `/proj_lwj/exam/status/${id}/1`,
+    url: `/proj_lwj/exam/${id}/publish`,
     method: 'put'
   })
 }

@@ -30,8 +30,7 @@
         <div v-if="form.attachments">已上传: {{ form.attachments }}</div>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="publishOrSave" :loading="publishLoading">{{ editing ? '保存' : '发布' }}</el-button>
-        <el-button v-if="editing" type="info" @click="cancelEdit" style="margin-left:8px">取消编辑</el-button>
+        <el-button type="primary" @click="publishOrSave" :loading="publishLoading">发布作业</el-button>
       </el-form-item>
     </el-form>
 
@@ -99,7 +98,15 @@
       </el-card>
     </div>
 
-    <el-dialog title="提交列表" :visible.sync="submissionsDialogVisible" width="800px">
+    <el-dialog
+      title="提交列表"
+      :visible.sync="submissionsDialogVisible"
+      width="800px"
+      :modal="false"
+      :lock-scroll="false"
+      :close-on-click-modal="false"
+      custom-class="centered-homework-dialog"
+    >
       <div>
         <div style="margin-bottom:8px"><strong>作业：</strong>{{ pubSelectedHomework && (pubSelectedHomework.title || pubSelectedHomework.homeworkTitle) }}</div>
         <el-table :data="pubSubmissions" style="width:100%">
@@ -133,6 +140,71 @@
         <el-button @click="submissionsDialogVisible = false">关闭</el-button>
       </span>
     </el-dialog>
+
+    <!-- 修改作业弹窗 -->
+    <el-dialog
+      title="修改作业"
+      :visible.sync="editDialogVisible"
+      width="720px"
+      :modal="false"
+      :lock-scroll="false"
+      :close-on-click-modal="false"
+      custom-class="centered-homework-dialog"
+    >
+      <el-form :model="editForm" label-width="100px" ref="editFormRef">
+        <el-form-item label="课程">
+          <el-select v-model="editForm.courseId" placeholder="请选择课程" filterable disabled>
+            <el-option v-for="c in courses" :key="c.courseId" :label="c.courseName" :value="c.courseId" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="课堂">
+          <el-select v-model="editForm.sessionId" placeholder="请选择课堂" disabled>
+            <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="标题" required>
+          <el-input v-model="editForm.title" placeholder="请输入作业标题" />
+        </el-form-item>
+        <el-form-item label="内容">
+          <el-input type="textarea" v-model="editForm.content" :rows="4" placeholder="请输入作业内容" />
+        </el-form-item>
+        <el-form-item label="分值" required>
+          <el-input-number v-model="editForm.totalScore" :min="0" :max="1000" :precision="1" />
+        </el-form-item>
+        <el-form-item label="截止时间" required>
+          <el-date-picker v-model="editForm.deadline" type="datetime" placeholder="选择截止日期时间" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="附件">
+          <el-upload
+            :action="uploadUrl"
+            :headers="headers"
+            name="file"
+            :on-success="editUploadSuccess"
+            :multiple="true"
+            :show-file-list="true"
+          >
+            <el-button size="small" type="primary">上传参考文件</el-button>
+          </el-upload>
+          <div v-if="editForm.attachments" style="margin-top: 8px;">
+            已上传:
+            <el-tag
+              v-for="(f, idx) in parseAttachments(editForm.attachments)"
+              :key="idx"
+              closable
+              @close="removeEditAttachment(idx)"
+              style="margin-right: 8px;">
+              {{ shortName(f) }}
+            </el-tag>
+          </div>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div style="text-align: right;">
+          <el-button @click="closeEditDialog">取消</el-button>
+          <el-button type="primary" :loading="editSaving" @click="saveEdit">保存修改</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -155,8 +227,6 @@ export default {
         deadline: null,
         attachments: ''
       },
-      editing: false,
-      editingId: null,
       // upload config for backend
       uploadUrl: process.env.VUE_APP_BASE_API + '/common/upload',
       headers: { Authorization: 'Bearer ' + (require('@/utils/auth').getToken()) },
@@ -173,34 +243,61 @@ export default {
         deadlineRange: [],
         withAttachments: null
       },
-      sort: { prop: 'deadline', order: 'descending' }
+      sort: { prop: 'deadline', order: 'descending' },
+      // 修改作业弹窗
+      editDialogVisible: false,
+      editForm: {
+        homeworkId: null,
+        courseId: null,
+        sessionId: null,
+        title: '',
+        content: '',
+        totalScore: 100,
+        deadline: null,
+        attachments: ''
+      },
+      editSaving: false
     }
   },
   created() {
     // fetch courses and then apply any route query preselection (courseId/sessionId)
     this.fetchCourses().then(() => {
       const q = (this.$route && this.$route.query) ? this.$route.query : {}
+
+      // 优先使用路由参数
       if (q.courseId) {
-        // prefer number when possible
         this.form.courseId = isNaN(Number(q.courseId)) ? q.courseId : Number(q.courseId)
-        // load sessions for the course then optionally set sessionId
         this.fetchSessionsByCourseId(this.form.courseId).then(() => {
           if (q.sessionId) {
             this.form.sessionId = isNaN(Number(q.sessionId)) ? q.sessionId : Number(q.sessionId)
-            // load homeworks for that session
             this.loadHomeworks(this.form.sessionId)
           }
         })
       } else if (q.sessionId) {
-        // if only sessionId provided, try to set it and load homeworks (course will be empty)
         this.form.sessionId = isNaN(Number(q.sessionId)) ? q.sessionId : Number(q.sessionId)
         this.loadHomeworks(this.form.sessionId)
+      } else {
+        // 如果没有路由参数，尝试恢复上次选择的课程和课堂
+        const lastCourseId = localStorage.getItem('homework_publish_last_courseId')
+        const lastSessionId = localStorage.getItem('homework_publish_last_sessionId')
+
+        if (lastCourseId) {
+          this.form.courseId = isNaN(Number(lastCourseId)) ? lastCourseId : Number(lastCourseId)
+          this.fetchSessionsByCourseId(this.form.courseId).then(() => {
+            if (lastSessionId && this.sessions.some(s => s.sessionId == lastSessionId)) {
+              this.form.sessionId = isNaN(Number(lastSessionId)) ? lastSessionId : Number(lastSessionId)
+              this.loadHomeworks(this.form.sessionId)
+            }
+          })
+        }
       }
     }).catch(() => {})
   },
   watch: {
     'form.courseId'(val) {
       if (val) {
+        // 保存用户选择的课程
+        localStorage.setItem('homework_publish_last_courseId', val)
         this.fetchSessionsByCourseId(val)
       } else {
         this.sessions = []
@@ -209,6 +306,8 @@ export default {
     },
     'form.sessionId'(val) {
       if (val) {
+        // 保存用户选择的课堂
+        localStorage.setItem('homework_publish_last_sessionId', val)
         this.loadHomeworks(val)
       } else {
         this.homeworkList = []
@@ -354,64 +453,45 @@ export default {
         if (formatted) payload.deadline = formatted
       }
       this.publishLoading = true
-      if (this.editing) {
-        // update
-        payload.homeworkId = this.editingId
-        updateHomework(payload).then(res => {
-          this.publishLoading = false
-          if (res && (res.code === 200 || res.code === 0)) {
-            this.$message.success('保存成功')
-            this.loadHomeworks(this.form.sessionId)
-            this.resetForm()
-          } else {
-            this.$message.error((res && (res.msg || res.message)) || '保存失败')
-          }
-        }).catch(err => {
-          this.publishLoading = false
-          console.error('更新作业失败', err)
-          this.$message.error('保存失败')
-        })
-      } else {
-        // Check for duplicate title in the same session
-        const isDuplicate = await this.checkDuplicateTitle(this.form.sessionId, this.form.title)
-        if (isDuplicate) {
-          this.publishLoading = false
-          this.$message.error('发布失败：当前课堂已存在相同标题的作业，请修改标题后重试')
-          return
-        }
-        addHomework(payload).then(res => {
-          this.publishLoading = false
-          if (res && (res.code === 200 || res.code === 0)) {
-            this.$message.success('发布成功')
-            this.loadHomeworks(this.form.sessionId)
-            this.resetForm()
-          } else {
-            this.$message.error((res && (res.msg || res.message)) || '发布失败')
-            console.error('发布失败，server response:', res)
-          }
-        }).catch(err => {
-          this.publishLoading = false
-          console.error('发布接口调用失败：', err)
-          let userMsg = '发布失败'
-          try {
-            if (err && err.response) {
-              const d = err.response.data
-              if (d && (d.msg || d.message)) userMsg = `发布失败：${d.msg || d.message}`
-              else userMsg = `发布失败（HTTP ${err.response.status}）`
-            } else if (err && err.message) {
-              userMsg = `发布失败：${err.message}`
-            }
-          } catch (e) {
-            console.error('解析发布错误信息失败', e)
-          }
-          this.$message.error(userMsg)
-        })
+
+      // Check for duplicate title in the same session
+      const isDuplicate = await this.checkDuplicateTitle(this.form.sessionId, this.form.title)
+      if (isDuplicate) {
+        this.publishLoading = false
+        this.$message.error('发布失败：当前课堂已存在相同标题的作业，请修改标题后重试')
+        return
       }
+
+      addHomework(payload).then(res => {
+        this.publishLoading = false
+        if (res && (res.code === 200 || res.code === 0)) {
+          this.$message.success('发布成功')
+          this.loadHomeworks(this.form.sessionId)
+          this.resetForm()
+        } else {
+          this.$message.error((res && (res.msg || res.message)) || '发布失败')
+          console.error('发布失败，server response:', res)
+        }
+      }).catch(err => {
+        this.publishLoading = false
+        console.error('发布接口调用失败：', err)
+        let userMsg = '发布失败'
+        try {
+          if (err && err.response) {
+            const d = err.response.data
+            if (d && (d.msg || d.message)) userMsg = `发布失败：${d.msg || d.message}`
+            else userMsg = `发布失败（HTTP ${err.response.status}）`
+          } else if (err && err.message) {
+            userMsg = `发布失败：${err.message}`
+          }
+        } catch (e) {
+          console.error('解析发布错误信息失败', e)
+        }
+        this.$message.error(userMsg)
+      })
     },
 
     resetForm() {
-      this.editing = false
-      this.editingId = null
       this.form.title = ''
       this.form.content = ''
       this.form.totalScore = 100
@@ -420,25 +500,141 @@ export default {
     },
 
     startEdit(row) {
-      this.editing = true
-      this.editingId = row.homeworkId || row.id || null
-      // populate form fields
-      this.form.courseId = row.courseId
-      this.form.sessionId = row.sessionId
-      this.form.title = row.title
-      this.form.content = row.content
-      this.form.totalScore = row.totalScore
-      // try to parse deadline into Date
-      this.form.deadline = row.deadline ? new Date(row.deadline) : null
-      this.form.attachments = row.attachments || ''
+      // 打开弹窗编辑，而不是在页面表单中编辑
+      this.editForm.homeworkId = row.homeworkId || row.id || null
+      this.editForm.courseId = row.courseId
+      this.editForm.sessionId = row.sessionId
+      this.editForm.title = row.title
+      this.editForm.content = row.content
+      this.editForm.totalScore = row.totalScore
+      this.editForm.deadline = row.deadline ? new Date(row.deadline) : null
+      this.editForm.attachments = row.attachments || ''
 
       // 确保课堂列表包含当前课堂
-      if (this.form.courseId && (!this.sessions || !this.sessions.find(s => s.sessionId === this.form.sessionId))) {
-        this.fetchSessionsByCourseId(this.form.courseId)
+      if (this.editForm.courseId && (!this.sessions || !this.sessions.find(s => s.sessionId === this.editForm.sessionId))) {
+        this.fetchSessionsByCourseId(this.editForm.courseId)
+      }
+
+      this.editDialogVisible = true
+    },
+
+    closeEditDialog() {
+      this.editDialogVisible = false
+      this.editForm = {
+        homeworkId: null,
+        courseId: null,
+        sessionId: null,
+        title: '',
+        content: '',
+        totalScore: 100,
+        deadline: null,
+        attachments: ''
       }
     },
 
-    cancelEdit() { this.resetForm() },
+    editUploadSuccess(res, file) {
+      if (res.code === 200 || res.code === 0) {
+        const url = res.url || res.data || res.fileName
+        this.editForm.attachments = this.editForm.attachments ? (this.editForm.attachments + ',' + url) : url
+        this.$message.success('文件上传成功')
+      } else {
+        this.$message.error('上传失败: ' + (res.msg || res.message || ''))
+      }
+    },
+
+    removeEditAttachment(idx) {
+      const arr = this.parseAttachments(this.editForm.attachments)
+      arr.splice(idx, 1)
+      this.editForm.attachments = arr.join(',')
+    },
+
+    async saveEdit() {
+      // 验证必填字段
+      if (!this.editForm.title || !this.editForm.title.trim()) {
+        this.$message.warning('请输入作业标题')
+        return
+      }
+      if (!this.editForm.totalScore || this.editForm.totalScore <= 0) {
+        this.$message.warning('请输入有效的分值')
+        return
+      }
+      if (!this.editForm.deadline) {
+        this.$message.warning('请选择截止时间')
+        return
+      }
+
+      this.editSaving = true
+      try {
+        // 格式化日期为后端期望的格式 yyyy-MM-dd HH:mm:ss
+        let formattedDeadline = this.editForm.deadline
+        if (this.editForm.deadline) {
+          formattedDeadline = this.formatDateToBackend(this.editForm.deadline)
+        }
+
+        const payload = {
+          homeworkId: this.editForm.homeworkId,
+          courseId: this.editForm.courseId,
+          sessionId: this.editForm.sessionId,
+          title: this.editForm.title,
+          content: this.editForm.content,
+          totalScore: this.editForm.totalScore,
+          deadline: formattedDeadline,
+          attachments: this.editForm.attachments
+        }
+
+        await updateHomework(payload)
+
+        // 立即更新本地数据，而不是重新加载
+        console.log('修改成功，开始更新本地数据')
+        console.log('当前 homeworkList:', this.homeworkList)
+        console.log('要查找的 homeworkId:', this.editForm.homeworkId)
+
+        // 确保 homeworkList 已初始化
+        if (!Array.isArray(this.homeworkList)) {
+          console.warn('homeworkList 未初始化，重新加载数据')
+          this.loadHomeworks(this.editForm.sessionId)
+          this.$message.success('作业修改成功')
+          this.closeEditDialog()
+          return
+        }
+
+        const index = this.homeworkList.findIndex(h =>
+          (h.homeworkId === this.editForm.homeworkId) ||
+          (h.id === this.editForm.homeworkId)
+        )
+
+        console.log('找到的索引:', index)
+
+        if (index !== -1) {
+          console.log('更新索引 ' + index + ' 的记录')
+          // 更新该记录的信息
+          this.$set(this.homeworkList, index, {
+            ...this.homeworkList[index],
+            title: this.editForm.title,
+            content: this.editForm.content,
+            totalScore: this.editForm.totalScore,
+            deadline: this.editForm.deadline,
+            attachments: this.editForm.attachments
+          })
+          console.log('本地数据已更新:', this.homeworkList[index])
+        } else {
+          console.warn('未找到对应的作业记录，索引:', index)
+          console.warn('将在延迟刷新时重新加载')
+        }
+
+        this.$message.success('作业修改成功')
+        this.closeEditDialog()
+
+        // 🔧 移除自动刷新，避免覆盖本地更新的数据
+        // 如果需要刷新，用户可以手动切换课堂或刷新页面
+        console.log('本地数据更新完成，跳过自动刷新以保持记录可见')
+      } catch (error) {
+        console.error('修改作业失败:', error)
+        this.$message.error('修改失败: ' + (error.message || '网络错误'))
+      } finally {
+        this.editSaving = false
+      }
+    },
 
     confirmDelete(row) {
       this.$confirm('确认删除该作业？', '提示', { type: 'warning' }).then(() => {
@@ -880,15 +1076,34 @@ export default {
   border-bottom: 1px solid #f5f5f7;
 }
 
-/* Dialog Styling */
+/* Dialog Styling - 使用 fixed + transform 完美居中在用户屏幕中间 */
+.app-container >>> .el-dialog__wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow: auto !important;
+}
+
 .app-container >>> .el-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
   border-radius: 18px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  max-height: 90vh;
+  max-width: 95vw;
+  display: flex;
+  flex-direction: column;
 }
 
 .app-container >>> .el-dialog__header {
   padding: 20px 24px;
   border-bottom: 1px solid #f5f5f7;
+  flex-shrink: 0;
 }
 
 .app-container >>> .el-dialog__title {
@@ -899,11 +1114,14 @@ export default {
 
 .app-container >>> .el-dialog__body {
   padding: 24px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .app-container >>> .el-dialog__footer {
   padding: 16px 24px;
   border-top: 1px solid #f5f5f7;
+  flex-shrink: 0;
 }
 
 /* Alert Styling */
@@ -918,7 +1136,31 @@ export default {
   background-color: #f5f5f7;
   color: #1d1d1f;
 }
+</style>
 
+<style>
+/* 全局样式 - 确保作业发布弹窗居中在用户屏幕中间（无 scoped） */
+.centered-homework-dialog .el-dialog__wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  overflow: auto !important;
+}
+
+.centered-homework-dialog .el-dialog {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  max-height: 90vh;
+  max-width: 95vw;
+}
+</style>
+
+<style scoped>
 /* Link Styling */
 .app-container >>> a {
   color: #0071e3;

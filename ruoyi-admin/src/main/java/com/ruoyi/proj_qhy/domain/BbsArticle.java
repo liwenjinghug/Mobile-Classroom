@@ -33,7 +33,7 @@ public class BbsArticle extends BaseEntity {
     @Excel(name = "文章分类")
     private String articleType;
 
-    /** 状态：editting-编辑中,published-已发布,draft-草稿 */
+    /** 状态 */
     @Excel(name = "状态")
     private String status;
 
@@ -57,13 +57,19 @@ public class BbsArticle extends BaseEntity {
     @Excel(name = "收藏数")
     private Long bookmarkCount;
 
-    /** 作者 */
+    /** 作者 (昵称) */
     @Excel(name = "作者")
     private String author;
+
+    /** 作者头像 (新增字段，非数据库直接字段，由关联查询得出) */
+    private String authorAvatar;
 
     /** 用户ID */
     @Excel(name = "用户ID")
     private Long userId;
+
+    // (新增) 当前用户是否已点赞 (1:赞, -1:踩, 0:无)
+    private Integer userLikeStatus;
 
     // getter/setter 方法
     public Long getId() { return id; }
@@ -105,8 +111,16 @@ public class BbsArticle extends BaseEntity {
     public String getAuthor() { return author; }
     public void setAuthor(String author) { this.author = author; }
 
+    public String getAuthorAvatar() { return authorAvatar; }
+    public void setAuthorAvatar(String authorAvatar) { this.authorAvatar = authorAvatar; }
+
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
+
+    public Integer getUserLikeStatus() { return userLikeStatus; }
+    public void setUserLikeStatus(Integer userLikeStatus) { this.userLikeStatus = userLikeStatus; }
+
+
 
     @Override
     public String toString() {
@@ -130,6 +144,7 @@ public class BbsArticle extends BaseEntity {
                 .append("updateBy", getUpdateBy())
                 .append("updateTime", getUpdateTime())
                 .append("remark", getRemark())
+                .append("authorAvatar", getAuthorAvatar())
                 .toString();
     }
 }

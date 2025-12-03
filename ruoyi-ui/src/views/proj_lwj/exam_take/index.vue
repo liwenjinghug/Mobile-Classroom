@@ -4,11 +4,9 @@
       <div class="exam-title">{{ exam ? exam.examName : '考试' }} (ID: {{ examId }})</div>
       <div class="exam-meta">
         <span>状态: <el-tag size="mini" :type="statusTagType">{{ statusLabel }}</el-tag></span>
-        <!-- 仅在开始后显示剩余时间；未开始不显示倒计时，也不显示“已超时” -->
         <span v-if="started && timeRemaining !== null && timeRemaining >= 0">剩余时间: <strong>{{ formatDuration(timeRemaining) }}</strong></span>
         <span v-else-if="started && timeRemaining !== null && timeRemaining < 0">已超时</span>
-        <!-- 移除头部的当前得分显示，避免考试过程中展示总分进度 -->
-        <!-- <span>当前得分: {{ (participant && participant.totalScore) || 0 }} / {{ (exam && exam.totalScore) || 0 }}</span> -->
+        <el-tag v-if="antiCheatEnabled" size="mini" type="danger">防作弊已启用</el-tag>
       </div>
       <div class="exam-actions">
         <el-button size="mini" type="primary" :disabled="!canStart || started" @click="start">开始考试</el-button>
@@ -43,18 +41,21 @@
           </div>
           <div class="q-content" v-html="currentQuestion.questionContent"></div>
 
-          <div v-if="currentQuestion.questionType===1" class="single-choice">
+          <!-- 判断题：新编码 type=1 -->
+          <div v-if="currentQuestion.questionType===1" class="judge-choice">
+            <el-radio-group v-model="workingAnswer" @change="onAnswerChanged">
+              <el-radio label="正确">正确</el-radio>
+              <el-radio label="错误">错误</el-radio>
+            </el-radio-group>
+          </div>
+          <!-- 选择题：新编码 type=2 -->
+          <div v-else-if="currentQuestion.questionType===2" class="single-choice">
             <el-radio-group v-model="workingAnswer" @change="onAnswerChanged">
               <el-radio v-for="opt in parsedOptions" :label="opt" :key="opt">{{ opt }}</el-radio>
             </el-radio-group>
           </div>
-          <div v-else-if="currentQuestion.questionType===3" class="judge-choice">
-            <el-radio-group v-model="workingAnswer" @change="onAnswerChanged">
-              <el-radio label="true">正确</el-radio>
-              <el-radio label="false">错误</el-radio>
-            </el-radio-group>
-          </div>
-          <div v-else-if="currentQuestion.questionType===5" class="short-answer">
+          <!-- 简答题：新编码 type=3 -->
+          <div v-else-if="currentQuestion.questionType===3" class="short-answer">
             <el-input type="textarea" :rows="6" v-model="workingAnswer" placeholder="请输入答案" @input="onAnswerInput"></el-input>
           </div>
           <div v-else>
@@ -89,7 +90,7 @@
     </div>
 
     <!-- 成绩汇总弹窗 -->
-    <el-dialog title="考试成绩" :visible.sync="summaryVisible" width="800px" v-if="exam">
+    <el-dialog title="考试成绩" :visible.sync="summaryVisible" width="800px" :modal="false" :lock-scroll="false" :append-to-body="true" v-if="exam">
       <div v-if="submitted">
         <!-- 未批改完主观题前，不显示及格与否，仅提示客观题得分 -->
         <el-alert v-if="canJudgePass"
@@ -160,7 +161,14 @@ export default {
       analysisMode: false,
       autoSaveTimer: null,
       // 新增：答题自动保存去抖定时器
-      answerSaveTimer: null
+      answerSaveTimer: null,
+      // 防作弊状态
+      antiCheatActive: false,
+      cheatViolations: 0,
+      lastViolationAt: 0,
+      blurTimer: null,
+      visibilityTimer: null,
+      cheatGraceUntil: 0 // 时间戳：此时间之前不计违规
     }
   },
   computed: {
@@ -236,7 +244,33 @@ export default {
     },
     finalScoreDisplay(){ return this.hideTotalScore ? '待批改' : this.formatScore(this.finalScoreNumeric) },
     scoreLabel(){ return this.hideTotalScore ? '客观题得分' : (this.canJudgePass ? '我的得分' : '客观题得分') },
-    summaryRows(){ return this.questions.map((q,i)=>{ const res=this.answerResultMap[q.id]||{}; const sc=res.score; const subj=this.isSubjective(q.questionType); let correct=res.correct; if(subj && (sc===undefined || sc===null)) { correct=undefined } return { index:i+1, type:this.typeLabel(q.questionType), score:sc, maxScore:q.score, correct, answer:this.answerMap[q.id]||'', correctAnswer:this.allowShowCorrect?(q.correctAnswer||''):'', scoreDisplay: sc===undefined? (subj? '待批改':(res.correct===undefined?'—':(res.correct? this.formatScore(q.score):'0'))): this.formatScore(sc) } }) },
+    summaryRows(){
+      return this.questions.map((q,i)=>{
+        const res = this.answerResultMap[q.id] || {};
+        const sc = res.score;
+        const subj = this.isSubjective(q.questionType);
+        let correct = res.correct;
+
+        // 主观题：如果分数为空或为0（未批改），则显示"待批改"
+        // 注意：即使后端错误地给了score=0和correct=false，也要显示待批改
+        if(subj && (sc === undefined || sc === null || sc === 0)) {
+          correct = undefined
+        }
+
+        return {
+          index: i+1,
+          type: this.typeLabel(q.questionType),
+          score: sc,
+          maxScore: q.score,
+          correct,
+          answer: this.answerMap[q.id] || '',
+          correctAnswer: this.allowShowCorrect ? (q.correctAnswer || '') : '',
+          scoreDisplay: sc === undefined || sc === null ?
+            (subj ? '待批改' : (res.correct === undefined ? '—' : (res.correct ? this.formatScore(q.score) : '0')))
+            : (subj && sc === 0 ? '待批改' : this.formatScore(sc))
+        }
+      })
+    },
     // 新增：结果列是否显示（提交后且允许显示答案才展示）
     showResultColumn(){
       if(!this.exam) return true
@@ -273,6 +307,9 @@ export default {
       if(mode === 1) return true
       if(mode === 2) return this.submitted
       return false
+    },
+    antiCheatEnabled(){
+      return !!(this.exam && (this.exam.antiCheat === 1 || this.exam.anti_cheat === 1))
     }
   },
   created() {
@@ -281,21 +318,9 @@ export default {
     this.init()
   },
   watch: {
-    '$route.query.autoStart': { handler(val){ if (String(val)==='1' && !this.started && this.canStart) { this.start() } }, immediate:true },
-    // 自动开始考试：当考试数据加载完成且满足开始条件时自动开始
-    canStart: {
-      handler(val) {
-        if (val && !this.started && !this.submitted && this.exam) {
-          // 延迟500ms后自动开始，避免数据未完全加载
-          setTimeout(() => {
-            if (this.canStart && !this.started && !this.submitted) {
-              this.start()
-            }
-          }, 500)
-        }
-      },
-      immediate: false
-    },
+    '$route.query.autoStart': { handler(val){ /* 禁用自动开始 */ }, immediate:false },
+    // 移除自动开始考试逻辑，用户需手动点击“开始考试”
+    // canStart 变化不再触发自动开始
     summaryVisible(val){
       if(val){
         // 打开弹窗时移除可能残留在题目选项上的焦点，避免 aria-hidden 焦点警告
@@ -303,7 +328,20 @@ export default {
       }
     }
   },
-  beforeDestroy(){ if (this.timer) clearInterval(this.timer); if (this.autoSaveTimer) clearInterval(this.autoSaveTimer); if (this.answerSaveTimer) clearTimeout(this.answerSaveTimer) },
+  beforeRouteLeave(to, from, next){
+    // 考试进行中且启用防作弊，禁止路由离开
+    if (this.started && !this.submitted && this.antiCheatEnabled) {
+      this.$message.error('防作弊开启：考试进行中禁止离开页面');
+      return next(false);
+    }
+    next();
+  },
+  beforeDestroy(){
+    if (this.timer) clearInterval(this.timer);
+    if (this.autoSaveTimer) clearInterval(this.autoSaveTimer);
+    if (this.answerSaveTimer) clearTimeout(this.answerSaveTimer);
+    this.unbindAntiCheat();
+  },
   methods: {
     // 考试类型标签映射
     examTypeLabel(t) {
@@ -317,22 +355,24 @@ export default {
         default: return '其它';
       }
     },
-    // 题型判断
-    isObjective(t){ return [1,2,3].includes(Number(t)) },
-    isSubjective(t){ return [4,5,6].includes(Number(t)) },
+    // 题型判断：新编码 1=判断 2=选择 3=简答
+    isObjective(t){ return [1,2].includes(Number(t)) },
+    isSubjective(t){ return Number(t) === 3 },
     hasSubjectiveQuestions(){ return this.questions.some(q => this.isSubjective(q.questionType)) },
-    // 简单兜底判分：仅支持单选(1)/判断(3)
+    // 简单兜底判分：新编码 1=判断 2=选择
     quickJudge(t, ans, correct){
       const tp=Number(t)
       if (tp===1) {
-        return String(ans||'').trim() === String(correct||'').trim()
-      }
-      if (tp===3) {
+        // 判断题：标准化比较
         const norm = v => String(v||'').toString().trim().toLowerCase()
-        const mapTrue = ['true','1','t','y','yes','对','正确']
-        const mapFalse = ['false','0','f','n','no','错','错误']
+        const mapTrue = ['true','1','t','y','yes','对','正确','是']
+        const mapFalse = ['false','0','f','n','no','错','错误','否']
         const a = norm(ans), c = norm(correct)
         return (mapTrue.includes(a) && mapTrue.includes(c)) || (mapFalse.includes(a) && mapFalse.includes(c))
+      }
+      if (tp===2) {
+        // 选择题：字符串比较
+        return String(ans||'').trim() === String(correct||'').trim()
       }
       return false
     },
@@ -365,11 +405,15 @@ export default {
         }
       },1000)
     },
-    selectIndex(i){ if(!this.started){ this.$message.info('请先点击“开始考试”'); return } this.currentIndex=i; this.workingAnswer=this.answerMap[this.currentQuestion.id]||'' },
+    selectIndex(i){ if(!this.started){ this.$message.info('请先点击“开始考试”'); return } this.currentIndex=i; this.workingAnswer=this.answerMap[this.currentQuestion.id]||''; // 题目切换后短暂宽限避免内部焦点变动触发失焦
+      this.cheatGraceUntil = Date.now() + 800; },
     prev(){ if(this.currentIndex>0) this.selectIndex(this.currentIndex-1) },
     next(){ if(this.currentIndex < this.questions.length-1) this.selectIndex(this.currentIndex+1) },
-    typeLabel(t){ return t===1?'单选':t===3?'判断':t===5?'简答':t===4?'填空':'其它' },
-    async start(){ if(!this.canStart) return this.$message.error('尚未到可开始时间或考试未发布'); try { const res=await startExamParticipant({ examId:Number(this.examId), studentNo:this.studentNo }); this.participant=res.data; this.started=true; this.computeRemaining(); this.$message.success('考试已开始') } catch(e){ console.error(e); this.$message.error('开始考试失败') } },
+    // 题型标签：新编码 1=判断 2=选择 3=简答
+    typeLabel(t){ return t===1?'判断':t===2?'选择':t===3?'简答':'其它' },
+    async start(){ if(!this.canStart) return this.$message.error('尚未到可开始时间或考试未发布'); try { const res=await startExamParticipant({ examId:Number(this.examId), studentNo:this.studentNo }); this.participant=res.data; this.started=true; this.computeRemaining(); this.$message.success('考试已开始')
+      if (this.antiCheatEnabled) { this.bindAntiCheat(); this.cheatGraceUntil = Date.now() + 2000; }
+     } catch(e){ console.error(e); this.$message.error('开始考试失败') } },
     formatScore(s){ return (s===undefined||s===null)?'—': (Number(s)%1===0?Number(s):Number(s).toFixed(2)) },
     recalculateTotal(){ if(!this.participant) this.participant={}; if(this.participant.totalScore==null) { this.participant.totalScore=this.displayedTotal } },
     // 新增：答题变化时的自动保存（去抖）
@@ -473,11 +517,123 @@ export default {
       } catch(e){
         console.error(e)
         this.$message.error('交卷失败')
+      } finally {
+        // 无论成功失败，结束考试流程均解除防作弊监听，避免影响其他页面
+        this.unbindAntiCheat();
       }
     },
-    openAnalysis(){ this.summaryVisible=false; this.analysisMode=true; if(!this.started && this.questions && this.questions.length>0){ this.currentIndex=0 } },
-    autoSubmitIfNeeded(){ if(this.exam && this.exam.autoSubmit===1 && this.started && !this.submitted){ this.$message.warning('时间到，自动交卷'); this.submitPaper() } },
-    autoSaveTick(){ if(!this.started || !this.currentQuestion) return; const qid=this.currentQuestion.id; const current=this.workingAnswer; const saved=this.answerMap[qid]; if(current && current!==saved){ this.saveCurrent().catch(()=>{}) } },
+    // 防作弊：绑定/解绑监听
+    bindAntiCheat(){
+      if (this.antiCheatActive) return;
+      this.antiCheatActive = true;
+      this.cheatViolations = 0;
+      this.lastViolationAt = 0;
+      document.addEventListener('visibilitychange', this.onVisibilityChange, true);
+      window.addEventListener('blur', this.onWindowBlur, true);
+      window.addEventListener('focus', this.onWindowFocus, true);
+      window.addEventListener('beforeunload', this.onBeforeUnload);
+      // 禁止复制/粘贴/剪切/右键
+      document.addEventListener('copy', this.blockUserEvent, true);
+      document.addEventListener('cut', this.blockUserEvent, true);
+      document.addEventListener('paste', this.blockUserEvent, true);
+      document.addEventListener('contextmenu', this.blockUserEvent, true);
+      // 键盘快捷键
+      document.addEventListener('keydown', this.onKeyDown, true);
+    },
+    unbindAntiCheat(){
+      if (!this.antiCheatActive) return;
+      this.antiCheatActive = false;
+      document.removeEventListener('visibilitychange', this.onVisibilityChange, true);
+      window.removeEventListener('blur', this.onWindowBlur, true);
+      window.removeEventListener('focus', this.onWindowFocus, true);
+      window.removeEventListener('beforeunload', this.onBeforeUnload);
+      document.removeEventListener('copy', this.blockUserEvent, true);
+      document.removeEventListener('cut', this.blockUserEvent, true);
+      document.removeEventListener('paste', this.blockUserEvent, true);
+      document.removeEventListener('contextmenu', this.blockUserEvent, true);
+      document.removeEventListener('keydown', this.onKeyDown, true);
+      if (this.blurTimer) { clearTimeout(this.blurTimer); this.blurTimer = null; }
+      if (this.visibilityTimer) { clearTimeout(this.visibilityTimer); this.visibilityTimer = null; }
+    },
+    blockUserEvent(e){
+      if (!this.antiCheatActive || !this.started || this.submitted || !this.antiCheatEnabled) return;
+      e.preventDefault();
+      try { e.stopPropagation(); } catch(_){}
+      this.$message.warning('已启用防作弊，禁止复制/粘贴/右键操作');
+      return false;
+    },
+    onKeyDown(e){
+      if (!this.antiCheatActive || !this.started || this.submitted || !this.antiCheatEnabled) return;
+      const key = (e.key || '').toLowerCase();
+      const blockCombo = (e.ctrlKey || e.metaKey) && ['c','x','v','a','s','p'].includes(key);
+      const blockF = (e.keyCode === 123) || (e.ctrlKey && e.shiftKey && ['i','j','c','u'].includes(key));
+      if (blockCombo || blockF) {
+        e.preventDefault();
+        try { e.stopPropagation(); } catch(_){}
+        this.$message.warning('已启用防作弊，部分快捷键被禁用');
+        return false;
+      }
+    },
+    onBeforeUnload(e){
+      if (!this.antiCheatActive || !this.started || this.submitted || !this.antiCheatEnabled) return;
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    },
+    onWindowBlur(){
+      if (!this.antiCheatActive || !this.started || this.submitted || !this.antiCheatEnabled) return;
+      if (Date.now() < this.cheatGraceUntil) return; // 宽限期内忽略
+      if (this.blurTimer) return;
+      this.blurTimer = setTimeout(() => {
+        this.blurTimer = null;
+        if (Date.now() < this.cheatGraceUntil) return; // 宽限期结束再检查
+        if (document.hidden) return;
+        try { const ae = document.activeElement; const root = this.$el; if (ae && root && root.contains(ae)) return; } catch (e) {}
+        const now = Date.now();
+        if (now - this.lastViolationAt < 1500) return;
+        this.handleCheatViolation('检测到窗口失焦/页面切换');
+      }, 800);
+    },
+    onWindowFocus(){
+      // 获得焦点，取消待处理的失焦判定
+      if (this.blurTimer) { clearTimeout(this.blurTimer); this.blurTimer = null; }
+    },
+    onVisibilityChange(){
+      if (!this.antiCheatActive || !this.started || this.submitted || !this.antiCheatEnabled) return;
+      if (document.hidden) {
+        if (Date.now() < this.cheatGraceUntil) return; // 宽限期内忽略
+        if (this.visibilityTimer) return;
+        this.visibilityTimer = setTimeout(() => {
+          this.visibilityTimer = null;
+          if (Date.now() < this.cheatGraceUntil) return;
+          if (document.hidden) {
+            const now = Date.now();
+            if (now - this.lastViolationAt < 1500) return;
+            this.handleCheatViolation('检测到页面不可见');
+          }
+        }, 600);
+      } else {
+        if (this.visibilityTimer) { clearTimeout(this.visibilityTimer); this.visibilityTimer = null; }
+      }
+    },
+    handleCheatViolation(reason){
+      // 再次宽限判断，防止极端竞态
+      if (Date.now() < this.cheatGraceUntil) return;
+      const now = Date.now();
+      this.lastViolationAt = now;
+      const next = (this.cheatViolations || 0) + 1;
+      this.cheatViolations = next;
+      const left = Math.max(0, 3 - next);
+      if (next < 3) {
+        this.$notify({ title: '防作弊警告', message: `${reason}。已记录(${next}/3)，再违规${left}次将自动交卷。`, type: 'warning', duration: 3000 });
+        return;
+      }
+      this.$notify({ title: '防作弊处理', message: `${reason}。违规已达(${next}/3)，将自动交卷。`, type: 'error', duration: 2500 });
+      if (this.started && !this.submitted) {
+        this.autoSubmitIfNeeded();
+        if (!this.exam || this.exam.autoSubmit !== 1) { this.submitPaper(); }
+      }
+    },
     formatDuration(sec){ if(sec==null) return '--:--'; if(sec<0) return '00:00'; const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60; return (h>0?String(h).padStart(2,'0')+':':'')+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0') },
     goBackPortal(){
       // 先关闭弹窗，避免 Element UI 遮罩在路由切换后短暂残留

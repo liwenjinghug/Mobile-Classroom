@@ -37,4 +37,13 @@ public class ClassHomeworkServiceImpl implements IClassHomeworkService {
     public int removeHomeworkByIds(Long[] ids) {
         return homeworkMapper.deleteHomeworkByIds(ids);
     }
+
+    @Override
+    public boolean existsBySessionAndTitle(Long sessionId, String title, Long excludeHomeworkId) {
+        if (sessionId == null || title == null || title.trim().isEmpty()) {
+            return false;
+        }
+        int count = homeworkMapper.countBySessionAndTitle(sessionId, title.trim(), excludeHomeworkId);
+        return count > 0;
+    }
 }

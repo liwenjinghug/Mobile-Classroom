@@ -12,10 +12,13 @@ import store from './store'
 import router from './router'
 import directive from './directive' // directive
 import plugins from './plugins' // plugins
+import uiEffects from '@/plugins/ui-effects' // ui animations & spotlight
 import { download } from '@/utils/request'
 
 import './assets/icons' // icon
 import './permission' // permission control
+
+Vue.use(uiEffects)
 import { getDicts } from "@/api/system/dict/data"
 import { getConfigKey } from "@/api/system/config"
 import { parseTime, resetForm, addDateRange, selectDictLabel, selectDictLabels, handleTree } from "@/utils/ruoyi"

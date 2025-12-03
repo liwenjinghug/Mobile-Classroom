@@ -1,0 +1,52 @@
+<view class="container">
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading-box">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <view wx:else>
+    <!-- 未批改提示 -->
+    <view wx:if="{{!graded}}" class="empty-box">
+      <view class="empty-icon">📝</view>
+      <text class="empty-text">作业尚未批改</text>
+      <text class="empty-hint">请耐心等待教师批改</text>
+    </view>
+
+    <!-- 成绩信息 -->
+    <view wx:else>
+      <!-- 成绩卡片 -->
+      <view class="grade-card">
+        <view class="grade-header">
+          <text class="label">您的得分</text>
+        </view>
+        <view class="score-display">
+          <text class="score-number">{{gradeInfo.score}}</text>
+          <text class="score-unit">分</text>
+        </view>
+        <view class="grade-time">批改时间：{{gradeInfo.correctedTime}}</view>
+      </view>
+
+      <!-- 评语卡片 -->
+      <view class="remark-card">
+        <view class="card-title">教师评语</view>
+        <view class="remark-content">
+          {{gradeInfo.remark || '暂无评语'}}
+        </view>
+      </view>
+
+      <!-- 批改附件 -->
+      <view wx:if="{{gradeInfo.gradeAttachment}}" class="attachment-card">
+        <view class="card-title">📎 批改附件</view>
+        <view class="attachment-content">
+          {{gradeInfo.gradeAttachment}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 返回按钮 -->
+    <view class="action-buttons">
+      <button class="btn-back" bindtap="goBack">返回</button>
+    </view>
+  </view>
+</view>
+

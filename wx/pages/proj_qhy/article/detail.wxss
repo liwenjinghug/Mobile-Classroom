@@ -5,6 +5,7 @@
   padding-bottom: 120rpx; /* 留出底部栏高度 */
 }
 
+/* ... (保留原有 header, title, meta 等样式) ... */
 .article-header {
   margin-bottom: 30rpx;
   border-bottom: 1rpx solid #f0f0f0;
@@ -27,14 +28,11 @@
 .author {
   color: #576b95;
 }
-
 .cover-img {
   width: 100%;
   border-radius: 12rpx;
   margin-bottom: 30rpx;
 }
-
-/* 摘要样式 */
 .article-digest {
   margin-bottom: 40rpx;
 }
@@ -60,6 +58,64 @@
   text-align: justify;
 }
 
+/* --- (新增) 富文本字体支持 --- */
+.ql-font-SimSun {
+  font-family: "SimSun", "宋体";
+}
+.ql-font-SimHei {
+  font-family: "SimHei", "黑体";
+}
+.ql-font-Microsoft-YaHei {
+  font-family: "Microsoft YaHei", "微软雅黑";
+}
+.ql-font-KaiTi {
+  font-family: "KaiTi", "楷体";
+}
+.ql-font-FangSong {
+  font-family: "FangSong", "仿宋";
+}
+
+/* --- (新增) 字号支持 --- */
+.ql-size-small {
+  font-size: 24rpx;
+}
+.ql-size-large {
+  font-size: 36rpx;
+}
+.ql-size-huge {
+  font-size: 48rpx;
+}
+
+/* --- (新增) 对齐支持 --- */
+.ql-align-center {
+  text-align: center;
+}
+.ql-align-right {
+  text-align: right;
+}
+.ql-align-justify {
+  text-align: justify;
+}
+
+.ql-code-unified {
+  display: block;
+  background-color: #f6f8fa;
+  border: 1rpx solid #e1e4e8;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+  
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 24rpx;
+  line-height: 1;
+  color: #333;
+  
+  /* 必须是 pre，这样 \n 才会换行，且保留缩进 */
+  white-space: pre; 
+  overflow-x: auto;
+}
+
+/* ... (保留 article-content, attachment, bottom-bar 等样式) ... */
 .article-content {
   font-size: 32rpx;
   color: #333;
@@ -67,8 +123,6 @@
   word-wrap: break-word;
   margin-bottom: 40rpx;
 }
-
-/* 附件列表样式 */
 .attachment-box {
   margin-top: 40rpx;
   border-top: 1rpx solid #eee;
@@ -88,9 +142,6 @@
   border-radius: 8rpx;
   margin-bottom: 15rpx;
 }
-.att-item:active {
-  background-color: #eef0f4;
-}
 .att-icon {
   margin-right: 15rpx;
   font-size: 32rpx;
@@ -108,8 +159,6 @@
   font-size: 24rpx;
   color: #999;
 }
-
-/* 底部栏 */
 .bottom-bar {
   position: fixed;
   bottom: 0;
@@ -140,8 +189,6 @@
 .liked {
   color: #f56c6c;
 }
-
-/* (新增) TXT 预览弹窗样式 */
 .txt-preview-mask {
   position: fixed;
   top: 0;
@@ -190,5 +237,5 @@
   line-height: 1.6;
   color: #333;
   word-break: break-all;
-  white-space: pre-wrap; /* 保留换行 */
+  white-space: pre-wrap; 
 }

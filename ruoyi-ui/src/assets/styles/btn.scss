@@ -97,3 +97,50 @@
   font-size: 14px;
   border-radius: 4px;
 }
+
+/* All Element buttons: 2px border beam on hover */
+.el-button {
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.el-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 220%;
+  height: 220%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 300deg,
+    rgba(255, 255, 255, 1) 330deg,
+    transparent 360deg
+  );
+  transform: translate(-50%, -50%) rotate(0deg);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.25s ease-out;
+  pointer-events: none;
+}
+
+.el-button::after {
+  content: '';
+  position: absolute;
+  inset: 2px; /* 2px border */
+  border-radius: inherit;
+  background: inherit;
+  z-index: -1;
+}
+
+.el-button:hover::before {
+  opacity: 1;
+  animation: pillBorderBeam 1.8s linear infinite;
+}
+
+@keyframes pillBorderBeam {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}

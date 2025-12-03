@@ -1,0 +1,18 @@
+.container { padding: 40rpx; background: #fff; min-height: 100vh; box-sizing: border-box; }
+
+.header { margin-bottom: 30rpx; }
+.title-row { display: flex; align-items: center; margin-bottom: 20rpx; }
+.tag { font-size: 22rpx; padding: 4rpx 12rpx; border-radius: 8rpx; color: #fff; margin-right: 16rpx; flex-shrink: 0; }
+.tag.todo { background: #e6a23c; }
+.tag.homework { background: #67c23a; }
+.tag.exam { background: #f56c6c; }
+.title { font-size: 36rpx; font-weight: bold; color: #333; }
+
+.meta { font-size: 26rpx; color: #999; display: flex; justify-content: space-between; }
+
+.divider { height: 1rpx; background: #eee; margin: 30rpx 0; }
+
+.content-box { min-height: 200rpx; }
+.content-text { font-size: 30rpx; color: #444; line-height: 1.8; }
+
+.footer-actions { margin-top: 60rpx; }
