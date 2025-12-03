@@ -1,55 +1,94 @@
 <template>
   <div class="app-container">
-    <el-form :model="form" label-width="100px">
-      <el-form-item label="课程">
-        <el-select v-model="form.courseId" placeholder="请选择课程" filterable>
-          <el-option v-for="c in courses" :key="c.courseId" :label="c.courseName" :value="c.courseId" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="课堂">
-        <el-select v-model="form.sessionId" placeholder="请选择课堂">
-          <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="标题">
-        <el-input v-model="form.title" />
-      </el-form-item>
-      <el-form-item label="内容">
-        <el-input type="textarea" v-model="form.content" />
-      </el-form-item>
-      <el-form-item label="分值">
-        <el-input v-model.number="form.totalScore" />
-      </el-form-item>
-      <el-form-item label="截止时间">
-        <el-date-picker v-model="form.deadline" type="datetime" placeholder="选择日期时间" style="width: 100%" />
-      </el-form-item>
-      <el-form-item label="附件">
-        <el-upload :action="uploadUrl" :headers="headers" name="file" :on-success="uploadSuccess" :multiple="true">
-          <el-button size="small" type="primary">上传参考文件</el-button>
-        </el-upload>
-        <div v-if="form.attachments">已上传: {{ form.attachments }}</div>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="publishOrSave" :loading="publishLoading">发布作业</el-button>
-      </el-form-item>
-    </el-form>
+    <!-- 顶部卡片：作业发布表单 -->
+    <el-card class="hero-card" shadow="hover">
+      <div slot="header" class="card-header">
+        <div class="title-wrap">
+          <i class="el-icon-edit-outline" />
+          <span class="title">作业发布</span>
+          <span class="sub">请选择课程与课堂，填写标题、内容、分值与截止时间</span>
+        </div>
+        <div class="header-actions">
+          <el-button type="primary" icon="el-icon-upload" @click="publishOrSave" :loading="publishLoading">发布作业</el-button>
+          <el-button type="default" icon="el-icon-refresh" @click="resetForm">重置</el-button>
+        </div>
+      </div>
+
+      <!-- 响应式两列布局的发布表单 -->
+      <el-form :model="form" label-width="100px" class="form-grid">
+        <el-row :gutter="16">
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="课程" required>
+              <el-select v-model="form.courseId" placeholder="请选择课程" filterable class="w-100">
+                <el-option v-for="c in courses" :key="c.courseId" :label="c.courseName" :value="c.courseId" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="课堂" required>
+              <el-select v-model="form.sessionId" placeholder="请选择课堂" class="w-100">
+                <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="标题" required>
+              <el-input v-model="form.title" placeholder="请输入作业标题" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="分值" required>
+              <el-input-number v-model="form.totalScore" :min="0" :max="1000" :precision="1" class="w-100" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24">
+            <el-form-item label="内容">
+              <el-input type="textarea" v-model="form.content" :rows="4" placeholder="请输入作业内容或要求" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="截止时间" required>
+              <el-date-picker v-model="form.deadline" type="datetime" placeholder="请选择截止时间" class="w-100" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12">
+            <el-form-item label="附件">
+              <!-- 使用原有上传实现，避免未知组件导致渲染错误 -->
+              <el-upload :action="uploadUrl" :headers="headers" name="file" :on-success="uploadSuccess" :multiple="true">
+                <el-button size="small" type="primary">上传参考文件</el-button>
+              </el-upload>
+              <div v-if="form.attachments" class="attach-tip">已选择附件：{{ form.attachments }}</div>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+
+      <!-- 表单提示与统计 -->
+      <div class="form-hint">
+        <el-alert type="info" :closable="false" :title="'提示：发布后学生即可在“作业上传”页面看到该作业并提交。'" />
+      </div>
+    </el-card>
 
     <!-- 工具栏：查询/导出/打印/统计 -->
-    <el-card class="box-card" style="margin-top: 10px" v-if="form.sessionId">
-      <div slot="header" class="clearfix">
-        <span>作业发布列表工具栏</span>
+    <el-card class="box-card toolbar-card" shadow="never" v-if="form.sessionId">
+      <div slot="header" class="toolbar-header">
+        <div class="left">
+          <i class="el-icon-s-order" />
+          <span>作业发布列表工具栏</span>
+        </div>
+        <div class="right">
+          <el-button type="primary" size="small" icon="el-icon-refresh" @click="applyFilters">刷新</el-button>
+          <el-button type="success" size="small" icon="el-icon-download" @click="exportList">导出列表</el-button>
+          <el-button type="info" size="small" icon="el-icon-printer" @click="printList">打印列表</el-button>
+        </div>
       </div>
       <div class="toolbar-row">
-        <el-input v-model="filters.keyword" placeholder="按标题/内容搜索" clearable style="width:240px" @keyup.enter.native="applyFilters" />
-        <el-date-picker v-model="filters.deadlineRange" type="datetimerange" start-placeholder="截止开始" end-placeholder="截止结束" style="margin-left:8px" @change="applyFilters" />
-        <el-select v-model="filters.withAttachments" placeholder="附件筛选" clearable style="width: 140px; margin-left:8px" @change="applyFilters">
-          <el-option :value="true" label="仅有附件" />
-          <el-option :value="false" label="仅无附件" />
+        <el-input v-model="filters.keyword" placeholder="按标题/内容搜索" clearable class="search-input" @keyup.enter.native="applyFilters" />
+        <el-date-picker v-model="filters.deadlineRange" type="datetimerange" start-placeholder="截止开始" end-placeholder="截止结束" class="date-range" @change="applyFilters" />
+        <el-select v-model="filters.withAttachments" placeholder="是否包含附件" clearable class="select-small" @change="applyFilters">
+          <el-option :value="true" label="含附件" />
+          <el-option :value="false" label="不含附件" />
         </el-select>
-        <el-button type="primary" icon="el-icon-search" style="margin-left:8px" @click="applyFilters">查询</el-button>
-        <el-button @click="resetFilters" style="margin-left:6px">重置</el-button>
-        <el-button type="success" icon="el-icon-download" style="margin-left:12px" @click="exportCSV">导出CSV</el-button>
-        <el-button type="info" icon="el-icon-printer" style="margin-left:6px" @click="printList">打印</el-button>
       </div>
       <div class="stats-row" v-if="stats">
         <el-alert :closable="false" type="info" :title="`统计：共 ${stats.total} 条；已过期 ${stats.overdue}；含附件 ${stats.withAttach}；平均分值 ${stats.avgScore}`" />
@@ -58,15 +97,15 @@
 
     <!-- 已发布列表 -->
     <div style="margin-top:16px">
-      <el-card>
-        <div slot="header" style="display:flex;align-items:center;justify-content:space-between">
+      <el-card class="list-card" shadow="hover">
+        <div slot="header" class="list-header">
           <span>已发布作业（当前课堂）</span>
           <div>
             <el-button size="small" type="primary" @click="resetForm">发布新作业</el-button>
           </div>
         </div>
 
-        <div v-if="!form.sessionId" style="padding:16px">请选择课堂以查看已发布作业</div>
+        <div v-if="!form.sessionId" class="empty-guard">请选择课堂以查看已发布作业</div>
         <div v-else>
           <el-table :data="sortedAndFilteredList" style="width:100%" v-loading="listLoading" @sort-change="onSortChange" :default-sort="defaultSort" show-summary :summary-method="summaryMethod">
             <el-table-column prop="title" label="标题" sortable="custom" />
@@ -79,7 +118,15 @@
             <el-table-column label="附件">
               <template slot-scope="scope">
                 <div v-if="scope.row.attachments">
-                  <a v-for="(f, idx) in parseAttachments(scope.row.attachments)" :key="idx" :href="downloadUrl(f)" target="_blank" style="margin-right:8px">{{ shortName(f) }}</a>
+                  <el-tag
+                    v-for="(f, idx) in parseAttachments(scope.row.attachments)"
+                    :key="idx"
+                    size="mini"
+                    @click="previewFile(f)"
+                    style="margin-right:8px; cursor: pointer;">
+                    <i class="el-icon-document" style="margin-right: 4px;"></i>
+                    {{ shortName(f) }}
+                  </el-tag>
                 </div>
                 <div v-else>—</div>
               </template>
@@ -739,211 +786,75 @@ export default {
             }
           })
         }
-      }).finally(() => {
         this.submissionsDialogVisible = false
+      }).catch(err => {
+        console.error('导航到批改页面失败', err)
+        this.$message.error('打开批改页面失败')
       })
     },
 
-    formatTime(val) {
-      if (!val) return null
-      const d = new Date(val)
-      if (isNaN(d.getTime())) return val
-      const Y = d.getFullYear()
-      const M = String(d.getMonth() + 1).padStart(2, '0')
-      const D = String(d.getDate()).padStart(2, '0')
-      const h = String(d.getHours()).padStart(2, '0')
-      const m = String(d.getMinutes()).padStart(2, '0')
-      const s = String(d.getSeconds()).padStart(2, '0')
-      return `${Y}-${M}-${D} ${h}:${m}:${s}`
-    },
-    // reuse parseAttachments already present
-    parseAttachments(str) {
-      if (!str) return []
-      return String(str).split(',').map(s => s.trim()).filter(Boolean)
-    },
-    downloadUrl(fileName) {
-      const base = process.env.VUE_APP_BASE_API || ''
-      if (!fileName) return ''
-      const f = String(fileName)
-      // if resource path exposed by backend (starts with resource prefix), call resource download
-      if (f.startsWith('/profile') || f.startsWith('profile')) {
-        return base + '/common/download/resource?resource=' + encodeURIComponent(f)
-      }
-      const token = require('@/utils/auth').getToken()
-      const baseQuery = base + '/common/download?fileName=' + encodeURIComponent(f)
-      return token ? (baseQuery + '&token=' + token) : baseQuery
-    },
-    shortName(path) {
-      const p = (path || '').toString()
-      const idx = Math.max(p.lastIndexOf('/'), p.lastIndexOf('\\'))
-      return idx >= 0 ? p.slice(idx + 1) : p
-    },
-
-    async onDeleteSubmission(row) {
-      if (!row || !(row.studentHomeworkId || row.id)) return
-      const id = row.studentHomeworkId || row.id
-      const ok = await this.$confirm('确认删除该学生的提交记录？此操作不可恢复。', '确认删除', { type: 'warning' }).then(() => true).catch(() => false)
-      if (!ok) return
-      try {
-        const res = await deleteSubmission(id)
-        if (res && (res.code === 200 || res.code === 0)) {
-          this.$message.success('删除成功')
-          // reload submissions for current selected homework
-          const hwId = this.pubSelectedHomework && (this.pubSelectedHomework.homeworkId || this.pubSelectedHomework.id)
-          this.loadSubmissionsForPublish(hwId)
-        } else {
-          this.$message.error((res && (res.msg || res.message)) || '删除失败')
-        }
-      } catch (e) {
-       console.error('删除提交失败', e)
-      this.$message.error('删除失败')
-     }
-    },
-
-    // Check whether a title duplicates an existing non-deleted homework in the same session.
-    // Returns true if duplicate exists (excluding optional excludeId), false otherwise.
-    async checkDuplicateTitle(sessionId, title, excludeId = null) {
-      if (!sessionId || !title) return false
-      try {
-        const resp = await listHomework({ sessionId: sessionId, pageNum: 1, pageSize: 1000 })
-        const list = (resp && (resp.rows || resp.data)) ? (resp.rows || resp.data) : (resp || [])
-        const normalized = (list || []).map(h => ({
-          id: h.homeworkId || h.id,
-          title: (h.title || '').toString().trim(),
-          deleted: !!(h.homeworkDeleted || h.homework_deleted)
-        }))
-        const t = title.toString().trim().toLowerCase()
-        for (const h of normalized) {
-          if (!h || h.deleted) continue
-          if (excludeId && String(h.id) === String(excludeId)) continue
-          if (h.title.toLowerCase() === t) return true
-        }
+    checkDuplicateTitle(sessionId, title) {
+      if (!sessionId || !title) return Promise.resolve(false)
+      return listHomework({ sessionId, title, pageNum: 1, pageSize: 1 }).then(res => {
+        const list = (res && (res.rows || res.data)) ? (res.rows || res.data) : []
+        return list.length > 0
+      }).catch(err => {
+        console.error('检查重复标题时出错', err)
         return false
-      } catch (e) {
-        console.warn('checkDuplicateTitle failed, falling back to client-side check', e)
-        // fallback: check the currently loaded homeworkList if available
-        const t = title.toString().trim().toLowerCase()
-        const list = this.homeworkList || []
-        for (const h of list) {
-          const id = h.homeworkId || h.id
-          const deleted = !!(h.homeworkDeleted || h.homework_deleted)
-          if (deleted) continue
-          if (excludeId && String(id) === String(excludeId)) continue
-          if ((h.title || '').toString().trim().toLowerCase() === t) return true
-        }
-        return false
-      }
+      })
     },
 
-    // 查询/筛选/排序交互
-    applyFilters() {
-      // 仅依赖 computed，触发视图更新
-      this.$forceUpdate()
-    },
-    resetFilters() {
-      this.filters.keyword = ''
-      this.filters.deadlineRange = []
-      this.filters.withAttachments = null
-      this.sort = { prop: 'deadline', order: 'descending' }
-    },
     onSortChange({ prop, order }) {
-      // element 自定义排序回调
-      this.sort = { prop, order }
+      // prop: 排序字段，order: asc / descending
+      if (!prop) return
+      this.sort.prop = prop
+      this.sort.order = order === 'ascending' ? 'ascending' : 'descending'
+      this.applyFilters()
     },
 
-    // 导出 CSV（客户端）
-    exportCSV() {
-      const rows = this.sortedAndFilteredList
-      if (!rows || rows.length === 0) {
-        this.$message.info('没有可导出的数据')
-        return
-      }
-      const headers = ['作业ID','课程ID','课堂ID','标题','分值','截止时间','附件']
-      const data = rows.map(h => [
-        h.homeworkId || h.id || '',
-        h.courseId || '',
-        h.sessionId || '',
-        (h.title || '').toString().replace(/\n/g,' '),
-        h.totalScore || '',
-        this.formatTime(h.deadline) || '',
-        (h.attachments || '').toString()
-      ])
-      const csv = this.buildCSV([headers, ...data])
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-      const fileName = `作业发布列表_${this.todayString()}.csv`
-      this.saveBlob(blob, fileName)
-    },
-    buildCSV(rows) {
-      return rows.map(r => r.map(cell => this.csvCell(cell)).join(',')).join('\r\n')
-    },
-    csvCell(val) {
-      if (val == null) return ''
-      const s = String(val)
-      // 如果包含逗号/引号/换行，加双引号并转义引号
-      if (/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"'
-      return s
-    },
-    todayString() {
-      const d = new Date()
-      const Y = d.getFullYear()
-      const M = String(d.getMonth() + 1).padStart(2, '0')
-      const D = String(d.getDate()).padStart(2, '0')
-      const h = String(d.getHours()).padStart(2, '0')
-      const m = String(d.getMinutes()).padStart(2, '0')
-      return `${Y}${M}${D}_${h}${m}`
-    },
-    saveBlob(blob, filename) {
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = filename
-      document.body.appendChild(a)
-      a.click()
-      setTimeout(() => {
-        document.body.removeChild(a)
-        window.URL.revokeObjectURL(url)
-      }, 0)
+    applyFilters() {
+      this.loadHomeworks(this.form.sessionId)
     },
 
-    // 打印列表（简单打印当前过滤后的表格数据）
+    exportList() {
+      // TODO: 实现导出功能
+      this.$message.warning('导出功能尚未实现')
+    },
+
     printList() {
-      const rows = this.sortedAndFilteredList
-      const htmlRows = rows.map(h => `
-        <tr>
-          <td>${h.homeworkId || h.id || ''}</td>
-          <td>${h.courseId || ''}</td>
-          <td>${h.sessionId || ''}</td>
-          <td>${(h.title || '').toString().replace(/</g,'&lt;')}</td>
-          <td>${h.totalScore || ''}</td>
-          <td>${this.formatTime(h.deadline) || ''}</td>
-          <td>${(h.attachments || '').toString().replace(/</g,'&lt;')}</td>
-        </tr>
-      `).join('')
-      const win = window.open('', '_blank')
-      if (!win) { this.$message.error('浏览器拦截了打印窗口'); return }
-      win.document.write(`
-        <html><head><title>作业发布列表</title>
-        <style>body{font-family:Arial,Helvetica,'Microsoft YaHei';padding:12px} table{border-collapse:collapse;width:100%} th,td{border:1px solid #999;padding:6px;text-align:left} h2{margin:0 0 12px}</style>
-        </head><body>
-        <h2>作业发布列表（${this.formatTime(new Date())}）</h2>
-        <table>
-          <thead><tr><th>作业ID</th><th>课程ID</th><th>课堂ID</th><th>标题</th><th>分值</th><th>截止时间</th><th>附件</th></tr></thead>
-          <tbody>${htmlRows}</tbody>
-        </table>
-        </body></html>
-      `)
-      win.document.close()
-      win.focus()
-      win.print()
+      // TODO: 实现打印功能
+      this.$message.warning('打印功能尚未实现')
     },
 
-    // 表尾合计
+    previewFile(file) {
+      const url = this.downloadUrl(file)
+      if (url) {
+        window.open(url, '_blank')
+      }
+    },
+
+    downloadUrl(file) {
+      if (!file) return ''
+      const baseUrl = process.env.VUE_APP_BASE_API + '/common/download'
+      return `${baseUrl}?file=${encodeURIComponent(file)}`
+    },
+
+    shortName(file) {
+      if (!file) return ''
+      const parts = file.split('/')
+      return parts.length > 0 ? parts[parts.length - 1] : file
+    },
+
+    parseAttachments(attachments) {
+      if (!attachments) return []
+      return attachments.split(',').map(f => f.trim()).filter(f => f !== '')
+    },
     summaryMethod({ columns, data }) {
       const sums = []
       columns.forEach((col, index) => {
         if (index === 0) { sums[index] = '合计'; return }
         if (col.property === 'totalScore') {
-          const total = data.reduce((acc, item) => {
+          const total = (data || []).reduce((acc, item) => {
             const v = Number(item.totalScore)
             return acc + (isNaN(v) ? 0 : v)
           }, 0)
@@ -953,244 +864,236 @@ export default {
         }
       })
       return sums
+    },
+    formatTime(value) {
+      if (!value) return ''
+      try {
+        if (typeof value === 'string') {
+          const s = value.trim()
+          // if pure digits, treat as timestamp
+          if (/^\d+$/.test(s)) {
+            let n = Number(s)
+            if (s.length === 10) n *= 1000
+            const d = new Date(n)
+            return isNaN(d.getTime()) ? '' : d.toLocaleString('zh-CN')
+          }
+          // try ISO or common formats
+          const d = new Date(s)
+          if (!isNaN(d.getTime())) return d.toLocaleString('zh-CN')
+          const d2 = new Date(s.replace(/-/g, '/'))
+          return isNaN(d2.getTime()) ? '' : d2.toLocaleString('zh-CN')
+        }
+        if (value instanceof Date) {
+          return isNaN(value.getTime()) ? '' : value.toLocaleString('zh-CN')
+        }
+        if (typeof value === 'number') {
+          let n = value
+          if (String(value).length === 10) n *= 1000
+          const d = new Date(n)
+          return isNaN(d.getTime()) ? '' : d.toLocaleString('zh-CN')
+        }
+      } catch (e) { /* ignore */ }
+      return ''
     }
   }
 }
 </script>
 
 <style scoped>
-/* Mac Style for Homework Publish */
 .app-container {
-  padding: 40px 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #1d1d1f;
-  background-color: #f5f5f7;
-  min-height: 100vh;
+  padding: 16px;
+  background-color: #f5f7fa;
 }
 
-/* Card Styling */
-.app-container >>> .el-card {
-  border-radius: 18px;
-  border: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+.hero-card {
   background-color: #ffffff;
-  margin-bottom: 24px;
-}
-
-.app-container >>> .el-card__header {
-  border-bottom: 1px solid #f5f5f7;
-  padding: 20px 24px;
-  font-weight: 600;
-  font-size: 18px;
-  color: #1d1d1f;
-}
-
-/* Form Styling */
-.app-container >>> .el-form-item__label {
-  font-weight: 500;
-  color: #1d1d1f;
-}
-
-.app-container >>> .el-input__inner,
-.app-container >>> .el-textarea__inner {
-  border-radius: 10px;
-  border: 1px solid #d2d2d7;
-  transition: all 0.2s ease;
-}
-
-.app-container >>> .el-input__inner:focus,
-.app-container >>> .el-textarea__inner:focus {
-  border-color: #0071e3;
-  box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
-}
-
-/* Button Styling */
-.app-container >>> .el-button {
-  border-radius: 980px;
-  font-weight: 500;
-  border: none;
-  padding: 9px 20px;
-  transition: all 0.2s ease;
-}
-
-.app-container >>> .el-button--primary {
-  background-color: #0071e3;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
-}
-
-.app-container >>> .el-button--primary:hover {
-  background-color: #0077ed;
-  transform: translateY(-1px);
-}
-
-.app-container >>> .el-button--success {
-  background-color: #34c759;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
-}
-
-.app-container >>> .el-button--info {
-  background-color: #86868b;
-  box-shadow: 0 2px 8px rgba(134, 134, 139, 0.2);
-}
-
-.app-container >>> .el-button--danger {
-  background-color: #ff3b30;
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.2);
-}
-
-.app-container >>> .el-button--default {
-  background-color: #e5e5ea;
-  color: #1d1d1f;
-}
-
-.app-container >>> .el-button--small {
-  padding: 8px 16px;
-  font-size: 13px;
-}
-
-.app-container >>> .el-button--mini {
-  padding: 6px 12px;
-  font-size: 12px;
-}
-
-/* Table Styling */
-.app-container >>> .el-table {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-  background-color: #ffffff;
-}
-
-.app-container >>> .el-table th {
-  background-color: #fbfbfd;
-  color: #86868b;
-  font-weight: 600;
-  border-bottom: 1px solid #f5f5f7;
-  padding: 12px 0;
-}
-
-.app-container >>> .el-table td {
-  padding: 12px 0;
-  border-bottom: 1px solid #f5f5f7;
-}
-
-/* Dialog Styling - 使用 fixed + transform 完美居中在用户屏幕中间 */
-.app-container >>> .el-dialog__wrapper {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  overflow: auto !important;
-}
-
-.app-container >>> .el-dialog {
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-  max-height: 90vh;
-  max-width: 95vw;
-  display: flex;
-  flex-direction: column;
-}
-
-.app-container >>> .el-dialog__header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #f5f5f7;
-  flex-shrink: 0;
-}
-
-.app-container >>> .el-dialog__title {
-  font-weight: 600;
-  font-size: 18px;
-  color: #1d1d1f;
-}
-
-.app-container >>> .el-dialog__body {
+  border-radius: 8px;
   padding: 24px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.app-container >>> .el-dialog__footer {
-  padding: 16px 24px;
-  border-top: 1px solid #f5f5f7;
-  flex-shrink: 0;
-}
-
-/* Alert Styling */
-.app-container >>> .el-alert {
-  border-radius: 10px;
   margin-bottom: 16px;
-  background-color: #f5f5f7;
-  color: #1d1d1f;
 }
 
-.app-container >>> .el-alert--info.is-light {
-  background-color: #f5f5f7;
-  color: #1d1d1f;
-}
-</style>
-
-<style>
-/* 全局样式 - 确保作业发布弹窗居中在用户屏幕中间（无 scoped） */
-.centered-homework-dialog .el-dialog__wrapper {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  overflow: auto !important;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
-.centered-homework-dialog .el-dialog {
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
-  max-height: 90vh;
-  max-width: 95vw;
-}
-</style>
-
-<style scoped>
-/* Link Styling */
-.app-container >>> a {
-  color: #0071e3;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.app-container >>> a:hover {
-  color: #0077ed;
-  text-decoration: underline;
-}
-
-/* Specific Styles */
-.toolbar-row {
+.title-wrap {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
 }
 
-.stats-row {
+.title-wrap i {
+  font-size: 24px;
+  color: #409eff;
+  margin-right: 8px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.sub {
+  font-size: 14px;
+  color: #999;
+  margin-left: 4px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.header-actions el-button {
+  margin-left: 8px;
+}
+
+.form-grid {
+  background-color: #ffffff;
+  padding: 24px;
+  border-radius: 8px;
+}
+
+.form-hint {
   margin-top: 16px;
 }
 
-.clearfix:before,
-.clearfix:after {
-  display: table;
-  content: "";
+.empty-guard {
+  padding: 24px;
+  text-align: center;
+  color: #999;
 }
-.clearfix:after {
-  clear: both
+
+.box-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.toolbar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+}
+
+.left i {
+  font-size: 20px;
+  color: #409eff;
+  margin-right: 8px;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+}
+
+.right el-button {
+  margin-left: 8px;
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search-input {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.date-range {
+  flex: 2;
+  margin-right: 8px;
+}
+
+.select-small {
+  width: 120px;
+}
+
+.stats-row {
+  margin-top: 8px;
+}
+
+.list-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.list-header span {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.list-header el-button {
+  margin-left: 8px;
+}
+
+.el-table {
+  width: 100%;
+}
+
+.el-table th,
+.el-table td {
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.el-table th {
+  background-color: #f5f7fa;
+  color: #333;
+  font-weight: 500;
+}
+
+.el-table td {
+  border-bottom: 1px solid #e4e7ec;
+}
+
+.el-table .empty {
+  padding: 24px;
+  text-align: center;
+  color: #999;
+}
+
+.el-tag {
+  margin-right: 8px;
+}
+
+.dialog-footer {
+  text-align: right;
+}
+
+.el-upload {
+  display: inline-block;
+  width: 100%;
+}
+
+.el-upload .el-button {
+  width: 100%;
+}
+
+.attach-tip {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
 }
 </style>
