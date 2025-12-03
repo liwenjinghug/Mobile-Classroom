@@ -84,6 +84,76 @@
     </div>
 
     <!-- 对话框部分保持不变 -->
+    <!-- 添加对话框部分到template中 -->
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="授课老师" prop="teacher">
+          <el-input v-model="form.teacher" placeholder="请输入授课老师" />
+        </el-form-item>
+        <el-form-item label="老师ID" prop="teacherId">
+          <el-input v-model="form.teacherId" placeholder="请输入老师ID" type="number" />
+        </el-form-item>
+        <el-form-item label="星期" prop="weekDay">
+          <el-select v-model="form.weekDay" placeholder="请选择星期" style="width: 100%">
+            <el-option
+              v-for="item in [
+            { label: '周一', value: '1' },
+            { label: '周二', value: '2' },
+            { label: '周三', value: '3' },
+            { label: '周四', value: '4' },
+            { label: '周五', value: '5' },
+            { label: '周六', value: '6' },
+            { label: '周日', value: '7' }
+          ]"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="上课时间" prop="startTime">
+          <el-time-select
+            v-model="form.startTime"
+            placeholder="请选择上课时间"
+            :picker-options="{ start: '08:00', step: '00:15', end: '22:00' }"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="下课时间" prop="endTime">
+          <el-time-select
+            v-model="form.endTime"
+            placeholder="请选择下课时间"
+            :picker-options="{ start: '08:00', step: '00:15', end: '22:00' }"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="课时长" prop="classDuration">
+          <el-input-number
+            v-model="form.classDuration"
+            placeholder="请输入每堂课时长"
+            :min="30"
+            :max="180"
+            :step="15"
+            style="width: 100%"
+          />
+          <div class="form-tip">单位：分钟</div>
+        </el-form-item>
+        <el-form-item label="课堂人数" prop="totalStudents">
+          <el-input-number
+            v-model="form.totalStudents"
+            placeholder="请输入课堂人数"
+            :min="1"
+            :max="100"
+            style="width: 100%"
+          />
+          <div class="form-tip">单位：人</div>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm" :loading="submitLoading">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
