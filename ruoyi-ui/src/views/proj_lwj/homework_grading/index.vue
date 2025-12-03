@@ -251,8 +251,16 @@ export default {
       const field = this.subSortField || 'graded'
       const order = (this.subSortOrder || 'desc').toLowerCase()
       const desc = order !== 'asc'
+
+      // 判断提交状态：0=未提交, 1=已提交未批改, 2=已批改
+      const getSubmitStatus = r => {
+        if (r.corrected_time || r.correctedTime || r.score != null) return 2 // 已批改
+        if (r.submitTime || (r.submissionFiles && r.submissionFiles.length)) return 1 // 已提交
+        return 0 // 未提交
+      }
+
       const val = r => {
-        if(field === 'graded') return (r.corrected_time || r.correctedTime || r.score != null) ? 1 : 0
+        if(field === 'graded') return getSubmitStatus(r)
         if(field === 'score') return r.score == null ? (desc?-Infinity:Infinity) : Number(r.score)
         if(field === 'submitTime') return r.submitTime ? new Date(r.submitTime).getTime() : 0
         if(field === 'correctedTime') return (r.corrected_time || r.correctedTime) ? new Date(r.corrected_time || r.correctedTime).getTime() : 0
@@ -264,9 +272,15 @@ export default {
         if(field === 'studentName') return (r.studentName || r.student_name || '').toString().toLowerCase()
         return 0
       }
+
       return rows.sort((a,b)=>{
         const av = val(a), bv = val(b)
-        if(av===bv) return 0
+        if(av===bv) {
+          // 相同状态时，按提交时间倒序排序（最新的在前）
+          const timeA = a.submitTime ? new Date(a.submitTime).getTime() : 0
+          const timeB = b.submitTime ? new Date(b.submitTime).getTime() : 0
+          return timeB - timeA
+        }
         return desc ? (av>bv?-1:1) : (av>bv?1:-1)
       })
     },
