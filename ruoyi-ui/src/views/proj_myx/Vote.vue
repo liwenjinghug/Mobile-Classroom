@@ -3,13 +3,28 @@
     <div class="vote-container">
       <h2 class="vote-title">投票管理</h2>
       <div class="vote-info">当前 sessionId: {{ sessionId }}</div>
-      
+
       <div class="vote-controls">
         <el-input v-model.number="sessionId" placeholder="请输入 Session ID" style="width: 220px;" @keyup.enter.native="loadVotes" />
         <el-button type="primary" @click="loadVotes">加载投票</el-button>
-        <el-button v-if="isAdmin" type="success" @click="handleCreate">新建投票</el-button>
-        <el-button v-if="isAdmin" icon="el-icon-download" @click="handleExport">导出列表</el-button>
-        <el-button v-if="isAdmin" icon="el-icon-printer" @click="handlePrint">打印</el-button>
+
+        <el-button
+          v-hasPermi="['proj_myx:vote:add']"
+          type="success"
+          @click="handleCreate"
+        >新建投票</el-button>
+
+        <el-button
+          v-hasPermi="['proj_myx:vote:export']"
+          icon="el-icon-download"
+          @click="handleExport"
+        >导出列表</el-button>
+
+        <el-button
+          v-hasPermi="['proj_myx:vote:print']"
+          icon="el-icon-printer"
+          @click="handlePrint"
+        >打印</el-button>
       </div>
 
       <el-table :data="list" v-loading="loading" style="width: 100%; margin-top: 20px;">
@@ -34,23 +49,41 @@
         <el-table-column label="操作" align="center" width="300" class-name="ops-col">
           <template slot-scope="{row}">
             <div style="display: flex; align-items: center; justify-content: center;">
-               <el-button size="mini" type="primary" @click="handleStats(row)">统计</el-button>
-               
-               <el-button v-if="isAdmin && row.status === '0'" size="mini" type="success" @click="handleStart(row)">开始</el-button>
-               <el-button v-if="isAdmin && row.status === '1'" size="mini" type="warning" @click="handleClose(row)">结束</el-button>
-               
-               <el-button v-if="isAdmin" size="mini" type="text" icon="el-icon-delete" style="color: #C0C4CC; margin-left: 10px;" @click="handleDelete(row)"></el-button>
+              <el-button size="mini" type="primary" @click="handleStats(row)">统计</el-button>
+
+              <el-button
+                v-if="row.status === '0'"
+                v-hasPermi="['proj_myx:vote:edit']"
+                size="mini"
+                type="success"
+                @click="handleStart(row)"
+              >开始</el-button>
+
+              <el-button
+                v-if="row.status === '1'"
+                v-hasPermi="['proj_myx:vote:edit']"
+                size="mini"
+                type="warning"
+                @click="handleClose(row)"
+              >结束</el-button>
+
+              <el-button
+                v-hasPermi="['proj_myx:vote:remove']"
+                size="mini"
+                type="text"
+                icon="el-icon-delete"
+                style="color: #C0C4CC; margin-left: 10px;"
+                @click="handleDelete(row)"
+              ></el-button>
             </div>
           </template>
         </el-table-column>
       </el-table>
 
-      <!-- Create Dialog -->
       <el-dialog title="新建投票" :visible.sync="dialogCreateVisible" width="600px">
         <create-vote :session-id="sessionId" @created="onCreated" v-if="dialogCreateVisible" />
       </el-dialog>
 
-      <!-- Stats Dialog -->
       <el-dialog title="投票统计" :visible.sync="dialogStatsVisible" width="600px">
         <vote-stats :vote-id="currentVoteId" v-if="dialogStatsVisible" />
       </el-dialog>
@@ -91,24 +124,24 @@ export default {
       try {
         const res = await listVotes(this.sessionId);
         let list = res.data || [];
-        
+
         // Sorting logic: In Progress (1) > Not Started (0) > Ended (2)
         // Secondary sort: End Time (Descending)
         list.sort((a, b) => {
           const statusOrder = { '1': 0, '0': 1, '2': 2 };
           const sa = statusOrder[a.status] !== undefined ? statusOrder[a.status] : 99;
           const sb = statusOrder[b.status] !== undefined ? statusOrder[b.status] : 99;
-          
+
           if (sa !== sb) {
             return sa - sb;
           }
-          
+
           // Same status, sort by endTime descending
           const ta = a.endTime ? new Date(a.endTime).getTime() : 0;
           const tb = b.endTime ? new Date(b.endTime).getTime() : 0;
           return tb - ta;
         });
-        
+
         this.list = list;
       } catch (e) {
         this.$message.error('加载失败');
@@ -127,7 +160,7 @@ export default {
     handleExport() {
       const tHeader = ['ID', '标题', '类型', '状态', '开始时间', '结束时间'];
       const filterVal = ['voteId', 'title', 'type', 'status', 'startTime', 'endTime'];
-      
+
       const list = this.list.map(item => ({
         voteId: item.voteId,
         title: item.title,
@@ -136,11 +169,11 @@ export default {
         startTime: this.parseTime(item.startTime),
         endTime: this.parseTime(item.endTime)
       }));
-      
+
       const data = list.map(v => filterVal.map(j => v[j]));
       data.unshift(tHeader);
-      
-      const csvContent = data.map(row => 
+
+      const csvContent = data.map(row =>
         row.map(item => {
           let str = String(item === null || item === undefined ? '' : item);
           if (str.includes(',') || str.includes('"') || str.includes('\n')) {
@@ -149,7 +182,7 @@ export default {
           return str;
         }).join(',')
       ).join('\n');
-      
+
       const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
@@ -301,7 +334,7 @@ export default {
   border-bottom: 1px solid #f5f5f7;
 }
 
-.vote-page >>> .el-table--border, 
+.vote-page >>> .el-table--border,
 .vote-page >>> .el-table--group {
   border: none;
 }
@@ -421,12 +454,12 @@ export default {
   }
   /* Hide table header for operations column if possible, or just accept it's there */
   .el-table__header colgroup col:last-child, .el-table__body colgroup col:last-child {
-     display: none;
+    display: none;
   }
   .el-table th:last-child, .el-table td:last-child {
     display: none;
   }
-  
+
   /* Ensure dialogs are printable if open */
   .el-dialog__wrapper {
     position: absolute !important;
@@ -442,12 +475,5 @@ export default {
     width: 100% !important;
     border: none !important;
   }
-  /* If dialog is open, hide the main page content to avoid clutter */
-  /* This is hard to do with just CSS without a parent class. 
-     But usually the dialog covers the page. 
-     We can try to hide .vote-container if .el-dialog__wrapper is visible? No, CSS can't do that.
-     We'll rely on the dialog covering the content or the user printing what they see.
-  */
 }
 </style>
-

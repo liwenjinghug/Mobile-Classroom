@@ -6,9 +6,24 @@
       <div class="attendance-controls">
         <el-input v-model.number="sessionId" placeholder="课堂 sessionId（数字）" style="width:220px;"></el-input>
         <el-button type="primary" @click="loadTasks">加载签到列表</el-button>
-        <el-button v-if="isAdmin" type="success" @click="openCreate">创建签到</el-button>
-        <el-button v-if="isAdmin" icon="el-icon-download" @click="handleExport">导出列表</el-button>
-        <el-button v-if="isAdmin" icon="el-icon-printer" @click="handlePrint">打印</el-button>
+
+        <el-button
+          v-hasPermi="['proj_myx:attendance:add']"
+          type="success"
+          @click="openCreate"
+        >创建签到</el-button>
+
+        <el-button
+          v-hasPermi="['proj_myx:attendance:export']"
+          icon="el-icon-download"
+          @click="handleExport"
+        >导出列表</el-button>
+
+        <el-button
+          v-hasPermi="['proj_myx:attendance:print']"
+          icon="el-icon-printer"
+          @click="handlePrint"
+        >打印</el-button>
       </div>
 
       <el-table :data="tasks" style="width:100%">
@@ -39,24 +54,25 @@
               <div style="flex: 1; text-align: center;">
                 <el-button size="mini" @click="openRecords(row)">详情</el-button>
                 <el-button size="mini" type="primary" style="background-color: #0071e3; border-color: #0071e3;" @click="openStats(row)">统计</el-button>
-                
-                <!-- 状态控制按钮 -->
-                <el-button 
-                  v-if="row.status === 0" 
-                  size="mini" 
-                  type="success" 
+
+                <el-button
+                  v-if="row.status === 0"
+                  v-hasPermi="['proj_myx:attendance:edit']"
+                  size="mini"
+                  type="success"
                   @click="handleStart(row)"
                 >开始</el-button>
-                <el-button 
-                  v-if="row.status === 1" 
-                  size="mini" 
-                  type="warning" 
+                <el-button
+                  v-if="row.status === 1"
+                  v-hasPermi="['proj_myx:attendance:close']"
+                  size="mini"
+                  type="warning"
                   @click="handleClose(row)"
                 >结束</el-button>
-                
-                <!-- 二维码按钮 -->
-                <el-button 
-                  v-show="isAdmin && row.type === 'qr' && row.status === 1"
+
+                <el-button
+                  v-if="row.type === 'qr' && row.status === 1"
+                  v-hasPermi="['proj_myx:attendance:qr:create']"
                   size="mini"
                   type="warning"
                   plain
@@ -64,12 +80,11 @@
                 >二维码</el-button>
               </div>
 
-              <!-- 删除按钮 -->
-              <el-button 
-                v-if="isAdmin" 
-                size="mini" 
-                type="text" 
-                icon="el-icon-delete" 
+              <el-button
+                v-hasPermi="['proj_myx:attendance:remove']"
+                size="mini"
+                type="text"
+                icon="el-icon-delete"
                 @click="handleDelete(row)"
                 style="margin-left: 10px; color: #C0C4CC; font-size: 14px;"
                 title="删除"
@@ -78,8 +93,6 @@
           </template>
         </el-table-column>
       </el-table>
-
-      <!-- 已移除调试 JSON 面板 -->
 
       <el-dialog title="创建签到" :visible.sync="showCreate" width="600px">
         <CreateAttendance @created="onCreated" :sessionId="sessionId" />
@@ -147,7 +160,6 @@ export default {
       showQrDialog: false,
       qrData: null,
       qrTtl: 10
-      // 已移除 devShowButtons 测试字段
     }
   },
   computed: {
@@ -166,7 +178,7 @@ export default {
       try {
         const res = await listTasks(this.sessionId)
         const raw = (res && res.data) || res || []
-        
+
         // 1. 处理数据
         let list = (Array.isArray(raw) ? raw : []).map(task => {
           // 确保 status 是数字
@@ -175,18 +187,14 @@ export default {
         })
 
         // 2. 排序逻辑
-        // 优先级：进行中(1) > 未开始(0) > 已结束(2)
-        // 同状态下：根据结束时间排序（这里假设按结束时间降序，即最近结束的在前；未开始的按开始时间降序）
         list.sort((a, b) => {
-          const statusOrder = { 1: 0, 0: 1, 2: 2 } // 映射优先级，越小越靠前
+          const statusOrder = { 1: 0, 0: 1, 2: 2 }
           const sa = statusOrder[a.status] !== undefined ? statusOrder[a.status] : 99
           const sb = statusOrder[b.status] !== undefined ? statusOrder[b.status] : 99
-          
+
           if (sa !== sb) {
             return sa - sb
           }
-          
-          // 同状态，按结束时间降序（或者创建时间降序，这里用 endTime 兜底用 createTime）
           const ta = a.endTime ? new Date(a.endTime).getTime() : (a.createTime ? new Date(a.createTime).getTime() : 0)
           const tb = b.endTime ? new Date(b.endTime).getTime() : (b.createTime ? new Date(b.createTime).getTime() : 0)
           return tb - ta
@@ -198,7 +206,7 @@ export default {
         this.$message.error('加载签到列表失败: ' + (err && err.message ? err.message : '请检查后端'))
       }
     },
-    
+
     // 状态变更操作
     async handleStart(task) {
       try {
@@ -236,12 +244,12 @@ export default {
         }
       })
     },
-    
+
     // 导出任务列表
     handleExport() {
       const tHeader = ['ID', '类型', '开始时间', '结束时间', '状态']
       const filterVal = ['taskId', 'type', 'startTime', 'endTime', 'status']
-      
+
       const list = this.tasks.map(item => ({
         taskId: item.taskId,
         type: item.type === 'location' ? '位置签到' : '二维码签到',
@@ -249,11 +257,11 @@ export default {
         startTime: this.formatDate(item.startTime),
         endTime: this.formatDate(item.endTime)
       }))
-      
+
       const data = list.map(v => filterVal.map(j => v[j]))
       data.unshift(tHeader)
-      
-      const csvContent = data.map(row => 
+
+      const csvContent = data.map(row =>
         row.map(item => {
           let str = String(item === null || item === undefined ? '' : item);
           if (str.includes(',') || str.includes('"') || str.includes('\n')) {
@@ -262,7 +270,7 @@ export default {
           return str;
         }).join(',')
       ).join('\n');
-      
+
       const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
@@ -272,7 +280,7 @@ export default {
       link.click();
       document.body.removeChild(link);
     },
-    
+
     handlePrint() {
       window.print()
     },
@@ -284,14 +292,11 @@ export default {
       }
       this.showCreate = true
     },
-    // onCreated 现在接收后端创建的对象（可能含 taskId），若有则自动打开详情
     async onCreated(created) {
       this.showCreate = false
       await this.loadTasks()
-      // 安全地解析 taskId，防止字符串 'null' 导致后端抛错
       const maybeId = created && (typeof created.taskId === 'number' ? created.taskId : (created.taskId ? Number(created.taskId) : NaN))
       if (Number.isFinite(maybeId)) {
-        // 自动打开签到详情
         try {
           const res = await taskRecords(maybeId)
           this.records = (res && res.data) || res || []
@@ -304,18 +309,14 @@ export default {
       }
     },
     async openRecords(task) {
-      // 严格校验 taskId，避免把字符串 'null' 发送到后端
       try {
         if (!task) return this.$message.error('无效的任务')
-        console.log('openRecords called with task:', task)
         const raw = task.taskId
         const id = (typeof raw === 'number') ? raw : (raw ? Number(raw) : NaN)
         if (!Number.isFinite(id)) {
-          console.warn('openRecords: invalid taskId', raw)
           return this.$message.error('无效的任务 ID（请检查任务列表或重新加载）')
         }
         this.selectedTask = task
-        // 请求并捕获异常，避免未捕获错误导致控制台和后端日志困惑
         try {
           const res = await taskRecords(id)
           this.records = (res && res.data) || res || []
@@ -350,7 +351,6 @@ export default {
     goToStats() { this.$router.push('/proj_myx/AttendanceStats') },
     async showQrForTask(task) {
       if (!task || !task.taskId) return this.$message.error('无效的任务')
-      // 如果任务已经结束，提示并返回
       const status = typeof task.status === 'number' ? task.status : (task.status ? Number(task.status) : NaN)
       if (Number.isFinite(status) && status === 2) {
         this.$message.info('签到已结束！')
@@ -375,11 +375,9 @@ export default {
     async toggleStudentStatus(student) {
       if (!this.selectedTask || !student) return;
       const currentStatus = student.attendanceStatus;
-      const newStatus = (currentStatus + 1) % 5; // 0->1->2->3->4->0
+      const newStatus = (currentStatus + 1) % 5;
       try {
         await updateStudentStatus(this.selectedTask.taskId, student.studentId, newStatus);
-        // 前端本地状态：
-        // 1 已签到、2 迟到 都视为“有签到时间”，如果之前是未签到则本地也补一个当前时间方便展示
         if ((newStatus === 1 || newStatus === 2) && !student.attendanceTime) {
           student.attendanceTime = new Date();
         }
@@ -402,7 +400,7 @@ export default {
 /* Apple-style Global Container */
 .attendance-page {
   padding: 20px;
-  background-color: #f5f5f7; /* Apple light gray background */
+  background-color: #f5f5f7;
   min-height: 100vh;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: #1d1d1f;
@@ -444,7 +442,6 @@ export default {
   border-radius: 14px;
 }
 
-/* Apple-style Inputs */
 .attendance-controls >>> .el-input__inner {
   border-radius: 12px;
   border: 1px solid #d2d2d7;
@@ -458,9 +455,8 @@ export default {
   box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
 }
 
-/* Apple-style Buttons */
 .attendance-controls >>> .el-button {
-  border-radius: 980px; /* Pill shape */
+  border-radius: 980px;
   font-weight: 500;
   padding: 10px 20px;
   border: none;
@@ -483,7 +479,6 @@ export default {
   background-color: #86868b;
 }
 
-/* Table Styling */
 .attendance-container >>> .el-table {
   width: 100%;
   border-radius: 12px;
@@ -505,7 +500,6 @@ export default {
   padding: 12px;
 }
 
-/* Tags */
 .attendance-container >>> .el-tag {
   border-radius: 6px;
   border: none;
@@ -527,7 +521,6 @@ export default {
   color: #8e8e93;
 }
 
-/* Operation Buttons in Table */
 .ops-col >>> .el-button {
   margin-left: 6px;
   border-radius: 8px;
@@ -547,7 +540,6 @@ export default {
   white-space: nowrap;
 }
 
-/* Student Grid in Dialog */
 .student-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -583,40 +575,38 @@ export default {
   transform: scale(0.96);
 }
 
-/* Status Colors for Grid */
-.student-cell.status-0 { /* 未签到 */
+.student-cell.status-0 {
   background-color: #ffffff;
   color: #86868b;
 }
 
-.student-cell.status-1 { /* 已签到 */
+.student-cell.status-1 {
   background-color: #0071e3;
   color: #ffffff;
   border-color: #0071e3;
   box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
 }
 
-.student-cell.status-2 { /* 迟到 */
+.student-cell.status-2 {
   background-color: #ff9500;
   color: #ffffff;
   border-color: #ff9500;
   box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
 }
 
-.student-cell.status-3 { /* 请假 */
+.student-cell.status-3 {
   background-color: #8e8e93;
   color: #ffffff;
   border-color: #8e8e93;
 }
 
-.student-cell.status-4 { /* 早退 */
+.student-cell.status-4 {
   background-color: #ff3b30;
   color: #ffffff;
   border-color: #ff3b30;
   box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
 }
 
-/* Legend */
 .legend {
   margin-bottom: 20px;
   display: flex;
@@ -655,7 +645,6 @@ export default {
   margin-left: auto;
 }
 
-/* Dialog Tweaks */
 .attendance-page >>> .el-dialog {
   border-radius: 18px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.1);

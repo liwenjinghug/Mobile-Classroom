@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <!-- 页面头部 -->
     <div class="page-header">
       <div class="header-left">
         <span class="page-title">资料推送管理</span>
@@ -18,7 +17,6 @@
       </div>
     </div>
 
-    <!-- 课程和课堂选择 -->
     <el-card class="filter-card">
       <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="80px">
         <el-form-item label="选择课程" prop="courseId">
@@ -29,7 +27,6 @@
             size="small"
             @change="handleCourseChange"
             style="width: 200px"
-            v-hasPermi="['projlw:material:list']"
           >
             <el-option
               v-for="course in courseList"
@@ -49,7 +46,6 @@
             @change="handleSessionChange"
             style="width: 200px"
             :disabled="!queryParams.courseId"
-            v-hasPermi="['projlw:material:list']"
           >
             <el-option
               v-for="session in sessionList"
@@ -67,19 +63,16 @@
             size="small"
             @click="handleQuery"
             :disabled="!queryParams.sessionId"
-            v-hasPermi="['projlw:material:list']"
           >查询</el-button>
           <el-button
             icon="el-icon-refresh"
             size="small"
             @click="resetQuery"
-            v-hasPermi="['projlw:material:list']"
           >重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <!-- 资料列表 -->
     <el-card>
       <div slot="header" class="table-header">
         <span>资料列表</span>
@@ -156,7 +149,6 @@
       />
     </el-card>
 
-    <!-- 上传资料对话框 -->
     <el-dialog :title="upload.title" :visible.sync="upload.open" width="500px" append-to-body>
       <el-form ref="uploadForm" :model="upload.form" :rules="upload.rules" label-width="100px">
         <el-form-item label="当前课堂" prop="sessionName">

@@ -114,26 +114,26 @@ export const constantRoutes = [
         path: 'Attendance',
         component: () => import('@/views/proj_myx/Attendance.vue'),
         name: 'ProjMyx_Attendance',
-        meta: { title: '课堂签到', icon: 'peoples', roles: ['admin','common'] }
+        meta: { title: '课堂签到', icon: 'peoples', roles: ['admin','common','teacher'] }
       },
       // Admin-only menu entries for detailed pages (they can also be accessed directly)
       {
         path: 'AttendanceCreate',
         component: () => import('@/views/proj_myx/CreateAttendance.vue'),
         name: 'ProjMyx_AttendanceCreate',
-        meta: { title: '创建签到', icon: 'edit', roles: ['admin'] }
+        meta: { title: '创建签到', icon: 'edit', roles: ['admin','teacher'] }
       },
       {
         path: 'AttendanceStats',
         component: () => import('@/views/proj_myx/AttendanceStats.vue'),
         name: 'ProjMyx_AttendanceStats',
-        meta: { title: '签到统计', icon: 'chart', roles: ['admin'] }
+        meta: { title: '签到统计', icon: 'chart', roles: ['admin','teacher'] }
       },
       {
         path: 'Vote',
         component: () => import('@/views/proj_myx/Vote.vue'),
         name: 'ProjMyx_Vote',
-        meta: { title: '课堂投票', icon: 'vote', roles: ['admin','common'] }
+        meta: { title: '课堂投票', icon: 'vote', roles: ['admin','common','teacher'] }
       }
     ]
   },
@@ -204,27 +204,31 @@ export const constantRoutes = [
         path: 'homework_publish',
         component: () => import('@/views/proj_lwj/homework_publish/index.vue'),
         name: 'ProjLwj_HomeworkPublish',
-        meta: { title: '作业发布', icon: 'list' }
+        meta: { title: '作业发布', icon: 'list', roles: ['teacher', 'admin'], permissions: ['projlwj:homework:list',
+            'projlwj:homework:add',
+            'projlwj:homework:edit',
+            'projlwj:homework:remove',
+            'projlwj:homework:query'] }
       },
       {
         path: 'homework_upload',
         alias: ['homework-upload','upload'],
         component: () => import('@/views/proj_lwj/homework-upload/index.vue'),
         name: 'ProjLwj_HomeworkUpload',
-        meta: { title: '作业上传', icon: 'upload' }
+        meta: { title: '作业上传', icon: 'upload', roles: ['student', 'admin'], permissions: ['projlwj:homework:submit'] }
       },
       {
         path: 'homework_grading',
         component: () => import('@/views/proj_lwj/homework_grading/index.vue'),
         name: 'ProjLwj_HomeworkGrading',
-        meta: { title: '作业批改', icon: 'edit' }
+        meta: { title: '作业批改', icon: 'edit', roles: ['teacher', 'admin'], permissions: ['projlwj:homework:grade'] }
       },
       // 新增：在作业批改下可见的“提交列表”菜单（展示某个作业的所有学生提交）
       {
         path: 'homework_grading/list/:homeworkId',
         component: () => import('@/views/proj_lwj/homework_grading/index.vue'),
         name: 'ProjLwj_HomeworkGradingList',
-        meta: { title: '提交列表', icon: 'list' }
+        meta: { title: '提交列表', icon: 'list',permissions: ['projlwj:homework:list'] }
       },
       // 支持通过路由 params 直接打开某个作业的批改详情页面（不在侧边栏显示）
       {
