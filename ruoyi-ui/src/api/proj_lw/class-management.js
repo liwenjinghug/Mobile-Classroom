@@ -3,14 +3,20 @@ import request from '@/utils/request'
 // 获取课堂学生列表
 export function getClassStudents(sessionId, query) {
   console.log('API调用: 获取课堂学生, sessionId:', sessionId, 'query:', query)
+
+  // 构建参数，添加不分页标识
+  const params = {
+    ...query,
+    noPagination: query.noPagination || true  // 默认不分页
+  }
+
   return request({
     url: `/proj_lw/class/management/${sessionId}/students`,
     method: 'get',
-    params: query
+    params: params
   }).then(response => {
     console.log('课堂学生API原始响应:', response)
-
-    // 直接返回响应，让组件处理
+    console.log('获取到学生数量:', response.rows ? response.rows.length : 0)
     return response
   }).catch(error => {
     console.error('课堂学生API错误:', error)
@@ -29,7 +35,8 @@ export function searchAllStudents(keyword, sessionId) {
     method: 'get',
     params: {
       keyword: keyword,
-      sessionId: sessionId  // 确保这里传递了sessionId
+      sessionId: sessionId,
+      noPagination: true  // 添加不分页参数
     }
   }).then(response => {
     console.log('API响应数据:', response)
