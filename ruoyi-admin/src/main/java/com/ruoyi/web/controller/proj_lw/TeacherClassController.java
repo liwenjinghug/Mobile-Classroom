@@ -3,6 +3,9 @@ package com.ruoyi.web.controller.proj_lw;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.proj_lw.domain.ClassJoinApplication;
 import com.ruoyi.proj_lw.domain.ClassSession;
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -121,6 +124,7 @@ public class TeacherClassController extends BaseController {
     /**
      * 审核申请
      */
+    @Log(title = "教师审核申请", businessType = BusinessType.UPDATE)
     @PostMapping("/application/audit")
     public AjaxResult auditApplication(@RequestParam Long applicationId,
                                        @RequestParam String status,
@@ -162,6 +166,7 @@ public class TeacherClassController extends BaseController {
     /**
      * 批量审核申请
      */
+    @Log(title = "教师批量审核申请", businessType = BusinessType.UPDATE)
     @PostMapping("/application/batchAudit")
     public AjaxResult batchAuditApplications(@RequestParam Long[] applicationIds,
                                              @RequestParam String status) {

@@ -15,7 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.ruoyi.common.annotation.Log;
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -71,7 +72,7 @@ public class MaterialController extends BaseController
      * 新增资料
      */
     @PreAuthorize("@ss.hasPermi('projlw:material:add')")
-    @Log(title = "资料", businessType = BusinessType.INSERT)
+    @Log(title = "资料管理", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody Material material)
     {
@@ -82,7 +83,7 @@ public class MaterialController extends BaseController
      * 修改资料
      */
     @PreAuthorize("@ss.hasPermi('projlw:material:edit')")
-    @Log(title = "资料", businessType = BusinessType.UPDATE)
+    @Log(title = "资料管理", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody Material material)
     {
@@ -93,7 +94,7 @@ public class MaterialController extends BaseController
      * 删除资料
      */
     @PreAuthorize("@ss.hasPermi('projlw:material:remove')")
-    @Log(title = "资料", businessType = BusinessType.DELETE)
+    @Log(title = "资料管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{materialId}")
     public AjaxResult remove(@PathVariable Long materialId)
     {

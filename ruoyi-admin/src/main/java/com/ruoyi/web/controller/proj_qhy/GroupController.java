@@ -1,5 +1,8 @@
 package com.ruoyi.web.controller.proj_qhy;
 
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.SecurityUtils;
@@ -36,6 +39,7 @@ public class GroupController extends BaseController {
      * 创建小组
      * 前端传递 { groupName: "xxx", memberUserIds: [1, 2, 3] }
      */
+    @Log(title = "小组-创建", businessType = BusinessType.INSERT)
     @PostMapping("/create")
     public AjaxResult createGroup(@RequestBody Map<String, Object> params) {
         String groupName = (String) params.get("groupName");
@@ -59,6 +63,7 @@ public class GroupController extends BaseController {
     /**
      * 修改小组信息 (名称/头像)
      */
+    @Log(title = "小组-修改信息", businessType = BusinessType.UPDATE)
     @PutMapping("/update")
     public AjaxResult updateGroupInfo(@RequestBody Group group) {
         // 权限校验在Service层
@@ -69,6 +74,7 @@ public class GroupController extends BaseController {
      * (新增) 修改小组头像
      * 我们将头像文件命名为 'avatarfile'
      */
+    @Log(title = "小组-修改头像", businessType = BusinessType.UPDATE)
     @PostMapping("/{groupId}/avatar")
     public AjaxResult updateGroupAvatar(@PathVariable Long groupId, @RequestParam("avatarfile") MultipartFile file) {
         // 权限和上传在Service层
@@ -90,6 +96,7 @@ public class GroupController extends BaseController {
     /**
      * 发送消息 (文本或图片)
      */
+    @Log(title = "小组-发送消息", businessType = BusinessType.INSERT)
     @PostMapping("/{groupId}/send")
     public AjaxResult sendMessage(@PathVariable Long groupId,
                                   GroupMessage message,
@@ -102,6 +109,7 @@ public class GroupController extends BaseController {
     /**
      * 移除成员 (组长权限)
      */
+    @Log(title = "小组-移除成员", businessType = BusinessType.DELETE)
     @DeleteMapping("/{groupId}/member/{memberUserId}")
     public AjaxResult removeMember(@PathVariable Long groupId, @PathVariable Long memberUserId) {
         // 权限校验在Service层
@@ -123,6 +131,7 @@ public class GroupController extends BaseController {
     /**
      * 加入小组
      */
+    @Log(title = "小组-加入", businessType = BusinessType.INSERT)
     @PostMapping("/join/{groupId}")
     public AjaxResult joinGroup(@PathVariable Long groupId) {
         Long userId = SecurityUtils.getUserId();
@@ -132,6 +141,7 @@ public class GroupController extends BaseController {
     /**
      * (新增) 解散小组 (组长权限)
      */
+    @Log(title = "小组-解散", businessType = BusinessType.DELETE)
     @DeleteMapping("/{groupId}/disband")
     public AjaxResult disbandGroup(@PathVariable Long groupId) {
         // 权限在Service层校验
@@ -142,6 +152,7 @@ public class GroupController extends BaseController {
     /**
      * (新增) 退出小组
      */
+    @Log(title = "小组-退出", businessType = BusinessType.DELETE)
     @PostMapping("/{groupId}/exit")
     public AjaxResult exitGroup(@PathVariable Long groupId) {
         // 逻辑在Service层处理
@@ -152,6 +163,7 @@ public class GroupController extends BaseController {
     /**
      * (新增) 撤回消息
      */
+    @Log(title = "小组-撤回消息", businessType = BusinessType.UPDATE)
     @PostMapping("/message/recall/{messageId}")
     public AjaxResult recallMessage(@PathVariable Long messageId) {
         // 权限和时间校验在Service层
@@ -162,6 +174,7 @@ public class GroupController extends BaseController {
     /**
      * (新增) 分享文章到小组
      */
+    @Log(title = "小组-分享文章", businessType = BusinessType.INSERT)
     @PostMapping("/share/article")
     public AjaxResult shareArticle(@RequestBody Map<String, Object> payload) {
         // (注意: 确保 Spring Boot 可以正确反序列化 Long 和 List)

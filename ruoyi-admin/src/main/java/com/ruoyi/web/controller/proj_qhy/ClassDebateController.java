@@ -1,6 +1,7 @@
 package com.ruoyi.web.controller.proj_qhy;
 
-import com.ruoyi.common.annotation.Log;
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -59,6 +60,7 @@ public class ClassDebateController extends BaseController {
 
     // --- 业务接口 ---
 
+    @Log(title = "辩论赛-加入", businessType = BusinessType.UPDATE)
     @PostMapping("/join")
     public AjaxResult join(@RequestBody Map<String, String> body) {
         Long debateId = Long.parseLong(body.get("debateId"));
@@ -72,6 +74,7 @@ public class ClassDebateController extends BaseController {
         return AjaxResult.success(classDebateService.getRoomInfo(id));
     }
 
+    @Log(title = "辩论赛-发送消息", businessType = BusinessType.INSERT)
     @PostMapping("/msg")
     public AjaxResult sendMsg(@RequestBody ClassDebateMsg msg) {
         return toAjax(classDebateService.sendMsg(msg));
@@ -82,6 +85,7 @@ public class ClassDebateController extends BaseController {
         return AjaxResult.success(classDebateService.getMsgList(debateId));
     }
 
+    @Log(title = "辩论赛-投票", businessType = BusinessType.INSERT)
     @PostMapping("/vote")
     public AjaxResult vote(@RequestBody Map<String, Object> body) {
         Long debateId = Long.parseLong(body.get("debateId").toString());
@@ -89,11 +93,13 @@ public class ClassDebateController extends BaseController {
         return toAjax(classDebateService.vote(debateId, side));
     }
 
+    @Log(title = "辩论赛-开始", businessType = BusinessType.UPDATE)
     @PutMapping("/start/{id}")
     public AjaxResult start(@PathVariable("id") Long id) {
         return toAjax(classDebateService.startDebate(id));
     }
 
+    @Log(title = "辩论赛-结束", businessType = BusinessType.UPDATE)
     @PutMapping("/stop/{id}")
     public AjaxResult stop(@PathVariable("id") Long id) {
         return toAjax(classDebateService.stopDebate(id));

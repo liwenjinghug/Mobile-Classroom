@@ -1,6 +1,8 @@
 package com.ruoyi.web.controller.proj_myx;
 
-import com.ruoyi.common.annotation.Log;
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.poi.ExcelUtil;
@@ -32,7 +34,7 @@ public class RandomPickController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('proj_myx:random:pick')")
-    @Log(title = "随机抽人", businessType = com.ruoyi.common.enums.BusinessType.OTHER)
+    @Log(title = "随机抽人", businessType = BusinessType.OTHER)
     @PostMapping("/pick/random")
     public AjaxResult pickRandom(@RequestParam Long sessionId, @RequestParam(required = false) Long teacherId) {
         if (sessionId == null) {
@@ -46,7 +48,7 @@ public class RandomPickController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('proj_myx:random:add')")
-    @Log(title = "保存抽取记录", businessType = com.ruoyi.common.enums.BusinessType.INSERT)
+    @Log(title = "保存抽取记录", businessType = BusinessType.INSERT)
     @PostMapping("/pick/save")
     public AjaxResult savePick(@RequestBody RandomPickRecord record) {
         if (record == null || record.getStudentId() == null || record.getSessionId() == null) {
@@ -67,21 +69,21 @@ public class RandomPickController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('proj_myx:random:remove')")
-    @Log(title = "删除抽取记录", businessType = com.ruoyi.common.enums.BusinessType.DELETE)
+    @Log(title = "删除抽取记录", businessType = BusinessType.DELETE)
     @DeleteMapping("/pick/{rpickId}")
     public AjaxResult remove(@PathVariable Long rpickId) {
         return toAjax(randomPickService.deletePick(rpickId));
     }
 
     @PreAuthorize("@ss.hasPermi('proj_myx:random:edit')")
-    @Log(title = "修改抽取记录", businessType = com.ruoyi.common.enums.BusinessType.UPDATE)
+    @Log(title = "修改抽取记录", businessType = BusinessType.UPDATE)
     @PutMapping("/pick")
     public AjaxResult edit(@RequestBody RandomPickRecord record) {
         return toAjax(randomPickService.updatePick(record));
     }
 
     @PreAuthorize("@ss.hasPermi('proj_myx:random:export')")
-    @Log(title = "导出抽取记录", businessType = com.ruoyi.common.enums.BusinessType.EXPORT)
+    @Log(title = "导出抽取记录", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, @RequestParam Long sessionId) {
         List<RandomPickRecord> list = randomPickService.getHistory(sessionId);

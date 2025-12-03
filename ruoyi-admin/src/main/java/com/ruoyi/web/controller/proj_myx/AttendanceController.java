@@ -1,5 +1,8 @@
 package com.ruoyi.web.controller.proj_myx;
 
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.proj_myx.domain.AttendanceTask;
@@ -37,6 +40,7 @@ public class AttendanceController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('proj_myx:attendance:add')")
+    @Log(title = "签到任务管理", businessType = BusinessType.INSERT)
     @PostMapping("/task/create")
     public AjaxResult createTask(@RequestBody AttendanceTask task) {
         if (task == null || task.getSessionId() == null) return AjaxResult.error("参数不完整");
@@ -51,7 +55,7 @@ public class AttendanceController extends BaseController {
                 // Default to 1 (In Progress) if within time or times are null
                 if (task.getStatus() == null) task.setStatus(1);
             }
-            
+
             task.setCreateBy(getUsername());
             AttendanceTask created = attendanceService.createTask(task);
             return created != null ? AjaxResult.success(created) : AjaxResult.error("签到创建失败!");
@@ -69,6 +73,7 @@ public class AttendanceController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('proj_myx:attendance:close')")
+    @Log(title = "签到任务管理", businessType = BusinessType.UPDATE)
     @PostMapping("/task/{taskId}/close")
     public AjaxResult closeTask(@PathVariable Long taskId) {
         int rows = attendanceService.closeTask(taskId);
@@ -76,6 +81,7 @@ public class AttendanceController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('proj_myx:attendance:edit')")
+    @Log(title = "签到任务管理", businessType = BusinessType.UPDATE)
     @PostMapping("/task/{taskId}/start")
     public AjaxResult startTask(@PathVariable Long taskId) {
         int rows = attendanceService.startTask(taskId);
@@ -83,6 +89,7 @@ public class AttendanceController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('proj_myx:attendance:remove')")
+    @Log(title = "签到任务管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/task/{taskId}")
     public AjaxResult deleteTask(@PathVariable Long taskId) {
         int rows = attendanceService.deleteTask(taskId);
@@ -98,6 +105,7 @@ public class AttendanceController extends BaseController {
 
     // 管理端：为指定 task 生成 QR token（可多次调用）
     @PreAuthorize("@ss.hasPermi('proj_myx:attendance:qr:create')")
+    @Log(title = "生成签到二维码", businessType = BusinessType.INSERT)
     @PostMapping("/task/generateQr")
     public AjaxResult generateQrByBody(@RequestBody Map<String, Object> body) {
         if (body == null) return AjaxResult.error("请求体为空");
@@ -130,6 +138,7 @@ public class AttendanceController extends BaseController {
     }
 
     // 学生端：扫码签到
+    @Log(title = "扫码签到", businessType = BusinessType.INSERT)
     @PostMapping("/sign/qr")
     public AjaxResult signByQr(@RequestBody Map<String, Object> body) {
         String taskIdRaw = body.get("taskId") == null ? null : body.get("taskId").toString();
@@ -149,6 +158,7 @@ public class AttendanceController extends BaseController {
     }
 
     // 学生端：位置签到（传纬度经度）
+    @Log(title = "位置签到", businessType = BusinessType.INSERT)
     @PostMapping("/sign/location")
     public AjaxResult signByLocation(@RequestBody Map<String, Object> body) {
         String taskIdRaw = body.get("taskId") == null ? null : body.get("taskId").toString();
@@ -173,6 +183,7 @@ public class AttendanceController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('proj_myx:attendance:edit')")
+    @Log(title = "修改签到状态", businessType = BusinessType.UPDATE)
     @PostMapping("/task/status")
     public AjaxResult updateStatus(@RequestBody Map<String, Object> body) {
         String taskIdRaw = body.get("taskId") == null ? null : body.get("taskId").toString();

@@ -1,5 +1,8 @@
 package com.ruoyi.web.controller.proj_lw;
 
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -122,6 +125,7 @@ public class ClassManagementController extends BaseController {
     /**
      * 添加学生到课堂
      */
+    @Log(title = "课堂添加学生", businessType = BusinessType.INSERT)
     @PostMapping("/{sessionId}/students/add")
     public AjaxResult addStudentsToClass(@PathVariable Long sessionId, @RequestBody List<Long> studentIds) {
         try {
@@ -145,6 +149,7 @@ public class ClassManagementController extends BaseController {
     /**
      * 从课堂移除学生
      */
+    @Log(title = "课堂移除学生", businessType = BusinessType.DELETE)
     @PostMapping("/{sessionId}/students/{studentId}/remove")
     public AjaxResult removeStudentFromClass(@PathVariable Long sessionId, @PathVariable Long studentId) {
         try {
@@ -164,6 +169,7 @@ public class ClassManagementController extends BaseController {
     /**
      * 批量移除学生
      */
+    @Log(title = "课堂批量移除学生", businessType = BusinessType.DELETE)
     @PostMapping("/{sessionId}/students/batch-remove")
     public AjaxResult batchRemoveStudents(@PathVariable Long sessionId, @RequestBody List<Long> studentIds) {
         try {

@@ -1,5 +1,8 @@
 package com.ruoyi.web.controller.proj_qhy;
 
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.config.RuoYiConfig;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +40,7 @@ public class FileController {
         SAVE_DIR = savePath;
     }
 
+    @Log(title = "本地图片上传(Base64)", businessType = BusinessType.INSERT)
     @PostMapping("/uploadLocal")
     public AjaxResult uploadLocalImage(@RequestBody Map<String, String> params) {
         try {

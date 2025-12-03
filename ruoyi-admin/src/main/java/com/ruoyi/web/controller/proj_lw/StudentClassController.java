@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -50,6 +53,7 @@ public class StudentClassController extends BaseController {
     /**
      * 申请加入课堂
      */
+    @Log(title = "学生申请加入课堂", businessType = BusinessType.INSERT)
     @PostMapping("/apply/{sessionId}")
     public AjaxResult applyJoinClass(@PathVariable("sessionId") Long sessionId) {
         try {
@@ -165,6 +169,7 @@ public class StudentClassController extends BaseController {
     /**
      * 取消申请
      */
+    @Log(title = "学生取消申请", businessType = BusinessType.DELETE)
     @PostMapping("/application/cancel/{applicationId}")
     public AjaxResult cancelApplication(@PathVariable("applicationId") Long applicationId) {
         try {
@@ -201,6 +206,7 @@ public class StudentClassController extends BaseController {
     /**
      * 退出课堂
      */
+    @Log(title = "学生退出课堂", businessType = BusinessType.DELETE)
     @PostMapping("/quit/{sessionId}")
     public AjaxResult quitClass(@PathVariable("sessionId") Long sessionId) {
         try {
