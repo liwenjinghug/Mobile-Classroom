@@ -26,21 +26,47 @@ public class ClassManagementController extends BaseController {
      * 获取课堂学生列表
      */
     @GetMapping("/{sessionId}/students")
-    public TableDataInfo getClassStudents(@PathVariable Long sessionId, ClassStudentLw query) {
+    public TableDataInfo getClassStudents(
+            @PathVariable Long sessionId,
+            @RequestParam(required = false) Boolean noPagination,  // 添加不分页标识
+            ClassStudentLw query) {
         try {
             System.out.println("=== 获取课堂学生列表 ===");
             System.out.println("课堂ID: " + sessionId);
+            System.out.println("不分页标识: " + noPagination);
 
-            startPage();
+            // 根据noPagination参数决定是否分页
+            if (noPagination == null || !noPagination) {
+                startPage();  // 默认分页
+            }
+
             List<ClassSessionStudent> list = classManagementService.getClassStudents(sessionId, query);
 
             System.out.println("查询到的学生数量: " + (list != null ? list.size() : "null"));
-            return getDataTable(list != null ? list : new ArrayList<>());
+
+            // 如果不分页，需要手动设置total
+            TableDataInfo rspData = new TableDataInfo();
+            rspData.setCode(200);
+            rspData.setRows(list != null ? list : new ArrayList<>());
+
+            if (noPagination != null && noPagination) {
+                // 不分页时，total就是列表大小
+                rspData.setTotal(list != null ? list.size() : 0);
+            } else {
+                // 分页时，getDataTable会处理total
+                return getDataTable(list != null ? list : new ArrayList<>());
+            }
+
+            return rspData;
 
         } catch (Exception e) {
             System.err.println("获取课堂学生列表失败: " + e.getMessage());
             e.printStackTrace();
-            return getDataTable(new ArrayList<>());
+            TableDataInfo rspData = new TableDataInfo();
+            rspData.setCode(500);
+            rspData.setRows(new ArrayList<>());
+            rspData.setTotal(0);
+            return rspData;
         }
     }
 
@@ -50,24 +76,46 @@ public class ClassManagementController extends BaseController {
     @GetMapping("/students/search")
     public TableDataInfo searchAllStudents(
             @RequestParam String keyword,
-            @RequestParam(required = false) Long sessionId) {
+            @RequestParam(required = false) Long sessionId,
+            @RequestParam(required = false) Boolean noPagination) {  // 添加不分页标识
 
         try {
             System.out.println("=== Controller: 搜索学生 ===");
             System.out.println("接收到的关键词: " + keyword);
-            System.out.println("接收到的sessionId: " + sessionId);
-            System.out.println("sessionId类型: " + (sessionId != null ? sessionId.getClass().getSimpleName() : "null"));
+            System.out.println("不分页标识: " + noPagination);
 
-            startPage();
+            // 根据noPagination参数决定是否分页
+            if (noPagination == null || !noPagination) {
+                startPage();  // 默认分页
+            }
+
             List<ClassStudentLw> list = classManagementService.searchAllStudents(keyword, sessionId);
 
             System.out.println("Controller返回数量: " + (list != null ? list.size() : "null"));
-            return getDataTable(list != null ? list : new ArrayList<>());
+
+            // 如果不分页，需要手动设置total
+            TableDataInfo rspData = new TableDataInfo();
+            rspData.setCode(200);
+            rspData.setRows(list != null ? list : new ArrayList<>());
+
+            if (noPagination != null && noPagination) {
+                // 不分页时，total就是列表大小
+                rspData.setTotal(list != null ? list.size() : 0);
+            } else {
+                // 分页时，getDataTable会处理total
+                return getDataTable(list != null ? list : new ArrayList<>());
+            }
+
+            return rspData;
 
         } catch (Exception e) {
             System.err.println("搜索学生失败: " + e.getMessage());
             e.printStackTrace();
-            return getDataTable(new ArrayList<>());
+            TableDataInfo rspData = new TableDataInfo();
+            rspData.setCode(500);
+            rspData.setRows(new ArrayList<>());
+            rspData.setTotal(0);
+            return rspData;
         }
     }
 
