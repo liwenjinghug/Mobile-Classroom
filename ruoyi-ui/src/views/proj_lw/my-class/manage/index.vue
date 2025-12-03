@@ -11,6 +11,9 @@
         <el-button type="primary" icon="el-icon-plus" @click="handleAddStudent">
           添加学生
         </el-button>
+        <el-button type="success" icon="el-icon-printer" @click="handlePrint">
+          打印学生列表
+        </el-button>
         <el-button icon="el-icon-back" @click="handleBack">返回</el-button>
       </div>
     </div>
@@ -19,15 +22,15 @@
     <el-card>
       <template #header>
         <div class="card-header">
-          <span>学生列表</span>
+          <span>学生列表（共 {{ studentList.length }} 人）</span>
           <el-input
             v-model="studentQuery.studentName"
             placeholder="搜索学生姓名"
             style="width: 200px;"
-            @keyup.enter="getStudentList"
+            @input="handleSearch"
           >
             <template #append>
-              <el-button icon="el-icon-search" @click="getStudentList" />
+              <el-button icon="el-icon-search" @click="getAllStudents" />
             </template>
           </el-input>
         </div>
@@ -35,33 +38,39 @@
 
       <el-table
         v-loading="studentLoading"
-        :data="studentList"
+        :data="filteredStudents"
         border
         fit
         highlight-current-row
+        style="width: 100%"
       >
+        <el-table-column label="序号" align="center" width="60">
+          <template #default="{ $index }">
+            {{ $index + 1 }}
+          </template>
+        </el-table-column>
         <el-table-column label="学生ID" prop="studentId" align="center" width="80" />
         <el-table-column label="学号" prop="studentNo" align="center" />
         <el-table-column label="姓名" prop="studentName" align="center" />
         <el-table-column label="性别" prop="gender" align="center" width="80">
-          <template slot-scope="{row}">
+          <template #default="{row}">
             <span>{{ row.gender === 'M' ? '男' : row.gender === 'F' ? '女' : '-' }}</span>
           </template>
         </el-table-column>
         <el-table-column label="状态" prop="status" align="center" width="100">
-          <template slot-scope="{row}">
+          <template #default="{row}">
             <el-tag :type="row.status === 1 ? 'success' : 'danger'">
               {{ row.status === 1 ? '在读' : '退学' }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="加入时间" prop="assignedAt" align="center" width="180">
-          <template slot-scope="{row}">
+          <template #default="{row}">
             <span>{{ row.assignedAt | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" align="center" width="120" class-name="small-padding fixed-width">
-          <template slot-scope="{row}">
+          <template #default="{row}">
             <el-button
               type="danger"
               size="mini"
@@ -72,14 +81,6 @@
           </template>
         </el-table-column>
       </el-table>
-
-      <pagination
-        v-show="studentTotal>0"
-        :total="studentTotal"
-        :page.sync="studentQuery.page"
-        :limit.sync="studentQuery.limit"
-        @pagination="getStudentList"
-      />
     </el-card>
 
     <!-- 添加学生对话框 -->
@@ -116,12 +117,12 @@
           <el-table-column label="学号" prop="studentNo" align="center" />
           <el-table-column label="姓名" prop="studentName" align="center" />
           <el-table-column label="性别" prop="gender" align="center" width="80">
-            <template slot-scope="{row}">
+            <template #default="{row}">
               <span>{{ row.gender === 'M' ? '男' : row.gender === 'F' ? '女' : '-' }}</span>
             </template>
           </el-table-column>
           <el-table-column label="状态" prop="status" align="center" width="100">
-            <template slot-scope="{row}">
+            <template #default="{row}">
               <el-tag :type="row.status === 1 ? 'success' : 'danger'">
                 {{ row.status === 1 ? '在读' : '退学' }}
               </el-tag>
@@ -148,16 +149,47 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 打印区域（隐藏） -->
+    <div v-show="false" ref="printContent" class="print-content">
+      <div class="print-header">
+        <h2>{{ classInfo.className }} - 学生名单</h2>
+        <p>课堂ID: {{ classInfo.sessionId }} | 生成时间: {{ currentTime }}</p>
+      </div>
+      <table class="print-table">
+        <thead>
+        <tr>
+          <th>序号</th>
+          <th>学号</th>
+          <th>姓名</th>
+          <th>性别</th>
+          <th>状态</th>
+          <th>加入时间</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(student, index) in studentList" :key="student.studentId">
+          <td>{{ index + 1 }}</td>
+          <td>{{ student.studentNo }}</td>
+          <td>{{ student.studentName }}</td>
+          <td>{{ student.gender === 'M' ? '男' : student.gender === 'F' ? '女' : '-' }}</td>
+          <td>{{ student.status === 1 ? '在读' : '退学' }}</td>
+          <td>{{ student.assignedAt | parseTime('{y}-{m}-{d} {h}:{i}') }}</td>
+        </tr>
+        </tbody>
+      </table>
+      <div class="print-footer">
+        <p>共 {{ studentList.length }} 名学生</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { getClassStudents, addStudentsToClass, removeStudentFromClass, searchAllStudents } from '@/api/proj_lw/class-management'
-import Pagination from '@/components/Pagination'
 
 export default {
   name: 'ClassManagement',
-  components: { Pagination },
   filters: {
     parseTime(time, format) {
       if (!time) return ''
@@ -188,14 +220,11 @@ export default {
         teacher: ''
       },
 
-      // 学生列表
-      studentList: [],
-      studentTotal: 0,
+      // 学生列表（不再需要分页相关数据）
+      studentList: [],  // 所有学生数据
       studentLoading: false,
       studentQuery: {
-        page: 1,
-        limit: 10,
-        studentName: ''
+        studentName: ''  // 仅保留搜索字段
       },
 
       // 添加学生对话框
@@ -210,7 +239,26 @@ export default {
         loading: false,
         results: [],
         selected: []
+      },
+
+      // 打印相关
+      currentTime: new Date().toLocaleString(),
+      userName: '管理员'  // 可以改为从store获取当前用户
+    }
+  },
+  computed: {
+    // 计算属性：实现前端搜索
+    filteredStudents() {
+      if (!this.studentQuery.studentName.trim()) {
+        return this.studentList
       }
+      const keyword = this.studentQuery.studentName.toLowerCase()
+      return this.studentList.filter(student => {
+        return (
+          (student.studentName && student.studentName.toLowerCase().includes(keyword)) ||
+          (student.studentNo && student.studentNo.toLowerCase().includes(keyword))
+        )
+      })
     }
   },
   created() {
@@ -224,36 +272,171 @@ export default {
       return
     }
 
-    this.getStudentList()
+    this.getAllStudents()
   },
   methods: {
-    // 在获取学生列表的方法中添加状态日志
-    async getStudentList() {
+    // 获取所有学生（不分页）
+    async getAllStudents() {
       this.studentLoading = true
       try {
-        console.log('=== 开始获取课堂学生列表 ===')
-        const response = await getClassStudents(this.classInfo.sessionId, this.studentQuery)
+        console.log('=== 开始获取课堂所有学生 ===')
+
+        // 创建一个不分页的查询参数
+        const params = {
+          studentName: this.studentQuery.studentName,
+          noPagination: true  // 添加不分页标识
+        }
+
+        const response = await getClassStudents(this.classInfo.sessionId, params)
         console.log('课堂学生完整响应:', JSON.stringify(response, null, 2))
 
+        // 直接使用rows作为完整列表
         this.studentList = response.rows || []
-        this.studentTotal = response.total || 0
 
-        // 添加状态值检查
-        if (this.studentList.length > 0) {
-          console.log('学生状态值检查:')
-          this.studentList.forEach(student => {
-            console.log(`学生: ${student.studentName}, status: ${student.status}, type: ${typeof student.status}`)
-          })
-        }
+        console.log(`获取到 ${this.studentList.length} 名学生`)
 
       } catch (error) {
         console.error('获取学生列表失败:', error)
         this.studentList = []
-        this.studentTotal = 0
         this.$message.error('获取学生列表失败')
       } finally {
         this.studentLoading = false
       }
+    },
+
+    // 实时搜索处理
+    handleSearch() {
+      // 如果搜索框为空，重新获取所有数据
+      if (!this.studentQuery.studentName.trim()) {
+        this.getAllStudents()
+      }
+    },
+
+    // 打印学生列表
+    handlePrint() {
+      if (this.studentList.length === 0) {
+        this.$message.warning('没有学生数据可打印')
+        return
+      }
+
+      // 更新当前时间
+      this.currentTime = new Date().toLocaleString()
+
+      // 等待DOM更新
+      this.$nextTick(() => {
+        // 创建打印窗口
+        const printWindow = window.open('', '_blank')
+
+        // 获取打印内容
+        const printContent = this.$refs.printContent.innerHTML
+
+        // 构建完整的打印页面
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>${this.classInfo.className} - 学生名单</title>
+            <meta charset="UTF-8">
+            <style>
+              body {
+                font-family: 'Microsoft YaHei', 'SimSun', sans-serif;
+                margin: 20px;
+                color: #333;
+              }
+              .print-content {
+                max-width: 1000px;
+                margin: 0 auto;
+              }
+              .print-header {
+                text-align: center;
+                margin-bottom: 30px;
+                border-bottom: 2px solid #333;
+                padding-bottom: 15px;
+              }
+              .print-header h2 {
+                margin: 0 0 10px 0;
+                font-size: 24px;
+                color: #333;
+              }
+              .print-header p {
+                margin: 0;
+                font-size: 14px;
+                color: #666;
+              }
+              .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 30px;
+                font-size: 14px;
+              }
+              .print-table th {
+                background-color: #f5f5f5;
+                font-weight: bold;
+                text-align: center;
+                padding: 10px;
+                border: 1px solid #ddd;
+              }
+              .print-table td {
+                text-align: center;
+                padding: 8px;
+                border: 1px solid #ddd;
+              }
+              .print-table tr:nth-child(even) {
+                background-color: #f9f9f9;
+              }
+              .print-footer {
+                margin-top: 30px;
+                text-align: right;
+                font-size: 14px;
+                color: #666;
+                border-top: 1px solid #ddd;
+                padding-top: 15px;
+              }
+              .print-footer p {
+                margin: 5px 0;
+              }
+              @media print {
+                body {
+                  margin: 0;
+                  padding: 10mm;
+                }
+                .no-print {
+                  display: none !important;
+                }
+                .print-table {
+                  page-break-inside: avoid;
+                }
+              }
+              @page {
+                size: A4 portrait;
+                margin: 20mm;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="print-content">
+              ${printContent}
+              <div class="no-print" style="margin-top: 30px; text-align: center;">
+                <button onclick="window.print()" style="padding: 10px 20px; background: #409EFF; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                  打印
+                </button>
+                <button onclick="window.close()" style="padding: 10px 20px; background: #909399; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                  关闭
+                </button>
+              </div>
+            </div>
+            <script>
+              // 自动触发打印对话框
+              setTimeout(function() {
+                window.print();
+              }, 500);
+            <\/script>
+          </body>
+          </html>
+        `)
+
+        printWindow.document.close()
+      })
     },
 
     // 打开添加学生对话框
@@ -264,7 +447,7 @@ export default {
       this.studentSearch.selected = []
     },
 
-    // 搜索学生
+    // 搜索学生（用于添加学生对话框）
     async searchStudents() {
       if (!this.studentSearch.keyword.trim()) {
         this.$message.warning('请输入搜索关键词')
@@ -276,24 +459,16 @@ export default {
         console.log('=== 前端搜索调试 ===')
         console.log('搜索关键词:', this.studentSearch.keyword)
         console.log('当前课堂ID:', this.classInfo.sessionId)
-        console.log('课堂信息:', this.classInfo)
 
-        // 检查API调用参数
-        const response = await searchAllStudents(this.studentSearch.keyword, this.classInfo.sessionId)
-        console.log('API响应:', response)
-        console.log('搜索结果:', response.rows)
+        // 添加不分页参数
+        const response = await searchAllStudents(
+          this.studentSearch.keyword,
+          this.classInfo.sessionId
+        )
 
         this.studentSearch.results = response.rows || []
 
         console.log('最终显示结果数量:', this.studentSearch.results.length)
-        console.log('最终显示结果:', this.studentSearch.results)
-
-        // 检查是否有已经在课堂中的学生被显示
-        const currentStudentIds = this.studentList.map(student => student.studentId)
-        const duplicateStudents = this.studentSearch.results.filter(student =>
-          currentStudentIds.includes(student.studentId)
-        )
-        console.log('重复的学生（应该为空）:', duplicateStudents)
 
         if (this.studentSearch.results.length === 0) {
           this.$message.info('未找到可添加的学生')
@@ -325,7 +500,7 @@ export default {
 
         this.$message.success(`成功添加 ${studentIds.length} 名学生`)
         this.addStudentDialog.visible = false
-        this.getStudentList() // 刷新列表
+        this.getAllStudents() // 刷新列表
       } catch (error) {
         console.error('添加学生失败:', error)
         this.$message.error(error.message || '添加学生失败')
@@ -345,7 +520,7 @@ export default {
 
         await removeStudentFromClass(this.classInfo.sessionId, row.studentId)
         this.$message.success('移除学生成功')
-        this.getStudentList() // 刷新列表
+        this.getAllStudents() // 刷新列表
       } catch (error) {
         if (error !== 'cancel') {
           console.error('移除学生失败:', error)
@@ -353,25 +528,6 @@ export default {
         }
       }
     },
-
-    // 获取状态显示文本
-    getStatusText(status) {
-      // 多种可能的"在读"状态值判断
-      if (status === 1 || status === '1' || status === true || status === 'true') {
-        return '在读'
-      }
-      return '退学'
-    },
-
-    // 获取状态标签类型
-    getStatusType(status) {
-      if (status === 1 || status === '1' || status === true || status === 'true') {
-        return 'success'
-      }
-      return 'danger'
-    },
-
-
 
     // 返回
     handleBack() {
@@ -439,5 +595,67 @@ export default {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+/* 打印相关样式 */
+.print-content {
+  font-family: 'Microsoft YaHei', 'SimSun', sans-serif;
+}
+
+.print-header {
+  text-align: center;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #333;
+  padding-bottom: 15px;
+}
+
+.print-header h2 {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.print-header p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+  font-size: 14px;
+}
+
+.print-table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.print-table td {
+  text-align: center;
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+
+.print-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.print-footer {
+  margin-top: 30px;
+  text-align: right;
+  font-size: 14px;
+  color: #666;
+  border-top: 1px solid #ddd;
+  padding-top: 15px;
+}
+
+.print-footer p {
+  margin: 5px 0;
 }
 </style>
