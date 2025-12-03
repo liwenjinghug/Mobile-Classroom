@@ -1,6 +1,7 @@
 package com.ruoyi.web.controller.proj_fz;
 
-import com.ruoyi.common.annotation.Log;
+// 使用自定义的 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -34,6 +35,7 @@ public class SystemMonitorController extends BaseController {
      * 查询系统监控列表
      */
     @PreAuthorize("@ss.hasPermi('proj_fz:monitor:list') or @ss.hasAnyRoles('teacher,student')")
+    @Log(title = "系统监控", businessType = BusinessType.OTHER) // 【新增】记录列表查询
     @GetMapping("/list")
     public TableDataInfo list(SystemMonitor systemMonitor) {
         startPage();
@@ -98,6 +100,7 @@ public class SystemMonitorController extends BaseController {
      * 获取实时服务器指标
      */
     @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
+    @Log(title = "服务器监控", businessType = BusinessType.OTHER) // 【新增】记录查看服务器监控
     @GetMapping("/server/realtime")
     public AjaxResult getServerMetrics() {
         ServerMetrics metrics = systemMonitorService.getRealTimeServerMetrics();
@@ -108,6 +111,7 @@ public class SystemMonitorController extends BaseController {
      * 获取服务器历史指标
      */
     @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
+    @Log(title = "服务器监控", businessType = BusinessType.OTHER) // 【新增】
     @GetMapping("/server/history")
     public AjaxResult getServerHistory(@RequestParam(defaultValue = "24") Integer hours) {
         List<ServerMetrics> list = systemMonitorService.getServerMetricsHistory(hours);
@@ -118,6 +122,7 @@ public class SystemMonitorController extends BaseController {
      * 获取实时数据库指标
      */
     @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
+    @Log(title = "数据库监控", businessType = BusinessType.OTHER) // 【新增】记录查看数据库监控
     @GetMapping("/database/realtime")
     public AjaxResult getDatabaseMetrics() {
         DatabaseMetrics metrics = systemMonitorService.getRealTimeDatabaseMetrics();
@@ -128,6 +133,7 @@ public class SystemMonitorController extends BaseController {
      * 获取数据库历史指标
      */
     @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
+    @Log(title = "数据库监控", businessType = BusinessType.OTHER) // 【新增】
     @GetMapping("/database/history")
     public AjaxResult getDatabaseHistory(@RequestParam(defaultValue = "24") Integer hours) {
         List<DatabaseMetrics> list = systemMonitorService.getDatabaseMetricsHistory(hours);
@@ -135,9 +141,10 @@ public class SystemMonitorController extends BaseController {
     }
 
     /**
-     * 获取监控统计数据
+     * 获取监控统计数据 (监控记录)
      */
     @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
+    @Log(title = "监控记录", businessType = BusinessType.OTHER) // 【新增】记录查看监控统计
     @GetMapping("/statistics")
     public AjaxResult getStatistics(@RequestParam(defaultValue = "7") Integer days) {
         Map<String, Object> stats = systemMonitorService.getMonitorStatistics(days);

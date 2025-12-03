@@ -10,6 +10,10 @@ import com.ruoyi.proj_lwj.service.IClassStudentHomeworkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+// 【核心修改】添加 import
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
+
 import java.util.List;
 
 /**
@@ -60,6 +64,8 @@ public class HomeworkController extends BaseController {
     /**
      * 提交作业（学生端）
      */
+    // 【核心修改】添加 Log 注解
+    @Log(title = "学生作业", businessType = BusinessType.INSERT)
     @PostMapping("/submit")
     public AjaxResult submit(@RequestBody ClassStudentHomework shw) {
         shw.setCreateBy(getUsername());
@@ -108,4 +114,3 @@ public class HomeworkController extends BaseController {
         return toAjax(r);
     }
 }
-

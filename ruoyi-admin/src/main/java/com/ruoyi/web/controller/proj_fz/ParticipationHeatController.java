@@ -14,6 +14,10 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.proj_fz.service.IParticipationHeatService;
 
+// 【核心修改】添加 import
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
+
 @RestController
 @RequestMapping("/proj_fz/participationHeat")
 public class ParticipationHeatController extends BaseController
@@ -72,6 +76,8 @@ public class ParticipationHeatController extends BaseController
      * 导出参与热力数据
      */
     @PreAuthorize("@ss.hasPermi('proj_fz:participationHeat:export')")
+    // 【核心修改】添加 Log 注解
+    @Log(title = "参与度热力", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(@RequestBody Map<String, Object> params, HttpServletResponse response)
     {

@@ -7,6 +7,10 @@ import com.ruoyi.proj_fz.service.IHomeworkStatisticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+// 【核心修改】添加 import
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
+
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +22,8 @@ public class HomeworkStatisticsController extends BaseController {
 
     @Autowired
     private IHomeworkStatisticsService homeworkStatisticsService;
+
+    // ... (保留查询类方法) ...
 
     /**
      * 获取作业统计列表
@@ -184,6 +190,8 @@ public class HomeworkStatisticsController extends BaseController {
     /**
      * 导出作业数据
      */
+    // 【核心修改】添加 Log 注解
+    @Log(title = "作业统计", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public void exportHomeworkData(@RequestParam(required = false) Long courseId,
                                    @RequestParam(required = false) Long sessionId,

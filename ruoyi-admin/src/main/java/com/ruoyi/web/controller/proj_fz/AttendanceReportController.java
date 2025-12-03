@@ -1,6 +1,7 @@
 package com.ruoyi.web.controller.proj_fz;
 
-import com.ruoyi.common.annotation.Log;
+// 【核心修改】使用自定义的 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
