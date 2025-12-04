@@ -128,11 +128,20 @@ Page({
       // 获取分数
       const score = submission ? (submission.score ?? submission.grade ?? null) : null;
 
+      // 获取评语（确保是非空字符串才保留）
+      let remark = null;
+      if (submission) {
+        const remarkValue = submission.remark || submission.grade_comment || submission.gradeComment || '';
+        if (remarkValue && remarkValue.trim() !== '') {
+          remark = remarkValue.trim();
+        }
+      }
+
       return {
         ...homework,
         homeworkId: homeworkIdNum,
         title: homework.title || '',
-        submission: submission ? { ...submission, score } : null,
+        submission: submission ? { ...submission, score, remark } : null,
         isExpired,
         isSubmitted,
         isGraded

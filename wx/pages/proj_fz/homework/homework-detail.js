@@ -75,9 +75,13 @@ Page({
                          mySubmission.corrected_time;
 
         // 统一分数字段
-        if (!mySubmission.score && mySubmission.grade !== undefined) {
+        if (mySubmission.score === undefined && mySubmission.grade !== undefined) {
           mySubmission.score = mySubmission.grade;
         }
+
+        // 统一评语字段（确保非空）
+        const remarkValue = mySubmission.remark || mySubmission.grade_comment || mySubmission.gradeComment || '';
+        mySubmission.remark = (remarkValue && remarkValue.trim() !== '') ? remarkValue.trim() : '';
 
         if (isGraded) {
           status = '已批改';
@@ -201,14 +205,15 @@ Page({
 
   // 查看成绩
   viewGrade() {
-    const { submission } = this.data;
+    const { submission, homeworkId } = this.data;
     if (!submission) {
       wx.showToast({ title: '暂无提交记录', icon: 'none' });
       return;
     }
 
+    const submissionId = submission.studentHomeworkId || submission.student_homework_id || submission.id;
     wx.navigateTo({
-      url: `/pages/proj_fz/homework/homework-grade?submissionId=${submission.studentHomeworkId}`
+      url: `/pages/proj_fz/homework/homework-grade?submissionId=${submissionId}&homeworkId=${homeworkId}`
     });
   },
 

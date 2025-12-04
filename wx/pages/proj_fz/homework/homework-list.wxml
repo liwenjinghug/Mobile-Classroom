@@ -94,10 +94,6 @@
       <!-- 作业信息 -->
       <view class="homework-info">
         <view class="info-row">
-          <text class="label">课程：</text>
-          <text class="value">{{item.courseName || '未知'}}</text>
-        </view>
-        <view class="info-row">
           <text class="label">截止时间：</text>
           <text class="value {{item.isExpired ? 'text-expired' : ''}}">{{item.deadline || '无截止时间'}}</text>
         </view>
@@ -105,8 +101,8 @@
           <text class="label">总分：</text>
           <text class="value text-score">{{item.totalScore || 100}}分</text>
         </view>
-        <view wx:if="{{item.isGraded && item.submission.remark}}" class="info-row">
-          <text class="label">教师评语：</text>
+        <view wx:if="{{item.isGraded && item.submission && item.submission.remark && item.submission.remark !== ''}}" class="info-row remark-row">
+          <text class="label">评语：</text>
           <text class="value text-remark">{{item.submission.remark}}</text>
         </view>
       </view>

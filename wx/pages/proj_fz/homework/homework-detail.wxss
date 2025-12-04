@@ -153,9 +153,26 @@
   font-size: 32rpx !important;
 }
 
-.remark {
+.remark-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.remark-row .label {
+  flex-shrink: 0;
+  width: 100rpx;
+}
+
+.remark-preview {
   color: #722ed1 !important;
   font-style: italic;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  word-break: break-all;
 }
 
 /* 作业内容 */
