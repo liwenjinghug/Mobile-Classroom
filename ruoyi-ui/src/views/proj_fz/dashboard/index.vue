@@ -2431,51 +2431,85 @@ export default {
   opacity: 1;
 }
 
+.core-metric >>> .el-card__body {
+  height: 100%;
+  padding: 0;
+}
+
 .metric-content {
   display: flex;
   align-items: center;
   height: 100%;
   padding: 15px;
+  box-sizing: border-box;
 }
 
 .metric-icon-wrapper {
   width: 60px;
   height: 60px;
+  min-width: 60px;
+  min-height: 60px;
+  max-width: 60px;
+  max-height: 60px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 15px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .metric-icon {
   font-size: 24px;
   color: white;
+  line-height: 1;
 }
 
 .metric-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  height: 60px;
 }
 
 .metric-value {
   font-size: 28px;
   font-weight: bold;
   color: #303133;
-  margin-bottom: 5px;
-  line-height: 1;
+  line-height: 1.2;
+  height: 34px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .metric-title {
   font-size: 14px;
   color: #909399;
-  margin-bottom: 5px;
+  line-height: 1.2;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .metric-subtitle {
   font-size: 12px;
   color: #C0C4CC;
-  margin-bottom: 8px;
+  line-height: 1;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 
@@ -3030,16 +3064,30 @@ export default {
 
   .metric-value {
     font-size: 24px;
+    height: 30px;
   }
 
   .metric-icon-wrapper {
     width: 50px;
     height: 50px;
+    min-width: 50px;
+    min-height: 50px;
+    max-width: 50px;
+    max-height: 50px;
     margin-right: 12px;
   }
 
   .metric-icon {
     font-size: 20px;
+  }
+
+  .metric-info {
+    height: 50px;
+  }
+
+  .metric-title {
+    height: 16px;
+    font-size: 13px;
   }
 }
 
@@ -3082,11 +3130,39 @@ export default {
     flex-direction: column;
     text-align: center;
     padding: 12px;
+    justify-content: center;
+    align-items: center;
   }
 
   .metric-icon-wrapper {
     margin-right: 0;
     margin-bottom: 10px;
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    min-height: 50px;
+    max-width: 50px;
+    max-height: 50px;
+  }
+
+  .metric-info {
+    height: auto;
+    align-items: center;
+  }
+
+  .metric-value {
+    height: auto;
+    justify-content: center;
+  }
+
+  .metric-title {
+    height: auto;
+    justify-content: center;
+  }
+
+  .metric-subtitle {
+    height: auto;
+    justify-content: center;
   }
 
   .chart-container {
@@ -3125,6 +3201,24 @@ export default {
 
   .metric-value {
     font-size: 20px;
+    height: auto;
+  }
+
+  .metric-icon-wrapper {
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    min-height: 45px;
+    max-width: 45px;
+    max-height: 45px;
+  }
+
+  .metric-icon {
+    font-size: 18px;
+  }
+
+  .metric-title {
+    font-size: 12px;
   }
 
   .chart-header {
