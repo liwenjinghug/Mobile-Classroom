@@ -1991,7 +1991,7 @@ export default {
       const routes = {
         course: '/proj_lw/course',
         classroom: '/proj_lw/classroom',
-        homework: '/proj_lwj/homework_publish',
+        homework: '/proj_lwj/homework_upload',
         exam: '/proj_lwj_exam/exam_portal',
         todo: '/proj_cyq/todo',
         grading: '/proj_lwj/homework_grading',
