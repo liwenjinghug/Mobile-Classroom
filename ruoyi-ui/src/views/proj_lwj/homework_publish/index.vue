@@ -78,8 +78,27 @@
         </div>
         <div class="right">
           <el-button type="primary" size="small" icon="el-icon-refresh" @click="applyFilters">刷新</el-button>
-          <el-button type="success" size="small" icon="el-icon-download" @click="exportList">导出列表</el-button>
-          <el-button type="info" size="small" icon="el-icon-printer" @click="printList">打印列表</el-button>
+          <el-dropdown trigger="click" @command="handleExportPrint" class="export-dropdown">
+            <el-button size="small" type="success">
+              <i class="el-icon-download"></i>
+              导出/打印
+              <i class="el-icon-arrow-down el-icon--right"></i>
+            </el-button>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="csv">
+                <i class="el-icon-document"></i>
+                导出 CSV
+              </el-dropdown-item>
+              <el-dropdown-item command="excel">
+                <i class="el-icon-document"></i>
+                导出 Excel
+              </el-dropdown-item>
+              <el-dropdown-item divided command="print">
+                <i class="el-icon-printer"></i>
+                打印列表
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
         </div>
       </div>
       <div class="toolbar-row">
@@ -101,13 +120,18 @@
         <div slot="header" class="list-header">
           <span>已发布作业（当前课堂）</span>
           <div>
+            <el-button size="small" type="danger" @click="batchDelete" :disabled="selectedHomeworks.length === 0">
+              <i class="el-icon-delete"></i>
+              批量删除 ({{ selectedHomeworks.length }})
+            </el-button>
             <el-button size="small" type="primary" @click="resetForm">发布新作业</el-button>
           </div>
         </div>
 
         <div v-if="!form.sessionId" class="empty-guard">请选择课堂以查看已发布作业</div>
         <div v-else>
-          <el-table :data="sortedAndFilteredList" style="width:100%" v-loading="listLoading" @sort-change="onSortChange" :default-sort="defaultSort" show-summary :summary-method="summaryMethod">
+          <el-table :data="sortedAndFilteredList" style="width:100%" v-loading="listLoading" @sort-change="onSortChange" @selection-change="handleSelectionChange" :default-sort="defaultSort" show-summary :summary-method="summaryMethod">
+            <el-table-column type="selection" width="55" :selectable="checkSelectable"></el-table-column>
             <el-table-column prop="title" label="标题" sortable="custom" />
             <el-table-column label="截止时间" sortable="custom" prop="deadline">
               <template slot-scope="scope">
@@ -280,6 +304,7 @@ export default {
       homeworkList: [],
       listLoading: false,
       publishLoading: false,
+      selectedHomeworks: [],
       // publish page submissions dialog
       submissionsDialogVisible: false,
       pubSubmissions: [],
@@ -702,6 +727,66 @@ export default {
       }).catch(() => {})
     },
 
+    handleSelectionChange(selection) {
+      this.selectedHomeworks = selection
+    },
+
+    checkSelectable(row) {
+      // 所有作业都可以被选择删除
+      return true
+    },
+
+    async batchDelete() {
+      if (this.selectedHomeworks.length === 0) {
+        this.$message.warning('请先选择要删除的作业')
+        return
+      }
+
+      try {
+        await this.$confirm(`确认删除选中的 ${this.selectedHomeworks.length} 条作业？`, '批量删除', {
+          type: 'warning',
+          confirmButtonText: '确认删除',
+          cancelButtonText: '取消'
+        })
+
+        // 询问是否同时删除学生提交
+        const also = window.confirm('是否同时删除这些作业的学生提交记录？\n\n确定：一并删除学生提交\n取消：仅删除发布记录（学生历史提交将保留）')
+
+        const deletePromises = this.selectedHomeworks.map(row => {
+          const id = row.homeworkId || row.id
+          return delHomework(id, also)
+            .then(res => {
+              if (res && (res.code === 200 || res.code === 0)) {
+                return { success: true, id, title: row.title }
+              } else {
+                return { success: false, id, title: row.title, error: res.msg || res.message || '删除失败' }
+              }
+            })
+            .catch(err => {
+              return { success: false, id, title: row.title, error: err.message || '网络错误' }
+            })
+        })
+
+        const results = await Promise.all(deletePromises)
+        const successCount = results.filter(r => r.success).length
+        const failCount = results.filter(r => !r.success).length
+
+        if (failCount === 0) {
+          this.$message.success(`成功删除 ${successCount} 条作业`)
+        } else {
+          const failedTitles = results.filter(r => !r.success).map(r => r.title).join('、')
+          this.$message.warning(`删除完成：成功 ${successCount} 条，失败 ${failCount} 条\n失败的作业：${failedTitles}`)
+        }
+
+        // 刷新列表
+        this.loadHomeworks(this.form.sessionId)
+        // 清空选择
+        this.selectedHomeworks = []
+      } catch {
+        // 用户取消操作
+      }
+    },
+
     loadHomeworks(sessionId) {
       if (!sessionId) { this.homeworkList = []; return }
       this.listLoading = true
@@ -816,14 +901,178 @@ export default {
       this.loadHomeworks(this.form.sessionId)
     },
 
-    exportList() {
-      // TODO: 实现导出功能
-      this.$message.warning('导出功能尚未实现')
+    handleExportPrint(command) {
+      const data = this.sortedAndFilteredList
+      if (!data || data.length === 0) {
+        this.$message.warning('当前没有可导出或打印的作业')
+        return
+      }
+
+      switch (command) {
+        case 'csv':
+          this.exportToCSV(data)
+          break
+        case 'excel':
+          this.exportToExcel(data)
+          break
+        case 'print':
+          this.printList(data)
+          break
+        default:
+          break
+      }
     },
 
-    printList() {
-      // TODO: 实现打印功能
-      this.$message.warning('打印功能尚未实现')
+    exportToCSV(data) {
+      const bom = '\ufeff'
+      const headers = ['标题', '内容', '截止时间', '分值', '附件', '发布状态']
+      const lines = [headers.join(',')]
+
+      data.forEach(r => {
+        const attachments = this.parseAttachments(r.attachments).map(f => this.shortName(f)).join(';')
+        const deadline = this.formatTime(r.deadline) || ''
+        const status = r.homeworkDeleted ? '已删除' : '正常'
+        const content = (r.content || '').replace(/\n/g, ' ').substring(0, 50) + (r.content && r.content.length > 50 ? '...' : '')
+
+        const row = [
+          r.title || '',
+          content,
+          deadline,
+          r.totalScore || '',
+          attachments,
+          status
+        ]
+        lines.push(row.map(v => ('"' + String(v).replace(/"/g, '""') + '"')).join(','))
+      })
+
+      const blob = new Blob([bom + lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `作业发布列表_${this.timestampString()}.csv`
+      a.click()
+      URL.revokeObjectURL(a.href)
+      this.$message.success('CSV导出成功')
+    },
+
+    exportToExcel(data) {
+      const headers = ['标题', '内容', '截止时间', '分值', '附件', '发布状态']
+      let html = '<table border="1"><thead><tr>' + headers.map(h => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>'
+
+      data.forEach(r => {
+        const attachments = this.parseAttachments(r.attachments).map(f => this.shortName(f)).join('; ')
+        const deadline = this.formatTime(r.deadline) || ''
+        const status = r.homeworkDeleted ? '已删除' : '正常'
+        const content = (r.content || '').replace(/\n/g, ' ').substring(0, 100) + (r.content && r.content.length > 100 ? '...' : '')
+
+        const row = [
+          r.title || '',
+          content,
+          deadline,
+          r.totalScore || '',
+          attachments,
+          status
+        ]
+        html += '<tr>' + row.map(v => '<td style="mso-number-format:\\@">' + String(v).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</td>').join('') + '</tr>'
+      })
+
+      html += '</tbody></table>'
+      const blob = new Blob(['\ufeff' + html], { type: 'application/vnd.ms-excel' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `作业发布列表_${this.timestampString()}.xls`
+      a.click()
+      URL.revokeObjectURL(a.href)
+      this.$message.success('Excel导出成功')
+    },
+
+    printList(data) {
+      if (!data || data.length === 0) {
+        this.$message.warning('没有可打印的数据')
+        return
+      }
+
+      const esc = s => String(s == null ? '' : s).replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      const rows = data.map(r => {
+        const attachments = this.parseAttachments(r.attachments).map(f => this.shortName(f)).join('; ')
+        const deadline = this.formatTime(r.deadline) || '—'
+        const status = r.homeworkDeleted ? '已删除' : '正常'
+        const content = (r.content || '').substring(0, 50) + (r.content && r.content.length > 50 ? '...' : '')
+
+        return `<tr>
+          <td>${esc(r.title || '')}</td>
+          <td>${esc(content)}</td>
+          <td>${esc(deadline)}</td>
+          <td>${esc(r.totalScore || '')}</td>
+          <td>${esc(attachments)}</td>
+          <td>${status}</td>
+        </tr>`
+      }).join('')
+
+      const stats = this.stats
+      const statsText = stats ? `统计：共 ${stats.total} 条；已过期 ${stats.overdue}；含附件 ${stats.withAttach}；平均分值 ${stats.avgScore}` : ''
+
+      const win = window.open('', '_blank')
+      if (!win) {
+        this.$message.error('打印窗口被拦截，请允许弹出窗口')
+        return
+      }
+
+      win.document.write(`
+        <html>
+        <head>
+          <title>作业发布列表</title>
+          <meta charset="utf-8" />
+          <style>
+            body { font-family: Arial, Helvetica, 'Microsoft YaHei'; padding: 20px; }
+            table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+            th, td { border: 1px solid #999; padding: 8px; text-align: left; font-size: 12px; }
+            th { background: #f5f5f5; font-weight: bold; }
+            h2 { margin: 0 0 12px; }
+            .meta { margin: 6px 0 16px; color: #666; font-size: 14px; }
+            .no-print { margin-top: 20px; text-align: center; }
+            @media print {
+              body { padding: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <h2>作业发布列表</h2>
+          <div class="meta">${statsText}</div>
+          <table>
+            <thead>
+              <tr>
+                <th>标题</th>
+                <th>内容</th>
+                <th>截止时间</th>
+                <th>分值</th>
+                <th>附件</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+          <div class="no-print">
+            <button onclick="window.print()" style="padding: 8px 20px; font-size: 14px; cursor: pointer;">打印</button>
+            <button onclick="window.close()" style="padding: 8px 20px; font-size: 14px; cursor: pointer; margin-left: 10px;">关闭</button>
+          </div>
+        </body>
+        </html>
+      `)
+      win.document.close()
+    },
+
+    timestampString() {
+      const d = new Date()
+      const pad = n => String(n).padStart(2, '0')
+      return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds())
+    },
+
+    exportList() {
+      // 保留旧方法以防兼容性问题
+      this.$message.warning('请使用"导出/打印"下拉菜单')
     },
 
     previewFile(file) {

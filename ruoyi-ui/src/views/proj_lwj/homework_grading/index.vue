@@ -47,24 +47,11 @@
 
     <!-- 提交列表模式（全屏） -->
     <div v-else class="submissions-full-view">
-      <div class="submissions-header">
-        <div class="left">
-          <h3>{{ selectedHomework ? selectedHomework.title : '作业' }} — 提交列表</h3>
-          <el-tag size="mini" type="info" style="margin-left:8px">课堂：{{ courseInfo.sessionName || '—' }}</el-tag>
+      <div class="header-row" v-if="isSubmissionsView">
+        <div class="title">
+          {{ (selectedHomework && selectedHomework.title) || '作业' }} - 提交列表
         </div>
-        <div class="right">
-          <el-select v-model="subSortField" size="mini" placeholder="排序字段" style="width:140px;margin-right:8px">
-            <el-option label="成绩" value="score" />
-            <el-option label="提交时间" value="submitTime" />
-            <el-option label="批改时间" value="correctedTime" />
-            <el-option label="已批改" value="graded" />
-            <el-option label="学号" value="studentNo" />
-            <el-option label="姓名" value="studentName" />
-          </el-select>
-          <el-select v-model="subSortOrder" size="mini" placeholder="顺序" style="width:120px;margin-right:8px">
-            <el-option label="降序" value="desc" />
-            <el-option label="升序" value="asc" />
-          </el-select>
+        <div class="controls">
           <el-button size="mini" type="primary" icon="el-icon-refresh" @click="refreshSubmissions(true)" :loading="submissionsLoading">刷新</el-button>
           <el-button size="mini" type="success" icon="el-icon-download" @click="exportSubmissionsCsv">导出</el-button>
           <el-button size="mini" type="info" icon="el-icon-printer" @click="printSubmissions">打印</el-button>
@@ -74,6 +61,13 @@
 
       <!-- 统计信息 -->
       <div v-if="submissions && submissions.length" class="stats-section">
+        <div class="section-header">
+          <h3>作业提交与批改</h3>
+          <div class="actions">
+            <!-- 这里可以加额外操作按钮 -->
+          </div>
+        </div>
+
         <el-alert type="info" :title="statsSummary" :closable="false" />
       </div>
 
@@ -100,8 +94,14 @@
           </el-table-column>
           <el-table-column label="成绩" width="100" align="center">
             <template #default="{ row }">
-              <span v-if="row.score !== null && row.score !== undefined"
-                    :style="{ color: row.score >= 60 ? '#67c23a' : '#f56c6c', fontWeight: 'bold', fontSize: '16px' }">
+              <span
+                v-if="row.score !== null && row.score !== undefined"
+                :style="{
+                  color: row.score >= 60 ? '#67c23a' : '#f56c6c',
+                  fontWeight: 'bold',
+                  fontSize: '16px'
+                }"
+              >
                 {{ row.score }}
               </span>
               <span v-else style="color: #909399">—</span>
@@ -113,23 +113,21 @@
               <span v-else style="color: #999">无评语</span>
             </template>
           </el-table-column>
-          <el-table-column label="附件" min-width="150" show-overflow-tooltip>
+          <el-table-column label="附件" min-width="200">
             <template #default="{ row }">
-              <div v-if="row.submissionFiles" style="display: flex; flex-wrap: wrap; gap: 4px;">
+              <div v-if="parseAttachments(row.submissionFiles).length">
                 <el-tag
-                  v-for="(file, index) in parseAttachments(row.submissionFiles)"
-                  :key="index"
-                  size="mini"
-                  type="success"
-                  class="attachment-download"
-                  style="cursor: pointer; margin: 2px;"
-                  :title="`点击下载文件：${getFileName(file)}`"
-                  @click="previewFile(file)">
-                  <i class="el-icon-download" style="margin-right: 4px;"></i>
-                  {{ getFileName(file) }}
+                  v-for="(f, idx) in parseAttachments(row.submissionFiles)"
+                  :key="idx + '-' + f"
+                  class="file-chip"
+                  type="info"
+                  @click="downloadFile(f)"
+                  style="cursor: pointer; margin-right: 6px; margin-bottom: 4px;"
+                >
+                  {{ getFileName(f) }}
                 </el-tag>
               </div>
-              <span v-else style="color: #999">无附件</span>
+              <span v-else>—</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="120" align="center" fixed="right">
@@ -138,7 +136,8 @@
                 size="mini"
                 :type="rowIsGraded(row) ? 'success' : 'primary'"
                 @click="startGrade(row)"
-                :disabled="!canGrade(row)">
+                :disabled="!canGrade(row)"
+              >
                 {{ gradeButtonLabel(row) }}
               </el-button>
             </template>
@@ -176,7 +175,8 @@
               :precision="1"
               :step="0.5"
               controls-position="right"
-              style="width: 100%" />
+              style="width: 100%"
+            />
             <div class="form-tip">满分: {{ selectedHomework ? selectedHomework.totalScore : 100 }} 分</div>
           </el-form-item>
           <el-form-item label="评语">
@@ -186,7 +186,8 @@
               :rows="4"
               placeholder="请输入评语（可选）"
               maxlength="200"
-              show-word-limit />
+              show-word-limit
+            />
           </el-form-item>
         </el-form>
       </div>
@@ -222,15 +223,13 @@ export default {
       selectedHomework: null,
       submissions: [],
       submissionsLoading: false,
+      selectedRows: [],
 
       // 批改相关
       gradeDialogVisible: false,
       gradingRow: {},
       gradeForm: { score: null, remark: '' },
       gradeSubmitting: false,
-
-      // 批量下载相关
-      batchDownloadLoading: false,
 
       // 排序相关
       subSortField: 'graded',
@@ -252,61 +251,91 @@ export default {
       const order = (this.subSortOrder || 'desc').toLowerCase()
       const desc = order !== 'asc'
 
-      // 判断提交状态：0=未提交, 1=已提交未批改, 2=已批改
+      // 统一用 status 来代表状态：0未提交、1已提交、2已批改、3已逾期
       const getSubmitStatus = r => {
-        if (r.corrected_time || r.correctedTime || r.score != null) return 2 // 已批改
-        if (r.submitTime || (r.submissionFiles && r.submissionFiles.length)) return 1 // 已提交
-        return 0 // 未提交
-      }
-
-      const val = r => {
-        if(field === 'graded') return getSubmitStatus(r)
-        if(field === 'score') return r.score == null ? (desc?-Infinity:Infinity) : Number(r.score)
-        if(field === 'submitTime') return r.submitTime ? new Date(r.submitTime).getTime() : 0
-        if(field === 'correctedTime') return (r.corrected_time || r.correctedTime) ? new Date(r.corrected_time || r.correctedTime).getTime() : 0
-        if(field === 'studentNo') {
-          const s = (r.student_no || r.studentNo || '').toString()
-          const n = Number(s.replace(/[^0-9]/g,''))
-          return isNaN(n) ? s.toLowerCase() : n
+        const sRaw = r.status
+        if (sRaw !== undefined && sRaw !== null) {
+          const s = String(sRaw)
+          // 排序优先级：已批改(2) > 已提交(1) > 已逾期(3) > 未提交(0)
+          if (s === '2') return 3
+          if (s === '1') return 2
+          if (s === '3') return 1
+          return 0
         }
-        if(field === 'studentName') return (r.studentName || r.student_name || '').toString().toLowerCase()
+        // 没有 status 时的兜底逻辑
+        if (this.rowIsGraded(r)) return 3
+        if (r.submitTime || (r.submissionFiles && r.submissionFiles.length)) return 2
         return 0
       }
 
-      return rows.sort((a,b)=>{
-        const av = val(a), bv = val(b)
-        if(av===bv) {
-          // 相同状态时，按提交时间倒序排序（最新的在前）
+      const val = r => {
+        if (field === 'graded') return getSubmitStatus(r)
+        if (field === 'score') return r.score == null ? (desc ? -Infinity : Infinity) : Number(r.score)
+        if (field === 'submitTime') return r.submitTime ? new Date(r.submitTime).getTime() : 0
+        if (field === 'correctedTime') {
+          const t = r.corrected_time || r.correctedTime
+          return t ? new Date(t).getTime() : 0
+        }
+        if (field === 'studentNo') {
+          const s = (r.student_no || r.studentNo || '').toString()
+          const n = Number(s.replace(/[^0-9]/g, ''))
+          return isNaN(n) ? s.toLowerCase() : n
+        }
+        if (field === 'studentName') return (r.studentName || r.student_name || '').toString().toLowerCase()
+        return 0
+      }
+
+      return rows.sort((a, b) => {
+        const av = val(a)
+        const bv = val(b)
+        if (av === bv) {
           const timeA = a.submitTime ? new Date(a.submitTime).getTime() : 0
           const timeB = b.submitTime ? new Date(b.submitTime).getTime() : 0
           return timeB - timeA
         }
-        return desc ? (av>bv?-1:1) : (av>bv?1:-1)
+        return desc ? (av > bv ? -1 : 1) : (av > bv ? 1 : -1)
       })
     },
     statsSummary() {
-      const total = (this.submissions || []).length
-      const submitted = (this.submissions || []).filter(r =>
-        r.submitTime || (r.submissionFiles && r.submissionFiles.length)
-      ).length
-      const graded = (this.submissions || []).filter(r => this.rowIsGraded(r)).length
-      const avgScore = total > 0 ?
-        ((this.submissions || []).reduce((sum, r) => sum + (Number(r.score) || 0), 0) / total).toFixed(1) : 0
+      const list = this.submissions || []
+      const total = list.length
+
+      // 统一用 status 来统计已提交人数（1、2、3 都认为是已提交，只是状态不同）
+      const submitted = list.filter(r => {
+        const sRaw = r.status
+        if (sRaw !== undefined && sRaw !== null) {
+          const s = String(sRaw)
+          if (s === '1' || s === '2' || s === '3') return true
+        }
+        return !!(r.submitTime || (r.submissionFiles && String(r.submissionFiles).trim()))
+      }).length
+
+      const graded = list.filter(r => this.rowIsGraded(r)).length
+
+      // 平均分只统计有分数的记录
+      const scoredList = list.filter(r => r.score !== null && r.score !== undefined && r.score !== '')
+      const avgScore =
+        scoredList.length > 0
+          ? (
+            scoredList.reduce((sum, r) => sum + (Number(r.score) || 0), 0) / scoredList.length
+          ).toFixed(1)
+          : 0
 
       return `统计：共 ${total} 人，已提交 ${submitted} 人，已批改 ${graded} 人，平均分 ${avgScore}`
     },
     hasAttachments() {
-      // 检查是否有提交的附件可以下载
       if (!this.submissions || !this.submissions.length) return false
-      return this.submissions.some(submission =>
-        submission.submissionFiles && submission.submissionFiles.trim()
+      return this.submissions.some(
+        submission => submission.submissionFiles && submission.submissionFiles.trim()
       )
+    },
+    hasAnyAttachment() {
+      return (this.submissions || []).some(r => this.attachmentsOf(r).length > 0)
     }
   },
   created() {
     console.log('作业批改页面初始化')
     this.fetchCourses().then(() => {
-      // 尝试恢复上次选择的课程和课堂
       const lastCourseId = localStorage.getItem('homework_grading_last_courseId')
       const lastSessionId = localStorage.getItem('homework_grading_last_sessionId')
 
@@ -343,7 +372,6 @@ export default {
         return
       }
 
-      // 保存用户选择的课程
       localStorage.setItem('homework_grading_last_courseId', this.form.courseId)
 
       try {
@@ -366,7 +394,6 @@ export default {
         return
       }
 
-      // 保存用户选择的课堂
       localStorage.setItem('homework_grading_last_sessionId', this.form.sessionId)
 
       this.loading = true
@@ -407,14 +434,12 @@ export default {
         totalScore: row.totalScore
       }
 
-      // 切换到提交列表视图
       this.isSubmissionsView = true
       this.loadSubmissions(id)
 
       this.$message.success(`正在加载【${this.selectedHomework.title}】的提交列表`)
     },
 
-    // 关闭提交列表视图
     closeSubmissionsView() {
       this.isSubmissionsView = false
       this.selectedHomework = null
@@ -448,15 +473,19 @@ export default {
       }
     },
 
-    async refreshSubmissions(force=false) {
-      if(!this.selectedHomework) return
+    async refreshSubmissions(force = false) {
+      if (!this.selectedHomework) return
       this.submissionsLoading = true
       try {
         const res = await getSubmissions(this.selectedHomework.homeworkId || this.selectedHomework.id)
-        const raw = res && (res.data || res.rows) ? (res.data || res.rows) : (res || [])
+        const raw = res && (res.data || res.rows) ? (res.data || res.rows) : res || []
         this.submissions = Array.isArray(raw) ? raw : []
-      } catch(e){ console.error(e); this.$message.error('加载提交失败') }
-      finally { this.submissionsLoading=false }
+      } catch (e) {
+        console.error(e)
+        this.$message.error('加载提交失败')
+      } finally {
+        this.submissionsLoading = false
+      }
     },
 
     startGrade(row) {
@@ -468,14 +497,12 @@ export default {
     },
 
     async submitGrade() {
-      // 提交批改成绩
       if (!this.selectedHomework || !this.gradingRow || !this.gradingRow.studentHomeworkId) {
         const sid = this.gradingRow.student_homework_id || this.gradingRow.id
         if (!sid) {
           this.$message.error('无法识别提交记录ID')
           return
         }
-        // 兼容不同字段命名
         this.gradingRow.studentHomeworkId = sid
       }
 
@@ -501,7 +528,6 @@ export default {
         }
         this.$message.success('批改成绩已提交')
         this.gradeDialogVisible = false
-        // 刷新提交列表以展示最新成绩
         await this.refreshSubmissions(true)
       } catch (error) {
         console.error('批改提交失败:', error)
@@ -511,14 +537,19 @@ export default {
       }
     },
 
+    // 统一“已批改”判断逻辑：status == 2 或 is_graded == 1 或 有成绩/批改时间
     rowIsGraded(row) {
-      return (row.is_graded === 1) ||
-        String(row.status) === '2' ||
-        (row.grade !== null && row.grade !== undefined) ||
-        (row.score !== null && row.score !== undefined)
+      const sRaw = row.status
+      if (sRaw !== undefined && sRaw !== null && String(sRaw) === '2') return true
+      if (row.is_graded === 1 || row.isGraded === 1) return true
+      if (row.corrected_time || row.correctedTime) return true
+      if (row.grade !== null && row.grade !== undefined) return true
+      if (row.score !== null && row.score !== undefined) return true
+      return false
     },
 
     canGrade(row) {
+      // 只要有提交记录就可以批改（包括已逾期的提交）
       return !!(row.submitTime || (row.submissionFiles && row.submissionFiles.length))
     },
 
@@ -526,21 +557,41 @@ export default {
       return this.rowIsGraded(row) ? '修改' : '批改'
     },
 
+    // 根据 status 返回标签类型
     getStatusType(row) {
-      if (this.rowIsGraded(row)) return 'success'
-      if (row.submitTime) return 'warning'
+      const sRaw = row.status
+      const s = sRaw !== undefined && sRaw !== null ? String(sRaw) : null
+
+      // 2 = 已批改
+      if (s === '2' || this.rowIsGraded(row)) return 'success'
+      // 3 = 已逾期
+      if (s === '3') return 'danger'
+      // 1 = 已提交未批改
+      if (s === '1') return 'warning'
+      // 兜底：通过 submitTime 判断是否已提交
+      if (row.submitTime || (row.submissionFiles && row.submissionFiles.length)) return 'warning'
+      // 0 或未定义 = 未提交
       return 'info'
     },
 
+    // 根据 status 返回显示文本
     getStatusText(row) {
-      if (this.rowIsGraded(row)) return '已批改'
-      if (row.submitTime) return '已提交'
+      const sRaw = row.status
+      const s = sRaw !== undefined && sRaw !== null ? String(sRaw) : null
+
+      if (s === '2' || this.rowIsGraded(row)) return '已批改'
+      if (s === '3') return '已逾期'
+      if (s === '1') return '已提交'
+      if (row.submitTime || (row.submissionFiles && row.submissionFiles.length)) return '已提交'
       return '未提交'
     },
 
     parseAttachments(files) {
       if (!files) return []
-      return String(files).split(',').map(f => f.trim()).filter(Boolean)
+      return String(files)
+        .split(',')
+        .map(f => f.trim())
+        .filter(Boolean)
     },
 
     getFileName(filePath) {
@@ -570,28 +621,38 @@ export default {
           method: 'get',
           responseType: 'blob',
           headers
-        }).then(blob => {
-          console.log('下载成功，创建下载链接')
-          const data = blob && blob.data instanceof Blob ? blob.data : (blob instanceof Blob ? blob : new Blob([blob]))
-          const href = URL.createObjectURL(data)
-          const a = document.createElement('a')
-          a.href = href
-          a.download = filename
-          a.click()
-          URL.revokeObjectURL(href)
-          this.$message.success('文件下载完成')
-        }).catch(error => {
-          console.error('下载失败:', error)
-          throw error
         })
+          .then(blob => {
+            console.log('下载成功，创建下载链接')
+            const data =
+              blob && blob.data instanceof Blob
+                ? blob.data
+                : blob instanceof Blob
+                  ? blob
+                  : new Blob([blob])
+            const href = URL.createObjectURL(data)
+            const a = document.createElement('a')
+            a.href = href
+            a.download = filename
+            a.click()
+            URL.revokeObjectURL(href)
+            this.$message.success('文件下载完成')
+          })
+          .catch(error => {
+            console.error('下载失败:', error)
+            throw error
+          })
       }
 
-      const tryProfile = () => downloadBlob(`/common/download/resource?resource=${encodeURIComponent(norm)}`).catch(() => {
-        console.log('profile资源下载失败，尝试fileName方式')
-        const rel = norm.replace(/^\/?profile\/upload\//, '')
-        if (!rel) throw new Error('missing path')
-        return downloadBlob(`/common/download?fileName=${encodeURIComponent(rel)}&delete=false`)
-      })
+      const tryProfile = () =>
+        downloadBlob(`/common/download/resource?resource=${encodeURIComponent(norm)}`).catch(
+          () => {
+            console.log('profile资源下载失败，尝试fileName方式')
+            const rel = norm.replace(/^\/?profile\/upload\//, '')
+            if (!rel) throw new Error('missing path')
+            return downloadBlob(`/common/download?fileName=${encodeURIComponent(rel)}&delete=false`)
+          }
+        )
 
       if (norm.startsWith('/profile')) {
         console.log('使用profile路径下载')
@@ -601,9 +662,11 @@ export default {
         window.open(norm, '_blank')
       } else {
         console.log('使用fileName方式下载')
-        downloadBlob(`/common/download?fileName=${encodeURIComponent(norm)}&delete=false`).catch(() => {
-          this.$message.error('文件下载失败')
-        })
+        downloadBlob(`/common/download?fileName=${encodeURIComponent(norm)}&delete=false`).catch(
+          () => {
+            this.$message.error('文件下载失败')
+          }
+        )
       }
       console.log('=== 调试结束 ===')
     },
@@ -612,23 +675,19 @@ export default {
     previewImage(filePath) {
       const imageUrl = this.downloadUrl(filePath)
       const fileName = this.getFileName(filePath)
-
-      // 解码文件名以正确显示中文
       const decodedFileName = decodeURIComponent(fileName)
 
-      // 调试信息
       console.log('图片预览 - 原始文件路径:', filePath)
       console.log('图片预览 - 生成的URL:', imageUrl)
       console.log('图片预览 - 文件名:', fileName)
       console.log('图片预览 - 解码后文件名:', decodedFileName)
 
-      // 创建一个测试图片来检查URL是否有效
       const testImg = new Image()
       testImg.onload = () => {
         console.log('图片加载成功，可以显示预览')
         this.showImagePreview(imageUrl, decodedFileName)
       }
-      testImg.onerror = (error) => {
+      testImg.onerror = error => {
         console.error('图片加载失败:', error)
         console.log('尝试备用下载方式')
         this.showImagePreviewWithFallback(imageUrl, filePath, decodedFileName)
@@ -636,9 +695,9 @@ export default {
       testImg.src = imageUrl
     },
 
-    // 显示图片预览（成功加载时）
     showImagePreview(blobUrl, fileName, originalUrl) {
-      this.$alert(`
+      this.$alert(
+        `
         <div style="text-align: center; padding: 10px;">
           <div style="margin-bottom: 12px; font-size: 14px; color: #666; font-weight: 500;">
             ${this.escapeHtml(fileName)}
@@ -654,24 +713,26 @@ export default {
             <a href="${originalUrl || blobUrl}" target="_blank" style="color: #409eff; text-decoration: none;">在新窗口中打开</a>
           </div>
         </div>
-      `, '图片预览', {
-        dangerouslyUseHTMLString: true,
-        showConfirmButton: true,
-        confirmButtonText: '关闭',
-        customClass: 'image-preview-dialog',
-        callback: () => {
-          // 清理blob URL资源
-          if (blobUrl && blobUrl.startsWith('blob:')) {
-            URL.revokeObjectURL(blobUrl)
-            console.log('已清理blob URL资源:', blobUrl)
+      `,
+        '图片预览',
+        {
+          dangerouslyUseHTMLString: true,
+          showConfirmButton: true,
+          confirmButtonText: '关闭',
+          customClass: 'image-preview-dialog',
+          callback: () => {
+            if (blobUrl && blobUrl.startsWith('blob:')) {
+              URL.revokeObjectURL(blobUrl)
+              console.log('已清理blob URL资源:', blobUrl)
+            }
           }
         }
-      })
+      )
     },
 
-    // 显示图片预览（加载失败时的备用方案）
     showImagePreviewWithFallback(imageUrl, filePath, fileName) {
-      this.$alert(`
+      this.$alert(
+        `
         <div style="text-align: center; padding: 20px;">
           <div style="margin-bottom: 16px;">
             <i class="el-icon-picture" style="font-size: 48px; color: #ddd;"></i>
@@ -686,7 +747,9 @@ export default {
             <a href="${imageUrl}" target="_blank" style="color: #409eff; text-decoration: none; padding: 8px 16px; border: 1px solid #409eff; border-radius: 4px; font-size: 12px;">
               在新窗口中打开
             </a>
-            <button onclick="document.createElement('a').href='${imageUrl}'; document.querySelector('a').download='${this.escapeHtml(fileName)}'; document.querySelector('a').click();" style="color: #67c23a; background: none; border: 1px solid #67c23a; border-radius: 4px; padding: 8px 16px; cursor: pointer; font-size: 12px;">
+            <button onclick="document.createElement('a').href='${imageUrl}'; document.querySelector('a').download='${this.escapeHtml(
+          fileName
+        )}'; document.querySelector('a').click();" style="color: #67c23a; background: none; border: 1px solid #67c23a; border-radius: 4px; padding: 8px 16px; cursor: pointer; font-size: 12px;">
               直接下载
             </button>
           </div>
@@ -694,15 +757,17 @@ export default {
             原始路径: ${this.escapeHtml(filePath)}
           </div>
         </div>
-      `, '图片预览', {
-        dangerouslyUseHTMLString: true,
-        showConfirmButton: true,
-        confirmButtonText: '关闭',
-        customClass: 'image-preview-dialog'
-      })
+      `,
+        '图片预览',
+        {
+          dangerouslyUseHTMLString: true,
+          showConfirmButton: true,
+          confirmButtonText: '关闭',
+          customClass: 'image-preview-dialog'
+        }
+      )
     },
 
-    // HTML转义函数，防止XSS攻击
     escapeHtml(text) {
       if (!text) return ''
       return String(text)
@@ -713,7 +778,6 @@ export default {
         .replace(/'/g, '&#39;')
     },
 
-    // 下载文件
     downloadFile(file) {
       const downloadLink = this.downloadUrl(file)
       const a = document.createElement('a')
@@ -724,17 +788,14 @@ export default {
       document.body.removeChild(a)
     },
 
-    // 生成下载URL
     downloadUrl(fileName) {
       const base = process.env.VUE_APP_BASE_API || ''
       if (!fileName) return ''
 
       let f = String(fileName).trim()
 
-      // 调试信息
       console.log('downloadUrl - 输入文件名:', f)
 
-      // 处理完整的HTTP URL
       if (f.startsWith('http://') || f.startsWith('https://')) {
         console.log('downloadUrl - 识别为完整URL')
         return f
@@ -742,35 +803,26 @@ export default {
 
       let finalUrl = ''
 
-      // 处理 /profile 开头的资源路径
       if (f.startsWith('/profile') || f.startsWith('profile')) {
         console.log('downloadUrl - 识别为profile路径')
         finalUrl = base + '/common/download/resource?resource=' + encodeURIComponent(f)
-      }
-      // 处理 /upload 开头的路径 - 转换为 /profile/upload
-      else if (f.startsWith('/upload/')) {
+      } else if (f.startsWith('/upload/')) {
         console.log('downloadUrl - 识别为/upload路径，转换为/profile/upload')
         const profilePath = '/profile' + f
         finalUrl = base + '/common/download/resource?resource=' + encodeURIComponent(profilePath)
-      }
-      // 处理 upload/ 开头的路径
-      else if (f.startsWith('upload/')) {
+      } else if (f.startsWith('upload/')) {
         console.log('downloadUrl - 识别为upload路径，转换为/profile/upload')
         const profilePath = '/profile/' + f
         finalUrl = base + '/common/download/resource?resource=' + encodeURIComponent(profilePath)
-      }
-      // 处理年份格式的路径 (如 2024/12/03/file.txt)
-      else if (/^\d{4}\//.test(f)) {
+      } else if (/^\d{4}\//.test(f)) {
         console.log('downloadUrl - 识别为年份格式路径，转换为/profile/upload/')
         const profilePath = '/profile/upload/' + f
         finalUrl = base + '/common/download/resource?resource=' + encodeURIComponent(profilePath)
-      }
-      // 默认使用fileName下载接口
-      else {
+      } else {
         console.log('downloadUrl - 使用默认fileName下载接口')
         const token = require('@/utils/auth').getToken()
         const baseQuery = base + '/common/download?fileName=' + encodeURIComponent(f)
-        finalUrl = token ? (baseQuery + '&token=' + token) : baseQuery
+        finalUrl = token ? baseQuery + '&token=' + token : baseQuery
       }
 
       console.log('downloadUrl - 最终生成的URL:', finalUrl)
@@ -778,61 +830,87 @@ export default {
     },
 
     exportSubmissions() {
-      // 导出逻辑
       this.$message.info('导出功能开发中...')
     },
 
     async exportSubmissionsCsv() {
       const list = this.sortedSubmissions || []
-      if(!list.length){ this.$message.warning('暂无可导出数据'); return }
-      const headers = ['学号','姓名','提交时间','批改时间','成绩','评语','文件']
+      if (!list.length) {
+        this.$message.warning('暂无可导出数据')
+        return
+      }
+      const headers = ['学号', '姓名', '提交时间', '批改时间', '成绩', '评语', '文件']
       const lines = [headers.join(',')]
-      list.forEach(r=>{
+      list.forEach(r => {
         const no = r.student_no || r.studentNo || ''
         const name = r.studentName || r.student_name || ''
         const submit = this.formatTime(r.submitTime) || ''
         const corrected = this.formatTime(r.corrected_time || r.correctedTime) || ''
-        const score = r.score==null?'':r.score
+        const score = r.score == null ? '' : r.score
         const remark = r.remark || ''
         const files = this.parseFiles(r.submissionFiles || r.files || '')
-        const row = [no,name,submit,corrected,score,remark,files.join(' | ')]
-        lines.push(row.map(v=> '"'+String(v).replace(/"/g,'""')+'"').join(','))
+        const row = [no, name, submit, corrected, score, remark, files.join(' | ')]
+        lines.push(
+          row
+            .map(v => '"' + String(v).replace(/"/g, '""') + '"')
+            .join(',')
+        )
       })
-      const blob = new Blob(['\ufeff'+lines.join('\n')], { type:'text/csv;charset=utf-8;' })
+      const blob = new Blob(['\ufeff' + lines.join('\n')], {
+        type: 'text/csv;charset=utf-8;'
+      })
       const a = document.createElement('a')
       a.href = URL.createObjectURL(blob)
-      a.download = `作业提交_${(this.selectedHomework && this.selectedHomework.title)||'作业'}_${this.tsStr()}.csv`
-      a.click(); URL.revokeObjectURL(a.href)
+      a.download = `作业提交_${(this.selectedHomework && this.selectedHomework.title) || '作业'}_${this.tsStr()}.csv`
+      a.click()
+      URL.revokeObjectURL(a.href)
     },
 
     printSubmissions() {
       const list = this.sortedSubmissions || []
-      const title = `${(this.selectedHomework && this.selectedHomework.title)||'作业'} - 提交列表（${this.courseInfo.sessionName||'课堂'}）`
-      const cols = ['学号','姓名','提交时间','批改时间','成绩','评语']
-      const rowsHtml = list.map(r=>{
-        const no = r.student_no || r.studentNo || ''
-        const name = r.studentName || r.student_name || ''
-        const submit = this.formatTime(r.submitTime) || '—'
-        const corrected = this.formatTime(r.corrected_time || r.correctedTime) || '—'
-        const score = r.score==null?'—':(r.score+'分')
-        const remark = r.remark || ''
-        return `<tr><td>${no}</td><td>${name}</td><td>${submit}</td><td>${corrected}</td><td>${score}</td><td>${remark}</td></tr>`
-      }).join('')
+      const title = `${(this.selectedHomework && this.selectedHomework.title) || '作业'} - 提交列表（${
+        this.courseInfo.sessionName || '课堂'
+      }）`
+      const cols = ['学号', '姓名', '提交时间', '批改时间', '成绩', '评语']
+      const rowsHtml = list
+        .map(r => {
+          const no = r.student_no || r.studentNo || ''
+          const name = r.studentName || r.student_name || ''
+          const submit = this.formatTime(r.submitTime) || '—'
+          const corrected = this.formatTime(r.corrected_time || r.correctedTime) || '—'
+          const score = r.score == null ? '—' : r.score + '分'
+          const remark = r.remark || ''
+          return `<tr><td>${no}</td><td>${name}</td><td>${submit}</td><td>${corrected}</td><td>${score}</td><td>${remark}</td></tr>`
+        })
+        .join('')
       const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>
       <style>body{font-family:Segoe UI,Arial,Helvetica,sans-serif;padding:20px;color:#303133}h1{font-size:20px;margin:0 0 12px}.table{width:100%;border-collapse:collapse}.table th,.table td{border:1px solid #ddd;padding:6px 8px;font-size:12px}.table th{background:#f5f7fa;text-align:left}@media print{button{display:none}}</style>
-      </head><body><h1>${title}</h1><table class="table"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table><button onclick="window.print()" style="margin-top:12px">打印</button></body></html>`
-      const win = window.open('','_blank'); if(win){ win.document.open(); win.document.write(html); win.document.close(); win.focus(); }
+      </head><body><h1>${title}</h1><table class="table"><thead><tr>${cols
+        .map(c => `<th>${c}</th>`)
+        .join('')}</tr></thead><tbody>${rowsHtml}</tbody></table><button onclick="window.print()" style="margin-top:12px">打印</button></body></html>`
+      const win = window.open('', '_blank')
+      if (win) {
+        win.document.open()
+        win.document.write(html)
+        win.document.close()
+        win.focus()
+      }
     },
 
     tsStr() {
-      const d=new Date();
-      const p=n=>String(n).padStart(2,'0');
-      return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`
+      const d = new Date()
+      const p = n => String(n).padStart(2, '0')
+      return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(
+        d.getMinutes()
+      )}${p(d.getSeconds())}`
     },
 
     parseFiles(files) {
-      if(!files) return [];
-      return String(files).split(',').map(s=>s.trim()).filter(Boolean)
+      if (!files) return []
+      return String(files)
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
     },
 
     backToList() {
@@ -843,36 +921,136 @@ export default {
     formatTime(val) {
       if (!val) return ''
       try {
-        // ISO string or common date string
         if (typeof val === 'string') {
           const s = val.trim()
-          // pure digits: timestamp
           if (/^\d+$/.test(s)) {
             let n = Number(s)
             if (s.length === 10) n *= 1000
             const d = new Date(n)
-            return isNaN(d.getTime()) ? '' : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+            return isNaN(d.getTime())
+              ? ''
+              : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+                d.getDate()
+              ).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(
+                d.getMinutes()
+              ).padStart(2, '0')}`
           }
           const d1 = new Date(s)
-          if (!isNaN(d1.getTime())) return `${d1.getFullYear()}-${String(d1.getMonth() + 1).padStart(2, '0')}-${String(d1.getDate()).padStart(2, '0')} ${String(d1.getHours()).padStart(2, '0')}:${String(d1.getMinutes()).padStart(2, '0')}`
+          if (!isNaN(d1.getTime())) {
+            return `${d1.getFullYear()}-${String(d1.getMonth() + 1).padStart(2, '0')}-${String(
+              d1.getDate()
+            ).padStart(2, '0')} ${String(d1.getHours()).padStart(2, '0')}:${String(
+              d1.getMinutes()
+            ).padStart(2, '0')}`
+          }
           const d2 = new Date(s.replace(/-/g, '/'))
-          if (!isNaN(d2.getTime())) return `${d2.getFullYear()}-${String(d2.getMonth() + 1).padStart(2, '0')}-${String(d2.getDate()).padStart(2, '0')} ${String(d2.getHours()).padStart(2, '0')}:${String(d2.getMinutes()).padStart(2, '0')}`
+          if (!isNaN(d2.getTime())) {
+            return `${d2.getFullYear()}-${String(d2.getMonth() + 1).padStart(2, '0')}-${String(
+              d2.getDate()
+            ).padStart(2, '0')} ${String(d2.getHours()).padStart(2, '0')}:${String(
+              d2.getMinutes()
+            ).padStart(2, '0')}`
+          }
           return s
         }
-        // Date object
         if (val instanceof Date) {
           const d = val
-          return isNaN(d.getTime()) ? '' : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+          return isNaN(d.getTime())
+            ? ''
+            : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+              d.getDate()
+            ).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(
+              d.getMinutes()
+            ).padStart(2, '0')}`
         }
-        // number timestamp (ms or s)
         if (typeof val === 'number') {
           let n = val
           if (String(val).length === 10) n *= 1000
           const d = new Date(n)
-          return isNaN(d.getTime()) ? '' : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+          return isNaN(d.getTime())
+            ? ''
+            : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+              d.getDate()
+            ).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(
+              d.getMinutes()
+            ).padStart(2, '0')}`
         }
-      } catch(e) { /* ignore */ }
+      } catch (e) {}
       return ''
+    },
+
+    onSelectionChange(rows) {
+      this.selectedRows = rows || []
+    },
+
+    attachmentsOf(row) {
+      if (!row) return []
+      const tryFields = []
+      if (row.attachments) tryFields.push(row.attachments)
+      if (row.attachmentList) tryFields.push(row.attachmentList)
+      if (row.files) tryFields.push(row.files)
+      if (row.fileList) tryFields.push(row.fileList)
+      if (row.attachmentUrls) tryFields.push(row.attachmentUrls)
+      if (row.attachmentUrl) tryFields.push([row.attachmentUrl])
+      if (row.filePath) tryFields.push([row.filePath])
+      if (row.originalPath) tryFields.push([row.originalPath])
+      let arr = []
+      for (const v of tryFields) {
+        if (!v) continue
+        if (Array.isArray(v)) arr = arr.concat(v)
+        else arr.push(v)
+      }
+      const norm = []
+      const seen = new Set()
+      for (const it of arr) {
+        let url = null
+        let name = null
+        if (typeof it === 'string') {
+          url = it
+        } else if (typeof it === 'object' && it) {
+          url = it.url || it.path || it.filePath || it.originalPath || it.src || it.href || null
+          name = it.name || it.fileName || it.title || null
+        }
+        if (!url) continue
+        const key = url
+        if (seen.has(key)) continue
+        seen.add(key)
+        norm.push({ url, name })
+      }
+      return norm
+    },
+
+    fileNameFromPath(p) {
+      if (!p) return '附件'
+      try {
+        const decoded = decodeURIComponent(p)
+        const parts = decoded.split('/')
+        return parts[parts.length - 1] || decoded
+      } catch (e) {
+        return String(p)
+      }
+    },
+
+    buildDownloadUrl(raw) {
+      let resource = raw
+      if (typeof raw === 'object' && raw) resource = raw.url || raw.path || raw.filePath || raw.originalPath
+      if (!resource) return null
+      if (/^https?:\/\//i.test(resource)) return resource
+      const base = process.env.VUE_APP_BASE_API || ''
+      const api =
+        base.replace(/\/$/, '') +
+        '/common/download/resource?resource=' +
+        encodeURIComponent(resource)
+      return api
+    },
+
+    downloadAttachment(row, file) {
+      const url = this.buildDownloadUrl(file)
+      if (!url) {
+        this.$message.error('无法解析附件下载地址')
+        return
+      }
+      window.open(url, '_blank')
     }
   }
 }
@@ -1037,7 +1215,11 @@ export default {
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
   40% {
@@ -1071,6 +1253,26 @@ export default {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+.attach-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.attach-item {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.submissions-table .muted {
+  color: #909399;
+}
+.file-chip {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
 

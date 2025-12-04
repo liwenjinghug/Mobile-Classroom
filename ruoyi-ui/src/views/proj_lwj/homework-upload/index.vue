@@ -316,7 +316,7 @@
           <el-dropdown v-if="studentConfirmed" trigger="click" class="export-dropdown">
             <el-button size="mini">
               <i class="el-icon-download"></i>
-              导出
+              导出/打印
               <i class="el-icon-arrow-down el-icon--right" />
             </el-button>
             <el-dropdown-menu slot="dropdown">
@@ -327,6 +327,10 @@
               <el-dropdown-item @click.native="exportSubmissions('excel')">
                 <i class="el-icon-document"></i>
                 导出 Excel
+              </el-dropdown-item>
+              <el-dropdown-item divided @click.native="printSubmissions">
+                <i class="el-icon-printer"></i>
+                打印列表
               </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
@@ -363,9 +367,6 @@
           </el-form-item>
           <el-form-item>
             <span class="filter-count">匹配 {{ filteredSubmissions.length }} / 总 {{ mySubmissions.length }}</span>
-          </el-form-item>
-          <el-form-item>
-            <el-button size="mini" icon="el-icon-printer" @click="printSubmissions" :disabled="!filteredSubmissions.length">打印</el-button>
           </el-form-item>
         </el-form>
         <div class="stats-row" v-if="submissionStats">
@@ -864,7 +865,8 @@ export default {
         remark: sub.remark || '',
         gradedTime: sub.gradedTime,
         homeworkDeleted: sub.homeworkDeleted,
-        studentNo: sub.studentNo || this.studentNo
+        studentNo: sub.studentNo || this.studentNo,
+        status: sub.status != null ? Number(sub.status) : null
       }
     },
 
@@ -1300,11 +1302,7 @@ export default {
     },
 
     isRowGraded(row) {
-      if (!row) return false
-      return (row.score != null && row.score !== '') ||
-        (row.gradedTime != null && row.gradedTime !== '') ||
-        (row.status && String(row.status) === '2') ||
-        row.isGraded === 1
+      return row && Number(row.status) === 2
     },
 
     isRowExpired(row) {
