@@ -80,8 +80,6 @@
         </div>
         <p class="identity-hint">
           输入学号后点击"确认学号"以加载您的历史提交记录
-          <br>
-          <strong style="color: #f56c6c;">注意：确认学号仅用于查看提交记录，不会自动提交作业</strong>
         </p>
 
         <el-alert
@@ -243,7 +241,7 @@
             :closable="false"
             show-icon
             title="请注意"
-            description="文件上传完成后，需要手动点击下方"提交作业"按钮才能正式提交作业。"
+            :description='"文件上传完成后，需要手动点击下方\"提交作业\"按钮才能正式提交作业。"'
           />
         </div>
 
@@ -689,23 +687,14 @@ export default {
   methods: {
     async initializePage() {
       try {
+        // 读取本地学号到输入框（不自动确认）
         this.loadRememberedData()
 
+        // 仅加载课程列表，其他由用户手动操作
         await this.fetchCourses()
 
-        if (this.selectionForm.courseId) {
-          await this.loadSessions(this.selectionForm.courseId)
-        }
-        if (this.selectionForm.sessionId) {
-          await this.refreshHomeworkList()
-        }
-        if (this.selectionForm.homeworkId) {
-          await this.loadHomeworkDetail(this.selectionForm.homeworkId)
-        }
-
-        if (this.lastConfirmedData && this.lastConfirmedData.studentNo) {
-          await this.restoreConfirmedState()
-        }
+        // 不自动加载课堂/作业/详情
+        // 不自动恢复提交记录
       } catch (error) {
         console.error('页面初始化失败:', error)
         this.$message.error('页面初始化失败')
@@ -804,38 +793,25 @@ export default {
       }
     },
 
-    async restoreConfirmedState() {
-      if (!this.lastConfirmedData || !this.lastConfirmedData.studentNo) return
-
+    loadRememberedData() {
       try {
-        this.studentConfirmed = true
-        this.mySubmissionsLoading = true
+        // 只恢复 studentNo 到输入框，不做自动确认
+        const savedNo = localStorage.getItem('hwUploadStudentNo')
+        this.studentNo = savedNo ? String(savedNo) : ''
 
-        const res = await getStudentSubmissions(this.lastConfirmedData.studentNo)
-        let list = []
-        if (Array.isArray(res)) {
-          list = res
-        } else if (res && Array.isArray(res.rows)) {
-          list = res.rows
-        } else if (res && Array.isArray(res.data)) {
-          list = res.data
-        }
+        // 不恢复 courseId / sessionId / homeworkId
+        this.selectionForm = { courseId: null, sessionId: null, homeworkId: null }
 
-        const normalized = list.map(this.normalizeSubmission)
-        this.mySubmissions = normalized
-        this.allSubmissions = normalized
-        this.submissionsLoaded = true
-
-        this.checkCurrentSubmission()
-
-        this.$message.success(`已自动恢复 ${this.lastConfirmedData.studentNo} 的提交记录`)
+        // 不设置 studentConfirmed，不恢复历史提交
+        this.lastConfirmedData = null
       } catch (e) {
-        console.error('恢复确认状态失败:', e)
-        this.studentConfirmed = false
-        this.mySubmissions = []
-      } finally {
-        this.mySubmissionsLoading = false
+        console.warn('加载记忆数据失败:', e)
       }
+    },
+
+    async restoreConfirmedState() {
+      // 禁用自动恢复确认状态
+      return
     },
 
     checkCurrentSubmission() {
@@ -959,35 +935,6 @@ export default {
         console.error('获取作业失败', e)
         this.homeworkList = []
         this.$message.error('作业列表加载失败')
-      }
-    },
-
-    loadRememberedData() {
-      try {
-        const savedNo = localStorage.getItem('hwUploadStudentNo')
-        if (savedNo) this.studentNo = savedNo
-
-        const lastCourseId = localStorage.getItem('hwUploadLastCourseId')
-        const lastSessionId = localStorage.getItem('hwUploadLastSessionId')
-        // 不再自动恢复作业选择，让用户手动选择
-        // const lastHomeworkId = localStorage.getItem('hwUploadLastHomeworkId')
-
-        this.selectionForm = {
-          courseId: lastCourseId ? Number(lastCourseId) : null,
-          sessionId: lastSessionId ? Number(lastSessionId) : null,
-          homeworkId: null  // 不自动选择作业
-        }
-
-        const confirmedData = localStorage.getItem('hwUploadConfirmedData')
-        if (confirmedData) {
-          this.lastConfirmedData = JSON.parse(confirmedData)
-          const now = Date.now()
-          if (this.lastConfirmedData.timestamp && (now - this.lastConfirmedData.timestamp) < 24 * 60 * 60 * 1000) {
-            this.studentConfirmed = true
-          }
-        }
-      } catch (e) {
-        console.warn('加载记忆数据失败:', e)
       }
     },
 

@@ -467,6 +467,50 @@ export default {
       this.gradeDialogVisible = true
     },
 
+    async submitGrade() {
+      // 提交批改成绩
+      if (!this.selectedHomework || !this.gradingRow || !this.gradingRow.studentHomeworkId) {
+        const sid = this.gradingRow.student_homework_id || this.gradingRow.id
+        if (!sid) {
+          this.$message.error('无法识别提交记录ID')
+          return
+        }
+        // 兼容不同字段命名
+        this.gradingRow.studentHomeworkId = sid
+      }
+
+      const score = this.gradeForm.score
+      if (score === null || score === undefined || isNaN(Number(score))) {
+        this.$message.warning('请填写有效的分数')
+        return
+      }
+
+      const payload = {
+        studentHomeworkId: this.gradingRow.studentHomeworkId,
+        homeworkId: this.selectedHomework.homeworkId || this.selectedHomework.id,
+        score: Number(score),
+        remark: this.gradeForm.remark || ''
+      }
+
+      this.gradeSubmitting = true
+      try {
+        const res = await gradeSubmission(payload)
+        const ok = res && (res.code === 0 || res.code === 200 || res.success === true)
+        if (!ok) {
+          throw new Error((res && res.msg) || '提交批改失败')
+        }
+        this.$message.success('批改成绩已提交')
+        this.gradeDialogVisible = false
+        // 刷新提交列表以展示最新成绩
+        await this.refreshSubmissions(true)
+      } catch (error) {
+        console.error('批改提交失败:', error)
+        this.$message.error(error.message || '批改提交失败')
+      } finally {
+        this.gradeSubmitting = false
+      }
+    },
+
     rowIsGraded(row) {
       return (row.is_graded === 1) ||
         String(row.status) === '2' ||
