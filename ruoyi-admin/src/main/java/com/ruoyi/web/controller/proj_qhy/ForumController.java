@@ -1,5 +1,8 @@
 package com.ruoyi.web.controller.proj_qhy;
 
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.proj_qhy.domain.ForumComment;
@@ -48,6 +51,7 @@ public class ForumController {
      * 发布帖子
      * (注意：这里使用 POST + Form-Data 混合接收)
      */
+    @Log(title = "论坛-发布帖子", businessType = BusinessType.INSERT)
     @PostMapping("/post/publish")
     public AjaxResult publishPost(ForumPost post, @RequestParam(value = "files", required = false) MultipartFile[] files) {
         // service层已处理用户信息
@@ -67,6 +71,7 @@ public class ForumController {
      * 修改帖子
      * (注意：这里使用 PUT + Form-Data 混合接收)
      */
+    @Log(title = "论坛-修改帖子", businessType = BusinessType.UPDATE)
     @PutMapping("/post/update")
     public AjaxResult updatePost(ForumPost post, @RequestParam(value = "files", required = false) MultipartFile[] files) {
         // service层已处理用户信息和鉴权
@@ -76,6 +81,7 @@ public class ForumController {
     /**
      * 删除帖子
      */
+    @Log(title = "论坛-删除帖子", businessType = BusinessType.DELETE)
     @DeleteMapping("/post/delete/{postId}")
     public AjaxResult deletePost(@PathVariable Long postId) {
         // service层已处理用户信息和鉴权
@@ -83,7 +89,7 @@ public class ForumController {
     }
 
 
-    // --- 以下是点赞、评论、通知的API (保持不变) ---
+    // --- 以下是点赞、评论、通知的API ---
 
     /**
      * 获取帖子的点赞列表
@@ -96,6 +102,7 @@ public class ForumController {
     /**
      * 点赞帖子
      */
+    @Log(title = "论坛-点赞", businessType = BusinessType.INSERT)
     @PostMapping("/like/{postId}")
     public AjaxResult likePost(@PathVariable Long postId) {
         Long userId = SecurityUtils.getUserId();
@@ -106,6 +113,7 @@ public class ForumController {
     /**
      * 取消点赞
      */
+    @Log(title = "论坛-取消点赞", businessType = BusinessType.DELETE)
     @PostMapping("/like/cancel/{postId}")
     public AjaxResult cancelLike(@PathVariable Long postId) {
         Long userId = SecurityUtils.getUserId();
@@ -124,6 +132,7 @@ public class ForumController {
     /**
      * 添加评论/回复
      */
+    @Log(title = "论坛-评论", businessType = BusinessType.INSERT)
     @PostMapping("/comment/add")
     public AjaxResult addComment(@RequestBody ForumComment comment) {
         return AjaxResult.success(commentService.addComment(comment));

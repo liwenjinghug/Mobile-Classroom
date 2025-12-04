@@ -2,7 +2,8 @@ package com.ruoyi.web.controller.proj_lwj;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ruoyi.common.annotation.Log;
+// [修改] 引入自定义的 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -231,6 +232,7 @@ public class ClassExamController extends BaseController {
     // 考试关联课堂
     @PreAuthorize("@ss.hasPermi('projlwj:exam:sessions')")
     @PutMapping("/{examId}/sessions")
+    @Log(title = "考试关联课堂", businessType = BusinessType.UPDATE)
     public AjaxResult bindSessions(@PathVariable Long examId, @RequestBody List<Long> sessionIds) {
         ClassExam ex = examService.selectExamById(examId);
         if (ex == null) return AjaxResult.error("考试不存在");
@@ -560,7 +562,7 @@ public class ClassExamController extends BaseController {
             // 保存每道题的答案
             for (Map<String, Object> answerData : answers) {
                 Long questionId = answerData.get("questionId") != null ?
-                    Long.valueOf(String.valueOf(answerData.get("questionId"))) : null;
+                        Long.valueOf(String.valueOf(answerData.get("questionId"))) : null;
                 Object studentAnswerObj = answerData.get("answer");
 
                 if (questionId == null) continue;
@@ -913,7 +915,7 @@ public class ClassExamController extends BaseController {
         }
         // 快照字段填充（仅在不存在时）
         if (payload.getQuestionContent() == null || payload.getQuestionOptions() == null ||
-            payload.getCorrectAnswer() == null || payload.getScore() == null) {
+                payload.getCorrectAnswer() == null || payload.getScore() == null) {
             ClassExamQuestion q = questionService.selectById(payload.getQuestionId());
             if (q != null) {
                 if (payload.getQuestionContent() == null) payload.setQuestionContent(q.getQuestionContent());

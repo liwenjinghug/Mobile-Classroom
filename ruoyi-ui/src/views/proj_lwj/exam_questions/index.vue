@@ -133,9 +133,9 @@
     <el-dialog title="从题库导入题目" :visible.sync="apiImportVisible" width="900px" :modal="false" :lock-scroll="false" :append-to-body="true">
       <div style="margin-bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
         <el-select v-model="apiFilter.type" placeholder="题型" clearable style="width: 120px" @change="onApiFilterChange">
-          <el-option :value="1" label="单选题"/>
-          <el-option :value="3" label="判断题"/>
-          <el-option :value="5" label="简答题"/>
+          <el-option :value="2" label="选择题"/>
+          <el-option :value="1" label="判断题"/>
+          <el-option :value="3" label="简答题"/>
         </el-select>
         <el-select v-model="apiFilter.difficulty" placeholder="难度" clearable style="width: 120px" @change="onApiFilterChange">
           <el-option :value="1" label="简单"/>

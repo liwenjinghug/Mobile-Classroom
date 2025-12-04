@@ -32,6 +32,15 @@
         </el-radio-group>
         <el-tag type="warning" size="mini" style="margin-left:12px">待批改考试: {{ gradingExams.filter(e=>e.gradingNeeded).length }}</el-tag>
         <el-button size="mini" type="primary" icon="el-icon-refresh" @click="reloadAllForGrading" style="margin-left:8px">刷新批改状态</el-button>
+        <el-button
+          size="mini"
+          type="success"
+          icon="el-icon-s-data"
+          @click="showClassScores"
+          style="margin-left:8px"
+          :disabled="!currentExamId">
+          查看课堂学生成绩
+        </el-button>
       </div>
 
       <!-- 考试信息概览 -->
@@ -63,6 +72,55 @@
             </el-tag>
           </el-descriptions-item>
         </el-descriptions>
+
+        <!-- 新位置：提交可视化面板（在题目列表之前） -->
+        <div v-if="currentExamId && submissionStats" class="submission-visual">
+          <el-card shadow="hover" class="submission-card" :body-style="{padding:'16px'}">
+            <div class="submission-header">
+              <h3>实时提交统计</h3>
+              <div class="submission-actions">
+                <el-button size="mini" type="primary" icon="el-icon-refresh" :loading="loadingSubmission" @click="refreshSubmissionStats(true)">刷新</el-button>
+                <el-button size="mini" type="warning" v-if="submissionTimer" @click="stopSubmissionAuto">停止自动刷新</el-button>
+                <el-button size="mini" type="success" v-else @click="startSubmissionAuto">开启自动刷新</el-button>
+                <span class="last-update" v-if="submissionStats.lastFetch">上次更新：{{ formatTs(submissionStats.lastFetch) }}</span>
+              </div>
+            </div>
+            <!-- 第一行：两个图表 -->
+            <el-row :gutter="16">
+              <el-col :xs="24" :sm="12" :md="12">
+                <div ref="submissionChart" class="chart-box"></div>
+              </el-col>
+              <el-col :xs="24" :sm="12" :md="12">
+                <div ref="scoreDistChart" class="chart-box"></div>
+              </el-col>
+            </el-row>
+            <!-- 第二行：统计数字卡片（全宽下方） -->
+            <div class="stats-grid stats-grid-under">
+              <el-card class="mini-stat" shadow="never"><div class="stat-title">参与人数</div><div class="stat-value">{{ submissionStats.participants }}</div></el-card>
+              <el-card class="mini-stat" shadow="never"><div class="stat-title">已提交</div><div class="stat-value success-text">{{ submissionStats.submitted }}</div></el-card>
+              <el-card class="mini-stat" shadow="never"><div class="stat-title">未提交</div><div class="stat-value warning-text">{{ submissionStats.unsubmitted }}</div></el-card>
+              <el-card class="mini-stat" shadow="never"><div class="stat-title">平均分</div><div class="stat-value">{{ submissionStats.avgScore==null?'—':submissionStats.avgScore.toFixed(1) }}</div></el-card>
+              <el-card class="mini-stat" shadow="never"><div class="stat-title">最高分</div><div class="stat-value">{{ submissionStats.maxScore==null?'—':submissionStats.maxScore.toFixed(1) }}</div></el-card>
+              <el-card class="mini-stat" shadow="never"><div class="stat-title">及格率</div><div class="stat-value">{{ submissionStats.passRate==null?'—':submissionStats.passRate.toFixed(1)+'%' }}</div></el-card>
+            </div>
+            <el-alert v-if="submissionError" :title="submissionError" type="error" show-icon style="margin-top:12px" />
+          </el-card>
+        </div>
+
+        <!-- 未选择考试提示 -->
+        <el-empty v-if="!currentExamId" description="请选择一个考试查看统计信息" :image-size="120" />
+
+        <!-- Insert an actions row inside overview for quick access -->
+        <div style="margin-top: 8px; display: flex; justify-content: flex-end; gap: 8px;">
+          <el-button
+            size="mini"
+            type="success"
+            icon="el-icon-s-data"
+            @click="showClassScores"
+            :disabled="!currentExamId">
+            查看课堂学生成绩
+          </el-button>
+        </div>
 
         <!-- 多课堂人数明细 -->
         <el-collapse-transition>
@@ -98,43 +156,6 @@
         </el-collapse-transition>
       </div>
 
-      <!-- 未选择考试提示 -->
-      <el-empty v-if="!currentExamId" description="请选择一个考试查看统计信息" :image-size="120" />
-
-      <!-- 新位置：提交可视化面板（在题目列表之前） -->
-      <div v-if="currentExamId && submissionStats" class="submission-visual">
-        <el-card shadow="hover" class="submission-card" :body-style="{padding:'16px'}">
-          <div class="submission-header">
-            <h3>实时提交统计</h3>
-            <div class="submission-actions">
-              <el-button size="mini" type="primary" icon="el-icon-refresh" :loading="loadingSubmission" @click="refreshSubmissionStats(true)">刷新</el-button>
-              <el-button size="mini" type="warning" v-if="submissionTimer" @click="stopSubmissionAuto">停止自动刷新</el-button>
-              <el-button size="mini" type="success" v-else @click="startSubmissionAuto">开启自动刷新</el-button>
-              <span class="last-update" v-if="submissionStats.lastFetch">上次更新：{{ formatTs(submissionStats.lastFetch) }}</span>
-            </div>
-          </div>
-          <!-- 第一行：两个图表 -->
-          <el-row :gutter="16">
-            <el-col :xs="24" :sm="12" :md="12">
-              <div ref="submissionChart" class="chart-box"></div>
-            </el-col>
-            <el-col :xs="24" :sm="12" :md="12">
-              <div ref="scoreDistChart" class="chart-box"></div>
-            </el-col>
-          </el-row>
-          <!-- 第二行：统计数字卡片（全宽下方） -->
-          <div class="stats-grid stats-grid-under">
-            <el-card class="mini-stat" shadow="never"><div class="stat-title">参与人数</div><div class="stat-value">{{ submissionStats.participants }}</div></el-card>
-            <el-card class="mini-stat" shadow="never"><div class="stat-title">已提交</div><div class="stat-value success-text">{{ submissionStats.submitted }}</div></el-card>
-            <el-card class="mini-stat" shadow="never"><div class="stat-title">未提交</div><div class="stat-value warning-text">{{ submissionStats.unsubmitted }}</div></el-card>
-            <el-card class="mini-stat" shadow="never"><div class="stat-title">平均分</div><div class="stat-value">{{ submissionStats.avgScore==null?'—':submissionStats.avgScore.toFixed(1) }}</div></el-card>
-            <el-card class="mini-stat" shadow="never"><div class="stat-title">最高分</div><div class="stat-value">{{ submissionStats.maxScore==null?'—':submissionStats.maxScore.toFixed(1) }}</div></el-card>
-            <el-card class="mini-stat" shadow="never"><div class="stat-title">及格率</div><div class="stat-value">{{ submissionStats.passRate==null?'—':submissionStats.passRate.toFixed(1)+'%' }}</div></el-card>
-          </div>
-          <el-alert v-if="submissionError" :title="submissionError" type="error" show-icon style="margin-top:12px" />
-        </el-card>
-      </div>
-
       <!-- 题目统计表格 -->
       <div v-if="currentExamId && questionStats" class="stats-section">
         <div class="section-header">
@@ -144,6 +165,10 @@
             <el-button v-if="hasUngradedSubjective" type="success" size="mini" icon="el-icon-document-checked" @click="batchGradeDialog=true" :disabled="!hasSelectedUngraded">
               批量批改 ({{ selectedUngraded.length }})
             </el-button>
+            <el-divider direction="vertical"></el-divider>
+            <el-button size="mini" type="success" icon="el-icon-download" @click="exportClassScores" :disabled="!classScoresList.length">导出成绩</el-button>
+            <el-button size="mini" type="info" icon="el-icon-printer" @click="printClassScores" :disabled="!classScoresList.length">打印成绩</el-button>
+            <el-button size="mini" type="warning" icon="el-icon-document" @click="exportGradingDetails" :disabled="!(allAnswers && allAnswers.length)">导出批改详情</el-button>
           </div>
         </div>
 
@@ -373,6 +398,114 @@
           </div>
         </template>
       </el-dialog>
+
+      <!-- 课堂学生成绩查看对话框 -->
+      <el-dialog
+        title="课堂学生成绩"
+        :visible.sync="classScoresVisible"
+        width="1000px"
+        :modal="false"
+        :lock-scroll="false"
+        :append-to-body="true"
+        custom-class="class-scores-dialog">
+
+        <div class="scores-header">
+          <div class="exam-info">
+            <h4>{{ currentExamName || '未知考试' }}</h4>
+            <div class="exam-sub">
+              <el-tag size="small" type="info">{{ currentSessionName || '全部课堂' }}</el-tag>
+            </div>
+          </div>
+          <div class="scores-actions">
+            <el-select v-model="scoresSortField" size="mini" placeholder="排序字段" style="width:140px;margin-right:8px">
+              <el-option label="得分" value="score" />
+              <el-option label="提交时间" value="submitTime" />
+              <el-option label="提交状态" value="submitted" />
+              <el-option label="批改状态" value="graded" />
+              <el-option label="学号" value="studentNo" />
+              <el-option label="姓名" value="studentName" />
+              <el-option label="课堂" value="sessionName" />
+            </el-select>
+            <el-select v-model="scoresSortOrder" size="mini" placeholder="顺序" style="width:120px;margin-right:8px">
+              <el-option label="降序" value="desc" />
+              <el-option label="升序" value="asc" />
+            </el-select>
+            <el-button size="mini" type="primary" icon="el-icon-refresh" @click="refreshClassScores(true)" :loading="loadingClassScores">刷新</el-button>
+            <el-button size="mini" type="success" icon="el-icon-download" @click="exportClassScores">导出成绩</el-button>
+            <el-button size="mini" type="info" icon="el-icon-printer" @click="printClassScores">打印</el-button>
+          </div>
+        </div>
+
+        <el-alert v-if="classScoresWarning" :title="classScoresWarning" type="warning" show-icon style="margin-bottom: 8px" />
+
+        <!-- Tabs for all sessions and each session -->
+        <el-tabs v-model="activeScoresTab" type="card">
+          <el-tab-pane label="全部课堂" name="all">
+            <div class="scores-stats" v-if="classScoresStats">
+              <div class="stats-grid">
+                <div class="stat"><div class="stat-title">总人数</div><div class="stat-value">{{ classScoresStats.totalStudents }}</div></div>
+                <div class="stat"><div class="stat-title">已提交</div><div class="stat-value success-text">{{ classScoresStats.submittedCount }}</div></div>
+                <div class="stat"><div class="stat-title">未提交</div><div class="stat-value warning-text">{{ (classScoresStats.totalStudents - classScoresStats.submittedCount) }}</div></div>
+                <div class="stat"><div class="stat-title">已批改</div><div class="stat-value">{{ classScoresStats.gradedCount }}</div></div>
+                <div class="stat"><div class="stat-title">平均分</div><div class="stat-value">{{ classScoresStats.avgScore }}</div></div>
+              </div>
+            </div>
+            <el-table :data="classScoresList" stripe size="small" v-loading="loadingClassScores" height="480" class="scores-table">
+              <el-table-column type="index" label="#" width="50" />
+              <el-table-column prop="studentNo" label="学号" width="140" />
+              <el-table-column prop="studentName" label="姓名" width="160" />
+              <el-table-column prop="sessionName" label="课堂" width="160" />
+              <el-table-column label="提交状态" width="120" align="center">
+                <template slot-scope="{ row }">
+                  <el-tag v-if="!row.submitted" type="danger" size="mini">未提交</el-tag>
+                  <el-tag v-else-if="!row.graded" type="warning" size="mini">未批改</el-tag>
+                  <el-tag v-else type="success" size="mini">已批改</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column label="得分" width="100" align="center">
+                <template slot-scope="{ row }">
+                  <span v-if="!row.submitted" class="muted">—</span>
+                  <span v-else-if="!row.graded" class="pending">待批改</span>
+                  <span v-else :class="row.score >= 60 ? 'score-pass' : 'score-fail'">{{ row.score }}分</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="submitTime" label="提交时间" width="180">
+                <template slot-scope="{ row }">{{ row.submitTime ? formatDateTime(row.submitTime) : '—' }}</template>
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
+          <el-tab-pane v-for="s in classSessionTabs" :key="s.sessionId" :label="s.sessionName" :name="'session_'+s.sessionId">
+            <el-table :data="perSessionScores[s.sessionId] || []" stripe size="small" v-loading="loadingClassScores" height="480" class="scores-table">
+              <el-table-column type="index" label="#" width="50" />
+              <el-table-column prop="studentNo" label="学号" width="160" />
+              <el-table-column prop="studentName" label="姓名" width="200" />
+              <el-table-column label="提交状态" width="120" align="center">
+                <template slot-scope="{ row }">
+                  <el-tag v-if="!row.submitted" type="danger" size="mini">未提交</el-tag>
+                  <el-tag v-else-if="!row.graded" type="warning" size="mini">未批改</el-tag>
+                  <el-tag v-else type="success" size="mini">已批改</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column label="得分" width="100" align="center">
+                <template slot-scope="{ row }">
+                  <span v-if="!row.submitted" class="muted">—</span>
+                  <span v-else-if="!row.graded" class="pending">待批改</span>
+                  <span v-else :class="row.score >= 60 ? 'score-pass' : 'score-fail'">{{ row.score }}分</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="submitTime" label="提交时间" width="180">
+                <template slot-scope="{ row }">{{ row.submitTime ? formatDateTime(row.submitTime) : '—' }}</template>
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
+        </el-tabs>
+
+        <template #footer>
+          <div class="dialog-footer">
+            <el-button @click="classScoresVisible = false">关闭</el-button>
+          </div>
+        </template>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -414,7 +547,21 @@ export default {
       submissionError: null,
       gradeDialogStyle: {},
       lastGradeClick: null,
-      _pendingRestoreExamId: null
+      _pendingRestoreExamId: null,
+
+      // Class scores dialog state
+      classScoresVisible: false,
+      loadingClassScores: false,
+      classScoresList: [],
+      classScoresStats: null,
+      currentExamName: '',
+      currentSessionName: '',
+      activeScoresTab: 'all',
+      classSessionTabs: [],
+      perSessionScores: {},
+      classScoresWarning: '',
+      scoresSortField: 'score',
+      scoresSortOrder: 'desc'
     }
   },
   computed: {
@@ -624,52 +771,36 @@ export default {
       }
     },
     updateSubmissionChart(){
-      if(!this.submissionStats) return
-      // 使用 $nextTick 和延迟确保 DOM 已渲染
+      if(!this.submissionStats || !this.$refs.submissionChart) return
       this.$nextTick(() => {
-        setTimeout(() => {
-          if(!this.$refs.submissionChart) {
-            console.warn('submissionChart ref not ready')
-            return
-          }
-          try {
-            const chart = echarts.getInstanceByDom(this.$refs.submissionChart) || echarts.init(this.$refs.submissionChart)
-            chart.setOption({
-              tooltip: { trigger:'item' },
-              series: [{
-                type:'pie', radius:['40%','70%'],
-                data:[
-                  { value:this.submissionStats.submitted, name:'已提交' },
-                  { value:this.submissionStats.unsubmitted, name:'未提交' }
-                ],
-                label: { formatter:'{b}: {c}' }
-              }]
-            })
-            console.log('Submission chart updated successfully')
-          } catch(e){ console.warn('updateSubmissionChart fail', e) }
-        }, 100)
+        try {
+          const chart = echarts.getInstanceByDom(this.$refs.submissionChart) || echarts.init(this.$refs.submissionChart)
+          chart.setOption({
+            tooltip: { trigger:'item' },
+            series: [{
+              type:'pie', radius:['40%','70%'],
+              data:[
+                { value:this.submissionStats.submitted, name:'已提交' },
+                { value:this.submissionStats.unsubmitted, name:'未提交' }
+              ],
+              label: { formatter:'{b}: {c}' }
+            }]
+          })
+        } catch(e){ console.warn('updateSubmissionChart fail', e) }
       })
     },
     updateScoreDistChart(){
-      if(!this.submissionStats) return
-      // 使用 $nextTick 和延迟确保 DOM 已渲染
+      if(!this.submissionStats || !this.$refs.scoreDistChart) return
       this.$nextTick(() => {
-        setTimeout(() => {
-          if(!this.$refs.scoreDistChart) {
-            console.warn('scoreDistChart ref not ready')
-            return
-          }
-          try {
-            const chart = echarts.getInstanceByDom(this.$refs.scoreDistChart) || echarts.init(this.$refs.scoreDistChart)
-            chart.setOption({
-              tooltip:{},
-              xAxis:{ type:'category', data: ['0-10%','10-20%','20-30%','30-40%','40-50%','50-60%','60-70%','70-80%','80-90%','90-100%'] },
-              yAxis:{ type:'value' },
-              series:[{ type:'bar', data: this.submissionStats.scoreBuckets, itemStyle:{ color:'#409EFF' } }]
-            })
-            console.log('Score distribution chart updated successfully')
-          } catch(e){ console.warn('updateScoreDistChart fail', e) }
-        }, 100)
+        try {
+          const chart = echarts.getInstanceByDom(this.$refs.scoreDistChart) || echarts.init(this.$refs.scoreDistChart)
+          chart.setOption({
+            tooltip:{},
+            xAxis:{ type:'category', data: ['0-10%','10-20%','20-30%','30-40%','40-50%','50-60%','60-70%','70-80%','80-90%','90-100%'] },
+            yAxis:{ type:'value' },
+            series:[{ type:'bar', data: this.submissionStats.scoreBuckets, itemStyle:{ color:'#409EFF' } }]
+          })
+        } catch(e){ console.warn('updateScoreDistChart fail', e) }
       })
     },
     startSubmissionAuto(){
@@ -1013,11 +1144,215 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
         })
       })
     },
-    closeGradeDialog(){ this.gradeDialogVisible=false }
-    // ...existing code...
+    closeGradeDialog(){ this.gradeDialogVisible=false },
+
+    showClassScores() {
+      if (!this.currentExamId) {
+        this.$message.warning('请先选择考试')
+        return
+      }
+      // Fill header info from existing stats/session
+      try {
+        this.currentExamName = (this.questionStats && this.questionStats.examName) || ''
+      } catch {}
+      try {
+        const s = (this.teacherSessions || []).find(x => String(x.sessionId) === String(this.currentSessionId))
+        this.currentSessionName = s ? (s.className || `课堂${s.sessionId}`) : ''
+      } catch {}
+
+      this.classScoresVisible = true
+      this.refreshClassScores()
+    },
+
+    async refreshClassScores(force=false) {
+      if (!this.currentExamId) return
+      this.loadingClassScores = true
+      this.classScoresWarning = ''
+      try {
+        // Build session tabs from questionStats.sessionDetails if available
+        const details = (this.questionStats && this.questionStats.sessionDetails) || []
+        this.classSessionTabs = details.map(d => ({ sessionId: d.sessionId, sessionName: d.sessionName || `课堂${d.sessionId}` }))
+        // Compose all scores
+        const allRows = await this.composeScoresWithRoster()
+        // 应用排序
+        const sorted = this.applyScoresSorting(allRows)
+        this.classScoresList = sorted
+        // Build per-session maps with sorting
+        const map = {}
+        sorted.forEach(r => {
+          const sid = r.sessionId || (this.currentSessionId || 'unknown')
+          if (!map[sid]) map[sid] = []
+          map[sid].push(r)
+        })
+        Object.keys(map).forEach(sid=>{ map[sid] = this.applyScoresSorting(map[sid]) })
+        this.perSessionScores = map
+        // Stats
+        const total = sorted.length
+        const submitted = sorted.filter(x => x.submitted).length
+        const graded = sorted.filter(x => x.graded).length
+        const sum = sorted.reduce((acc, x) => acc + (x.score == null ? 0 : x.score), 0)
+        const avg = total ? sum / total : 0
+        this.classScoresStats = { totalStudents: total, submittedCount: submitted, gradedCount: graded, avgScore: Number(avg.toFixed(1)) }
+        if (force) this.activeScoresTab = 'all'
+      } catch(e){
+        console.error('refreshClassScores error', e)
+        this.$message.error(e.message || '成绩加载失败')
+      } finally { this.loadingClassScores=false }
+    },
+    async composeScoresWithRoster() {
+      // Build scores solely from loaded answers and session details; no backend roster fetch to avoid 404
+      const details = (this.questionStats && this.questionStats.sessionDetails) || []
+      const nameBySession = {}
+      details.forEach(d => { nameBySession[d.sessionId] = d.sessionName || `课堂${d.sessionId}` })
+
+      const submittedMap = {}
+      ;(this.allAnswers || []).forEach(a => {
+        const no = a.studentNo || a.student_no
+        if (!no) return
+        const sid = a.sessionId || this.currentSessionId || (details[0] && details[0].sessionId) || 'unknown'
+        const key = `${sid}|${no}`
+        const prev = submittedMap[key]
+        const score = (a.score != null && a.score !== '') ? Number(a.score) : null
+        const graded = (a.correctorId != null) || (a.score != null && a.score !== '')
+        const item = {
+          sessionId: sid,
+          sessionName: nameBySession[sid] || '',
+          studentNo: no,
+          studentName: a.studentName || '',
+          submitted: true,
+          graded,
+          score,
+          submitTime: a.submitTime || null
+        }
+        submittedMap[key] = prev ? (prev.score != null && score != null && score < prev.score ? prev : item) : item
+      })
+      const rows = Object.values(submittedMap)
+      // Sort by session, submission, grading, score
+      rows.sort((a, b) => {
+        const sidA = String(a.sessionId || '')
+        const sidB = String(b.sessionId || '')
+        if (sidA !== sidB) return sidA.localeCompare(sidB)
+        const sa = a.submitted ? 1 : 0
+        const sb = b.submitted ? 1 : 0
+        if (sa !== sb) return sb - sa
+        const ga = a.graded ? 1 : 0
+        const gb = b.graded ? 1 : 0
+        if (ga !== gb) return gb - ga
+        const sca = a.score == null ? -Infinity : a.score
+        const scb = b.score == null ? -Infinity : b.score
+        return scb - sca
+      })
+      // Clear any previous roster warning since we no longer attempt a fetch
+      this.classScoresWarning = ''
+      return rows
+    },
+    applyScoresSorting(rows){
+      const field = this.scoresSortField || 'score'
+      const order = (this.scoresSortOrder || 'desc').toLowerCase()
+      const desc = order !== 'asc'
+      const val = r => {
+        let v = r[field]
+        if(field === 'submitted' || field === 'graded') v = r[field] ? 1 : 0
+        if(field === 'score') v = (r.score==null ? -Infinity : Number(r.score))
+        if(field === 'submitTime') v = r.submitTime ? new Date(r.submitTime).getTime() : 0
+        if(typeof v === 'string') return v.toLowerCase()
+        if(typeof v === 'number') return v
+        return v==null ? (desc?-Infinity:Infinity) : v
+      }
+      return (rows||[]).slice().sort((a,b)=>{
+        const av = val(a), bv = val(b)
+        if(av===bv) return 0
+        return desc ? (av>bv?-1:1) : (av>bv?1:-1)
+      })
+    },
+    exportClassScores() {
+      const list = this.applyScoresSorting(this.classScoresList || [])
+      if (!list.length) {
+        this.$message.warning('没有可导出的成绩数据')
+        return
+      }
+      const headers = ['学号', '姓名', '课堂', '提交状态', '批改状态', '得分', '提交时间']
+      const lines = [headers.join(',')]
+      list.forEach(r => {
+        const submitted = r.submitted ? '已提交' : '未提交'
+        const graded = r.graded ? '已批改' : (r.submitted ? '未批改' : '—')
+        const score = r.score == null ? '' : r.score
+        const time = r.submitTime ? this.formatDateTime(r.submitTime) : ''
+        const row = [r.studentNo || '', r.studentName || '', r.sessionName || '', submitted, graded, score, time]
+        lines.push(row.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(','))
+      })
+      const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `课堂学生成绩_${this.currentExamName || '考试'}_${this.timestampString()}.csv`
+      a.click()
+      URL.revokeObjectURL(a.href)
+    },
+    printClassScores(){
+      const list = this.applyScoresSorting(this.classScoresList || [])
+      const stats = this.classScoresStats || { totalStudents:0, submittedCount:0, gradedCount:0, avgScore:0 }
+      const title = `${this.currentExamName || '考试'} - 课堂学生成绩（${this.currentSessionName || '全部课堂'}）`
+      const cols = ['学号','姓名','课堂','提交状态','批改状态','得分','提交时间']
+      const rowsHtml = list.map(r=>{
+        const submitted = r.submitted ? '已提交' : '未提交'
+        const graded = r.graded ? '已批改' : (r.submitted ? '未批改' : '—')
+        const score = r.score == null ? '—' : r.score + '分'
+        const time = r.submitTime ? this.formatDateTime(r.submitTime) : '—'
+        return `<tr><td>${r.studentNo||''}</td><td>${r.studentName||''}</td><td>${r.sessionName||''}</td><td>${submitted}</td><td>${graded}</td><td>${score}</td><td>${time}</td></tr>`
+      }).join('')
+      const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title>
+        <style>
+          body{font-family:Segoe UI,Arial,Helvetica,sans-serif;padding:20px;color:#303133}
+          h1{font-size:20px;margin:0 0 12px}
+          .stats{display:flex;gap:12px;margin-bottom:12px}
+          .stat{border:1px solid #ddd;border-radius:6px;padding:8px 12px}
+          .table{width:100%;border-collapse:collapse}
+          .table th,.table td{border:1px solid #ddd;padding:6px 8px;font-size:12px}
+          .table th{background:#f5f7fa;text-align:left}
+          @media print{button{display:none}}
+        </style>
+      </head><body>
+        <h1>${title}</h1>
+        <div class="stats">
+          <div class="stat">总人数：${stats.totalStudents}</div>
+          <div class="stat">已提交：${stats.submittedCount}</div>
+          <div class="stat">未提交：${stats.totalStudents - stats.submittedCount}</div>
+          <div class="stat">已批改：${stats.gradedCount}</div>
+          <div class="stat">平均分：${stats.avgScore}</div>
+        </div>
+        <table class="table"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table>
+        <button onclick="window.print()" style="margin-top:12px">打印</button>
+      </body></html>`
+      const win = window.open('','_blank')
+      if(win){ win.document.open(); win.document.write(html); win.document.close(); win.focus(); }
+    },
+    // 导出当前题目批改详情（CSV）：每条主观题批改记录
+    exportGradingDetails(){
+      const answers = this.allAnswers || []
+      const subjective = answers.filter(a=> String(a.questionType||a.type) === '3')
+      if(!subjective.length){ this.$message.warning('暂无主观题批改记录可导出'); return }
+      const headers = ['题目ID','学号','姓名','得分','评语','提交时间','批改人']
+      const lines = [headers.join(',')]
+      subjective.forEach(a=>{
+        const row = [a.questionId, a.studentNo||'', a.studentName||'', a.score==null?'':a.score, a.correctComment||'', a.submitTime||'', a.correctorName||a.correctorId||'']
+        lines.push(row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','))
+      })
+      const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `主观题批改记录_${this.currentExamName || '考试'}_${this.timestampString()}.csv`
+      a.click()
+      URL.revokeObjectURL(a.href)
+    },
+    timestampString(){
+      const d = new Date()
+      const pad = n => String(n).padStart(2,'0')
+      return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`
+    }
   }
 }
 </script>
+
 <style scoped>
 .exam-grading-page {
   padding: 16px;
@@ -1178,6 +1513,23 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
   border-top: 1px solid #ebeef5;
   flex-shrink: 0;
 }
+
+/* 课堂学生成绩查看对话框特定样式 */
+.class-scores-dialog .scores-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.class-scores-dialog .exam-info h4 { margin:0; font-weight:600; }
+.class-scores-dialog .exam-sub { color:#909399; font-size:12px; }
+.class-scores-dialog .scores-table { margin-top:8px; border-radius:8px; overflow:hidden; }
+.class-scores-dialog .muted { color:#909399; }
+.class-scores-dialog .pending { color:#e6a23c; font-weight:600; }
+.class-scores-dialog .score-pass { color:#67c23a; font-weight:600; }
+.class-scores-dialog .score-fail { color:#f56c6c; font-weight:600; }
+.class-scores-dialog .stats-grid { display:grid; grid-template-columns: repeat(5, 1fr); gap:8px; margin-bottom:8px; }
+.class-scores-dialog .stat { background:#fff; border:1px solid #ebeef5; border-radius:8px; padding:10px; text-align:center; }
+.class-scores-dialog .stat-title { font-size:12px; color:#909399; }
+.class-scores-dialog .stat-value { font-size:18px; font-weight:600; }
+.class-scores-dialog >>> .el-dialog__header { background:#f5f7fa; border-bottom:1px solid #ebeef5; }
+.class-scores-dialog >>> .el-dialog__body { padding:16px; }
+.class-scores-dialog >>> .el-dialog__footer { background:#f5f7fa; border-top:1px solid #ebeef5; }
 </style>
 
 <style>
@@ -1252,5 +1604,3 @@ body .centered-batch-dialog .el-dialog {
   position: static !important;
 }
 </style>
-
-

@@ -78,7 +78,11 @@
             </div>
           </div>
         </div>
-        <p class="identity-hint">输入学号后点击"确认学号"以加载您的历史提交记录</p>
+        <p class="identity-hint">
+          输入学号后点击"确认学号"以加载您的历史提交记录
+          <br>
+          <strong style="color: #f56c6c;">注意：确认学号仅用于查看提交记录，不会自动提交作业</strong>
+        </p>
 
         <el-alert
           v-if="!studentConfirmed"
@@ -93,20 +97,15 @@
     </el-card>
 
     <!-- 3. 作业详情与上传 -->
-    <el-card v-if="homework && studentConfirmed" class="work-card">
-      <div slot="header" class="card-header-with-icon">
-        <i class="el-icon-document"></i>
-        <span>作业详情 - {{ homework.title }}</span>
-        <el-button
-          v-if="homeworkId"
-          type="text"
-          size="mini"
-          icon="el-icon-refresh"
-          @click="refreshHomeworkDetail"
-          style="margin-left: auto;"
-        >
-          刷新详情
-        </el-button>
+    <el-card v-if="homework && studentConfirmed" class="work-card" :body-style="{ padding: '16px 20px' }">
+      <div slot="header" class="work-header">
+        <div class="work-title">
+          <i class="el-icon-document"></i>
+          <span>{{ homework.title || '作业详情' }}</span>
+        </div>
+        <div class="work-actions">
+          <el-button size="mini" type="primary" icon="el-icon-refresh" @click="refreshHomework" :loading="homeworkLoading">刷新详情</el-button>
+        </div>
       </div>
 
       <!-- 状态提示 -->
@@ -145,34 +144,37 @@
         />
       </div>
 
-      <el-descriptions :column="1" size="small" border class="homework-info">
-        <el-descriptions-item label="作业标题">{{ homework.title || '—' }}</el-descriptions-item>
-        <el-descriptions-item label="截止时间">
-          <span :class="{ overdue: isDeadlinePassed }">
-            {{ formatTime(homework.deadline) || '—' }}
-            <el-tag v-if="isDeadlinePassed" size="mini" type="danger" style="margin-left:8px">已过期</el-tag>
-            <el-tag v-else size="mini" type="success" style="margin-left:8px">进行中</el-tag>
-          </span>
-        </el-descriptions-item>
-        <el-descriptions-item label="作业分值">
-          <span>{{ homework.totalScore || 100 }} 分</span>
-        </el-descriptions-item>
-        <el-descriptions-item label="教师附件">
-          <span v-if="!parsedHomeworkAttachments.length" class="text-muted">无附件</span>
-          <div v-else class="attachment-list">
-            <el-tag v-for="(f,i) in parsedHomeworkAttachments" :key="i" size="mini" @click="previewFile(f)" class="tag-link attachment-tag">
-              <i class="el-icon-document"></i>
-              {{ getFileName(f) }}
-            </el-tag>
-          </div>
-        </el-descriptions-item>
-        <el-descriptions-item label="作业内容">
-          <div class="content-preview" v-html="homework.content || '暂无内容描述'" />
-        </el-descriptions-item>
-      </el-descriptions>
+      <!-- 作业信息 -->
+      <div class="homework-info-section">
+        <el-descriptions :column="1" size="small" border class="homework-info">
+          <el-descriptions-item label="作业标题">{{ homework.title || '—' }}</el-descriptions-item>
+          <el-descriptions-item label="截止时间">
+            <span :class="{ overdue: isDeadlinePassed }">
+              {{ formatTime(homework.deadline) || '—' }}
+              <el-tag v-if="isDeadlinePassed" size="mini" type="danger" style="margin-left:8px">已过期</el-tag>
+              <el-tag v-else size="mini" type="success" style="margin-left:8px">进行中</el-tag>
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item label="作业分值">
+            <span>{{ homework.totalScore || 100 }} 分</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="教师附件">
+            <span v-if="!parsedHomeworkAttachments.length" class="text-muted">无附件</span>
+            <div v-else class="attachment-list">
+              <el-tag v-for="(f,i) in parsedHomeworkAttachments" :key="i" size="mini" @click="previewFile(f)" class="tag-link attachment-tag">
+                <i class="el-icon-document"></i>
+                {{ getFileName(f) }}
+              </el-tag>
+            </div>
+          </el-descriptions-item>
+          <el-descriptions-item label="作业内容">
+            <div class="content-preview" v-html="homework.content || '暂无内容描述'" />
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
 
       <!-- 上传区域 -->
-      <div class="upload-section" v-if="!isSubmissionGraded && !isDeadlinePassed">
+      <div class="upload-section">
         <h4 class="upload-title">
           <i class="el-icon-upload2"></i>
           上传作业文件
@@ -234,6 +236,17 @@
           </div>
         </div>
 
+        <!-- 提交说明 -->
+        <div v-if="uploadedFiles.length > 0 && !submitDisabled" class="submit-notice">
+          <el-alert
+            type="warning"
+            :closable="false"
+            show-icon
+            title="请注意"
+            description="文件上传完成后，需要手动点击下方"提交作业"按钮才能正式提交作业。"
+          />
+        </div>
+
         <!-- 提交按钮 -->
         <div class="submit-actions">
           <el-button
@@ -242,6 +255,7 @@
             :loading="submitLoading"
             @click="submitHomework"
             class="submit-btn"
+            size="medium"
           >
             <i class="el-icon-check"></i>
             {{ hasExistingSubmission ? '更新提交' : '提交作业' }}
@@ -1147,6 +1161,22 @@ export default {
         return
       }
 
+      // 添加确认对话框
+      const action = this.hasExistingSubmission ? '重新提交' : '提交'
+      const confirmResult = await this.$confirm(
+        `确认要${action}作业吗？\n\n已上传文件数量：${this.uploadedFiles.length} 个\n作业：${this.homework ? this.homework.title : ''}`,
+        `确认${action}`,
+        {
+          confirmButtonText: `确认${action}`,
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      ).catch(() => false)
+
+      if (!confirmResult) {
+        return
+      }
+
       const failedFiles = Object.keys(this.failedFilesMap)
       if (failedFiles.length > 0) {
         this.$message.error('有文件上传失败，请先解决上传问题')
@@ -1873,36 +1903,45 @@ export default {
   background: linear-gradient(135deg, #ffffff 0%, #f9fbff 100%);
 }
 
-.homework-info-section {
-  padding: 16px 0;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 16px;
-  margin-top: 12px;
-}
-
-.info-item {
+.work-header {
   display: flex;
-  align-items: flex-start;
-  padding: 12px;
-  background: #fafbfc;
-  border-radius: 8px;
-  border-left: 3px solid #409EFF;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
 }
 
-.info-item strong {
-  min-width: 100px;
-  color: #606266;
+.work-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.work-title i {
+  color: #67C23A;
+}
+
+.work-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-alerts {
+  margin: 8px 0 12px;
+}
+
+.homework-info-section {
+  padding: 8px 0;
+}
+
+.homework-info >>> .el-descriptions__header {
   font-weight: 600;
 }
 
-.info-item span {
-  color: #303133;
-  flex: 1;
-  word-break: break-word;
+.homework-info >>> .el-descriptions__body {
+  background: #fafafa;
 }
 
 /* ============ 上传区域样式 ============ */
@@ -1920,55 +1959,105 @@ export default {
 
 .refresh-btn:hover {
   background: #ecf5ff;
-  color: #66b1ff;
+  color: #67b1ff;
 }
 
 .upload-section {
-  padding: 20px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e8f4fd 100%);
-  border-radius: 12px;
-  margin-top: 20px;
+  margin-top: 8px;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  padding: 16px;
 }
 
 .upload-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 16px;
   display: flex;
   align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
-.upload-title i {
-  margin-right: 8px;
-  color: #409EFF;
+.upload-block {
+  border: 1px dashed #c0c4cc;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fcfdff;
 }
 
-/* ============ 文件列表美化 ============ */
-.files-display {
+.upload-tip {
+  color: #909399;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.upload-status {
   margin-top: 12px;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .file-item {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 10px 14px;
-  background: white;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 6px;
+  padding: 8px;
 }
 
-.file-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transform: translateX(4px);
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.file-item i {
-  font-size: 20px;
-  margin-right: 12px;
+.file-name {
+  font-weight: 500;
+  color: #606266;
+}
+
+.file-size {
+  color: #909399;
+  font-size: 12px;
+}
+
+.file-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.file-tag {
+  cursor: pointer;
+}
+
+.tag-link {
+  border: 1px solid #409EFF;
   color: #409EFF;
+  background: #f0f9ff;
+}
+
+.tag-link:hover {
+  background: #409EFF;
+  color: #fff;
 }
 
 /* ============ 提交记录区域 ============ */

@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.ruoyi.common.annotation.Log;
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -104,6 +105,7 @@ public class BbsArticleController extends BaseController {
     /**
      * 增加阅读数
      */
+    @Log(title = "文章阅读", businessType = BusinessType.UPDATE)
     @PostMapping("/view/{id}")
     public AjaxResult increaseViewCount(@PathVariable Long id) {
         return toAjax(bbsArticleService.increaseViewCount(id));
@@ -111,6 +113,7 @@ public class BbsArticleController extends BaseController {
     /**
      * 点赞文章
      */
+    @Log(title = "文章点赞", businessType = BusinessType.INSERT)
     @PostMapping("/like/{id}")
     public AjaxResult likeArticle(@PathVariable Long id) {
         return toAjax(bbsArticleService.likeArticle(id));
@@ -119,6 +122,7 @@ public class BbsArticleController extends BaseController {
     /**
      * 点踩文章
      */
+    @Log(title = "文章点踩", businessType = BusinessType.INSERT)
     @PostMapping("/hate/{id}")
     public AjaxResult hateArticle(@PathVariable Long id) {
         return toAjax(bbsArticleService.hateArticle(id));

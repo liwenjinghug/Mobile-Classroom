@@ -12,6 +12,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+// 【核心修改】添加 import
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
+
 /**
  * 文件下载和上传Controller
  * 专门处理附件下载到服务器本地，以及保持原始文件名的上传
@@ -25,6 +29,8 @@ public class FileDownloadController extends BaseController {
     /**
      * 上传文件并保持原始文件名（不添加时间戳）
      */
+    // 【核心修改】添加 Log 注解
+    @Log(title = "文件管理", businessType = BusinessType.OTHER)
     @PostMapping("/uploadOriginal")
     public AjaxResult uploadOriginal(MultipartFile file, @RequestParam(value = "originalName", required = false) String originalName) {
         try {
@@ -34,15 +40,15 @@ public class FileDownloadController extends BaseController {
 
             // 优先使用前端传递的原始文件名，如果没有则使用文件自带的名称
             String originalFilename = (originalName != null && !originalName.isEmpty())
-                ? originalName
-                : file.getOriginalFilename();
+                    ? originalName
+                    : file.getOriginalFilename();
 
             if (originalFilename == null || originalFilename.isEmpty()) {
                 return AjaxResult.error("文件名不能为空");
             }
 
             logger.info("上传文件，保持原始文件名: {} (前端传递: {}, 文件自带: {})",
-                originalFilename, originalName, file.getOriginalFilename());
+                    originalFilename, originalName, file.getOriginalFilename());
 
             // 构建保存路径：uploadPath/upload/
             String uploadPath = RuoYiConfig.getUploadPath();
@@ -120,7 +126,7 @@ public class FileDownloadController extends BaseController {
                 String path = uri.getPath();
                 String encodedPath = encodePath(path);
                 fullUrl = uri.getScheme() + "://" + uri.getHost() +
-                         (uri.getPort() != -1 ? ":" + uri.getPort() : "") + encodedPath;
+                        (uri.getPort() != -1 ? ":" + uri.getPort() : "") + encodedPath;
                 logger.info("编码后的URL: {}", fullUrl);
             } catch (Exception e) {
                 logger.warn("URL编码失败，使用原始URL: {}", e.getMessage());
@@ -240,4 +246,3 @@ public class FileDownloadController extends BaseController {
         }
     }
 }
-

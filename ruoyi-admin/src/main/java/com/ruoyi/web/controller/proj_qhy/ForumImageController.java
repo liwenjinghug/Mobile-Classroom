@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+// [修改] 使用自定义 Log 注解
+import com.ruoyi.proj_cyq.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +35,7 @@ public class ForumImageController extends BaseController {
     /**
      * 上传图片到本地assets目录
      */
+    @Log(title = "论坛图片上传", businessType = BusinessType.INSERT)
     @PostMapping("/upload")
     public AjaxResult uploadImage(MultipartFile file) {
         try {
@@ -105,6 +109,7 @@ public class ForumImageController extends BaseController {
     /**
      * 批量上传图片
      */
+    @Log(title = "论坛图片批量上传", businessType = BusinessType.INSERT)
     @PostMapping("/uploadMultiple")
     public AjaxResult uploadMultipleImages(MultipartFile[] files) {
         try {
