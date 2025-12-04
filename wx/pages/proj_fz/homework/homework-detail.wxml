@@ -1,6 +1,7 @@
 <view class="container">
   <!-- 加载中 -->
   <view wx:if="{{loading}}" class="loading-box">
+    <view class="loading-spinner"></view>
     <text class="loading-text">加载中...</text>
   </view>
 
@@ -9,8 +10,28 @@
     <view class="homework-info">
       <view class="info-header">
         <text class="title">{{homework.title}}</text>
-        <view class="status-tag {{isExpired ? 'expired' : 'ongoing'}}">
-          {{status}}
+      </view>
+
+      <!-- 多状态标签行 -->
+      <view class="status-tags">
+        <!-- 截止状态 -->
+        <view class="status-tag {{isExpired ? 'tag-expired' : 'tag-ongoing'}}">
+          {{isExpired ? '已截止' : '进行中'}}
+        </view>
+
+        <!-- 提交状态 -->
+        <view class="status-tag {{submission ? 'tag-submitted' : 'tag-not-submitted'}}">
+          {{submission ? '已提交' : '未提交'}}
+        </view>
+
+        <!-- 批改状态（仅在已提交时显示） -->
+        <view wx:if="{{submission}}" class="status-tag {{status === '已批改' ? 'tag-graded' : 'tag-pending'}}">
+          {{status === '已批改' ? '已批改' : '待批改'}}
+        </view>
+
+        <!-- 分数（仅在已批改时显示） -->
+        <view wx:if="{{status === '已批改' && submission.score !== null && submission.score !== undefined}}" class="status-tag tag-score">
+          {{submission.score}}分
         </view>
       </view>
 
@@ -31,7 +52,19 @@
 
       <view class="info-item">
         <text class="label">总分：</text>
-        <text class="value score">{{homework.totalScore}}分</text>
+        <text class="value score">{{homework.totalScore || 100}}分</text>
+      </view>
+
+      <!-- 已批改时显示成绩信息 -->
+      <view wx:if="{{status === '已批改'}}" class="grade-info">
+        <view class="info-item">
+          <text class="label">我的得分：</text>
+          <text class="value grade-score">{{submission.score}}分</text>
+        </view>
+        <view wx:if="{{submission.remark}}" class="info-item">
+          <text class="label">教师评语：</text>
+          <text class="value remark">{{submission.remark}}</text>
+        </view>
       </view>
     </view>
 

@@ -41,24 +41,48 @@ Page({
       console.log('作业详情', homework);
       console.log('我的提交记录', submissions);
 
-      // 从提交记录中找到当前作业的提交
+      // 从提交记录中找到当前作业的提交 - 使用Number()确保类型一致
       let mySubmission = null;
+      const homeworkIdNum = Number(homeworkId);
       if (submissions && Array.isArray(submissions.rows || submissions)) {
         const list = submissions.rows || submissions;
-        mySubmission = list.find(item => item.homeworkId == homeworkId);
+        mySubmission = list.find(item => {
+          const itemHomeworkId = Number(item.homeworkId || item.homework_id);
+          return itemHomeworkId === homeworkIdNum;
+        });
       }
+
+      console.log(`作业ID: ${homeworkId}, 找到的提交记录:`, mySubmission);
 
       // 判断是否过期
       const now = new Date();
       const deadline = homework.deadline ? new Date(homework.deadline) : null;
       const isExpired = deadline ? now > deadline : false;
 
-      // 判断状态
+      // 判断状态 - 兼容多种字段格式
+      // 批改状态：isGraded=1 或 is_graded=1 或 status=2 或 有分数(score/grade) 或 有批改时间
       let status = '未提交';
       if (mySubmission) {
-        if (mySubmission.isGraded === 1) {
+        const hasScore = (mySubmission.score !== null && mySubmission.score !== undefined && mySubmission.score !== '') ||
+                         (mySubmission.grade !== null && mySubmission.grade !== undefined && mySubmission.grade !== '');
+        const isGraded = mySubmission.isGraded === 1 ||
+                         mySubmission.isGraded === '1' ||
+                         mySubmission.is_graded === 1 ||
+                         mySubmission.is_graded === '1' ||
+                         Number(mySubmission.status) === 2 ||
+                         hasScore ||
+                         mySubmission.correctedTime ||
+                         mySubmission.corrected_time;
+
+        // 统一分数字段
+        if (!mySubmission.score && mySubmission.grade !== undefined) {
+          mySubmission.score = mySubmission.grade;
+        }
+
+        if (isGraded) {
           status = '已批改';
-        } else if (mySubmission.status == 1) {
+        } else if (Number(mySubmission.status) >= 1 || mySubmission.submitTime || mySubmission.submit_time) {
+          // 已提交状态：status>=1 或者有提交时间
           status = '已提交';
         }
       } else if (isExpired) {
@@ -66,8 +90,8 @@ Page({
       }
 
       // 解析提交内容（分离答案和文件）
-      const submissionContent = mySubmission?.submissionFiles
-        ? this.parseSubmissionContent(mySubmission.submissionFiles)
+      const submissionContent = mySubmission?.submissionFiles || mySubmission?.submission_files
+        ? this.parseSubmissionContent(mySubmission.submissionFiles || mySubmission.submission_files)
         : { answer: '', files: [] };
 
       this.setData({
@@ -424,9 +448,35 @@ Page({
       // 按逗号分隔URL列表
       const urls = filesPart.split(',').map(url => url.trim()).filter(url => url);
       return urls.map(url => {
-        const fileName = url.split('/').pop().split('_').pop() || url.split('/').pop();
+        // 提取文件名：优先尝试从URL路径获取
+        let fileName = '';
+        const parts = url.split('/');
+        const lastPart = parts[parts.length - 1] || '';
+
+        // 处理带时间戳的文件名，如：2025/12/04/xxx_timestamp.pdf
+        // 或者原始文件名格式
+        if (lastPart.includes('_')) {
+          // 尝试提取原始文件名部分
+          const nameParts = lastPart.split('_');
+          if (nameParts.length > 1) {
+            // 取最后一部分作为可能的原始文件名
+            fileName = nameParts[nameParts.length - 1];
+          } else {
+            fileName = lastPart;
+          }
+        } else {
+          fileName = lastPart;
+        }
+
+        // 解码URL编码的文件名
+        try {
+          fileName = decodeURIComponent(fileName);
+        } catch (e) {
+          // 解码失败，使用原始值
+        }
+
         return {
-          name: decodeURIComponent(fileName),
+          name: fileName || '未知文件',
           url: url,
           sizeText: ''
         };
@@ -441,20 +491,36 @@ Page({
   parseSubmissionContent(filesStr) {
     if (!filesStr) return { answer: '', files: [] };
 
+    // 检查是否有附件标记
     const attachmentIndex = filesStr.indexOf('附件：');
-    if (attachmentIndex === -1) {
-      // 没有附件标记，全部作为答案
-      return {
-        answer: filesStr,
-        files: []
-      };
+
+    if (attachmentIndex !== -1) {
+      // 有附件标记，分离答案和附件
+      const answer = filesStr.substring(0, attachmentIndex).trim();
+      const files = this.parseFiles(filesStr);
+      return { answer, files };
     }
 
-    // 分离答案和附件
-    const answer = filesStr.substring(0, attachmentIndex).trim();
-    const files = this.parseFiles(filesStr);
+    // 没有附件标记，判断是否为纯URL格式（网页端提交的格式）
+    // 检查是否以URL路径开头（如 /profile/upload/ 或 http）
+    const trimmed = filesStr.trim();
+    const isUrlFormat = trimmed.startsWith('/profile/') ||
+                        trimmed.startsWith('/upload/') ||
+                        trimmed.startsWith('http://') ||
+                        trimmed.startsWith('https://') ||
+                        /^\/[a-zA-Z0-9_]+\//.test(trimmed);
 
-    return { answer, files };
+    if (isUrlFormat) {
+      // 纯URL格式，作为附件处理
+      const files = this.parseFiles(filesStr);
+      return { answer: '', files };
+    }
+
+    // 其他情况，全部作为答案
+    return {
+      answer: filesStr,
+      files: []
+    };
   },
 });
 
