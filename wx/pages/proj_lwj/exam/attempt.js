@@ -14,7 +14,8 @@ Page({
     // no-op; violation is recorded onHide
   },
   onHide() {
-    // 记录一次违规（切出页面/进入后台）
+    // 记录一次违规（切出页面/进入后台）——在提交过程中或提交结束后不再计违规
+    if (this.submitting || this.examEnded) return;
     if (this.data.antiCheatEnabled) {
       const now = Date.now();
       if (now - (this.data.lastViolationAt || 0) > 1500) {
@@ -218,6 +219,8 @@ Page({
   },
 
   handleViolation(reason) {
+    // 在提交过程中或考试结束后不再提示违规
+    if (this.submitting || this.examEnded) return;
     if (!this.data.antiCheatEnabled) return;
     const count = (this.data.violations || 0) + 1;
     this.setData({ violations: count });
@@ -235,6 +238,9 @@ Page({
     const that = this;
     if (this.submitting) return;
     this.submitting = true;
+    // 提交阶段关闭防作弊提示，避免多次违规弹框
+    this.setData({ antiCheatEnabled: false });
+    try { if (wx.disableAlertBeforeUnload) wx.disableAlertBeforeUnload(); } catch(e) {}
     wx.showLoading({ title: '提交中...' });
 
     const payload = { answers: [], durationSeconds: (this.data.exam.durationSeconds - this.data.remaining) };
@@ -246,9 +252,8 @@ Page({
     api.submitExam(this.examId, payload).then(res => {
       wx.hideLoading();
       that.submitting = false;
-      if (timer) clearInterval(timer);
-      timer = null;
-      try { wx.removeStorageSync('exam_auto_' + that.examId); } catch (e) {}
+      that.examEnded = true;
+      try { if (wx.disableAlertBeforeUnload) wx.disableAlertBeforeUnload(); } catch(e) {}
 
       // 根据返回结果决定提示内容
       let title = '提交成功';
@@ -256,10 +261,8 @@ Page({
 
       if (res) {
         if (res.hasUnscoredSubjective) {
-          // 有未批改的简答题
           content = '已提交，等待批改';
         } else if (res.totalScore !== null && res.totalScore !== undefined) {
-          // 无简答题或简答题已批改，显示总分
           content = '得分：' + res.totalScore + '分';
         }
       }
@@ -275,9 +278,13 @@ Page({
     }).catch(err => {
       wx.hideLoading();
       that.submitting = false;
+      that.examEnded = true;
+      try { if (wx.disableAlertBeforeUnload) wx.disableAlertBeforeUnload(); } catch(e) {}
+
+      // 错误情况下也标记考试结束，避免返回过程出现违规弹框
+      that.examEnded = true;
       console.error('submitExam API error', err);
 
-      // 如果是重复提交错误（500），也认为是成功的，直接返回列表
       if (err && (err.code === 500 || err.code === '500') && err.msg && err.msg.indexOf('已提交') !== -1) {
         if (timer) clearInterval(timer);
         timer = null;
@@ -293,7 +300,6 @@ Page({
         return;
       }
 
-      // If server says participant not started, suggest retrying to start
       if (err && err.code === 404) {
         wx.showModal({ title: '提交失败', content: (err.msg || err.message || '未开始考试或记录不存在') + '\n请返回考试列表并重新进入以尝试创建参与记录。', showCancel: false });
         return;
