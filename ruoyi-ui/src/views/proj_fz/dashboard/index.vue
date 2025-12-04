@@ -838,8 +838,7 @@ export default {
           trend: this.coreMetrics.gradingTrend,
           icon: 'el-icon-edit',
           color: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-          route: 'grading',
-          subTitle: `批改率: ${this.coreMetrics.gradingRate}%`
+          route: 'grading'
         }
       ]
     },
