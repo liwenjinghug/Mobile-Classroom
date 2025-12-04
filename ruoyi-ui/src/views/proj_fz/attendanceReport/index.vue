@@ -939,7 +939,7 @@ export default {
       });
     },
 
-    /** 打印功能 */
+    /** 打印功能 - 打印所有页的数据 */
     handlePrint() {
       if (this.dataList.length === 0) {
         this.$message.warning('没有数据可以打印');
@@ -953,89 +953,141 @@ export default {
         duration: 0
       });
 
-      // 先生成图表图片
-      this.generateChartImages();
+      // 先获取所有页的数据
+      this.getAllDataForPrint().then(allData => {
+        // 先生成图表图片
+        this.generateChartImages();
 
-      // 等待图表图片生成完成
-      setTimeout(() => {
-        const printContent = this.generatePrintContent();
-        const printWindow = window.open('', '_blank');
+        // 等待图表图片生成完成
+        setTimeout(() => {
+          const printContent = this.generatePrintContent(allData);
+          const printWindow = window.open('', '_blank');
 
-        if (printWindow) {
-          printWindow.document.write(printContent);
-          printWindow.document.close();
+          if (printWindow) {
+            printWindow.document.write(printContent);
+            printWindow.document.close();
 
-          // 等待打印窗口的内容完全加载
-          printWindow.onload = () => {
-            // 查找所有图片元素
-            const images = printWindow.document.querySelectorAll('img');
-            let loadedCount = 0;
-            const totalImages = images.length;
+            // 等待打印窗口的内容完全加载
+            printWindow.onload = () => {
+              // 查找所有图片元素
+              const images = printWindow.document.querySelectorAll('img');
+              let loadedCount = 0;
+              const totalImages = images.length;
 
-            if (totalImages === 0) {
-              // 没有图片，直接打印
-              loadingMsg.close();
-              setTimeout(() => {
-                printWindow.print();
-              }, 300);
-              return;
-            }
-
-            // 检查所有图片是否加载完成
-            const checkAllImagesLoaded = () => {
-              loadedCount++;
-              if (loadedCount >= totalImages) {
-                // 所有图片加载完成，关闭提示并打印
+              if (totalImages === 0) {
+                // 没有图片，直接打印
                 loadingMsg.close();
                 setTimeout(() => {
                   printWindow.print();
-                }, 500);
+                }, 300);
+                return;
               }
+
+              // 检查所有图片是否加载完成
+              const checkAllImagesLoaded = () => {
+                loadedCount++;
+                if (loadedCount >= totalImages) {
+                  // 所有图片加载完成，关闭提示并打印
+                  loadingMsg.close();
+                  setTimeout(() => {
+                    printWindow.print();
+                  }, 500);
+                }
+              };
+
+              // 为每个图片添加加载事件监听
+              images.forEach(img => {
+                if (img.complete) {
+                  checkAllImagesLoaded();
+                } else {
+                  img.onload = checkAllImagesLoaded;
+                  img.onerror = checkAllImagesLoaded; // 即使加载失败也继续
+                }
+              });
+
+              // 设置超时保护，避免一直等待
+              setTimeout(() => {
+                if (loadedCount < totalImages) {
+                  console.warn('部分图片加载超时，强制打印');
+                  loadingMsg.close();
+                  printWindow.print();
+                }
+              }, 5000);
             };
+          } else {
+            loadingMsg.close();
+            this.$message.error('无法打开打印窗口，请检查浏览器弹窗设置');
+          }
+        }, 1500);
+      }).catch(err => {
+        loadingMsg.close();
+        console.error('获取打印数据失败', err);
+        this.$message.error('获取打印数据失败: ' + (err.message || '请检查网络连接'));
+      });
+    },
 
-            // 为每个图片添加加载事件监听
-            images.forEach(img => {
-              if (img.complete) {
-                checkAllImagesLoaded();
-              } else {
-                img.onload = checkAllImagesLoaded;
-                img.onerror = checkAllImagesLoaded; // 即使加载失败也继续
-              }
-            });
+    /** 获取所有页的数据用于打印 */
+    getAllDataForPrint() {
+      return new Promise((resolve, reject) => {
+        const params = {
+          pageNum: 1,
+          pageSize: 999999, // 获取所有数据
+          sessionId: this.queryParams.sessionId,
+          attendanceStatus: this.queryParams.attendanceStatus,
+          startDate: this.dateRange && this.dateRange.length ? this.dateRange[0] : undefined,
+          endDate: this.dateRange && this.dateRange.length ? this.dateRange[1] : undefined
+        };
 
-            // 设置超时保护，避免一直等待
-            setTimeout(() => {
-              if (loadedCount < totalImages) {
-                console.warn('部分图片加载超时，强制打印');
-                loadingMsg.close();
-                printWindow.print();
-              }
-            }, 5000);
-          };
-        } else {
-          loadingMsg.close();
-          this.$message.error('无法打开打印窗口，请检查浏览器弹窗设置');
+        let apiMethod;
+        switch (this.statDimension) {
+          case 'summary':
+            apiMethod = sessionStatistics;
+            break;
+          case 'trend':
+            params.groupBy = 'day';
+            apiMethod = timeStatistics;
+            break;
+          case 'details':
+            apiMethod = attendanceDetails;
+            break;
+          default:
+            apiMethod = sessionStatistics;
         }
-      }, 1500);
+
+        apiMethod(params).then(response => {
+          let data = [];
+          if (response && response.code === 200) {
+            if (this.statDimension === 'trend') {
+              data = response.data?.statistics || [];
+            } else {
+              data = response.rows || [];
+            }
+          }
+          resolve(data);
+        }).catch(reject);
+      });
     },
 
     /** 生成打印内容 */
-    generatePrintContent() {
+    generatePrintContent(allData) {
       const title = '考勤报表';
       const now = this.parseTime(new Date(), '{y}-{m}-{d} {h}:{i}:{s}');
       const userName = (this.$store && this.$store.state.user && this.$store.state.user.userName) || '当前用户';
+
+      // 使用传入的所有数据，如果没有传入则使用当前页数据
+      const printData = allData || this.dataList;
 
       let tableContent = '';
       let chartContent = '';
 
       if (this.statDimension === 'summary') {
-        tableContent = this.generateSummaryTable();
+        tableContent = this.generateSummaryTable(printData);
         chartContent = this.generateSummaryChartsForPrint();
       } else if (this.statDimension === 'trend') {
-        tableContent = this.generateTrendTable();
+        tableContent = this.generateTrendTable(printData);
         chartContent = this.generateTrendChartsForPrint();
       } else {
-        tableContent = this.generateDetailsTable();
+        tableContent = this.generateDetailsTable(printData);
       }
 
       return `
@@ -1114,7 +1166,7 @@ export default {
             <div class="print-info">
               <strong>生成人:</strong> ${userName} |
               <strong>生成时间:</strong> ${now} |
-              <strong>数据条数:</strong> ${this.dataList.length} 条
+              <strong>数据条数:</strong> ${printData.length} 条
             </div>
           </div>
 
@@ -1184,8 +1236,9 @@ export default {
     },
 
     /** 生成汇总统计表格 */
-    generateSummaryTable() {
-      if (!this.dataList || this.dataList.length === 0) {
+    generateSummaryTable(data) {
+      const tableData = data || this.dataList;
+      if (!tableData || tableData.length === 0) {
         return '<div class="no-data">暂无数据</div>';
       }
 
@@ -1204,7 +1257,7 @@ export default {
             </tr>
           </thead>
           <tbody>
-            ${this.dataList.map((item, index) => `
+            ${tableData.map((item, index) => `
               <tr>
                 <td>${item.className || '未知'}</td>
                 <td>${item.totalStudents || 0}</td>
@@ -1222,8 +1275,9 @@ export default {
     },
 
     /** 生成趋势分析表格 */
-    generateTrendTable() {
-      if (!this.dataList || this.dataList.length === 0) {
+    generateTrendTable(data) {
+      const tableData = data || this.dataList;
+      if (!tableData || tableData.length === 0) {
         return '<div class="no-data">暂无数据</div>';
       }
 
@@ -1243,7 +1297,7 @@ export default {
             </tr>
           </thead>
           <tbody>
-            ${this.dataList.map((item, index) => `
+            ${tableData.map((item, index) => `
               <tr>
                 <td>${item.className || '未知'}</td>
                 <td>${item.statDate ? this.parseTime(item.statDate, '{y}-{m}-{d} {h}:{i}') : '未知时间'}</td>
@@ -1262,8 +1316,9 @@ export default {
     },
 
     /** 生成明细表格 */
-    generateDetailsTable() {
-      if (!this.dataList || this.dataList.length === 0) {
+    generateDetailsTable(data) {
+      const tableData = data || this.dataList;
+      if (!tableData || tableData.length === 0) {
         return '<div class="no-data">暂无数据</div>';
       }
 
@@ -1280,7 +1335,7 @@ export default {
             </tr>
           </thead>
           <tbody>
-            ${this.dataList.map((item, index) => `
+            ${tableData.map((item, index) => `
               <tr>
                 <td>${item.studentName || '未知'}</td>
                 <td>${item.studentNo || '未知'}</td>
