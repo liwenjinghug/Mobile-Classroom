@@ -1,137 +1,54 @@
 <view class="page">
-  <!-- 页面标题和操作栏 -->
+  <!-- 页面标题 -->
   <view class="header-row">
     <view class="header">{{sessionName}} - 作业</view>
     <view class="header-actions">
-      <button bindtap="toggleFilter" size="mini" class="filter-toggle-btn {{showFilter ? 'active' : ''}}">
-        <text class="filter-icon">⚙</text>
-        筛选
-      </button>
       <button bindtap="onPullDownRefresh" size="mini" class="refresh-btn">刷新</button>
     </view>
   </view>
 
-  <!-- 快捷筛选栏 -->
-  <view class="quick-filter-bar">
-    <view class="quick-filter-item">
-      <picker mode="selector" range="{{['全部', '已截止', '进行中']}}"
-              value="{{filterForm.isExpired === 'yes' ? 1 : (filterForm.isExpired === 'no' ? 2 : 0)}}"
-              data-field="isExpired" bindchange="onQuickFilterChange">
-        <view class="quick-filter-picker {{filterForm.isExpired ? 'active' : ''}}">
-          <text class="quick-filter-label">截止：</text>
-          <text class="quick-filter-value">{{filterForm.isExpired === 'yes' ? '已截止' : (filterForm.isExpired === 'no' ? '进行中' : '全部')}}</text>
-          <text class="quick-filter-arrow">▼</text>
+  <!-- 筛选栏 - 只保留状态筛选 -->
+  <view class="filter-bar">
+    <view class="filter-item">
+      <picker mode="selector" range="{{['全部', '进行中', '已截止']}}"
+              value="{{filterForm.isExpired === 'no' ? 1 : (filterForm.isExpired === 'yes' ? 2 : 0)}}"
+              data-field="isExpired" bindchange="onFilterChange">
+        <view class="filter-picker {{filterForm.isExpired ? 'active' : ''}}">
+          <text class="filter-text">{{filterForm.isExpired === 'yes' ? '已截止' : (filterForm.isExpired === 'no' ? '进行中' : '截止状态')}}</text>
+          <text class="filter-arrow">▼</text>
         </view>
       </picker>
     </view>
 
-    <view class="quick-filter-item">
+    <view class="filter-item">
       <picker mode="selector" range="{{['全部', '已提交', '未提交']}}"
               value="{{filterForm.isSubmitted === 'yes' ? 1 : (filterForm.isSubmitted === 'no' ? 2 : 0)}}"
-              data-field="isSubmitted" bindchange="onQuickFilterChange">
-        <view class="quick-filter-picker {{filterForm.isSubmitted ? 'active' : ''}}">
-          <text class="quick-filter-label">提交：</text>
-          <text class="quick-filter-value">{{filterForm.isSubmitted === 'yes' ? '已提交' : (filterForm.isSubmitted === 'no' ? '未提交' : '全部')}}</text>
-          <text class="quick-filter-arrow">▼</text>
+              data-field="isSubmitted" bindchange="onFilterChange">
+        <view class="filter-picker {{filterForm.isSubmitted ? 'active' : ''}}">
+          <text class="filter-text">{{filterForm.isSubmitted === 'yes' ? '已提交' : (filterForm.isSubmitted === 'no' ? '未提交' : '提交状态')}}</text>
+          <text class="filter-arrow">▼</text>
         </view>
       </picker>
     </view>
 
-    <view class="quick-filter-item">
+    <view class="filter-item">
       <picker mode="selector" range="{{['全部', '已批改', '未批改']}}"
               value="{{filterForm.isGraded === 'yes' ? 1 : (filterForm.isGraded === 'no' ? 2 : 0)}}"
-              data-field="isGraded" bindchange="onQuickFilterChange">
-        <view class="quick-filter-picker {{filterForm.isGraded ? 'active' : ''}}">
-          <text class="quick-filter-label">批改：</text>
-          <text class="quick-filter-value">{{filterForm.isGraded === 'yes' ? '已批改' : (filterForm.isGraded === 'no' ? '未批改' : '全部')}}</text>
-          <text class="quick-filter-arrow">▼</text>
+              data-field="isGraded" bindchange="onFilterChange">
+        <view class="filter-picker {{filterForm.isGraded ? 'active' : ''}}">
+          <text class="filter-text">{{filterForm.isGraded === 'yes' ? '已批改' : (filterForm.isGraded === 'no' ? '未批改' : '批改状态')}}</text>
+          <text class="filter-arrow">▼</text>
         </view>
       </picker>
     </view>
-  </view>
 
-  <!-- 高级筛选面板 -->
-  <view wx:if="{{showFilter}}" class="filter-panel">
-    <view class="filter-title">
-      <text>高级筛选</text>
-      <text class="filter-count">共 {{homeworkList.length}} 项</text>
-    </view>
-
-    <view class="filter-section">
-      <view class="filter-row">
-        <text class="filter-label">课程</text>
-        <picker mode="selector" range="{{['全部'].concat(courseOptions)}}"
-                value="{{filterForm.courseName ? courseOptions.indexOf(filterForm.courseName) + 1 : 0}}"
-                data-field="courseName" bindchange="onFilterInput">
-          <view class="filter-picker">
-            <text>{{filterForm.courseName || '全部'}}</text>
-            <text class="picker-arrow">▼</text>
-          </view>
-        </picker>
-      </view>
-
-      <view class="filter-row">
-        <text class="filter-label">课堂</text>
-        <picker mode="selector" range="{{['全部'].concat(classOptions)}}"
-                value="{{filterForm.className ? classOptions.indexOf(filterForm.className) + 1 : 0}}"
-                data-field="className" bindchange="onFilterInput">
-          <view class="filter-picker">
-            <text>{{filterForm.className || '全部'}}</text>
-            <text class="picker-arrow">▼</text>
-          </view>
-        </picker>
-      </view>
-
-      <view class="filter-row">
-        <text class="filter-label">作业</text>
-        <picker mode="selector" range="{{['全部'].concat(titleOptions)}}"
-                value="{{filterForm.title ? titleOptions.indexOf(filterForm.title) + 1 : 0}}"
-                data-field="title" bindchange="onFilterInput">
-          <view class="filter-picker">
-            <text>{{filterForm.title || '全部'}}</text>
-            <text class="picker-arrow">▼</text>
-          </view>
-        </picker>
-      </view>
-    </view>
-
-    <view class="filter-section">
-      <view class="filter-row">
-        <text class="filter-label">发布时间</text>
-        <view class="filter-date-range">
-          <picker mode="date" value="{{filterForm.publishStartDate}}"
-                  data-field="publishStartDate" bindchange="onFilterInput">
-            <view class="filter-date-picker">{{filterForm.publishStartDate || '开始'}}</view>
-          </picker>
-          <text class="filter-separator">至</text>
-          <picker mode="date" value="{{filterForm.publishEndDate}}"
-                  data-field="publishEndDate" bindchange="onFilterInput">
-            <view class="filter-date-picker">{{filterForm.publishEndDate || '结束'}}</view>
-          </picker>
-        </view>
-      </view>
-
-      <view class="filter-row">
-        <text class="filter-label">截止时间</text>
-        <view class="filter-date-range">
-          <picker mode="date" value="{{filterForm.deadlineStartDate}}"
-                  data-field="deadlineStartDate" bindchange="onFilterInput">
-            <view class="filter-date-picker">{{filterForm.deadlineStartDate || '开始'}}</view>
-          </picker>
-          <text class="filter-separator">至</text>
-          <picker mode="date" value="{{filterForm.deadlineEndDate}}"
-                  data-field="deadlineEndDate" bindchange="onFilterInput">
-            <view class="filter-date-picker">{{filterForm.deadlineEndDate || '结束'}}</view>
-          </picker>
-        </view>
-      </view>
-    </view>
-
-    <view class="filter-buttons">
-      <button class="filter-btn reset-btn" size="mini" bindtap="resetFilter">重置筛选</button>
-      <button class="filter-btn apply-btn" size="mini" type="primary" bindtap="applyFilter">应用筛选</button>
+    <view wx:if="{{hasActiveFilter}}" class="filter-reset" bindtap="resetFilter">
+      <text>重置</text>
     </view>
   </view>
+
+  <!-- 作业数量 -->
+  <view class="homework-count">共 {{homeworkList.length}} 项作业</view>
 
   <!-- 加载中 -->
   <view wx:if="{{loading}}" class="loading">

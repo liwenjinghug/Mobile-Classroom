@@ -171,23 +171,26 @@ public class HomeworkController extends BaseController {
         // 尝试通过学号查找 class_student 表中的 student_id
         // 这样网页端通过 class_student.student_id 查询时能找到记录
         Long classStudentId = null;
+        String studentName = null;
         try {
             ClassStudent cs = classStudentMapper.selectByStudentNo(username);
             if (cs != null && cs.getStudentId() != null) {
                 classStudentId = cs.getStudentId();
-                logger.info("通过学号 {} 找到 class_student.student_id = {}", username, classStudentId);
+                studentName = cs.getStudentName();
+                logger.info("通过学号 {} 找到 class_student.student_id = {}, student_name = {}", username, classStudentId, studentName);
             }
         } catch (Exception e) {
             logger.warn("通过学号查找class_student失败", e);
         }
 
-        // 设置学生ID：优先使用 class_student.student_id，否则使用 sys_user.user_id
-        if (shw.getStudentId() == null || shw.getStudentId() == 0L) {
-            if (classStudentId != null) {
-                shw.setStudentId(classStudentId);
-            } else {
-                shw.setStudentId(userId);
-            }
+        // 设置学生ID：必须使用 class_student.student_id，这样网页端才能查到
+        // 如果找不到class_student记录，才使用userId
+        Long finalStudentId = classStudentId != null ? classStudentId : userId;
+        shw.setStudentId(finalStudentId);
+
+        // 设置学生姓名
+        if (studentName != null && (shw.getStudentName() == null || shw.getStudentName().isEmpty())) {
+            shw.setStudentName(studentName);
         }
 
         // 设置提交时间和状态
@@ -198,30 +201,32 @@ public class HomeworkController extends BaseController {
             shw.setStatus(1); // 1=已提交
         }
 
-        // 检查是否已有提交 - 同时通过多种方式查找
+        // 检查是否已有提交 - 同时通过多种方式查找（包括之前用错误ID提交的记录）
         ClassStudentHomework existingSubmission = null;
         Set<Long> checkedIds = new HashSet<>();
 
-        // 1. 通过当前设置的 studentId 查找
-        try {
-            List<ClassStudentHomework> existingById = studentHomeworkService.selectByStudentId(shw.getStudentId());
-            if (existingById != null) {
-                for (ClassStudentHomework e : existingById) {
-                    if (e.getHomeworkId() != null && e.getHomeworkId().equals(shw.getHomeworkId())) {
-                        existingSubmission = e;
-                        break;
-                    }
-                    if (e.getStudentHomeworkId() != null) {
-                        checkedIds.add(e.getStudentHomeworkId());
+        // 1. 通过正确的 class_student.student_id 查找
+        if (classStudentId != null) {
+            try {
+                List<ClassStudentHomework> existingById = studentHomeworkService.selectByStudentId(classStudentId);
+                if (existingById != null) {
+                    for (ClassStudentHomework e : existingById) {
+                        if (e.getHomeworkId() != null && e.getHomeworkId().equals(shw.getHomeworkId())) {
+                            existingSubmission = e;
+                            break;
+                        }
+                        if (e.getStudentHomeworkId() != null) {
+                            checkedIds.add(e.getStudentHomeworkId());
+                        }
                     }
                 }
+            } catch (Exception e) {
+                logger.warn("通过classStudentId查找已有提交失败", e);
             }
-        } catch (Exception e) {
-            logger.warn("通过studentId查找已有提交失败", e);
         }
 
-        // 2. 如果没找到，且 classStudentId 与 userId 不同，也通过 userId 查找
-        if (existingSubmission == null && classStudentId != null && !classStudentId.equals(userId)) {
+        // 2. 如果没找到，通过 user_id 查找（兼容之前用错误ID提交的记录）
+        if (existingSubmission == null) {
             try {
                 List<ClassStudentHomework> existingByUserId = studentHomeworkService.selectByStudentId(userId);
                 if (existingByUserId != null) {
@@ -229,6 +234,8 @@ public class HomeworkController extends BaseController {
                         if (e.getHomeworkId() != null && e.getHomeworkId().equals(shw.getHomeworkId())) {
                             if (e.getStudentHomeworkId() == null || !checkedIds.contains(e.getStudentHomeworkId())) {
                                 existingSubmission = e;
+                                // 找到了用user_id提交的旧记录，更新时会修正student_id
+                                logger.info("找到用userId={}提交的旧记录，将更新student_id为{}", userId, finalStudentId);
                                 break;
                             }
                         }

@@ -304,7 +304,10 @@ getNoticeDetail(noticeId) {
 
   // 获取作业列表
   getHomeworkList(sessionId, status) {
-    const query = {};
+    const query = {
+      pageNum: 1,
+      pageSize: 1000  // 获取足够多的数据
+    };
     if (sessionId) query.sessionId = sessionId;
     return request({
       url: '/proj_fz/homework/list',

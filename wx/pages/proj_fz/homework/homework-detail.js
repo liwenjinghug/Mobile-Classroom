@@ -178,10 +178,18 @@ Page({
         wx.showToast({ title: '提交成功', icon: 'success' });
         this.setData({ submitting: false });
 
-        // 延迟刷新
-        setTimeout(() => {
-          this.loadHomeworkDetail();
-        }, 1000);
+        // 刷新当前页面数据
+        this.loadHomeworkDetail();
+
+        // 标记需要刷新列表（onShow会检测）
+        const pages = getCurrentPages();
+        if (pages.length > 1) {
+          const prevPage = pages[pages.length - 2];
+          if (prevPage && prevPage.loadHomeworkList) {
+            // 直接标记前一页需要刷新
+            prevPage.needRefresh = true;
+          }
+        }
       })
       .catch(err => {
         console.error('提交失败', err);
