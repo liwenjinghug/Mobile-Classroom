@@ -5,27 +5,32 @@
   min-height: 100vh;
 }
 
-/* 页面标题和操作栏 */
+/* 1. 标题栏 (仿考试列表风格：白底黑字) */
 .header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16rpx;
-  padding: 20rpx 24rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12rpx;
-  box-shadow: 0 4rpx 12rpx rgba(102, 126, 234, 0.3);
+  padding: 30rpx 30rpx;
+  background-color: #ffffff; /* 白底 */
+  border-bottom: 1rpx solid #e5e5e5; /* 分割线 */
 }
 
 .header {
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: bold;
-  color: #fff;
+  color: #333333; /* 黑字 */
 }
 
-.header-actions {
-  display: flex;
-  gap: 12rpx;
+/* 刷新按钮样式适配白底 */
+.header-actions button {
+  margin-left: 10rpx;
+  font-size: 24rpx;
+  background: #f0f0f0 !important; /* 浅灰背景 */
+  color: #333 !important;       /* 深色文字 */
+  border: none !important;
+  border-radius: 8rpx;
+  padding: 0 20rpx;
+  line-height: 1.8;
 }
 
 .filter-toggle-btn, .refresh-btn {

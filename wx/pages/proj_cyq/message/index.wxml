@@ -11,7 +11,6 @@
     <view class="header-actions">
       <view class="btn-group">
         <button class="mini-btn default" bindtap="handleMarkAllRead">一键已读</button>
-        <button class="mini-btn primary" bindtap="requestSubscribe">开启提醒</button>
       </view>
     </view>
 
@@ -55,7 +54,6 @@
               <icon wx:if="{{item.status === '1'}}" type="success_no_circle" size="14" color="#fff"/>
             </view>
           </view>
-          
           <view class="todo-content {{item.status === '1' ? 'done' : ''}}" bindtap="navigateToEditTodo" data-id="{{item.todoId}}">
             <view class="todo-title">
               {{item.title}}

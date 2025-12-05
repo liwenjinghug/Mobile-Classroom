@@ -1,22 +1,21 @@
 <view class="container">
-  <view class="header">
-    <view class="title-row">
+  <view class="card">
+    <view class="header-top">
       <text class="tag {{msg.type}}">{{msg.typeName}}</text>
-      <text class="title">{{msg.title}}</text>
-    </view>
-    <view class="meta">
-      <text class="sender">发送者：{{msg.sender}}</text>
       <text class="time">{{msg.sendTime}}</text>
     </view>
-  </view>
+    
+    <view class="title">{{msg.title}}</view>
+    
+    <view class="sender-box">
+      <text class="sender-label">发送人：</text>
+      <text class="sender-name">{{msg.sender}}</text>
+    </view>
 
-  <view class="divider"></view>
+    <view class="divider"></view>
 
-  <view class="content-box">
-    <text class="content-text" user-select>{{msg.content}}</text>
-  </view>
-
-  <view class="footer-actions" wx:if="{{msg.type === 'exam'}}">
-    <button type="primary" bindtap="handleAction">去处理</button>
+    <view class="content-box">
+      <rich-text nodes="{{msg.content}}"></rich-text>
+    </view>
   </view>
 </view>
