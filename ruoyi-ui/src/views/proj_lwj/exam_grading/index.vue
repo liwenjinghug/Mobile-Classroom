@@ -1186,12 +1186,14 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
         })
         Object.keys(map).forEach(sid=>{ map[sid] = this.applyScoresSorting(map[sid]) })
         this.perSessionScores = map
-        // Stats
+        // Stats - 修复：只计算已提交学生的平均分，与实时刷新统计保持一致
         const total = sorted.length
-        const submitted = sorted.filter(x => x.submitted).length
+        const submittedStudents = sorted.filter(x => x.submitted)
+        const submitted = submittedStudents.length
         const graded = sorted.filter(x => x.graded).length
-        const sum = sorted.reduce((acc, x) => acc + (x.score == null ? 0 : x.score), 0)
-        const avg = total ? sum / total : 0
+        // 只统计已提交学生的分数求平均
+        const sum = submittedStudents.reduce((acc, x) => acc + (x.score == null ? 0 : x.score), 0)
+        const avg = submitted > 0 ? sum / submitted : 0
         this.classScoresStats = { totalStudents: total, submittedCount: submitted, gradedCount: graded, avgScore: Number(avg.toFixed(1)) }
         if (force) this.activeScoresTab = 'all'
       } catch(e){

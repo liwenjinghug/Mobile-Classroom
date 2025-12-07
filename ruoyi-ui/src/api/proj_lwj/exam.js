@@ -129,6 +129,15 @@ export function listAvailableExam(studentNo) {
     params: { studentNo }
   })
 }
+
+// 获取当前登录用户可参加的考试列表（无需学号）
+export function listMyAvailableExams() {
+  return request({
+    url: '/proj_lwj/exam/my-available',
+    method: 'get'
+  })
+}
+
 // 兼容前端调用的复数命名与对象参数形式
 export function listAvailableExams(arg) {
   if (typeof arg === 'string') return listAvailableExam(arg)
@@ -208,6 +217,12 @@ export function listMyParticipants(arg) {
 export function listMyExams(studentNo){
   return request({ url:'/proj_lwj/exam/my', method:'get', params:{ studentNo } })
 }
+
+// 获取当前登录用户的综合考试列表（无需学号）
+export function listMyOwnExams() {
+  return request({ url:'/proj_lwj/exam/my-exams', method:'get' })
+}
+
 // 获取题目统计与批改概览
 export function getQuestionCorrectSummary(examId){
   return request({ url:`/proj_lwj/exam/${examId}/questionCorrectSummary`, method:'get' })

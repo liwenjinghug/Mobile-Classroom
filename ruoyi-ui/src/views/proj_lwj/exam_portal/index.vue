@@ -4,15 +4,15 @@
       <div slot="header">考试入口</div>
       <el-form inline @submit.native.prevent>
         <el-form-item label="学号">
-          <el-input v-model.trim="studentNo" placeholder="请输入学号" clearable style="width:240px" />
+          <el-input v-model.trim="studentNo" placeholder="自动获取学号" disabled style="width:240px" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="loadExams">查询我参加的考试</el-button>
+          <el-button type="primary" @click="loadExams">查询可参加的考试</el-button>
           <el-button type="success" @click="loadMyList" :disabled="!studentNo" style="margin-left:8px">查询我的考试记录</el-button>
           <el-button v-if="studentNoStored" type="text" @click="clearStored" style="margin-left:4px">清除记住的学号</el-button>
         </el-form-item>
       </el-form>
-      <el-alert v-if="!studentNo" type="info" :closable="false" title="请输入学号，查询您可参加的考试列表或您的历史记录" />
+      <el-alert v-if="!studentNo" type="warning" :closable="false" title="未获取到学号信息，请确保您已登录且已绑定学生身份" />
     </el-card>
 
     <!-- 考试列表，仅在点击查询后显示 -->
@@ -54,12 +54,21 @@
     </el-card>
     <el-card v-else-if="examsLoaded" shadow="never" class="list-pane"><el-empty description="暂无符合条件的考试" /></el-card>
 
-    <!-- 我的考试记录：仅在点击查询后显示 -->
+    <!-- 未完成的考试弹窗 -->
     <el-card v-if="myLoaded" shadow="never" class="my-pane" style="margin-top:16px">
       <div slot="header" class="clearfix">
         <span>我的考试记录</span>
         <div style="float:right; display:flex; align-items:center; gap:8px">
-          <el-input v-model.trim="myQuery.keyword" placeholder="搜索考试/课程" size="mini" clearable style="width:220px;margin-right:8px" />
+          <el-select v-model="myQuery.filterCourse" placeholder="全部课程" size="mini" clearable style="width:150px">
+            <el-option label="全部课程" value="" />
+            <el-option
+              v-for="course in distinctCourses"
+              :key="course.courseId"
+              :label="course.courseName"
+              :value="course.courseId"
+            />
+          </el-select>
+          <el-input v-model.trim="myQuery.keyword" placeholder="搜索考试/课程" size="mini" clearable style="width:220px" />
           <el-button size="mini" type="primary" :loading="myLoading" @click="loadMyList">刷新</el-button>
           <el-button size="mini" @click="exportMyCSV" :disabled="!myDisplayed.length">导出</el-button>
           <el-button size="mini" @click="printMy" :disabled="!myDisplayed.length">打印</el-button>
@@ -74,8 +83,7 @@
       <el-table :data="myDisplayed" size="small" :row-key="row=>row.id || (row.examId+'-'+row.studentNo)" ref="myTable">
         <el-table-column type="index" width="50" />
         <el-table-column prop="examName" label="考试名称" min-width="200" />
-        <el-table-column prop="courseName" label="课程" width="160" />
-        <!-- 删除课堂列（不需要展示课堂） -->
+        <el-table-column prop="courseName" label="课程" width="140" />
         <el-table-column prop="studentNo" label="学号" width="140" />
         <el-table-column prop="totalScore" label="成绩" width="100">
           <template slot-scope="scope">{{ displayScoreRow(scope.row) }}</template>
@@ -85,13 +93,27 @@
             <el-tag :type="passTagType(scope.row)">{{ passStatusText(scope.row) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="participantStatus" label="状态" width="100">
+        <el-table-column label="状态" width="120">
           <template slot-scope="scope">
-            <el-tag :type="scope.row.participantStatus===2?'success':'info'">{{ scope.row.participantStatus===2?'已提交':'进行中' }}</el-tag>
+            <el-tag :type="getStatusTagType(scope.row)">{{ getStatusText(scope.row) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="startTime" label="开始时间" width="180" />
         <el-table-column prop="submitTime" label="提交时间" width="180" />
+        <el-table-column label="操作" width="150" fixed="right">
+          <template slot-scope="scope">
+            <el-button
+              v-if="canEnterExam(scope.row)"
+              type="primary"
+              size="mini"
+              @click="goToExam(scope.row)"
+            >
+              {{ scope.row.participantStatus === null || scope.row.participantStatus === undefined ? '开始考试' : '进入考试' }}
+            </el-button>
+            <span v-else-if="isExpired(scope.row)" style="color: #F56C6C;">已截止</span>
+            <span v-else-if="scope.row.participantStatus === 2" style="color: #67C23A;">{{ displayScoreRow(scope.row) }}</span>
+          </template>
+        </el-table-column>
       </el-table>
       <div v-if="!myDisplayed.length" style="padding:12px 0">
         <el-empty description="暂无记录">
@@ -110,18 +132,22 @@
 </template>
 
 <script>
-import { listAvailableExams, startExamParticipant, listMyParticipants, getExam, listMyExams, getQuestionCorrectSummary } from '@/api/proj_lwj/exam'
+import { getCurrentStudent } from '@/api/proj_lw/classStudent'
+import { getExam, listMyAvailableExams, listMyParticipants, startExamParticipant, getQuestionCorrectSummary } from '@/api/proj_lwj/exam'
 
 export default {
   name: 'ExamPortal',
   data() {
     return {
-      studentNo: '', exams: [], loading: false, studentNoStored: false,
+      studentNo: '',
+      studentNoStored: false,
+      exams: [],
+      loading: false,
       // 新增：是否已点击查询标记
       examsLoaded: false,
       myLoaded: false,
       myList: [], myLoading: false,
-      myQuery: { keyword: '' },
+      myQuery: { keyword: '', filterCourse: '' }, // 只保留关键字和课程筛选
       examCache: {},
       myStats: { total: 0, finished: 0, avgScore: '—', passRate: 0 },
       diagnosing:false
@@ -147,36 +173,87 @@ export default {
         return timeValid && statusValid && notSubmitted
       })
     },
+    // 获取所有不同的课堂（用于筛选）
+    distinctSessions() {
+      const sessions = new Map()
+      this.myList.forEach(r => {
+        const sid = r.sessionId
+        const sname = r.className || r.sessionName || `课堂${sid}`
+        if (sid && !sessions.has(sid)) {
+          sessions.set(sid, { sessionId: sid, sessionName: sname })
+        }
+      })
+      return Array.from(sessions.values()).sort((a, b) => a.sessionId - b.sessionId)
+    },
+    // 获取所有不同的课程（用于筛选）
+    distinctCourses() {
+      const courses = new Map()
+      console.log('[distinctCourses] myList 长度:', this.myList.length)
+      this.myList.forEach(r => {
+        const cid = r.courseId
+        const cname = r.courseName || `课程${cid}`
+        console.log('[distinctCourses] 记录:', { courseId: cid, courseName: cname })
+        if (cid && !courses.has(cid)) {
+          courses.set(cid, { courseId: cid, courseName: cname })
+        }
+      })
+      const result = Array.from(courses.values()).sort((a, b) => a.courseId - b.courseId)
+      console.log('[distinctCourses] 最终课程列表:', result)
+      return result
+    },
     myDisplayed(){
       const kw = (this.myQuery.keyword||'').toLowerCase()
-      if (!kw) return this.myList
-      return this.myList.filter(r=>
-        String(r.examName||'').toLowerCase().includes(kw) ||
-        String(r.courseName||'').toLowerCase().includes(kw)
-      )
+      const filterCourse = this.myQuery.filterCourse
+
+      let filtered = this.myList
+
+      // 关键字筛选
+      if (kw) {
+        filtered = filtered.filter(r=>
+          String(r.examName||'').toLowerCase().includes(kw) ||
+          String(r.courseName||'').toLowerCase().includes(kw)
+        )
+      }
+
+      // 课程筛选
+      if (filterCourse) {
+        filtered = filtered.filter(r => r.courseId === Number(filterCourse))
+      }
+
+      return filtered
     }
   },
   watch: {
-    studentNo(val) {
-      const v = (val||'').trim()
+    studentNo(v) {
       if (v) {
         try { localStorage.setItem('exam_portal_studentNo', v); this.studentNoStored = true } catch(e){}
       } else {
-        this.studentNoStored = !!localStorage.getItem('exam_portal_studentNo')
+        try { localStorage.removeItem('exam_portal_studentNo'); this.studentNoStored = false } catch(e){}
       }
     }
   },
-  created() {
-    // 从localStorage恢复学号，但不自动加载列表，避免未就绪接口报错
-    try {
-      const saved = localStorage.getItem('exam_portal_studentNo')
-      if (saved) {
-        this.studentNo = saved
-        this.studentNoStored = true
-      }
-    } catch(e) { /* ignore */ }
+  async mounted() {
+    // 从当前登录用户自动获取学号
+    await this.fetchCurrentStudent()
   },
   methods: {
+    async fetchCurrentStudent() {
+      this.loading = true
+      try {
+        const res = await getCurrentStudent()
+        if (res && res.data && res.data.studentNo) {
+          this.studentNo = res.data.studentNo
+          this.$message.success('已自动获取学号: ' + this.studentNo)
+        } else {
+          this.$message.warning('未获取到学号信息，请确保已绑定学生身份')
+        }
+      } catch(e) {
+        console.error('获取学号失败:', e)
+        this.$message.error('获取学号失败，请确保已登录')
+      } finally {
+        this.loading = false
+      }
+    },
     clearStored() {
       try { localStorage.removeItem('exam_portal_studentNo') } catch(e){}
       this.studentNoStored = false
@@ -187,7 +264,7 @@ export default {
       this.loading = true
       this.examsLoaded = false
       try {
-        const res = await listAvailableExams(this.studentNo)
+        const res = await listMyAvailableExams()
         const data = res && (res.data || res.rows || res.list || res.exams)
         this.exams = Array.isArray(data) ? data : (Array.isArray(res) ? res : [])
         // 合并本地已结束考试摘要
@@ -273,20 +350,6 @@ export default {
         return v!=null ? v : '——'
       } catch(e){ return '——' }
     },
-    displayScoreRow(row){
-      if(!row) return '——'
-      // 当存在主观题且 correctStatus!=1 时显示 待批改
-      if (row.hasSubjective && row.correctStatus !== 1) return '待批改'
-      const t = row.totalScore
-      if (t !== undefined && t !== null && !isNaN(Number(t))) {
-        const n = Number(t); return (n%1===0)? n : n.toFixed(2)
-      }
-      const o = row.objectiveScore
-      if (o !== undefined && o !== null && !isNaN(Number(o))) {
-        const n = Number(o); return (n%1===0)? n : n.toFixed(2)
-      }
-      return '——'
-    },
     passStatusText(row){
       if(!row) return '——'
       // 未批改主观题不显示及格/不及格
@@ -307,42 +370,241 @@ export default {
 
     // ===== 我的考试记录 =====
     scoreDisplay(s){ return (s===undefined||s===null)?'——': (Number(s)%1===0?Number(s):Number(s).toFixed(2)) },
+    displayScoreRow(row) {
+      if (!row) return '——'
+      if (row.participantStatus !== 2) return '——' // 未提交
+      if (row.hasSubjective && row.correctStatus !== 1) return '批改中'
+      return this.scoreDisplay(row.totalScore)
+    },
+    isExpired(row) {
+      if (!row || !row.endTime) return false
+      const now = Date.now()
+      const endTime = new Date(row.endTime).getTime()
+      return endTime < now
+    },
+    canEnterExam(row) {
+      if (!row) return false
+
+      const notExpired = !this.isExpired(row)
+
+      // 未参加过或未提交的都可以进入（只要未截止）
+      if (row.participantStatus === null || row.participantStatus === undefined) {
+        return notExpired
+      }
+
+      const notFinished = row.participantStatus !== 2
+      return notFinished && notExpired
+    },
+    getStatusText(row) {
+      if (!row) return '——'
+
+      // 已删除的考试
+      if (row.isDeleted) {
+        return '已删除'
+      }
+
+      // 未参加
+      if (row.participantStatus === null || row.participantStatus === undefined) {
+        const now = Date.now()
+        const endTime = row.endTime ? new Date(row.endTime).getTime() : null
+        const isExpired = endTime && endTime < now
+        return isExpired ? '已截止(未参加)' : '未参加'
+      }
+
+      const isExpired = this.isExpired(row)
+      const isFinished = row.participantStatus === 2
+
+      if (isFinished) return '已完成'
+      if (isExpired) return '已截止'
+      return '待完成'
+    },
+    getStatusTagType(row) {
+      if (!row) return 'info'
+
+      // 已删除的考试
+      if (row.isDeleted) {
+        return 'danger'
+      }
+
+      // 未参加
+      if (row.participantStatus === null || row.participantStatus === undefined) {
+        const now = Date.now()
+        const endTime = row.endTime ? new Date(row.endTime).getTime() : null
+        const isExpired = endTime && endTime < now
+        return isExpired ? 'danger' : 'info'
+      }
+
+      const isExpired = this.isExpired(row)
+      const isFinished = row.participantStatus === 2
+
+      if (isFinished) return 'success'
+      if (isExpired) return 'danger'
+      return 'warning'
+    },
+    async goToExam(row) {
+      if (!row || !row.examId) return
+      if (!this.studentNo) {
+        this.$message.warning('请先输入学号')
+        return
+      }
+
+      // 检查是否可以进入考试
+      if (!this.canEnterExam(row)) {
+        this.$message.warning('当前考试已截止或已完成')
+        return
+      }
+
+      try {
+        this.loading = true
+        // 调用开考接口创建参与记录
+        await startExamParticipant({
+          examId: Number(row.examId),
+          studentNo: this.studentNo
+        })
+
+        // 跳转到考试页面
+        this.$router.push({
+          path: '/proj_lwj/exam_take',
+          query: {
+            examId: row.examId,
+            studentNo: this.studentNo,
+            autoStart: '1'
+          }
+        })
+      } catch (e) {
+        console.error('开考失败:', e)
+        const errMsg = e.message || e.msg || '开考失败，请稍后重试'
+        this.$message.error(errMsg)
+      } finally {
+        this.loading = false
+      }
+    },
     async loadMyList(){
       if (!this.studentNo) { this.$message.info('请先输入学号'); return }
       this.myLoading = true
       this.myLoaded = true
       try {
-        // 只查询实际参与记录（从 class_exam_participant 表），不显示未参与的考试
-        const res = await listMyParticipants(this.studentNo)
-        const listRaw = res && (res.data || res.rows || res.list)
-        let list = Array.isArray(listRaw) ? listRaw.slice() : []
+        console.log('[ExamPortal] 开始加载我的考试记录（仅已参与的）...')
+        console.log('[ExamPortal] 使用学号:', this.studentNo)
 
-        // 标准化字段: examId 兼容 id
-        list = list.map(r => ({
-          ...r,
-          examId: r.examId != null ? r.examId : (r.id != null ? r.id : r.exam_id),
-          totalScore: r.totalScore != null ? r.totalScore : r.total_score,
-          objectiveScore: r.objectiveScore != null ? r.objectiveScore : r.objective_score,
-          passStatus: r.passStatus != null ? r.passStatus : r.pass_status,
-          correctStatus: r.correctStatus != null ? r.correctStatus : r.correct_status,
-          hasSubjective: r.hasSubjective != null ? r.hasSubjective : r.has_subjective
-        }))
+        // 获取用户的参与记录 - 使用 listMyParticipants 接口
+        const participantsRes = await listMyParticipants(this.studentNo)
+        console.log('[ExamPortal] API 返回:', participantsRes)
 
-        // 推断主观题及 correctStatus 缺失的记录（仅缺失时）
-        const needInfer = list.filter(r => r.examId && (r.hasSubjective === undefined || r.correctStatus === undefined))
-        if (needInfer.length) await this.inferSubjectiveFlags(needInfer)
-        // 填充考试基本信息
-        await this.enrichExamInfo(list)
-        // 排序：提交时间优先，其次开始时间
-        list.sort((a,b)=> new Date(b.submitTime||0)-new Date(a.submitTime||0) || new Date(b.startTime||0)-new Date(a.startTime||0))
+        const participants = (participantsRes && (participantsRes.data || participantsRes.rows || participantsRes.list)) || []
+        console.log('[ExamPortal] 获取到参与记录:', participants.length, '个')
+        if (participants.length > 0) {
+          console.log('[ExamPortal] 第一条记录示例:', participants[0])
+          console.log('[ExamPortal] 第一条记录的所有字段:', Object.keys(participants[0]))
+        }
+
+        // 直接使用参与记录作为列表
+        let list = []
+        if (Array.isArray(participants) && participants.length > 0) {
+          list = participants.map(p => {
+            if (!p) return null
+            const examId = p.examId != null ? p.examId : (p.id != null ? p.id : p.exam_id)
+
+            // 检查是否已删除（如果有 delFlag 字段）
+            const isDeleted = p.delFlag === '1' || p.delFlag === 1 || p.status === 0
+
+            return {
+              examId,
+              examName: p.examName || p.exam_name || '未命名考试',
+              courseName: p.courseName || p.course_name || '未知课程',
+              className: p.className || p.class_name || '',
+              courseId: p.courseId || p.course_id,
+              sessionId: p.sessionId || p.session_id,
+              startTime: p.startTime || p.start_time,
+              endTime: p.endTime || p.end_time,
+              status: p.status,
+              studentNo: this.studentNo,
+              totalScore: p.totalScore != null ? p.totalScore : p.total_score,
+              objectiveScore: p.objectiveScore != null ? p.objectiveScore : p.objective_score,
+              passStatus: p.passStatus != null ? p.passStatus : p.pass_status,
+              correctStatus: p.correctStatus != null ? p.correctStatus : p.correct_status,
+              hasSubjective: p.hasSubjective != null ? p.hasSubjective : p.has_subjective,
+              participantStatus: p.participantStatus != null ? p.participantStatus : p.participant_status,
+              submitTime: p.submitTime || p.submit_time,
+              isDeleted: isDeleted  // 标记已删除的考试
+            }
+          }).filter(item => item !== null)
+        }
+
+        console.log('[ExamPortal] 我的考试记录数:', list.length)
+        if (list.length > 0) {
+          const deletedCount = list.filter(r => r.isDeleted).length
+          if (deletedCount > 0) {
+            console.log('[ExamPortal] 其中已删除的考试:', deletedCount, '个')
+          }
+          // 调试：检查课程信息
+          console.log('[ExamPortal] 第一条记录的课程信息:', {
+            courseId: list[0].courseId,
+            courseName: list[0].courseName
+          })
+          const withCourseId = list.filter(r => r.courseId).length
+          console.log('[ExamPortal] 有 courseId 的记录:', withCourseId, '/', list.length)
+        }
+
+        // 推断主观题及 correctStatus 缺失的记录
+        console.log('[ExamPortal] 其中已删除的考试:', list.filter(r => r.isDeleted).length, '个')
+
+        // 推断主观题及 correctStatus 缺失的记录（仅有参与记录时）
+        try {
+          const needInfer = list.filter(r => r && r.participantStatus !== null && r.examId && (r.hasSubjective === undefined || r.correctStatus === undefined))
+          if (needInfer.length > 0) {
+            console.log('[ExamPortal] 需要推断主观题标记的记录数:', needInfer.length)
+            await this.inferSubjectiveFlags(needInfer)
+          }
+        } catch (e) {
+          console.error('[ExamPortal] 推断主观题标记失败:', e)
+          // 不中断流程，继续执行
+        }
+
+        // 排序：有参与记录的优先，然后按提交时间或开始时间排序
+        list.sort((a, b) => {
+          // 有参与记录的排在前面
+          const aHas = a.participantStatus !== null
+          const bHas = b.participantStatus !== null
+          if (aHas && !bHas) return -1
+          if (!aHas && bHas) return 1
+
+          // 都有或都没有参与记录，按时间排序
+          const aTime = new Date(a.submitTime || a.startTime || 0).getTime()
+          const bTime = new Date(b.submitTime || b.startTime || 0).getTime()
+          return bTime - aTime
+        })
+
         this.myList = list
         this.calcStats()
+
         if (!list.length) {
-          this.$message.info('未获取到考试记录：可能尚无参与记录')
+          console.log('[ExamPortal] ℹ️ 未获取到考试记录（participants:', participants.length, '个）')
+          this.$message.info('当前没有考试记录。可能原因：您还未参加任何考试')
+        } else {
+          console.log('[ExamPortal] ✅ 成功加载', list.length, '条记录')
         }
       } catch(e){
-        console.error(e); this.$message.error('加载考试记录失败'); this.myList=[]; this.calcStats()
-      } finally { this.myLoading=false }
+        console.error('[ExamPortal] 加载考试记录失败 - 完整错误:', e)
+        console.error('[ExamPortal] 错误类型:', typeof e)
+        console.error('[ExamPortal] 错误信息:', e.message || '无')
+        console.error('[ExamPortal] 错误堆栈:', e.stack || '无')
+
+        const errorMsg = e.message || e.msg || (typeof e === 'string' ? e : '未知错误')
+        this.$message.error('加载考试记录失败: ' + errorMsg)
+
+        this.myList = []
+
+        try {
+          this.calcStats()
+        } catch (statsError) {
+          console.error('[ExamPortal] calcStats 也失败了:', statsError)
+          // 手动设置默认统计值
+          this.myStats = { total: 0, finished: 0, avgScore: '—', passRate: 0 }
+        }
+      } finally {
+        this.myLoading = false
+      }
     },
     async enrichExamInfo(list){
       const needIds = []
@@ -399,7 +661,7 @@ export default {
         }
       } finally { this.diagnosing=false }
     },
-    // 重新加入统计方法
+    // ===== 未完成的考试 =====
     calcStats(){
       const total = this.myList.length
       let finished = 0, pass = 0, sum = 0, cnt = 0, gradedTotal = 0

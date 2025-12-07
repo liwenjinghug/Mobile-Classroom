@@ -316,6 +316,51 @@ public class ClassHomeworkController extends BaseController {
         return AjaxResult.success(list);
     }
 
+    /**
+     * 获取当前登录用户的作业提交记录（基于登录账号，无需学号）
+     */
+    @GetMapping("/my-submissions")
+    public AjaxResult getMySubmissions() {
+        Long userId = getUserId();
+        String username = getUsername();
+
+        logger.info("getMySubmissions called for userId={}, username={}", userId, username);
+
+        // 先通过username查找class_student表获取student_id
+        Long classStudentId = null;
+        try {
+            com.ruoyi.proj_lwj.domain.ClassStudent cs = classStudentMapper.selectByStudentNo(username);
+            if (cs != null && cs.getStudentId() != null) {
+                classStudentId = cs.getStudentId();
+                logger.info("Found class_student.student_id={} for username={}", classStudentId, username);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to find class_student by username", e);
+        }
+
+        // 使用class_student_id或userId查询
+        Long finalStudentId = classStudentId != null ? classStudentId : userId;
+        List<ClassStudentHomework> list = studentHomeworkService.selectByStudentId(finalStudentId);
+
+        // 如果没找到，再尝试用username作为studentNo查询
+        if ((list == null || list.isEmpty()) && username != null) {
+            try {
+                list = studentHomeworkService.selectByStudentNo(username);
+            } catch (Exception ex) {
+                logger.warn("fallback selectByStudentNo failed", ex);
+            }
+        }
+
+        if (list == null) {
+            list = new ArrayList<>();
+        }
+
+        list = filterOutDeletedHomework(list);
+        ensureStudentNames(list);
+        resolveSubmissionFilePaths(list);
+        return AjaxResult.success(list);
+    }
+
     @GetMapping("/studentSubmissions/public")
     public AjaxResult publicStudentSubmissions(@RequestParam(required = false) Long studentId, @RequestParam(required = false) String studentNo, @RequestParam(required = false) String studentName) {
         logger.info("publicStudentSubmissions called with studentId={}, studentNo={}, studentName={}", studentId, studentNo, studentName);

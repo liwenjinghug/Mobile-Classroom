@@ -42,31 +42,11 @@
         <div class="identity-input-group">
           <el-input
             v-model.trim="studentNo"
-            placeholder="请输入学号"
+            placeholder="自动获取学号"
             style="max-width:260px"
             prefix-icon="el-icon-s-custom"
-            :disabled="studentConfirmed"
+            disabled
           />
-          <div class="identity-actions">
-            <el-button
-              v-if="!studentConfirmed"
-              type="primary"
-              size="mini"
-              :disabled="confirming || !studentNo"
-              @click="confirmIdentity"
-              class="confirm-btn"
-            >
-              {{ confirming ? '确认中...' : '确认学号' }}
-            </el-button>
-            <el-button
-              v-else
-              size="mini"
-              @click="resetIdentity"
-              class="reset-btn"
-            >
-              重新确认
-            </el-button>
-          </div>
           <div class="identity-status-indicator">
             <div v-if="studentConfirmed" class="status-badge success">
               <i class="el-icon-success"></i>
@@ -74,21 +54,21 @@
             </div>
             <div v-else class="status-badge warning">
               <i class="el-icon-warning"></i>
-              <span>未确认</span>
+              <span>{{ confirming ? '正在确认...' : '未确认' }}</span>
             </div>
           </div>
         </div>
         <p class="identity-hint">
-          输入学号后点击"确认学号"以加载您的历史提交记录
+          学号已从您的登录账号自动获取
         </p>
 
         <el-alert
-          v-if="!studentConfirmed"
+          v-if="!studentConfirmed && !confirming"
           type="warning"
           :closable="false"
           show-icon
-          title="尚未确认学号"
-          description="请先输入学号并点击'确认学号'按钮以启用下面的功能"
+          title="未获取到学号"
+          description="请确保您已登录且已绑定学生身份"
           class="identity-alert"
         />
       </div>
@@ -493,7 +473,7 @@
             <div slot="tip" class="upload-tip">支持多文件上传，最多5个文件，单个文件≤50MB</div>
           </el-upload>
           <div v-if="editNewFiles.length" class="file-tags">
-            <el-tag v-for="(f,i) in editNewFiles" :key="'new-'+i" size="small" type="info" closable @close="removeNewFile(i)" class="tag-link file-tag" @click="previewFile(f)">
+            <el-tag v-for="(f,i) in editNewFiles" :key="i" size="small" closable @close="removeNewFile(i)" class="tag-link file-tag" @click="previewFile(f)">
               <i class="el-icon-document"></i>
               {{ getFileName(f) }}
             </el-tag>
@@ -513,6 +493,7 @@
 <script>
 import { listCourse } from '@/api/proj_lw/course'
 import { getHomework, submitHomework, updateSubmission, listHomework, getStudentSubmissions, deleteSubmission } from '@/api/proj_lwj/homework'
+import { getCurrentStudent } from '@/api/proj_lw/classStudent'
 import { getToken } from '@/utils/auth'
 
 export default {
@@ -671,8 +652,11 @@ export default {
       return { total, graded, expired, avgScore }
     }
   },
-  created() {
-    this.initializePage()
+  async created() {
+    // 加载课程列表
+    await this.loadCourses()
+    // 从当前登录用户自动获取学号并确认身份
+    await this.fetchAndConfirmCurrentStudent()
   },
   watch: {
     'selectionForm.homeworkId': {
@@ -686,36 +670,66 @@ export default {
     }
   },
   methods: {
-    async initializePage() {
+    async fetchAndConfirmCurrentStudent() {
       try {
-        // 读取本地学号到输入框（不自动确认）
-        this.loadRememberedData()
+        const res = await getCurrentStudent()
+        if (res && res.data && res.data.studentNo) {
+          this.studentNo = res.data.studentNo
+          console.log('[HW] 自动获取学号:', this.studentNo)
 
-        // 仅加载课程列表，其他由用户手动操作
-        await this.fetchCourses()
-
-        // 不自动加载课堂/作业/详情
-        // 不自动恢复提交记录
-      } catch (error) {
-        console.error('页面初始化失败:', error)
-        this.$message.error('页面初始化失败')
+          // 自动确认身份并加载提交记录
+          await this.autoConfirmIdentity()
+        } else {
+          this.$message.warning('未获取到学号信息，请确保已绑定学生身份')
+        }
+      } catch(e) {
+        console.error('获取学号失败:', e)
+        this.$message.error('获取学号失败，请确保已登录')
       }
     },
 
-    async onHomeworkChange(homeworkId) {
-      console.log('[HW] homework change', homeworkId)
-      this.saveRememberedData()
+    async autoConfirmIdentity() {
+      if (!this.studentNo) return
 
-      this.homeworkId = homeworkId
-      this.homework = null
-      this.uploadedFiles = []
-      this.fileList = []
-      this.currentSubmission = null
-      this.submitResult = null
+      this.confirming = true
+      try {
+        this.mySubmissionsLoading = true
+        const res = await getStudentSubmissions(this.studentNo)
 
-      if (!homeworkId) return
+        let list = []
+        if (Array.isArray(res)) {
+          list = res
+        } else if (res && Array.isArray(res.rows)) {
+          list = res.rows
+        } else if (res && Array.isArray(res.data)) {
+          list = res.data
+        }
 
-      await this.loadHomeworkDetail(homeworkId)
+        const normalized = list.map(this.normalizeSubmission)
+        this.mySubmissions = normalized
+        this.allSubmissions = normalized
+        this.studentConfirmed = true
+        this.submissionsLoaded = true
+
+        console.log('[HW] 学号自动确认成功，提交记录数:', list.length)
+      } catch (e) {
+        console.error('加载提交记录失败', e)
+        this.mySubmissions = []
+        this.studentConfirmed = false
+      } finally {
+        this.mySubmissionsLoading = false
+        this.confirming = false
+      }
+    },
+
+    async loadCourses() {
+      try {
+        const res = await listCourse()
+        this.courses = res.rows || []
+      } catch (e) {
+        console.error('加载课程失败', e)
+        this.$message.error('课程列表加载失败')
+      }
     },
 
     async loadHomeworkDetail(homeworkId) {
@@ -726,14 +740,9 @@ export default {
 
       this.homeworkLoading = true
       try {
-        console.log('开始加载作业详情，作业ID:', homeworkId)
         const res = await getHomework(homeworkId)
-        this.homework = (res && res.data) || res
-        console.log('作业详情加载成功:', this.homework)
-
-        if (this.studentConfirmed) {
-          this.checkCurrentSubmission()
-        }
+        this.homework = res.data || res || null
+        this.checkCurrentSubmission()
       } catch (e) {
         console.error('加载作业详情失败', e)
         this.homework = null
@@ -748,6 +757,11 @@ export default {
         await this.loadHomeworkDetail(this.homeworkId)
         this.$message.success('作业详情已刷新')
       }
+    },
+
+    // Alias for template compatibility
+    refreshHomework() {
+      return this.refreshHomeworkDetail()
     },
 
     async confirmIdentity() {
@@ -938,6 +952,17 @@ export default {
         this.homeworkList = []
         this.$message.error('作业列表加载失败')
       }
+    },
+
+    onHomeworkChange(homeworkId) {
+      console.log('[HW] homework change', homeworkId)
+      this.saveRememberedData()
+
+      // Set the homeworkId for loading
+      this.homeworkId = homeworkId
+
+      // The watcher will automatically trigger loadHomeworkDetail
+      // No need to call it here since the watch handler will do it
     },
 
     saveRememberedData() {

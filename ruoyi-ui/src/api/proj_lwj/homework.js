@@ -81,6 +81,15 @@ export function getStudentSubmissions(studentNo) {
   })
 }
 
+// 获取当前登录用户的作业提交记录（无需学号）
+export function getMySubmissions() {
+  return request({
+    url: '/proj_lwj/homework/my-submissions',
+    method: 'get',
+    silent: true
+  })
+}
+
 // Convenience alias for grading (uses same backend endpoint as updateSubmission)
 export function gradeSubmission(data) {
   return request({

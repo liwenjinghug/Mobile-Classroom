@@ -271,6 +271,23 @@ public class ClassExamController extends BaseController {
         }
     }
 
+    /**
+     * 获取当前登录用户可参加的考试列表（基于登录账号，无需学号）
+     */
+    @GetMapping("/my-available")
+    public AjaxResult myAvailable() {
+        try {
+            String username = getUsername();
+            Long userId = getUserId();
+            logger.info("myAvailable called for userId={}, username={}", userId, username);
+
+            // 使用username作为studentNo查询
+            return available(username);
+        } catch (Exception ex) {
+            return AjaxResult.success(java.util.Collections.emptyList()).put("error", ex.getMessage());
+        }
+    }
+
     // 学生综合考试列表：包含可参加考试 + 已参与记录(成绩/状态)
     @GetMapping("/my")
     public AjaxResult myExams(@RequestParam(value = "studentNo", required = false) String studentNo) {
@@ -351,6 +368,23 @@ public class ClassExamController extends BaseController {
         }
     }
 
+    /**
+     * 获取当前登录用户的综合考试列表（基于登录账号，无需学号）
+     */
+    @GetMapping("/my-exams")
+    public AjaxResult myOwnExams() {
+        try {
+            String username = getUsername();
+            Long userId = getUserId();
+            logger.info("myOwnExams called for userId={}, username={}", userId, username);
+
+            // 使用username作为studentNo查询
+            return myExams(username);
+        } catch (Exception ex) {
+            return AjaxResult.success(java.util.Collections.emptyList()).put("error", ex.getMessage());
+        }
+    }
+
     // ===== 参与者相关 =====
     @GetMapping("/participant/list")
     public AjaxResult participantList(@RequestParam(value = "studentNo", required = false) String studentNo) {
@@ -408,8 +442,10 @@ public class ClassExamController extends BaseController {
                 if (examRef != null) {
                     map.put("examName", examRef.getExamName());
                     map.put("courseName", examRef.getCourseName());
+                    map.put("courseId", examRef.getCourseId()); // 添加课程ID用于筛选
                     // 根据需求：我的考试记录里不需要有课堂，但 participant/list 表格保留 className 以便区分
                     map.put("className", examRef.getClassName());
+                    map.put("sessionId", examRef.getSessionId()); // 添加课堂ID用于筛选
                     map.put("examType", examRef.getExamType());
                     map.put("examTotalScore", examRef.getTotalScore());
                     map.put("passScore", examRef.getPassScore());
@@ -485,18 +521,60 @@ public class ClassExamController extends BaseController {
     @PostMapping("/participant/start")
     public AjaxResult startExam(@RequestBody ClassExamParticipant payload) {
         if (payload.getExamId() == null) return AjaxResult.error("examId不能为空");
+
         Long studentId = payload.getStudentId();
-        if ((studentId == null || payload.getStudentNo() == null) && payload.getStudentNo() != null) {
-            ClassStudent s = classStudentMapper.selectByStudentNo(payload.getStudentNo());
+        String studentNo = payload.getStudentNo();
+
+        // 如果没有提供studentNo，使用当前登录用户的username
+        if (studentNo == null || studentNo.trim().isEmpty()) {
+            try {
+                studentNo = getUsername();
+                payload.setStudentNo(studentNo);
+                logger.info("Using logged-in username as studentNo: {}", studentNo);
+            } catch (Exception e) {
+                logger.warn("Failed to get logged-in username", e);
+            }
+        }
+
+        if ((studentId == null || studentNo == null) && studentNo != null) {
+            ClassStudent s = classStudentMapper.selectByStudentNo(studentNo);
             if (s != null) {
                 studentId = s.getStudentId();
                 if (payload.getStudentName() == null) payload.setStudentName(s.getStudentName());
             }
         }
+
+        // 如果仍然没有studentId，尝试使用当前登录用户的userId
+        if (studentId == null) {
+            try {
+                Long userId = getUserId();
+                String username = getUsername();
+
+                // 尝试通过username查找class_student
+                ClassStudent cs = classStudentMapper.selectByStudentNo(username);
+                if (cs != null) {
+                    studentId = cs.getStudentId();
+                    studentNo = cs.getStudentNo();
+                    payload.setStudentNo(studentNo);
+                    if (payload.getStudentName() == null) payload.setStudentName(cs.getStudentName());
+                    logger.info("Found class_student for username {}: studentId={}", username, studentId);
+                } else {
+                    // 如果找不到，使用userId作为studentId
+                    studentId = userId;
+                    studentNo = username;
+                    payload.setStudentNo(username);
+                    logger.info("Using userId as studentId: {}", studentId);
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to get user identity", e);
+            }
+        }
+
         if (studentId == null) {
             // 未能解析出学生身份 -> 明确提示
             return AjaxResult.error("学号未找到，无法开始考试");
         }
+
         // 反查补齐 studentNo/studentName，避免 DB 约束失败
         if (payload.getStudentNo() == null) {
             ClassStudent s2 = classStudentMapper.selectByStudentId(studentId);
@@ -534,13 +612,40 @@ public class ClassExamController extends BaseController {
         String studentNo = (String) payload.get("studentNo");
         Long studentId = null;
 
+        // 如果没有提供studentNo，使用当前登录用户的username
+        if (studentNo == null || studentNo.trim().isEmpty()) {
+            try {
+                studentNo = getUsername();
+                logger.info("Using logged-in username as studentNo for exam submission: {}", studentNo);
+            } catch (Exception e) {
+                logger.warn("Failed to get logged-in username", e);
+            }
+        }
+
         if (studentNo != null) {
             ClassStudent s = classStudentMapper.selectByStudentNo(studentNo);
             if (s != null) {
                 studentId = s.getStudentId();
+            } else {
+                // 如果找不到class_student，尝试使用当前登录用户的userId
+                try {
+                    Long userId = getUserId();
+                    studentId = userId;
+                    logger.info("Class_student not found for studentNo {}, using userId {} as studentId", studentNo, userId);
+                } catch (Exception e) {
+                    logger.warn("Failed to get userId", e);
+                }
             }
         }
-        if (studentId == null) studentId = getUserId();
+
+        if (studentId == null) {
+            try {
+                studentId = getUserId();
+                logger.info("Using logged-in userId as studentId: {}", studentId);
+            } catch (Exception e) {
+                logger.warn("Failed to get userId", e);
+            }
+        }
 
         // 2. 获取参与记录
         ClassExamParticipant existing = participantService.selectByExamStudent(examId, studentId);

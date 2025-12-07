@@ -1,8 +1,10 @@
 package com.ruoyi.web.controller.proj_lwj;
 
+import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.proj_lwj.domain.ClassStudent;
 import com.ruoyi.proj_lwj.service.IClassStudentService;
+import com.ruoyi.proj_lwj.mapper.ClassStudentMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,11 +13,43 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/proj_lw/class_student")
-public class ClassStudentController {
+@RequestMapping("/proj_lw/student/class")
+public class ClassStudentController extends BaseController {
 
     @Autowired
     private IClassStudentService classStudentService;
+
+    @Autowired
+    private ClassStudentMapper classStudentMapper;
+
+    /**
+     * 获取当前登录用户的学生信息
+     */
+    @GetMapping("/current-student")
+    public AjaxResult getCurrentStudent() {
+        try {
+            String username = getUsername();
+            Long userId = getUserId();
+
+            logger.info("getCurrentStudent called for userId={}, username={}", userId, username);
+
+            // 通过username查找class_student表
+            ClassStudent student = classStudentMapper.selectByStudentNo(username);
+
+            if (student != null) {
+                return AjaxResult.success(student);
+            } else {
+                // 如果找不到，返回一个包含username的基本信息
+                Map<String, Object> data = new HashMap<>();
+                data.put("studentNo", username);
+                data.put("userId", userId);
+                return AjaxResult.success(data);
+            }
+        } catch (Exception e) {
+            logger.error("Failed to get current student", e);
+            return AjaxResult.error("获取学生信息失败: " + e.getMessage());
+        }
+    }
 
     // 根据课堂 ID 查询该课堂下所有学生
     @GetMapping("/bySession")

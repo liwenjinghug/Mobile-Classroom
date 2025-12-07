@@ -1,11 +1,11 @@
 import request from '@/utils/request'
 
-export function listStudentsByCourseAndSession(params) {
-  // params: { courseCode, sessionId }
+// 获取当前登录用户的学生信息
+export function getCurrentStudent() {
   return request({
-    url: '/proj_lw/class_student/listByCourseAndSession',
-    method: 'get',
-    params
+    url: '/proj_lw/student/class/current-student',
+    method: 'get'
   })
 }
+
 

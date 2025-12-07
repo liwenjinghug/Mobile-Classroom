@@ -242,8 +242,20 @@ export default {
       if (this.participant && this.participant.totalScore != null) return Number(this.participant.totalScore)
       return this.displayedTotal
     },
-    finalScoreDisplay(){ return this.hideTotalScore ? '待批改' : this.formatScore(this.finalScoreNumeric) },
-    scoreLabel(){ return this.hideTotalScore ? '客观题得分' : (this.canJudgePass ? '我的得分' : '客观题得分') },
+    finalScoreDisplay(){
+      // 当答案策略为"不显示"时，不显示得分
+      if (this.exam && this.exam.showAnswer === 0) {
+        return '—'
+      }
+      return this.hideTotalScore ? '待批改' : this.formatScore(this.finalScoreNumeric)
+    },
+    scoreLabel(){
+      // 当答案策略为"不显示"时，标签显示为"得分"
+      if (this.exam && this.exam.showAnswer === 0) {
+        return '得分'
+      }
+      return this.hideTotalScore ? '客观题得分' : (this.canJudgePass ? '我的得分' : '客观题得分')
+    },
     summaryRows(){
       return this.questions.map((q,i)=>{
         const res = this.answerResultMap[q.id] || {};
