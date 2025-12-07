@@ -28,25 +28,33 @@
   },
   "tabBar": {
     "color": "#8a8a8a",
-    "selectedColor": "#2d8cf0",
+    "selectedColor": "#3498db",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [
       {
         "pagePath": "pages/course/list",
-        "text": "课程"
+        "text": "课程",
+        "iconPath": "images/tab/course.png",
+        "selectedIconPath": "images/tab/course-active.png"
       },
       {
         "pagePath": "pages/proj_cyq/message/index",
-        "text": "消息"
+        "text": "消息",
+        "iconPath": "images/tab/message.png",
+        "selectedIconPath": "images/tab/message-active.png"
       },
       {
         "pagePath": "pages/proj_qhy/forum/forum",
-        "text": "社区"
+        "text": "社区",
+        "iconPath": "images/tab/forum.png",
+        "selectedIconPath": "images/tab/forum-active.png"
       },
       {
         "pagePath": "pages/proj_cyq/mine/index",
-        "text": "我的"
+        "text": "我的",
+        "iconPath": "images/tab/mine.png",
+        "selectedIconPath": "images/tab/mine-active.png"
       }
     ]
   },

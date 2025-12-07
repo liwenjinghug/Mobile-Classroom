@@ -245,33 +245,33 @@
   50% { transform: scale(1.1); }
 }
 
-/* 不同功能的配色 - 增强渐变 */
+ /* 不同功能的配色 - 浅色柔和渐变 */
 .homework-icon {
-  background: linear-gradient(135deg, #ff9a76 0%, #ff6b6b 50%, #ee5a6f 100%);
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #ffb88c 100%);
   box-shadow:
-    0 8rpx 20rpx rgba(255, 107, 107, 0.35),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+    0 8rpx 20rpx rgba(252, 182, 159, 0.35),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
 }
 
 .exam-icon {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #1890ff 100%);
+  background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%);
   box-shadow:
-    0 8rpx 20rpx rgba(24, 144, 255, 0.35),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+    0 8rpx 20rpx rgba(128, 222, 234, 0.35),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
 }
 
 .sign-icon {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 50%, #52c41a 100%);
+  background: linear-gradient(135deg, #e8f5e9 0%, #a5d6a7 50%, #81c784 100%);
   box-shadow:
-    0 8rpx 20rpx rgba(82, 196, 26, 0.35),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+    0 8rpx 20rpx rgba(129, 199, 132, 0.35),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
 }
 
 .forum-icon {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 50%, #722ed1 100%);
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 50%, #ce93d8 100%);
   box-shadow:
-    0 8rpx 20rpx rgba(114, 46, 209, 0.35),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.4);
+    0 8rpx 20rpx rgba(206, 147, 216, 0.35),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.6);
 }
 
 .function-label {
