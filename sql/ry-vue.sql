@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 07/12/2025 16:57:54
+ Date: 07/12/2025 17:05:03
 */
 
 SET NAMES utf8mb4;
@@ -1341,7 +1341,7 @@ CREATE TABLE `class_login_log`  (
   `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '提示消息',
   `login_time` datetime NULL DEFAULT NULL COMMENT '访问时间',
   PRIMARY KEY (`login_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 159 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 160 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_login_log
@@ -1504,6 +1504,7 @@ INSERT INTO `class_login_log` VALUES (155, '2023141460368', '127.0.0.1', '内网
 INSERT INTO `class_login_log` VALUES (156, '2023141460368', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-07 14:12:50');
 INSERT INTO `class_login_log` VALUES (157, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-12-07 14:15:18');
 INSERT INTO `class_login_log` VALUES (158, '2023141460368', '127.0.0.1', '内网IP', 'Safari', 'Mac OS X', 0, '登录成功', '2025-12-07 16:25:26');
+INSERT INTO `class_login_log` VALUES (159, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-12-07 17:04:37');
 
 -- ----------------------------
 -- Table structure for class_material
@@ -3092,7 +3093,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 532 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 533 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -3529,6 +3530,7 @@ INSERT INTO `sys_logininfor` VALUES (528, '2023141460368', '127.0.0.1', '内网I
 INSERT INTO `sys_logininfor` VALUES (529, '2023141460368', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-07 14:12:49');
 INSERT INTO `sys_logininfor` VALUES (530, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-07 14:15:18');
 INSERT INTO `sys_logininfor` VALUES (531, '2023141460368', '127.0.0.1', '内网IP', 'Mobile Safari', 'Mac OS X (iPhone)', '0', '登录成功', '2025-12-07 16:25:26');
+INSERT INTO `sys_logininfor` VALUES (532, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-07 17:04:37');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -5064,8 +5066,6 @@ INSERT INTO `sys_role_menu` VALUES (2, 2044);
 INSERT INTO `sys_role_menu` VALUES (2, 2045);
 INSERT INTO `sys_role_menu` VALUES (2, 2047);
 INSERT INTO `sys_role_menu` VALUES (100, 1);
-INSERT INTO `sys_role_menu` VALUES (100, 100);
-INSERT INTO `sys_role_menu` VALUES (100, 101);
 INSERT INTO `sys_role_menu` VALUES (100, 102);
 INSERT INTO `sys_role_menu` VALUES (100, 103);
 INSERT INTO `sys_role_menu` VALUES (100, 104);
@@ -5075,18 +5075,6 @@ INSERT INTO `sys_role_menu` VALUES (100, 107);
 INSERT INTO `sys_role_menu` VALUES (100, 108);
 INSERT INTO `sys_role_menu` VALUES (100, 500);
 INSERT INTO `sys_role_menu` VALUES (100, 501);
-INSERT INTO `sys_role_menu` VALUES (100, 1000);
-INSERT INTO `sys_role_menu` VALUES (100, 1001);
-INSERT INTO `sys_role_menu` VALUES (100, 1002);
-INSERT INTO `sys_role_menu` VALUES (100, 1003);
-INSERT INTO `sys_role_menu` VALUES (100, 1004);
-INSERT INTO `sys_role_menu` VALUES (100, 1005);
-INSERT INTO `sys_role_menu` VALUES (100, 1006);
-INSERT INTO `sys_role_menu` VALUES (100, 1007);
-INSERT INTO `sys_role_menu` VALUES (100, 1008);
-INSERT INTO `sys_role_menu` VALUES (100, 1009);
-INSERT INTO `sys_role_menu` VALUES (100, 1010);
-INSERT INTO `sys_role_menu` VALUES (100, 1011);
 INSERT INTO `sys_role_menu` VALUES (100, 1012);
 INSERT INTO `sys_role_menu` VALUES (100, 1013);
 INSERT INTO `sys_role_menu` VALUES (100, 1014);
@@ -5139,8 +5127,6 @@ INSERT INTO `sys_role_menu` VALUES (100, 2016);
 INSERT INTO `sys_role_menu` VALUES (100, 2017);
 INSERT INTO `sys_role_menu` VALUES (100, 2018);
 INSERT INTO `sys_role_menu` VALUES (100, 2019);
-INSERT INTO `sys_role_menu` VALUES (100, 2020);
-INSERT INTO `sys_role_menu` VALUES (100, 2021);
 INSERT INTO `sys_role_menu` VALUES (100, 2022);
 INSERT INTO `sys_role_menu` VALUES (100, 2023);
 INSERT INTO `sys_role_menu` VALUES (100, 2024);
@@ -5228,10 +5214,6 @@ INSERT INTO `sys_role_menu` VALUES (100, 2117);
 INSERT INTO `sys_role_menu` VALUES (100, 2118);
 INSERT INTO `sys_role_menu` VALUES (101, 1);
 INSERT INTO `sys_role_menu` VALUES (101, 2);
-INSERT INTO `sys_role_menu` VALUES (101, 3);
-INSERT INTO `sys_role_menu` VALUES (101, 4);
-INSERT INTO `sys_role_menu` VALUES (101, 100);
-INSERT INTO `sys_role_menu` VALUES (101, 101);
 INSERT INTO `sys_role_menu` VALUES (101, 102);
 INSERT INTO `sys_role_menu` VALUES (101, 103);
 INSERT INTO `sys_role_menu` VALUES (101, 104);
@@ -5245,23 +5227,8 @@ INSERT INTO `sys_role_menu` VALUES (101, 111);
 INSERT INTO `sys_role_menu` VALUES (101, 112);
 INSERT INTO `sys_role_menu` VALUES (101, 113);
 INSERT INTO `sys_role_menu` VALUES (101, 114);
-INSERT INTO `sys_role_menu` VALUES (101, 115);
-INSERT INTO `sys_role_menu` VALUES (101, 116);
-INSERT INTO `sys_role_menu` VALUES (101, 117);
 INSERT INTO `sys_role_menu` VALUES (101, 500);
 INSERT INTO `sys_role_menu` VALUES (101, 501);
-INSERT INTO `sys_role_menu` VALUES (101, 1000);
-INSERT INTO `sys_role_menu` VALUES (101, 1001);
-INSERT INTO `sys_role_menu` VALUES (101, 1002);
-INSERT INTO `sys_role_menu` VALUES (101, 1003);
-INSERT INTO `sys_role_menu` VALUES (101, 1004);
-INSERT INTO `sys_role_menu` VALUES (101, 1005);
-INSERT INTO `sys_role_menu` VALUES (101, 1006);
-INSERT INTO `sys_role_menu` VALUES (101, 1007);
-INSERT INTO `sys_role_menu` VALUES (101, 1008);
-INSERT INTO `sys_role_menu` VALUES (101, 1009);
-INSERT INTO `sys_role_menu` VALUES (101, 1010);
-INSERT INTO `sys_role_menu` VALUES (101, 1011);
 INSERT INTO `sys_role_menu` VALUES (101, 1012);
 INSERT INTO `sys_role_menu` VALUES (101, 1013);
 INSERT INTO `sys_role_menu` VALUES (101, 1014);
@@ -5305,12 +5272,6 @@ INSERT INTO `sys_role_menu` VALUES (101, 1051);
 INSERT INTO `sys_role_menu` VALUES (101, 1052);
 INSERT INTO `sys_role_menu` VALUES (101, 1053);
 INSERT INTO `sys_role_menu` VALUES (101, 1054);
-INSERT INTO `sys_role_menu` VALUES (101, 1055);
-INSERT INTO `sys_role_menu` VALUES (101, 1056);
-INSERT INTO `sys_role_menu` VALUES (101, 1057);
-INSERT INTO `sys_role_menu` VALUES (101, 1058);
-INSERT INTO `sys_role_menu` VALUES (101, 1059);
-INSERT INTO `sys_role_menu` VALUES (101, 1060);
 INSERT INTO `sys_role_menu` VALUES (101, 2000);
 INSERT INTO `sys_role_menu` VALUES (101, 2003);
 INSERT INTO `sys_role_menu` VALUES (101, 2006);
@@ -5325,15 +5286,10 @@ INSERT INTO `sys_role_menu` VALUES (101, 2014);
 INSERT INTO `sys_role_menu` VALUES (101, 2015);
 INSERT INTO `sys_role_menu` VALUES (101, 2016);
 INSERT INTO `sys_role_menu` VALUES (101, 2017);
-INSERT INTO `sys_role_menu` VALUES (101, 2020);
-INSERT INTO `sys_role_menu` VALUES (101, 2021);
 INSERT INTO `sys_role_menu` VALUES (101, 2022);
 INSERT INTO `sys_role_menu` VALUES (101, 2024);
 INSERT INTO `sys_role_menu` VALUES (101, 2025);
 INSERT INTO `sys_role_menu` VALUES (101, 2026);
-INSERT INTO `sys_role_menu` VALUES (101, 2027);
-INSERT INTO `sys_role_menu` VALUES (101, 2028);
-INSERT INTO `sys_role_menu` VALUES (101, 2029);
 INSERT INTO `sys_role_menu` VALUES (101, 2030);
 INSERT INTO `sys_role_menu` VALUES (101, 2031);
 INSERT INTO `sys_role_menu` VALUES (101, 2032);
@@ -5415,7 +5371,7 @@ INSERT INTO `sys_user` VALUES (2, 105, 'ry', '张三', '00', 'ry@qq.com', '15666
 INSERT INTO `sys_user` VALUES (3, 103, 'student1', '李比', '00', 'student1@school.com', '13800138001', '0', 'https://img0.baidu.com/it/u=2660145230,331641081&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=625', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-23 20:39:34', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '学生');
 INSERT INTO `sys_user` VALUES (4, 105, 'teacher1', '王老师', '01', 'teacher1@school.com', '13900139001', '1', 'https://picsum.photos/200/200?random=2', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-23 17:23:36', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '教师');
 INSERT INTO `sys_user` VALUES (5, 103, 'student2', '赵六', '00', 'student2@school.com', '13700137001', '0', 'https://picsum.photos/200/200?random=3', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 09:15:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '学生');
-INSERT INTO `sys_user` VALUES (100, NULL, 'teacher_zhang', '张老师', '00', 'chenrabbitcyq@163.com', '13800000001', '0', '', '$2a$10$ldKvLfpL/LOTr8YoBPsFOuoEQqqp/fiI1UqnTDZLByjgjK2zINCO2', '0', '0', '127.0.0.1', '2025-12-03 17:35:43', '2025-11-21 23:24:33', 'admin', '2025-11-12 01:32:46', '', '2025-11-21 23:24:33', NULL);
+INSERT INTO `sys_user` VALUES (100, NULL, 'teacher_zhang', '张老师', '00', 'chenrabbitcyq@163.com', '13800000001', '0', '', '$2a$10$ldKvLfpL/LOTr8YoBPsFOuoEQqqp/fiI1UqnTDZLByjgjK2zINCO2', '0', '0', '127.0.0.1', '2025-12-07 17:04:37', '2025-11-21 23:24:33', 'admin', '2025-11-12 01:32:46', '', '2025-11-21 23:24:33', NULL);
 INSERT INTO `sys_user` VALUES (101, NULL, 'student_li', '李同学', '00', '', '13800000002', '1', '', '$2a$10$76UxrSPYQSpNnfhy7PcKcukg9nPYHs9Q00ereE6msATSUELIOIybC', '0', '0', '127.0.0.1', '2025-11-26 19:03:20', NULL, 'admin', '2025-11-12 01:33:19', 'admin', '2025-11-12 01:34:13', NULL);
 INSERT INTO `sys_user` VALUES (102, NULL, '2022141460087', '贺英洲', '00', '', '', '0', '', '$2a$10$cFNpukiHcAmX8c8kSIG6RO539tAR385u27QXFdeiqYzCAIkbGCK/e', '0', '0', '', NULL, '2025-11-26 19:44:05', '', '2025-11-26 19:44:04', 'admin', '2025-11-26 23:33:51', NULL);
 INSERT INTO `sys_user` VALUES (103, NULL, '2022141460092', '刘成伟', '00', '', '', '0', '', '$2a$10$Z961iyKUCfMjf0rX4LjVquUFZRv4bgo3xiZ3fn5e81xKvpG.AY3rO', '0', '0', '', NULL, '2025-11-26 19:45:22', '', '2025-11-26 19:45:21', 'admin', '2025-11-26 23:33:47', NULL);
