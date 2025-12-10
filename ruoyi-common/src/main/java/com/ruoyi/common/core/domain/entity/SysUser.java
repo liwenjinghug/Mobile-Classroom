@@ -52,6 +52,9 @@ public class SysUser extends BaseEntity
     /** 用户头像 */
     private String avatar;
 
+    /** 微信OpenID */
+    private String openId;
+
     /** 密码 */
     private String password;
 
@@ -198,6 +201,16 @@ public class SysUser extends BaseEntity
     public void setAvatar(String avatar)
     {
         this.avatar = avatar;
+    }
+
+    public String getOpenId()
+    {
+        return openId;
+    }
+
+    public void setOpenId(String openId)
+    {
+        this.openId = openId;
     }
 
     public String getPassword()

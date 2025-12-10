@@ -112,6 +112,7 @@ public class SecurityConfig
                     permitAllUrl.getUrls().forEach(url -> requests.antMatchers(url).permitAll());
                     // 对于登录login 注册register 验证码captchaImage 允许匿名访问
                     requests.antMatchers("/login", "/register", "/captchaImage").permitAll()
+                            .antMatchers("/app/login/**").permitAll()
                             //添加cyq的API白名单
                             .antMatchers("/proj_cyq/password/**").permitAll()
                                     //添加结束

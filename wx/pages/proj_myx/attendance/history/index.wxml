@@ -1,0 +1,23 @@
+<view class="container">
+  <view class="history-list">
+    <block wx:for="{{historyList}}" wx:key="id">
+      <view class="history-item">
+        <view class="item-left">
+          <text class="course-name">{{item.courseName}}</text>
+          <text class="task-title">{{item.row2}}</text>
+          <text class="time">{{item.row3}}</text>
+          <text class="time" wx:if="{{item.row4}}">{{item.row4}}</text>
+        </view>
+        <view class="item-right">
+          <text class="status status-{{item.status}}">{{
+            item.status === 1 ? '已签到' : 
+            item.status === 2 ? '迟到' : 
+            item.status === 3 ? '请假' : 
+            item.status === 4 ? '早退' : '缺勤'
+          }}</text>
+        </view>
+      </view>
+    </block>
+    <view wx:if="{{historyList.length === 0}}" class="empty-tip">{{emptyText}}</view>
+  </view>
+</view>

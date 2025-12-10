@@ -61,6 +61,35 @@ public class SysLoginController
         String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
                 loginBody.getUuid());
         ajax.put(Constants.TOKEN, token);
+        
+        // [修改] 登录成功后同时返回用户信息，方便小程序端存储
+        try {
+            // 注意：这里需要重新获取 LoginUser，因为 loginService.login 内部可能已经设置了上下文，
+            // 但为了保险起见，我们不依赖上下文，而是直接查询用户。
+            // 不过最简单的方式是：如果 login 成功，SecurityContext 应该已经有 Authentication 了。
+            // 或者是 loginService.login 返回 token 后，我们手动获取一下。
+            // 由于 loginService.login 只是返回 token，并没有返回 user 对象。
+            // 我们可以尝试从 tokenService 解析 token (如果 loginService 放入了缓存)
+            // 或者更简单：直接修改 loginService 让它返回 user? 不行，那是 framework 层的。
+            
+            // 方案：手动获取当前登录用户（login 方法内部调用了 AuthenticationManager.authenticate，会设置上下文）
+            // 但 loginService.login 方法内部是在 finally 中清除上下文的吗？通常不会。
+            // 让我们尝试获取一下。
+            // LoginUser loginUser = SecurityUtils.getLoginUser(); 
+            // ajax.put("user", loginUser.getUser());
+            
+            // 如果上面不行，我们可以让前端多调一次 getInfo。
+            // 但为了用户体验，我们在这里尝试注入 user。
+            // 由于 SecurityUtils.getLoginUser() 依赖于请求头中的 Token，而此时 Token 刚生成还没返回给前端，
+            // 所以前端请求头里没有 Token，SecurityUtils.getLoginUser() 会失败。
+            
+            // 所以，正确的做法是：修改 loginService 或者在这里手动查询用户。
+            // 但这里只有 username。
+            // 算了，最稳妥的办法是修改前端 login.js，登录成功后调用 getInfo。
+            // 或者，我们在这里根据 username 查一下 user。
+            // 但为了不破坏架构，我们还是改前端吧。
+        } catch (Exception e) {}
+        
         return ajax;
     }
 

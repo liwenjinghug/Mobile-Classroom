@@ -1,6 +1,10 @@
 <template>
   <div class="create-form-container">
     <el-form :model="form" label-position="top" class="apple-form">
+      <el-form-item label="签到标题">
+        <el-input v-model="form.title" placeholder="例如：第一周理论课签到" />
+      </el-form-item>
+
       <el-form-item label="签到方式">
         <el-radio-group v-model="form.type" class="apple-radio-group">
           <el-radio label="location" border>位置签到</el-radio>
@@ -16,6 +20,9 @@
           <el-form-item label="中心经度" class="half-width">
             <el-input v-model.number="form.centerLng" placeholder="例如：116.4074" />
           </el-form-item>
+        </div>
+        <div style="margin-bottom: 18px;">
+          <el-button type="primary" size="mini" icon="el-icon-location" @click="getLocation">自动获取当前位置</el-button>
         </div>
         <el-form-item label="半径（米）">
           <el-input v-model.number="form.radius" placeholder="例如：500" />
@@ -64,15 +71,83 @@ export default {
   name: 'CreateAttendance',
   props: { sessionId: { type: Number, required: true } },
   data() {
+    const now = new Date();
+    const end = new Date(now.getTime() + 15 * 60 * 1000);
     return {
-      form: { type: 'location', centerLat: null, centerLng: null, radius: 500, qrTtl: 10, startTime: null, endTime: null },
+      form: { title: '', type: 'location', centerLat: null, centerLng: null, radius: 150, qrTtl: 10, startTime: now, endTime: end },
       showQr: false,
       qrData: null,
       pendingCreated: null // store created payload until QR dialog is closed
     }
   },
+  mounted() {
+    this.getLocation();
+  },
   methods: {
+    getLocation() {
+      if (navigator.geolocation) {
+        const loading = this.$loading({
+          lock: true,
+          text: '正在获取位置...',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            loading.close();
+            this.form.centerLat = parseFloat(position.coords.latitude.toFixed(6));
+            this.form.centerLng = parseFloat(position.coords.longitude.toFixed(6));
+            this.$message.success('位置获取成功');
+          },
+          (error) => {
+            loading.close();
+            let msg = '';
+            switch(error.code) {
+              case error.PERMISSION_DENIED:
+                msg = '用户拒绝了地理定位请求';
+                break;
+              case error.POSITION_UNAVAILABLE:
+                msg = '位置信息不可用';
+                break;
+              case error.TIMEOUT:
+                msg = '请求获取用户位置超时';
+                break;
+              case error.UNKNOWN_ERROR:
+                msg = '发生未知错误';
+                break;
+              default:
+                msg = error.message;
+            }
+            this.$message.error('获取位置失败: ' + msg);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+          }
+        );
+      } else {
+        this.$message.error('您的浏览器不支持地理定位');
+      }
+    },
     async create() {
+      if (this.form.type === 'location') {
+        if (this.form.centerLat === null || this.form.centerLng === null || this.form.centerLat === '' || this.form.centerLng === '') {
+          this.$message.error('请输入经纬度');
+          return;
+        }
+      }
+
+      if (!this.form.startTime || !this.form.endTime) {
+        this.$message.error('请输入正确的时间格式');
+        return;
+      }
+      if (new Date(this.form.endTime) <= new Date(this.form.startTime)) {
+        this.form.endTime = null;
+        this.$message.error('请输入合适的结束时间');
+        return;
+      }
+
       const payload = Object.assign({}, this.form, { sessionId: this.sessionId })
       try {
         const res = await createTask(payload)

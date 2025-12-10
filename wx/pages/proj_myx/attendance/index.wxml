@@ -1,0 +1,78 @@
+<view class="container">
+  <view class="nav-right" bindtap="goToHistory">
+    <text>记录</text>
+  </view>
+  <view class="header">
+    <text class="title">课堂签到</text>
+    <text class="subtitle" wx:if="{{currentTask}}">{{currentTask.title}}</text>
+    <text class="subtitle" wx:else>请选择签到任务</text>
+  </view>
+
+  <!-- 任务列表区域 (当有多个任务且未选择时显示) -->
+  <view class="task-list-section" wx:if="{{!currentTask && activeTasks.length > 0}}">
+    <block wx:for="{{activeTasks}}" wx:key="id">
+      <view class="task-item" bindtap="selectTask" data-task="{{item}}">
+        <view class="task-info">
+          <text class="task-title">{{item.title}}</text>
+          <text class="task-time">发布时间: {{item.createTime}}</text>
+        </view>
+        <view class="task-type">
+          <text class="type-tag {{item.type}}">{{item.type === 'location' ? '位置' : '扫码'}}</text>
+          <text class="arrow">></text>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- 无任务状态 -->
+  <view class="empty-state" wx:if="{{!currentTask && activeTasks.length === 0}}">
+    <image class="empty-icon" src="/images/tab/course.png" mode="aspectFit"></image>
+    <text class="empty-text">当前暂无正在进行的签到</text>
+  </view>
+
+  <!-- 签到操作区域 (选中任务后显示) -->
+  <block wx:if="{{currentTask}}">
+    
+    <!-- 返回列表按钮 (仅当有多个任务时显示) -->
+    <view class="back-btn-container" wx:if="{{activeTasks.length > 1}}">
+      <text class="back-btn" bindtap="backToTaskList">切换任务</text>
+    </view>
+
+    <!-- 位置签到区域 -->
+    <view class="sign-section" wx:if="{{currentType === 'location'}}">
+      <view class="circle-container" bindtap="handleLocationSignIn">
+        <view class="circle-outer {{isSigning ? 'pulse' : ''}} {{currentTask.attendanceStatus === 1 ? 'disabled' : ''}}">
+          <view class="circle-inner">
+            <text class="sign-text" wx:if="{{!isSigning && !signSuccess && currentTask.attendanceStatus !== 1}}">签到</text>
+            <text class="sign-text" wx:if="{{currentTask.attendanceStatus === 1}}">已签到</text>
+            <text class="sign-text" wx:if="{{isSigning}}">...</text>
+            <icon type="success" size="50" color="#fff" wx:if="{{signSuccess}}"/>
+          </view>
+        </view>
+        <view class="radar" wx:if="{{isSigning}}"></view>
+      </view>
+      
+      <view class="location-info">
+        <image class="location-icon" src="/images/tab/course.png" mode="aspectFit"></image>
+        <text class="location-text">{{locationText}}</text>
+      </view>
+    </view>
+
+    <!-- 扫码签到区域 -->
+    <view class="sign-section" wx:if="{{currentType === 'qr'}}">
+      <view class="qr-container" bindtap="handleScanCode">
+        <image class="scan-icon" src="/images/tab/course-active.png" mode="aspectFit"></image>
+        <text class="scan-text" wx:if="{{currentTask.attendanceStatus !== 1}}">点击扫码</text>
+        <text class="scan-text" wx:else>已签到</text>
+      </view>
+      <view class="input-section" wx:if="{{currentTask.attendanceStatus !== 1}}">
+        <input class="code-input" type="text" placeholder="或输入签到码" bindinput="handleInputCode" value="{{code}}"/>
+        <button class="submit-btn" bindtap="handleCodeSignIn" disabled="{{!code}}">确认</button>
+      </view>
+    </view>
+
+    <view class="status-message" wx:if="{{message}}">
+      <text>{{message}}</text>
+    </view>
+  </block>
+</view>

@@ -21,4 +21,14 @@ public interface IAttendanceService {
     int signByLocation(Long taskId, Long studentId, Double lat, Double lng);
 
     int updateAttendanceStatus(Long taskId, Long studentId, Integer status);
+
+    /**
+     * 获取某课堂下所有活跃（进行中）的签到任务，并附带当前用户的签到状态
+     */
+    List<AttendanceTask> getActiveTasksBySession(Long sessionId, Long userId);
+
+    /**
+     * 获取某学生的所有签到记录
+     */
+    List<Attendance> getStudentHistory(Long studentId, Long sessionId);
 }

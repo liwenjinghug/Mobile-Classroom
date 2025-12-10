@@ -6,6 +6,8 @@ import com.ruoyi.proj_myx.domain.AttendanceQr;
 import com.ruoyi.proj_myx.mapper.AttendanceTaskMapper;
 import com.ruoyi.proj_myx.mapper.AttendanceMapper;
 import com.ruoyi.proj_myx.mapper.AttendanceQrMapper;
+import com.ruoyi.proj_lwj.mapper.ClassStudentMapper;
+import com.ruoyi.proj_lwj.domain.ClassStudent;
 import com.ruoyi.proj_myx.service.IAttendanceService;
 import com.ruoyi.proj_myx.service.IAttendanceQrService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AttendanceServiceImpl implements IAttendanceService {
@@ -27,6 +30,9 @@ public class AttendanceServiceImpl implements IAttendanceService {
 
     @Autowired
     private IAttendanceQrService qrService;
+
+    @Autowired
+    private ClassStudentMapper classStudentMapper;
 
     @Override
     @Transactional
@@ -96,11 +102,64 @@ public class AttendanceServiceImpl implements IAttendanceService {
     @Override
     public List<Attendance> getAllByTask(Long taskId) {
         // reuse existing mapper to fetch all students for the session (include signed and unsigned)
-        AttendanceTask t = taskMapper.selectById(taskId);
-        if (t == null) return Collections.emptyList();
+        // Note: The mapper method name might be selectAllByTask or similar based on previous read
         return attendanceMapper.selectAllByTask(taskId);
     }
 
+    @Override
+    public List<AttendanceTask> getActiveTasksBySession(Long sessionId, Long userId) {
+        List<AttendanceTask> allTasks = getTasksBySession(sessionId);
+        if (allTasks == null) return Collections.emptyList();
+
+        // Resolve studentId
+        Long studentId = null;
+        if (userId != null) {
+            ClassStudent s = classStudentMapper.selectByUserId(userId);
+            if (s != null) studentId = s.getStudentId();
+        }
+        final Long finalStudentId = studentId;
+
+        // Filter for status = 1 (In Progress)
+        return allTasks.stream()
+                .filter(t -> t.getStatus() != null && t.getStatus() == 1)
+                .peek(t -> {
+                    // Generate a default title if missing
+                    if (t.getTitle() == null) {
+                        String timeStr = t.getCreateTime() != null ? String.format("%tH:%tM", t.getCreateTime(), t.getCreateTime()) : "";
+                        String typeStr = "location".equals(t.getType()) ? "位置签到" : "扫码签到";
+                        t.setTitle(typeStr + " " + timeStr);
+                    }
+                    // Check attendance status
+                    if (finalStudentId != null) {
+                        Attendance a = attendanceMapper.selectByTaskAndStudent(t.getTaskId(), finalStudentId);
+                        if (a != null) {
+                            t.setAttendanceStatus(a.getAttendanceStatus());
+                        } else {
+                            t.setAttendanceStatus(0);
+                        }
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Attendance> getStudentHistory(Long studentId, Long sessionId) {
+        List<Attendance> list;
+        if (sessionId != null) {
+            list = attendanceMapper.selectTasksWithStatusBySession(studentId, sessionId);
+        } else {
+            list = attendanceMapper.selectByStudent(studentId, null);
+        }
+        
+        if (list != null) {
+            for (Attendance a : list) {
+                if (a.getTaskTitle() == null) {
+                    a.setTaskTitle("签到任务");
+                }
+            }
+        }
+        return list;
+    }
 
     @Transactional
     public int setAttendanceStatus(Long sessionId, Long studentId, Integer status) {
@@ -139,6 +198,14 @@ public class AttendanceServiceImpl implements IAttendanceService {
     @Override
     @Transactional
     public int signByQr(Long taskId, Long studentId, String token) {
+        // Resolve studentId from userId
+        ClassStudent s = classStudentMapper.selectByUserId(studentId);
+        if (s == null) {
+             System.out.println("SignByQr Fail: User " + studentId + " is not a student.");
+             return 0;
+        }
+        Long realStudentId = s.getStudentId();
+
         // validate token
         AttendanceQr qr = qrService.findByToken(token);
         if (qr == null) return 0; // token invalid
@@ -147,7 +214,7 @@ public class AttendanceServiceImpl implements IAttendanceService {
         if (qr.getUsed() != null && qr.getUsed() == 1) return 0; // already used
 
         // insert/update attendance record: set attendance_time = now, attendance_status = 1
-        int rows = upsertAttendanceRecord(taskId, studentId, new Date(), 1, null);
+        int rows = upsertAttendanceRecord(taskId, realStudentId, new Date(), 1, null);
         if (rows > 0) {
             qrService.markUsed(qr.getQrId());
         }
@@ -157,16 +224,36 @@ public class AttendanceServiceImpl implements IAttendanceService {
     @Override
     @Transactional
     public int signByLocation(Long taskId, Long studentId, Double lat, Double lng) {
+        // Resolve studentId from userId
+        ClassStudent s = classStudentMapper.selectByUserId(studentId);
+        if (s == null) {
+             System.out.println("SignByLocation Fail: User " + studentId + " is not a student.");
+             return 0;
+        }
+        Long realStudentId = s.getStudentId();
+
         AttendanceTask t = taskMapper.selectById(taskId);
-        if (t == null) return 0;
-        if (!"location".equalsIgnoreCase(t.getType())) return 0; // not a location task
-        if (t.getCenterLat() == null || t.getCenterLng() == null || t.getRadius() == null) return 0;
+        if (t == null) {
+            System.out.println("SignByLocation Fail: Task not found: " + taskId);
+            return 0;
+        }
+        if (!"location".equalsIgnoreCase(t.getType())) {
+            System.out.println("SignByLocation Fail: Task type mismatch: " + t.getType());
+            return 0; 
+        }
+        if (t.getCenterLat() == null || t.getCenterLng() == null || t.getRadius() == null) {
+             System.out.println("SignByLocation Fail: Task location info missing");
+             return 0;
+        }
 
         double dist = haversineDistanceMeters(t.getCenterLat(), t.getCenterLng(), lat, lng);
+        System.out.println(String.format("SignByLocation: TaskCenter=(%f, %f), Student=(%f, %f), Dist=%f, Radius=%f", 
+            t.getCenterLat(), t.getCenterLng(), lat, lng, dist, t.getRadius().doubleValue()));
+
         if (dist > t.getRadius()) return 0; // out of range
 
         // mark attendance
-        return upsertAttendanceRecord(taskId, studentId, new Date(), 1, String.format("%f,%f", lat, lng));
+        return upsertAttendanceRecord(taskId, realStudentId, new Date(), 1, String.format("%f,%f", lat, lng));
     }
 
     @Override

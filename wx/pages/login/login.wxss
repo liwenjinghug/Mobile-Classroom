@@ -389,3 +389,33 @@
   word-break: break-all;
   white-space: pre-wrap;
 }
+
+/* 微信一键登录按钮 */
+.wx-login-btn {
+  margin-top: 30rpx;
+  background: #07c160 !important; /* 微信绿 */
+  color: #ffffff !important;
+  border-radius: 44rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  border: none;
+  box-shadow: 0 8rpx 16rpx rgba(7, 193, 96, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.wx-login-btn:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 4rpx 8rpx rgba(7, 193, 96, 0.2);
+  opacity: 0.9;
+}
+
+.wx-icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-right: 16rpx;
+}

@@ -79,6 +79,11 @@
     <button class="login-btn" bindtap="onSubmit">
       <text>登 录</text>
     </button>
+
+    <!-- 微信一键登录按钮 -->
+    <button class="wx-login-btn" type="primary" bindtap="onWxLogin">
+      <text>微信一键登录</text>
+    </button>
   </view>
 
   <!-- 底部说明 -->

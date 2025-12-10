@@ -28,6 +28,7 @@
 
       <el-table :data="tasks" style="width:100%">
         <el-table-column prop="taskId" label="ID" width="80" align="center"/>
+        <el-table-column prop="title" label="标题" align="center"/>
         <el-table-column prop="type" label="方式" width="120" align="center">
           <template slot-scope="{ row }">
             <span>{{ row.type === 'location' ? '位置签到' : '二维码签到' }}</span>
@@ -407,7 +408,7 @@ export default {
 }
 
 .attendance-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   background-color: #ffffff;
   border-radius: 18px;

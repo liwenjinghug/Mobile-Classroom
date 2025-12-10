@@ -37,4 +37,7 @@ public interface ClassStudentMapper {
     @Select("SELECT student_id AS studentId, student_no AS studentNo, student_name AS studentName " +
             "FROM class_student WHERE student_id = #{studentId} LIMIT 1")
     ClassStudent selectByStudentId(@Param("studentId") Long studentId);
+
+    @Select("SELECT student_id AS studentId, student_no AS studentNo, student_name AS studentName FROM class_student WHERE user_id = #{userId}")
+    ClassStudent selectByUserId(@Param("userId") Long userId);
 }

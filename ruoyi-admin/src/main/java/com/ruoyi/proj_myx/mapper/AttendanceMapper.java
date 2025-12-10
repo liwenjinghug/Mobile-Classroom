@@ -56,4 +56,47 @@ public interface AttendanceMapper {
 
     @Update("UPDATE class_attendance SET attendance_time = #{attendanceTime}, attendance_status = #{attendanceStatus}, session_id = #{sessionId}, updated_at = #{updatedAt}, device_ip = #{deviceIp}, device_type = #{deviceType}, location = #{location} WHERE attendance_id = #{attendanceId}")
     int updateAttendance(Attendance attendance);
+
+    @Select("<script>" +
+            "SELECT a.attendance_id AS attendanceId, " +
+            "       COALESCE(a.session_id, t.session_id) AS sessionId, " +
+            "       a.task_id AS taskId, " +
+            "       a.student_id AS studentId, " +
+            "       a.attendance_time AS attendanceTime, " +
+            "       a.attendance_status AS attendanceStatus, " +
+            "       a.created_at AS createdAt, " +
+            "       a.updated_at AS updatedAt, " +
+            "       a.device_ip AS deviceIp, " +
+            "       a.device_type AS deviceType, " +
+            "       a.location AS location, " +
+            "       c.course_name AS courseName " +
+            "FROM class_attendance a " +
+            "LEFT JOIN class_attendance_task t ON a.task_id = t.task_id " +
+            "LEFT JOIN class_session cs ON COALESCE(a.session_id, t.session_id) = cs.session_id " +
+            "LEFT JOIN class_course c ON cs.course_id = c.course_id " +
+            "WHERE a.student_id = #{studentId} " +
+            "<if test='sessionId != null'> AND COALESCE(a.session_id, t.session_id) = #{sessionId} </if>" +
+            "ORDER BY a.attendance_time DESC" +
+            "</script>")
+    List<Attendance> selectByStudent(@Param("studentId") Long studentId, @Param("sessionId") Long sessionId);
+
+    @Select("SELECT " +
+            "    t.task_id AS taskId, " +
+            "    t.session_id AS sessionId, " +
+            "    t.title AS title, " +
+            "    t.type AS type, " +
+            "    t.start_time AS startTime, " +
+            "    COALESCE(t.title, CONCAT(CASE WHEN t.type = 'location' THEN '位置签到' ELSE '二维码签到' END, ' ', DATE_FORMAT(t.create_time, '%Y-%m-%d %H:%i'))) AS taskTitle, " +
+            "    t.create_time AS createdAt, " +
+            "    COALESCE(a.attendance_status, 0) AS attendanceStatus, " +
+            "    a.attendance_time AS attendanceTime, " +
+            "    a.attendance_id AS attendanceId, " +
+            "    c.course_name AS courseName " +
+            "FROM class_attendance_task t " +
+            "LEFT JOIN class_attendance a ON t.task_id = a.task_id AND a.student_id = #{studentId} " +
+            "LEFT JOIN class_session cs ON t.session_id = cs.session_id " +
+            "LEFT JOIN class_course c ON cs.course_id = c.course_id " +
+            "WHERE t.session_id = #{sessionId} " +
+            "ORDER BY t.create_time DESC")
+    List<Attendance> selectTasksWithStatusBySession(@Param("studentId") Long studentId, @Param("sessionId") Long sessionId);
 }

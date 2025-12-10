@@ -68,7 +68,14 @@ Page({
   },
 
   goToSign() {
-    wx.showToast({ title: '进入签到（后续实现）', icon: 'none' });
+    const id = this.sessionId || (this.data.course && this.data.course.id);
+    if (!id) {
+      wx.showToast({ title: '课堂ID缺失', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/proj_myx/attendance/index?sessionId=${id}`
+    });
   },
 
   goToForum() {

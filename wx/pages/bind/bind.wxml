@@ -1,0 +1,35 @@
+<!--pages/bind/bind.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">绑定账号</text>
+    <text class="subtitle">请完善信息并绑定现有账号</text>
+  </view>
+
+  <view class="form-group">
+    <!-- 头像选择 -->
+    <button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+      <image class="avatar" src="{{avatarUrl || '/images/tab/mine.png'}}"></image>
+    </button>
+    <text class="tip">点击设置头像</text>
+
+    <!-- 昵称输入 -->
+    <view class="input-item">
+      <text class="label">昵称</text>
+      <input type="nickname" class="input" placeholder="请输入昵称" bind:change="onNicknameChange" />
+    </view>
+
+    <!-- 账号输入 -->
+    <view class="input-item">
+      <text class="label">学号</text>
+      <input class="input" placeholder="请输入学号" model:value="{{username}}" />
+    </view>
+
+    <!-- 密码输入 -->
+    <view class="input-item">
+      <text class="label">密码</text>
+      <input class="input" password type="text" placeholder="请输入密码" model:value="{{password}}" />
+    </view>
+
+    <button class="btn-bind" bindtap="handleBind">立即绑定</button>
+  </view>
+</view>

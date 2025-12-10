@@ -8,8 +8,10 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.proj_myx.domain.AttendanceTask;
 import com.ruoyi.proj_myx.domain.Attendance;
 import com.ruoyi.proj_myx.domain.AttendanceQr;
+import com.ruoyi.proj_lw.domain.ClassStudentLw;
 import com.ruoyi.proj_myx.service.IAttendanceService;
 import com.ruoyi.proj_myx.service.IAttendanceQrService;
+import com.ruoyi.proj_lw.mapper.ClassStudentLwMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +32,9 @@ public class AttendanceController extends BaseController {
 
     @Autowired
     private IAttendanceQrService qrService;
+
+    @Autowired
+    private ClassStudentLwMapper classStudentLwMapper;
 
     @PreAuthorize("@ss.hasPermi('proj_myx:attendance:list')")
     @GetMapping("/tasks")
@@ -94,6 +99,36 @@ public class AttendanceController extends BaseController {
     public AjaxResult deleteTask(@PathVariable Long taskId) {
         int rows = attendanceService.deleteTask(taskId);
         return rows > 0 ? AjaxResult.success() : AjaxResult.error();
+    }
+
+    // 学生端：获取当前活跃任务
+    @GetMapping("/active")
+    public AjaxResult getActiveTasks(@RequestParam Long sessionId) {
+        if (sessionId == null) return AjaxResult.error("sessionId 不能为空");
+        Long userId = null;
+        try {
+            userId = getUserId();
+        } catch (Exception e) {
+            // ignore if not logged in or system user
+        }
+        List<AttendanceTask> tasks = attendanceService.getActiveTasksBySession(sessionId, userId);
+        return AjaxResult.success(tasks);
+    }
+
+    // 学生端：获取签到历史
+    @GetMapping("/student/history")
+    public AjaxResult getStudentHistory(@RequestParam(required = false) Long studentId, @RequestParam(required = false) Long sessionId) {
+        if (studentId == null) {
+            Long userId = getUserId();
+            ClassStudentLw student = classStudentLwMapper.selectClassStudentByUserId(userId);
+            if (student != null) {
+                studentId = student.getStudentId();
+            } else {
+                return AjaxResult.error("无法获取当前用户的学生信息");
+            }
+        }
+        List<Attendance> history = attendanceService.getStudentHistory(studentId, sessionId);
+        return AjaxResult.success(history);
     }
 
     @PreAuthorize("@ss.hasPermi('proj_myx:attendance:stats')")

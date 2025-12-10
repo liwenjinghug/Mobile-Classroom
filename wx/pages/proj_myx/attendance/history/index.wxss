@@ -1,0 +1,84 @@
+.container {
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  padding: 20rpx;
+}
+
+.history-list {
+  width: 100%;
+}
+
+.history-item {
+  background-color: #fff;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  border-radius: 12rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.item-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.course-name {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.time {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.status {
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+/* 0: 缺勤 (Red) */
+.status-0 {
+  color: #f56c6c;
+}
+
+/* 1: 已签到 (Green) */
+.status-1 {
+  color: #67c23a;
+}
+
+/* 2: 迟到 (Orange) */
+.status-2 {
+  color: #e6a23c;
+}
+
+/* 3: 请假 (Blue) */
+.status-3 {
+  color: #409eff;
+}
+
+/* 4: 早退 (Gray/Orange) */
+.status-4 {
+  color: #909399;
+}
+
+.empty-tip {
+  text-align: center;
+  color: #999;
+  margin-top: 100rpx;
+  font-size: 28rpx;
+}
+.task-title {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 6rpx;
+  background-color: #f0f2f5;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  align-self: flex-start;
+}
+

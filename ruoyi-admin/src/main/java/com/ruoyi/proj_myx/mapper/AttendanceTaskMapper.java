@@ -13,7 +13,7 @@ import java.util.List;
 @Mapper
 public interface AttendanceTaskMapper {
 
-    @Insert("INSERT INTO class_attendance_task(session_id, type, center_lat, center_lng, radius, qr_code, start_time, end_time, status, create_by, create_time) VALUES(#{sessionId}, #{type}, #{centerLat}, #{centerLng}, #{radius}, #{qrCode}, #{startTime}, #{endTime}, IFNULL(#{status},1), IFNULL(#{createBy},'system'), NOW())")
+    @Insert("INSERT INTO class_attendance_task(session_id, title, type, center_lat, center_lng, radius, qr_code, start_time, end_time, status, create_by, create_time) VALUES(#{sessionId}, #{title}, #{type}, #{centerLat}, #{centerLng}, #{radius}, #{qrCode}, #{startTime}, #{endTime}, IFNULL(#{status},1), IFNULL(#{createBy},'system'), NOW())")
     @Options(useGeneratedKeys = true, keyProperty = "taskId", keyColumn = "task_id")
     int insertTask(AttendanceTask task);
 

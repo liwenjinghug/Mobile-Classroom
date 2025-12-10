@@ -13,6 +13,12 @@ ruoyi:
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
 
+# 微信小程序配置
+wx:
+  miniapp:
+    appid: wx1e21dce38f53cc7f # 请替换为您的AppID
+    secret: b28ca298a4f9eb68aad9acb6fb43683f # 请替换为您的AppSecret
+
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080

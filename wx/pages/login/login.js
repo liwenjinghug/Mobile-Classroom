@@ -100,14 +100,24 @@ Page({
           // clear last response debug
           this.setData({ lastLoginResponse: '' });
           wx.setStorageSync('token', res.token);
-          // 保存学号和用户信息
+          // 保存学号
           wx.setStorageSync('studentNo', studentNo.trim());
-          if (res.raw && res.raw.user) {
-            wx.setStorageSync('userInfo', res.raw.user);
-          }
-          wx.showToast({ title: '登录成功', icon: 'success' });
-          // 登录后切换到课程 tab
-          wx.switchTab({ url: '/pages/course/list' });
+          
+          // [修改] 登录成功后，立即获取用户信息并存储
+          // 这样 attendance/history/index.js 中的 wx.getStorageSync('userInfo') 才能获取到数据
+          api.request({ url: '/getInfo', method: 'GET' }).then(infoRes => {
+             if (infoRes && infoRes.user) {
+               wx.setStorageSync('userInfo', infoRes.user);
+               console.log('UserInfo saved:', infoRes.user);
+             }
+             wx.showToast({ title: '登录成功', icon: 'success' });
+             // 登录后切换到课程 tab
+             wx.switchTab({ url: '/pages/course/list' });
+          }).catch(err => {
+             console.warn('getInfo failed after login', err);
+             // 即使获取用户信息失败，也允许跳转，但在使用相关功能时可能会报错
+             wx.switchTab({ url: '/pages/course/list' });
+          });
         })
         .catch(err => {
           wx.hideLoading();
@@ -149,5 +159,59 @@ Page({
       console.error('login exception', ex);
       wx.showModal({ title: '异常', content: String(ex), showCancel: false });
     }
+  },
+  onWxLogin() {
+    wx.showLoading({ title: '微信登录中...' });
+    wx.login({
+      success: res => {
+        if (res.code) {
+          // 调用后端检查接口
+          api.request({
+            url: '/app/login/check',
+            method: 'POST',
+            data: { code: res.code }
+          }).then(res => {
+            wx.hideLoading();
+            // api.request 默认处理了 code!=200 的情况，但我们需要特殊处理 202
+            // 由于 api.request 内部逻辑是 code!=200 就 reject，所以这里可能进不到 then
+            // 我们需要修改 api.js 或者在这里 catch 202
+            // 假设 api.request 已经修改为允许 202 或者我们在 catch 里处理
+            
+            // 如果 api.request 成功返回 (code=200)
+            if (res.token) {
+               wx.setStorageSync('token', res.token);
+               wx.showToast({ title: '登录成功', icon: 'success' });
+               setTimeout(() => { wx.switchTab({ url: '/pages/course/list' }) }, 1500);
+            }
+          }).catch(err => {
+            wx.hideLoading();
+            // 检查是否是 202 需要绑定
+            if (err && err.code === 202) {
+               wx.showModal({
+                title: '提示',
+                content: '当前微信未绑定账号，请前往绑定',
+                showCancel: false,
+                success: (modalRes) => {
+                  if (modalRes.confirm) {
+                    wx.navigateTo({
+                      url: `/pages/bind/bind?openId=${err.openId}`
+                    })
+                  }
+                }
+              })
+            } else {
+               wx.showToast({ title: err.msg || '登录失败', icon: 'none' });
+            }
+          })
+        } else {
+           wx.hideLoading();
+           wx.showToast({ title: '微信登录失败', icon: 'none' });
+        }
+      },
+      fail: () => {
+         wx.hideLoading();
+         wx.showToast({ title: '调用微信登录接口失败', icon: 'none' });
+      }
+    })
   }
 });

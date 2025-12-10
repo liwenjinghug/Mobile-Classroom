@@ -39,6 +39,10 @@ function request(options) {
             if (body && typeof body === 'object' && Object.prototype.hasOwnProperty.call(body, 'code')) {
               const code = body.code;
               // convention: code === 200 means success
+              // Special handling for 202 (Bind needed)
+              if (Number(code) === 202) {
+                 return reject(body); // Reject so we can catch it in the UI
+              }
               if (Number(code) !== 200) {
                 console.warn('[api.request] application-level error code != 200', body);
                 return reject(body);
@@ -104,6 +108,7 @@ function requestWithRetry(options, retries = 1, backoff = 500) {
 }
 
 module.exports = {
+  request, // Export the internal request function
   // 登录示例：后端需实现对应接口
   login(payload) {
     // 兼容前端传入 { studentNo, password } 或 { username, password }
