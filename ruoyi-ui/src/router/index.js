@@ -307,7 +307,7 @@ export const constantRoutes = [
         path: 'dashboard',
         component: () => import('@/views/proj_fz/dashboard/index'),
         name: 'ProjFz_Dashboard',
-        meta: { title: '驾驶舱', icon: 'dashboard' }
+        meta: { title: '驾驶舱', icon: 'dashboard',roles: ['admin', 'teacher', 'student'] }
       },
       // 保留原有其他路由顺序，不动其实现
       {
@@ -320,7 +320,7 @@ export const constantRoutes = [
         path: 'attendanceReport',
         component: () => import('@/views/proj_fz/attendanceReport/index'),
         name: 'ProjFz_AttendanceReport',
-        meta: { title: '考勤报表', icon: 'form' }
+        meta: { title: '考勤报表', icon: 'form',roles: ['admin', 'teacher', 'student'] }
       },
       {
         path: 'participationHeat',
