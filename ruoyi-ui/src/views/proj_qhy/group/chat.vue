@@ -427,7 +427,8 @@ export default {
         }).catch(err => {
           this.$message.error(err.msg || '撤回失败')
         });
-      }).catch(() => {});
+      }).catch(() => {
+      });
     },
     getMessageClass(msg) {
       if (msg.messageType === '9') return 'message-item system'
@@ -531,9 +532,11 @@ export default {
 
 .message-item {
   display: flex;
-  align-items: flex-end;
+  /* 1. 确保头像和气泡顶部对齐 */
+  align-items: flex-start;
   gap: 8px;
   max-width: 80%;
+  /* 默认靠左，无需额外设置 */
 }
 
 .message-item .avatar {
@@ -578,6 +581,8 @@ export default {
 
 /* System Message */
 .message-item.system {
+  /* 系统消息居中 */
+  margin: 0 auto;
   justify-content: center;
   max-width: 100%;
 }
@@ -601,7 +606,10 @@ export default {
 
 /* Sent Message */
 .message-item.sent {
-  align-self: flex-end;
+  /* 2. 关键修复：使用 margin-left: auto 强制推到最右边 */
+  margin-left: auto;
+
+  /* 头像在右，气泡在左 */
   flex-direction: row-reverse;
 }
 

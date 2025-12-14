@@ -13,15 +13,24 @@
 
     <div class="debate-list">
       <div v-for="item in debateList" :key="item.id" class="debate-item" @click="handleEnter(item)">
-        <div class="debate-header">
-          <div class="debate-title">{{ item.title }}</div>
-          <el-tag :type="statusType(item.status)">{{ statusLabel(item.status) }}</el-tag>
+
+        <div class="card-actions" @click.stop="handleDelete(item)" v-hasPermi="['proj_qhy:debate:remove']">
+          <i class="el-icon-delete-solid"></i>
         </div>
+
+        <div class="debate-header">
+          <span class="debate-title">{{ item.title }}</span>
+          <el-tag size="mini" :type="statusType(item.status)" class="status-tag">
+            {{ statusLabel(item.status) }}
+          </el-tag>
+        </div>
+
         <div class="debate-body">
           <div class="viewpoint pro">正方：{{ item.proViewpoint }}</div>
           <div class="vs">VS</div>
           <div class="viewpoint con">反方：{{ item.conViewpoint }}</div>
         </div>
+
         <div class="debate-footer">
           <span>邀请码: <strong style="color: #0071e3">{{ item.inviteCode }}</strong></span>
           <span class="create-time">{{ parseTime(item.createTime) }}</span>
@@ -72,7 +81,7 @@
 </template>
 
 <script>
-import { listDebate, addDebate, joinDebate } from "@/api/proj_qhy/debate";
+import {listDebate, addDebate, joinDebate, delDebate} from "@/api/proj_qhy/debate";
 
 export default {
   name: "DebateList",
@@ -116,6 +125,15 @@ export default {
       this.resetForm("form");
       this.open = true;
       this.title = "新建辩论";
+    },
+    handleDelete(row) {
+      const id = row.id;
+      this.$modal.confirm('是否确认删除辩题为"' + row.title + '"的辩论？').then(function() {
+        return delDebate(id);
+      }).then(() => {
+        this.getList();
+        this.$modal.msgSuccess("删除成功");
+      }).catch(() => {});
     },
     submitForm() {
       this.$refs["form"].validate(valid => {
@@ -167,20 +185,88 @@ export default {
 </script>
 
 <style scoped>
-/* 复用之前的Mac Style */
 .app-container { background-color: #f5f5f7; min-height: 100vh; padding: 20px; }
 .debate-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+
 .debate-item {
-  background: white; border-radius: 18px; padding: 24px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s;
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: all 0.3s;
+  /* 关键：为绝对定位提供参考系 */
+  position: relative;
+  overflow: hidden; /* 防止圆角溢出 */
 }
-.debate-item:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
-.debate-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.debate-title { font-size: 18px; font-weight: 700; color: #1d1d1f; }
-.debate-body { display: flex; justify-content: space-between; align-items: center; background: #f5f5f7; padding: 12px; border-radius: 10px; margin-bottom: 16px; }
+
+.debate-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+}
+
+/* --- 新增：删除按钮样式 --- */
+.card-actions {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c0c4cc; /* 默认浅灰色 */
+  font-size: 16px;
+  transition: all 0.2s;
+  z-index: 10; /* 保证在最上层 */
+}
+
+/* 鼠标悬停在卡片上时，按钮变红并稍微放大 */
+.debate-item:hover .card-actions {
+  color: #ff3b30;
+  background-color: rgba(255, 59, 48, 0.1); /* 淡淡的红色背景 */
+}
+/* --- 结束 --- */
+
+.debate-header {
+  display: flex;
+  align-items: center; /* 垂直居中 */
+  margin-bottom: 16px;
+  padding-right: 30px; /* 防止标题太长遮挡删除按钮 */
+}
+
+.debate-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-right: 10px; /* 标题和标签的间距 */
+}
+
+/* 标签样式微调 */
+.status-tag {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.debate-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f5f5f7;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
 .viewpoint { font-size: 14px; color: #1d1d1f; font-weight: 500; width: 40%; text-align: center; }
 .pro { color: #0071e3; }
 .con { color: #ff3b30; }
 .vs { font-weight: 900; color: #86868b; font-style: italic; }
-.debate-footer { display: flex; justify-content: space-between; font-size: 13px; color: #86868b; }
+
+.debate-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #86868b;
+}
 </style>

@@ -75,8 +75,18 @@ public class ClassDebateServiceImpl implements IClassDebateService {
     @Override
     public int deleteClassDebateByIds(Long[] ids) {
         int count = 0;
+        Long currentUserId = SecurityUtils.getUserId();
+        String currentUsername = SecurityUtils.getUsername();
+
         for (Long id : ids) {
-            count += classDebateMapper.deleteClassDebateById(id);
+            ClassDebate debate = classDebateMapper.selectClassDebateById(id);
+            if (debate != null) {
+                // 校验：不是超级管理员 且 不是创建者，则禁止删除
+                if (!SecurityUtils.isAdmin(currentUserId) && !debate.getCreateBy().equals(currentUsername)) {
+                    throw new RuntimeException("无权删除由 " + debate.getCreateBy() + " 创建的辩论");
+                }
+                count += classDebateMapper.deleteClassDebateById(id);
+            }
         }
         return count;
     }
