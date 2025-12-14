@@ -109,7 +109,7 @@
         type="info" show-icon class="process-alert"/>
       <!-- 在考试列表上方增加当前所选考试的得分汇总提示 -->
       <el-alert v-if="scoreSummary" :title="scoreSummaryTitle" type="warning" show-icon class="score-alert" />
-      <el-table :data="list" v-loading="listLoading" style="width:100%" :row-key="rowKeyField" :row-class-name="rowClassName" @selection-change="onSelectionChange" class="beautified-table" @expand-change="handleExpandChange">
+      <el-table :data="sortedList" v-loading="listLoading" style="width:100%" :row-key="rowKeyField" :row-class-name="rowClassName" @selection-change="onSelectionChange" class="beautified-table" @expand-change="handleExpandChange" @sort-change="handleSortChange">
         <el-table-column type="selection" width="42" reserve-selection />
         <!-- 新增：展开列显示提交统计 -->
         <el-table-column type="expand">
@@ -179,18 +179,18 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="examName" label="名称" min-width="140" />
-        <el-table-column label="时间" min-width="220">
+        <el-table-column prop="examName" label="名称" min-width="140" sortable="custom" />
+        <el-table-column label="时间" min-width="220" sortable="custom" prop="startTime">
           <template #default="scope">{{ fmt(scope.row.startTime) }} ~ {{ fmt(scope.row.endTime) }}</template>
         </el-table-column>
-        <el-table-column prop="examDuration" label="时长" width="74" />
-        <el-table-column prop="totalScore" label="总分" width="74" />
-        <el-table-column prop="questionCount" label="题目数" width="80">
+        <el-table-column prop="examDuration" label="时长" width="74" sortable="custom" />
+        <el-table-column prop="totalScore" label="总分" width="74" sortable="custom" />
+        <el-table-column prop="questionCount" label="题目数" width="80" sortable="custom">
           <template #default="scope">
             <span :style="{color: scope.row.questionCount ? '#409EFF' : '#F56C6C'}">{{ scope.row.questionCount || 0 }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="96">
+        <el-table-column label="状态" width="96" sortable="custom" prop="status">
           <template #default="scope">
             <el-tag :type="statusType(scope.row)" class="status-tag">{{ statusDisplay(scope.row) }}</el-tag>
           </template>
@@ -449,6 +449,9 @@ export default {
       bulkDeleting: false,
       submissionStats: {}, // examId -> { loading, participantsCount, submittedCount, unsubmittedCount, submittedRate, averageScore, passRate, records:[], lastFetch, timer, error }
       expandedExamIds: [],
+      // 排序相关
+      sortField: null,
+      sortOrder: null,
     }
   },
   watch: {
@@ -480,6 +483,41 @@ export default {
     })
   },
   computed:{
+    // 排序后的列表
+    sortedList() {
+      const rows = Array.isArray(this.list) ? this.list.slice() : []
+      if (!this.sortField || !this.sortOrder) return rows
+
+      const field = this.sortField
+      const desc = this.sortOrder === 'descending'
+
+      return rows.sort((a, b) => {
+        let av, bv
+        if (field === 'examName') {
+          av = (a.examName || '').toLowerCase()
+          bv = (b.examName || '').toLowerCase()
+        } else if (field === 'startTime') {
+          av = a.startTime ? new Date(a.startTime).getTime() : 0
+          bv = b.startTime ? new Date(b.startTime).getTime() : 0
+        } else if (field === 'examDuration') {
+          av = Number(a.examDuration) || 0
+          bv = Number(b.examDuration) || 0
+        } else if (field === 'totalScore') {
+          av = Number(a.totalScore) || 0
+          bv = Number(b.totalScore) || 0
+        } else if (field === 'questionCount') {
+          av = Number(a.questionCount) || 0
+          bv = Number(b.questionCount) || 0
+        } else if (field === 'status') {
+          av = Number(a.status) || 0
+          bv = Number(b.status) || 0
+        } else {
+          return 0
+        }
+        if (av === bv) return 0
+        return desc ? (av > bv ? -1 : 1) : (av > bv ? 1 : -1)
+      })
+    },
     // 用实际进行中判断禁止批量删除
     canBulkDelete(){ return this.selection.length>0 && this.selection.every(r => !this.isRunning(r)) },
     batchCanSubmit(){
@@ -495,6 +533,11 @@ export default {
     }
   },
   methods: {
+    // 处理表格排序变化
+    handleSortChange({ prop, order }) {
+      this.sortField = order ? prop : null
+      this.sortOrder = order || null
+    },
     // 所有methods方法都保持不变
     fetchCourses() {
       return listCourse({ pageNum: 1, pageSize: 1000 }).then(res => {

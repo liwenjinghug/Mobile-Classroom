@@ -73,26 +73,26 @@
 
       <!-- 提交列表 -->
       <el-card class="submissions-card">
-        <el-table :data="sortedSubmissions" v-loading="submissionsLoading" stripe style="width: 100%">
+        <el-table :data="sortedSubmissions" v-loading="submissionsLoading" stripe style="width: 100%" @sort-change="handleSortChange">
           <el-table-column type="index" label="#" width="60" align="center" />
-          <el-table-column label="学号" width="120" fixed="left">
+          <el-table-column label="学号" width="120" fixed="left" sortable="custom" prop="studentNo">
             <template #default="{ row }">{{ row.student_no || row.studentNo || '—' }}</template>
           </el-table-column>
-          <el-table-column prop="studentName" label="姓名" width="100" fixed="left" />
-          <el-table-column label="提交状态" width="100" align="center">
+          <el-table-column prop="studentName" label="姓名" width="100" fixed="left" sortable="custom" />
+          <el-table-column label="提交状态" width="100" align="center" sortable="custom" prop="status">
             <template #default="{ row }">
               <el-tag :type="getStatusType(row)" size="small">
                 {{ getStatusText(row) }}
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="提交时间" width="160">
+          <el-table-column label="提交时间" width="160" sortable="custom" prop="submitTime">
             <template #default="{ row }">{{ formatTime(row.submitTime) || '—' }}</template>
           </el-table-column>
-          <el-table-column label="批改时间" width="160">
+          <el-table-column label="批改时间" width="160" sortable="custom" prop="correctedTime">
             <template #default="{ row }">{{ formatTime(row.corrected_time || row.correctedTime) || '—' }}</template>
           </el-table-column>
-          <el-table-column label="成绩" width="100" align="center">
+          <el-table-column label="成绩" width="100" align="center" sortable="custom" prop="score">
             <template #default="{ row }">
               <span
                 v-if="row.score !== null && row.score !== undefined"
@@ -113,7 +113,7 @@
               <span v-else style="color: #999">无评语</span>
             </template>
           </el-table-column>
-          <el-table-column label="附件" min-width="200">
+          <el-table-column label="附件" width="200" fixed="right">
             <template #default="{ row }">
               <div v-if="parseAttachments(row.submissionFiles).length">
                 <el-tag
@@ -351,6 +351,28 @@ export default {
     })
   },
   methods: {
+    // 处理表格排序变化
+    handleSortChange({ column, prop, order }) {
+      console.log('排序变化:', prop, order)
+      if (!order) {
+        // 取消排序时，恢复默认排序（按状态）
+        this.subSortField = 'graded'
+        this.subSortOrder = 'desc'
+      } else {
+        // 将 prop 映射到 sortedSubmissions 中使用的字段名
+        const fieldMap = {
+          'studentNo': 'studentNo',
+          'studentName': 'studentName',
+          'status': 'graded',
+          'submitTime': 'submitTime',
+          'correctedTime': 'correctedTime',
+          'score': 'score'
+        }
+        this.subSortField = fieldMap[prop] || prop
+        this.subSortOrder = order === 'ascending' ? 'asc' : 'desc'
+      }
+    },
+
     async fetchCourses() {
       try {
         console.log('开始获取课程列表')
@@ -779,13 +801,75 @@ export default {
     },
 
     downloadFile(file) {
-      const downloadLink = this.downloadUrl(file)
-      const a = document.createElement('a')
-      a.href = downloadLink
-      a.download = this.getFileName(file)
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
+      if (!file) return
+
+      const request = require('@/utils/request').default
+      const getToken = require('@/utils/auth').getToken
+      const token = getToken()
+      const headers = { Authorization: 'Bearer ' + token, isToken: true }
+      const norm = String(file).replace(/\\/g, '/').trim()
+      const filename = decodeURIComponent(norm.split('/').pop())
+
+      console.log('downloadFile - 输入文件路径:', file)
+      console.log('downloadFile - 标准化路径:', norm)
+      console.log('downloadFile - 文件名:', filename)
+
+      const downloadBlob = url => {
+        console.log('downloadFile - 尝试下载URL:', url)
+        return request({
+          url,
+          method: 'get',
+          responseType: 'blob',
+          headers
+        }).then(blob => {
+          console.log('downloadFile - 下载成功，创建下载链接')
+          const data = blob && blob.data instanceof Blob ? blob.data : (blob instanceof Blob ? blob : new Blob([blob]))
+          const href = URL.createObjectURL(data)
+          const a = document.createElement('a')
+          a.href = href
+          a.download = filename
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(href)
+          this.$message.success('文件下载完成')
+        }).catch(error => {
+          console.error('downloadFile - 下载失败:', error)
+          throw error
+        })
+      }
+
+      const tryProfile = () => downloadBlob(`/common/download/resource?resource=${encodeURIComponent(norm)}`).catch(() => {
+        console.log('downloadFile - profile资源下载失败，尝试fileName方式')
+        const rel = norm.replace(/^\/?profile\/upload\//, '')
+        if (!rel) throw new Error('missing path')
+        return downloadBlob(`/common/download?fileName=${encodeURIComponent(rel)}&delete=false`)
+      })
+
+      if (norm.startsWith('/profile') || norm.startsWith('profile')) {
+        console.log('downloadFile - 使用profile路径下载')
+        tryProfile().catch(() => this.$message.error('文件下载失败'))
+      } else if (/^https?:\/\//i.test(norm)) {
+        console.log('downloadFile - 外部链接，直接打开')
+        window.open(norm, '_blank')
+      } else if (norm.startsWith('/upload/') || norm.startsWith('upload/')) {
+        console.log('downloadFile - 使用upload路径下载，转换为profile路径')
+        const profilePath = norm.startsWith('/') ? '/profile' + norm : '/profile/' + norm
+        downloadBlob(`/common/download/resource?resource=${encodeURIComponent(profilePath)}`).catch(() => {
+          this.$message.error('文件下载失败')
+        })
+      } else if (/^\d{4}\//.test(norm)) {
+        console.log('downloadFile - 识别为年份格式路径，转换为/profile/upload/')
+        const profilePath = '/profile/upload/' + norm
+        downloadBlob(`/common/download/resource?resource=${encodeURIComponent(profilePath)}`).catch(() => {
+          this.$message.error('文件下载失败')
+        })
+      } else {
+        console.log('downloadFile - 使用fileName方式下载')
+        downloadBlob(`/common/download?fileName=${encodeURIComponent(norm)}&delete=false`).catch(() => {
+          this.$message.error('文件下载失败')
+        })
+      }
     },
 
     downloadUrl(fileName) {

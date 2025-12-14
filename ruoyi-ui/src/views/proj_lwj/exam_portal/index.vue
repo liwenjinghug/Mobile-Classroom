@@ -27,23 +27,23 @@
           style="float:right; margin-left:8px"
         >刷新</el-button>
       </div>
-      <el-table :data="displayedExams" size="small" style="width:100%">
-        <el-table-column prop="examName" label="考试名称" min-width="200" />
-        <el-table-column prop="courseName" label="课程" width="160" />
-        <el-table-column prop="className" label="课堂" width="160" />
-        <el-table-column prop="startTime" label="开始时间" width="180" />
-        <el-table-column prop="endTime" label="结束时间" width="180" />
-        <el-table-column label="我的分数" width="120">
+      <el-table :data="sortedDisplayedExams" size="small" style="width:100%" @sort-change="handleExamSortChange">
+        <el-table-column prop="examName" label="考试名称" min-width="200" sortable="custom" />
+        <el-table-column prop="courseName" label="课程" width="160" sortable="custom" />
+        <el-table-column prop="className" label="课堂" width="160" sortable="custom" />
+        <el-table-column prop="startTime" label="开始时间" width="180" sortable="custom" />
+        <el-table-column prop="endTime" label="结束时间" width="180" sortable="custom" />
+        <el-table-column label="我的分数" width="120" sortable="custom" prop="score">
           <template slot-scope="scope">
             {{ myScore(scope.row) }}
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="120">
+        <el-table-column label="状态" width="120" sortable="custom" prop="status">
           <template slot-scope="scope">
             <el-tag :type="statusTagType(scope.row)">{{ statusLabel(scope.row) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200">
+        <el-table-column label="操作" width="200" fixed="right">
           <template slot-scope="scope">
             <el-button type="primary" size="mini" :disabled="!canTake(scope.row) || submittedLocal(scope.row)" @click="goTake(scope.row)">
               {{ submittedLocal(scope.row) ? '已完成' : '进入考试' }}
@@ -80,26 +80,26 @@
         <el-descriptions-item label="平均分">{{ myStats.avgScore }}</el-descriptions-item>
         <el-descriptions-item label="及格率">{{ myStats.passRate }}%</el-descriptions-item>
       </el-descriptions>
-      <el-table :data="myDisplayed" size="small" :row-key="row=>row.id || (row.examId+'-'+row.studentNo)" ref="myTable">
+      <el-table :data="sortedMyDisplayed" size="small" :row-key="row=>row.id || (row.examId+'-'+row.studentNo)" ref="myTable" @sort-change="handleMySortChange">
         <el-table-column type="index" width="50" />
-        <el-table-column prop="examName" label="考试名称" min-width="200" />
-        <el-table-column prop="courseName" label="课程" width="140" />
-        <el-table-column prop="studentNo" label="学号" width="140" />
-        <el-table-column prop="totalScore" label="成绩" width="100">
+        <el-table-column prop="examName" label="考试名称" min-width="200" sortable="custom" />
+        <el-table-column prop="courseName" label="课程" width="140" sortable="custom" />
+        <el-table-column prop="studentNo" label="学号" width="140" sortable="custom" />
+        <el-table-column prop="totalScore" label="成绩" width="100" sortable="custom">
           <template slot-scope="scope">{{ displayScoreRow(scope.row) }}</template>
         </el-table-column>
-        <el-table-column prop="passStatus" label="评定" width="100">
+        <el-table-column prop="passStatus" label="评定" width="100" sortable="custom">
           <template slot-scope="scope">
             <el-tag :type="passTagType(scope.row)">{{ passStatusText(scope.row) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="状态" width="120">
+        <el-table-column label="状态" width="120" sortable="custom" prop="participantStatus">
           <template slot-scope="scope">
             <el-tag :type="getStatusTagType(scope.row)">{{ getStatusText(scope.row) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="startTime" label="开始时间" width="180" />
-        <el-table-column prop="submitTime" label="提交时间" width="180" />
+        <el-table-column prop="startTime" label="开始时间" width="180" sortable="custom" />
+        <el-table-column prop="submitTime" label="提交时间" width="180" sortable="custom" />
         <el-table-column label="操作" width="150" fixed="right">
           <template slot-scope="scope">
             <el-button
@@ -150,7 +150,12 @@ export default {
       myQuery: { keyword: '', filterCourse: '' }, // 只保留关键字和课程筛选
       examCache: {},
       myStats: { total: 0, finished: 0, avgScore: '—', passRate: 0 },
-      diagnosing:false
+      diagnosing:false,
+      // 排序相关
+      examSortField: null,
+      examSortOrder: null,
+      mySortField: null,
+      mySortOrder: null
     }
   },
   computed: {
@@ -221,6 +226,73 @@ export default {
       }
 
       return filtered
+    },
+    // 排序后的考试列表
+    sortedDisplayedExams() {
+      const rows = this.displayedExams.slice()
+      if (!this.examSortField || !this.examSortOrder) return rows
+
+      const field = this.examSortField
+      const desc = this.examSortOrder === 'descending'
+
+      return rows.sort((a, b) => {
+        let av, bv
+        if (field === 'examName' || field === 'courseName' || field === 'className') {
+          av = (a[field] || '').toLowerCase()
+          bv = (b[field] || '').toLowerCase()
+        } else if (field === 'startTime' || field === 'endTime') {
+          av = a[field] ? new Date(a[field]).getTime() : 0
+          bv = b[field] ? new Date(b[field]).getTime() : 0
+        } else if (field === 'score') {
+          av = a.myScore != null ? Number(a.myScore) : -Infinity
+          bv = b.myScore != null ? Number(b.myScore) : -Infinity
+        } else if (field === 'status') {
+          av = Number(a.status) || 0
+          bv = Number(b.status) || 0
+        } else {
+          return 0
+        }
+        if (av === bv) return 0
+        return desc ? (av > bv ? -1 : 1) : (av > bv ? 1 : -1)
+      })
+    },
+    // 排序后的我的考试记录
+    sortedMyDisplayed() {
+      const rows = this.myDisplayed.slice()
+      if (!this.mySortField || !this.mySortOrder) return rows
+
+      const field = this.mySortField
+      const desc = this.mySortOrder === 'descending'
+
+      return rows.sort((a, b) => {
+        let av, bv
+        if (field === 'examName' || field === 'courseName' || field === 'studentNo') {
+          av = (a[field] || '').toLowerCase()
+          bv = (b[field] || '').toLowerCase()
+        } else if (field === 'totalScore') {
+          av = a.totalScore != null ? Number(a.totalScore) : -Infinity
+          bv = b.totalScore != null ? Number(b.totalScore) : -Infinity
+        } else if (field === 'passStatus') {
+          // 及格 > 不及格 > 未知
+          const getPassVal = r => {
+            if (r.passStatus === 1 || r.passed === true) return 2
+            if (r.passStatus === 0 || r.passed === false) return 1
+            return 0
+          }
+          av = getPassVal(a)
+          bv = getPassVal(b)
+        } else if (field === 'participantStatus') {
+          av = Number(a.participantStatus) || 0
+          bv = Number(b.participantStatus) || 0
+        } else if (field === 'startTime' || field === 'submitTime') {
+          av = a[field] ? new Date(a[field]).getTime() : 0
+          bv = b[field] ? new Date(b[field]).getTime() : 0
+        } else {
+          return 0
+        }
+        if (av === bv) return 0
+        return desc ? (av > bv ? -1 : 1) : (av > bv ? 1 : -1)
+      })
     }
   },
   watch: {
@@ -237,6 +309,16 @@ export default {
     await this.fetchCurrentStudent()
   },
   methods: {
+    // 处理考试列表排序变化
+    handleExamSortChange({ prop, order }) {
+      this.examSortField = order ? prop : null
+      this.examSortOrder = order || null
+    },
+    // 处理我的考试记录排序变化
+    handleMySortChange({ prop, order }) {
+      this.mySortField = order ? prop : null
+      this.mySortOrder = order || null
+    },
     async fetchCurrentStudent() {
       this.loading = true
       try {
