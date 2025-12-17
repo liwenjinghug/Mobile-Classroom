@@ -1,4 +1,4 @@
-<template>
+ <template>
   <div class="exam-take" v-loading="loading">
     <el-card shadow="never" class="exam-header">
       <div class="exam-title">{{ exam ? exam.examName : '考试' }} (ID: {{ examId }})</div>
@@ -74,6 +74,9 @@
               <el-tag :type="answerResultMap[currentQuestion.id].correct?'success':'danger'">
                 {{ answerResultMap[currentQuestion.id].correct ? '正确' : '错误' }}
               </el-tag>
+              <span v-if="currentQuestion.correctAnswer" style="margin-left:8px; color:#67c23a; font-weight:bold;">
+                正确答案：{{ currentQuestion.correctAnswer }}
+              </span>
             </template>
             <el-tag v-if="canShowPerQuestionScore && (answerResultMap[currentQuestion.id].score !== undefined)" type="info" style="margin-left:6px">
               得分: {{ formatScore(answerResultMap[currentQuestion.id].score) }} / {{ currentQuestion.score }}
@@ -110,9 +113,6 @@
         <el-table :data="summaryRows" size="mini" style="margin-top:16px" height="360">
           <el-table-column prop="index" label="#" width="50" />
           <el-table-column prop="type" label="题型" width="80" />
-          <el-table-column prop="score" label="得分" width="100">
-            <template slot-scope="scope">{{ scope.row.scoreDisplay }}</template>
-          </el-table-column>
           <el-table-column prop="maxScore" label="满分" width="80" />
           <el-table-column v-if="showResultColumn" prop="correct" label="结果" width="80">
             <template slot-scope="scope">
@@ -130,6 +130,40 @@
         <el-button @click="summaryVisible=false">关闭</el-button>
         <el-button v-if="canShowAnalysis" @click="openAnalysis" type="info">查看解析</el-button>
         <el-button type="primary" @click="goBackPortal">返回考试入口</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 解析弹窗 -->
+    <el-dialog title="题目解析" :visible.sync="analysisVisible" width="900px" :modal="true" :append-to-body="true" v-if="exam">
+      <div class="analysis-content" style="max-height: 60vh; overflow-y: auto;">
+        <div v-for="(q, idx) in questions" :key="q.id" class="analysis-item" style="margin-bottom: 24px; padding: 16px; background: #f9f9f9; border-radius: 8px;">
+          <div class="analysis-header" style="display: flex; align-items: center; margin-bottom: 12px;">
+            <el-tag size="small" type="primary" style="margin-right: 8px;">第 {{ idx + 1 }} 题</el-tag>
+            <el-tag size="small">{{ typeLabel(q.questionType) }}</el-tag>
+            <el-tag size="small" type="warning" style="margin-left: 8px;">{{ q.score }} 分</el-tag>
+            <el-tag v-if="answerResultMap[q.id] && answerResultMap[q.id].correct === true" size="small" type="success" style="margin-left: 8px;">正确</el-tag>
+            <el-tag v-else-if="answerResultMap[q.id] && answerResultMap[q.id].correct === false" size="small" type="danger" style="margin-left: 8px;">错误</el-tag>
+            <el-tag v-else size="small" type="info" style="margin-left: 8px;">待批改</el-tag>
+          </div>
+          <div class="analysis-question" style="margin-bottom: 12px; font-size: 15px; line-height: 1.6;" v-html="q.questionContent"></div>
+          <el-descriptions :column="1" size="small" border>
+            <el-descriptions-item label="我的答案">
+              <span :style="{ color: answerResultMap[q.id] && answerResultMap[q.id].correct === false ? '#f56c6c' : '#303133' }">
+                {{ answerMap[q.id] || '未作答' }}
+              </span>
+            </el-descriptions-item>
+            <el-descriptions-item label="正确答案">
+              <span style="color: #67c23a; font-weight: bold;">{{ q.correctAnswer || '—' }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item v-if="q.analysis" label="解析">
+              <span style="color: #909399;">{{ q.analysis }}</span>
+            </el-descriptions-item>
+          </el-descriptions>
+        </div>
+        <el-empty v-if="!questions || questions.length === 0" description="暂无题目" />
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="analysisVisible=false">关闭</el-button>
       </span>
     </el-dialog>
   </div>
@@ -158,6 +192,7 @@ export default {
       showImmediateAnswer: false,
       studentNo: '',
       summaryVisible: false,
+      analysisVisible: false,
       analysisMode: false,
       autoSaveTimer: null,
       // 新增：答题自动保存去抖定时器
@@ -647,6 +682,10 @@ export default {
       }
     },
     formatDuration(sec){ if(sec==null) return '--:--'; if(sec<0) return '00:00'; const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60; return (h>0?String(h).padStart(2,'0')+':':'')+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0') },
+    openAnalysis(){
+      // 打开解析弹窗，显示所有题目的解析和正确答案
+      this.analysisVisible = true
+    },
     goBackPortal(){
       // 先关闭弹窗，避免 Element UI 遮罩在路由切换后短暂残留
       this.summaryVisible = false

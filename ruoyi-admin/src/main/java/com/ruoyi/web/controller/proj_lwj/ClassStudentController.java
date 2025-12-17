@@ -33,8 +33,13 @@ public class ClassStudentController extends BaseController {
 
             logger.info("getCurrentStudent called for userId={}, username={}", userId, username);
 
-            // 通过username查找class_student表
-            ClassStudent student = classStudentMapper.selectByStudentNo(username);
+            // 优先通过userId查找class_student表
+            ClassStudent student = classStudentMapper.selectByUserId(userId);
+
+            // 如果通过userId找不到，再尝试通过username查找
+            if (student == null) {
+                student = classStudentMapper.selectByStudentNo(username);
+            }
 
             if (student != null) {
                 return AjaxResult.success(student);

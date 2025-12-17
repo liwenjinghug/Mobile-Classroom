@@ -281,9 +281,21 @@ public class ClassExamController extends BaseController {
             Long userId = getUserId();
             logger.info("myAvailable called for userId={}, username={}", userId, username);
 
-            // 使用username作为studentNo查询
-            return available(username);
+            // 先通过 userId 获取学生信息，获取真实的 studentNo
+            ClassStudent student = classStudentMapper.selectByUserId(userId);
+            String studentNo;
+            if (student != null && student.getStudentNo() != null && !student.getStudentNo().trim().isEmpty()) {
+                studentNo = student.getStudentNo();
+                logger.info("myAvailable: Found studentNo={} for userId={}", studentNo, userId);
+            } else {
+                // 如果通过 userId 找不到，回退使用 username
+                studentNo = username;
+                logger.info("myAvailable: No student found for userId={}, fallback to username={}", userId, username);
+            }
+
+            return available(studentNo);
         } catch (Exception ex) {
+            logger.error("myAvailable error", ex);
             return AjaxResult.success(java.util.Collections.emptyList()).put("error", ex.getMessage());
         }
     }

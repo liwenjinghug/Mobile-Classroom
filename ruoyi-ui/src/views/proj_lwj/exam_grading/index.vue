@@ -769,6 +769,29 @@ export default {
         scoreBuckets: buckets,
         lastFetch: Date.now()
       }
+      // 检查是否所有人都已提交，如果是则自动结束考试
+      this.checkAutoEndExam(participants, submitted, unsubmitted)
+    },
+    // 检查并自动结束考试（所有人交卷后）
+    async checkAutoEndExam(participants, submitted, unsubmitted) {
+      // 条件：参与人数大于0，未提交人数为0，当前考试正在进行中
+      if (participants > 0 && unsubmitted === 0 && submitted === participants && this.isCurrentExamRunning) {
+        console.log('[Auto End] All students submitted, attempting to end exam:', this.currentExamId)
+        try {
+          const res = await endExam(this.currentExamId)
+          if (res && (res.code === 200 || res.code === 0)) {
+            this.$message.success('所有学生已交卷，考试已自动结束')
+            // 停止自动刷新
+            this.stopSubmissionAuto()
+            // 重新加载考试列表以更新状态
+            await this.loadExams()
+          } else {
+            console.warn('[Auto End] Failed to end exam:', res && (res.msg || res.message))
+          }
+        } catch (e) {
+          console.error('[Auto End] Error ending exam:', e)
+        }
+      }
     },
     updateSubmissionChart(){
       if(!this.submissionStats || !this.$refs.submissionChart) return
@@ -1214,19 +1237,37 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
         const sid = a.sessionId || this.currentSessionId || (details[0] && details[0].sessionId) || 'unknown'
         const key = `${sid}|${no}`
         const prev = submittedMap[key]
-        const score = (a.score != null && a.score !== '') ? Number(a.score) : null
-        const graded = (a.correctorId != null) || (a.score != null && a.score !== '')
-        const item = {
-          sessionId: sid,
-          sessionName: nameBySession[sid] || '',
-          studentNo: no,
-          studentName: a.studentName || '',
-          submitted: true,
-          graded,
-          score,
-          submitTime: a.submitTime || null
+        const answerScore = (a.score != null && a.score !== '') ? Number(a.score) : 0
+        // 检查该题是否已批改：主观题需要correctorId，客观题有score即视为已批改
+        const answerGraded = (a.correctorId != null) || (a.score != null && a.score !== '')
+
+        if (prev) {
+          // 累加分数：将所有答案的分数加到学生的总分上
+          prev.score = (prev.score || 0) + answerScore
+          // 更新批改状态：只有所有答案都已批改才算已批改
+          prev.graded = prev.graded && answerGraded
+          prev.answerCount = (prev.answerCount || 1) + 1
+          // 保留最新的提交时间
+          if (a.submitTime && (!prev.submitTime || new Date(a.submitTime) > new Date(prev.submitTime))) {
+            prev.submitTime = a.submitTime
+          }
+          // 保留学生姓名（如果之前没有）
+          if (!prev.studentName && a.studentName) {
+            prev.studentName = a.studentName
+          }
+        } else {
+          submittedMap[key] = {
+            sessionId: sid,
+            sessionName: nameBySession[sid] || '',
+            studentNo: no,
+            studentName: a.studentName || '',
+            submitted: true,
+            graded: answerGraded,
+            score: answerScore,
+            submitTime: a.submitTime || null,
+            answerCount: 1
+          }
         }
-        submittedMap[key] = prev ? (prev.score != null && score != null && score < prev.score ? prev : item) : item
       })
       const rows = Object.values(submittedMap)
       // Sort by session, submission, grading, score
