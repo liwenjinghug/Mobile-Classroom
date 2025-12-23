@@ -5,6 +5,7 @@
       <div class="attendance-info">当前 sessionId: {{ sessionId }} | 当前角色: {{ rolesDisplay.join(', ') || '未登录/无角色' }}</div>
       <div class="attendance-controls">
         <el-input v-model.number="sessionId" placeholder="课堂 sessionId（数字）" style="width:220px;"></el-input>
+        <el-button type="text" icon="el-icon-refresh" @click="checkActiveSession" title="自动获取当前课堂" style="margin-left: 5px; margin-right: 10px;"></el-button>
         <el-button type="primary" @click="loadTasks">加载签到列表</el-button>
 
         <el-button
@@ -135,6 +136,13 @@
           <el-button @click="showQrDialog=false">关闭</el-button>
         </span>
       </el-dialog>
+
+      <el-dialog title="选择当前课堂" :visible.sync="showSessionSelect" width="400px" append-to-body>
+        <el-table :data="activeSessions" @row-click="selectSession" style="cursor:pointer">
+          <el-table-column property="className" label="课程名称"></el-table-column>
+          <el-table-column property="startTime" label="开始时间" width="100"></el-table-column>
+        </el-table>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -143,6 +151,7 @@
 import CreateAttendance from '@/views/proj_myx/CreateAttendance.vue'
 import AttendanceStats from '@/views/proj_myx/AttendanceStats.vue'
 import { listTasks, taskRecords, generateQr, updateStudentStatus, closeTask, startTask, deleteTask } from '@/api/proj_myx/attendance'
+import { getActiveSessions } from '@/api/proj_lw/session'
 import { formatDate } from '@/utils/format'
 
 export default {
@@ -151,6 +160,8 @@ export default {
   data() {
     return {
       sessionId: null,
+      showSessionSelect: false,
+      activeSessions: [],
       tasks: [],
       showCreate: false,
       showRecords: false,
@@ -172,7 +183,47 @@ export default {
       return (this.$store && this.$store.getters && this.$store.getters.roles) || []
     }
   },
+  mounted() {
+    this.checkActiveSession();
+  },
+  activated() {
+    this.checkActiveSession();
+  },
   methods: {
+    checkActiveSession() {
+      getActiveSessions().then(res => {
+        const list = res.data || [];
+        if (list.length === 1) {
+          this.sessionId = list[0].sessionId;
+          sessionStorage.setItem('currentSessionId', this.sessionId);
+          this.$message.success(`已自动进入课堂：${list[0].className || '未命名'}`);
+          this.loadTasks();
+        } else if (list.length > 1) {
+          // 多个活跃课堂时必须选择，避免误进“课堂1/缓存课堂”
+          this.sessionId = null;
+          this.tasks = [];
+          this.records = [];
+          this.selectedTask = null;
+          this.activeSessions = list;
+          this.showSessionSelect = true;
+        } else {
+          // 如果没有活跃课堂，尝试读取缓存
+          const cachedId = sessionStorage.getItem('currentSessionId');
+          if (cachedId) {
+            this.sessionId = Number(cachedId);
+            this.loadTasks();
+          } else {
+            this.$message.info('当前无正在进行的课程，请输入 Session ID');
+          }
+        }
+      });
+    },
+    selectSession(session) {
+      this.sessionId = session.sessionId;
+      sessionStorage.setItem('currentSessionId', this.sessionId);
+      this.showSessionSelect = false;
+      this.loadTasks();
+    },
     formatDate,
     async loadTasks() {
       if (!this.sessionId) return this.$message.warning('请输入 sessionId')

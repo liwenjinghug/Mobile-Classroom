@@ -8,6 +8,13 @@ export function listSession(query) {
   })
 }
 
+export function getActiveSessions() {
+  return request({
+    url: '/proj_lw/session/current/active',
+    method: 'get'
+  })
+}
+
 // 修改这个方法：使用查询参数方式
 export function getSessionsByClassNumber(classNumber) {
   return request({

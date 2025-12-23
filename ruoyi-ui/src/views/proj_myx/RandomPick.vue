@@ -7,15 +7,16 @@
         <p>未检测到有效的课堂 sessionId，请输入课堂 ID（数字）：</p>
         <input v-model="sessionInput" placeholder="例如：1" />
         <button class="btn" @click="applySessionId">加载课堂</button>
+        <el-button type="text" icon="el-icon-refresh" @click="checkActiveSession" title="自动获取当前课堂">自动获取</el-button>
         <p style="color:#999;margin-top:8px">提示：请在后台课堂管理或课程安排中查看当前 session 的 numeric id，菜单直接访问时可能未携带该参数。</p>
       </div>
 
       <div v-else>
-        <RandomWheel 
-          :students="students" 
-          @picked="onPicked" 
+        <RandomWheel
+          :students="students"
+          @picked="onPicked"
           @start-spin="onStartSpin"
-          ref="wheel" 
+          ref="wheel"
         />
 
         <div v-if="loading" class="loading">加载中...</div>
@@ -37,7 +38,7 @@
           <el-button size="small" icon="el-icon-printer" @click="handlePrint">打印</el-button>
         </div>
       </div>
-      
+
       <div class="history-list">
         <div v-for="item in history" :key="item.rpickId" class="history-item">
           <div class="info">
@@ -66,12 +67,20 @@
         <el-button type="primary" @click="submitEdit">确 定</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="选择当前课堂" :visible.sync="showSessionSelect" width="400px" append-to-body>
+      <el-table :data="activeSessions" @row-click="selectSession" style="cursor:pointer">
+        <el-table-column property="className" label="课程名称"></el-table-column>
+        <el-table-column property="startTime" label="开始时间" width="100"></el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import RandomWheel from '@/components/proj_myx/RandomWheel.vue'
 import { fetchEligible, savePick, fetchHistory, delPick, updatePick, exportPick } from '@/api/proj_myx/randomPick'
+import { getActiveSessions } from '@/api/proj_lw/session'
 
 export default {
   name: 'RandomPick',
@@ -80,12 +89,20 @@ export default {
     const route = this.$route || {}
     const q = route.query || {}
     const p = route.params || {}
-    // 尝试把传入的 sessionId 转为数字（Long），若无法转换则留空并提示用户输入正确的数字 ID
-    const raw = q.sessionId || p.sessionId || ''
-    const parsed = raw !== '' ? Number(raw) : NaN
+    // 尝试把传入的 sessionId 转为数字（Long），若无法转换则留空
+    const raw = q.sessionId || p.sessionId
+    let parsed = null
+    if (raw) {
+      const n = Number(raw)
+      if (!isNaN(n) && n > 0) {
+        parsed = n
+      }
+    }
     return {
-      sessionId: isNaN(parsed) ? null : parsed,
+      sessionId: parsed,
       sessionInput: '',
+      showSessionSelect: false,
+      activeSessions: [],
       students: [],
       result: null,
       history: [],
@@ -98,9 +115,15 @@ export default {
       }
     }
   },
+  mounted() {
+    this.initPage();
+  },
+  activated() {
+    this.initPage();
+  },
   computed: {
     validSessionId() {
-      return this.sessionId !== null && !isNaN(this.sessionId)
+      return this.sessionId !== null && !isNaN(this.sessionId) && this.sessionId > 0
     },
     stats() {
       return {
@@ -110,6 +133,60 @@ export default {
     }
   },
   methods: {
+    initPage() {
+      // 首次进入时有概率比 token 注入更早触发；延迟到 nextTick 后再拉取更稳。
+      this.$nextTick(() => {
+        // 始终先拉取活跃课堂，只有在返回 0 个时才回退到手输/缓存
+        this.checkActiveSession(true);
+      })
+    },
+    checkActiveSession(forceRefresh = false) {
+      getActiveSessions().then(res => {
+        const list = Array.isArray(res && res.data) ? res.data : [];
+        if (list.length === 1) {
+          // 只有唯一课堂时才自动进入；其余场景需要用户确认
+          this.sessionId = list[0].sessionId;
+          sessionStorage.setItem('currentSessionId', this.sessionId);
+          this.$message.success(`已自动进入课堂：${list[0].className || '未命名'}`);
+          this.loadEligible();
+          this.loadHistory();
+        } else if (list.length > 1) {
+          // 返回多个课堂：必须让老师选择，不允许沿用上次/缓存课堂
+          this.sessionId = null;
+          this.students = [];
+          this.history = [];
+          this.activeSessions = list;
+          this.showSessionSelect = true;
+        } else {
+          // 无活跃课堂：若有缓存则沿用，否则提示手动输入
+          const cachedId = sessionStorage.getItem('currentSessionId');
+          if (cachedId) {
+            this.sessionId = Number(cachedId);
+            this.loadEligible();
+            this.loadHistory();
+          } else {
+            this.$message.info('当前无正在进行的课程，请输入 Session ID');
+          }
+        }
+      }).catch(() => {
+        // 请求失败时给出明确反馈，避免“什么都没发生”的体验
+        const cachedId = sessionStorage.getItem('currentSessionId');
+        if (cachedId) {
+          this.sessionId = Number(cachedId);
+          this.loadEligible();
+          this.loadHistory();
+        } else {
+          this.$message.info('自动获取课堂失败，请稍后重试');
+        }
+      })
+    },
+    selectSession(session) {
+      this.sessionId = session.sessionId;
+      sessionStorage.setItem('currentSessionId', this.sessionId);
+      this.showSessionSelect = false;
+      this.loadEligible();
+      this.loadHistory();
+    },
     unwrap(res) {
       return res && typeof res === 'object' && 'data' in res ? res.data : res
     },
@@ -125,6 +202,7 @@ export default {
         return
       }
       this.sessionId = v
+      sessionStorage.setItem('currentSessionId', this.sessionId);
       // 初始化加载
       this.loadEligible()
       this.loadHistory()
@@ -234,12 +312,6 @@ export default {
     },
     handlePrint() {
       window.print()
-    }
-  },
-  mounted() {
-    if (this.validSessionId) {
-      this.loadEligible()
-      this.loadHistory()
     }
   }
 }

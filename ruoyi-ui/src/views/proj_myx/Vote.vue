@@ -6,6 +6,7 @@
 
       <div class="vote-controls">
         <el-input v-model.number="sessionId" placeholder="请输入 Session ID" style="width: 220px;" @keyup.enter.native="loadVotes" />
+        <el-button type="text" icon="el-icon-refresh" @click="checkActiveSession" title="自动获取当前课堂" style="margin-left: 5px; margin-right: 10px;"></el-button>
         <el-button type="primary" @click="loadVotes">加载投票</el-button>
 
         <el-button
@@ -87,12 +88,20 @@
       <el-dialog title="投票统计" :visible.sync="dialogStatsVisible" width="600px">
         <vote-stats :vote-id="currentVoteId" v-if="dialogStatsVisible" />
       </el-dialog>
+
+      <el-dialog title="选择当前课堂" :visible.sync="showSessionSelect" width="400px" append-to-body>
+        <el-table :data="activeSessions" @row-click="selectSession" style="cursor:pointer">
+          <el-table-column property="className" label="课程名称"></el-table-column>
+          <el-table-column property="startTime" label="开始时间" width="100"></el-table-column>
+        </el-table>
+      </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
 import { listVotes, startVote, closeVote, deleteVote } from '@/api/proj_myx/vote'
+import { getActiveSessions } from '@/api/proj_lw/session'
 import CreateVote from './CreateVote'
 import VoteStats from './VoteStats'
 import { parseTime } from '@/utils/ruoyi'
@@ -103,6 +112,8 @@ export default {
   data() {
     return {
       sessionId: null,
+      showSessionSelect: false,
+      activeSessions: [],
       list: [],
       loading: false,
       dialogCreateVisible: false,
@@ -116,7 +127,45 @@ export default {
       return roles && roles.includes('admin')
     }
   },
+  mounted() {
+    this.checkActiveSession();
+  },
+  activated() {
+    this.checkActiveSession();
+  },
   methods: {
+    checkActiveSession() {
+      getActiveSessions().then(res => {
+        const list = res.data || [];
+        if (list.length === 1) {
+          this.sessionId = list[0].sessionId;
+          sessionStorage.setItem('currentSessionId', this.sessionId);
+          this.$message.success(`已自动进入课堂：${list[0].className || '未命名'}`);
+          this.loadVotes();
+        } else if (list.length > 1) {
+          // 多个活跃课堂时必须选择，避免误进“课堂1/缓存课堂”
+          this.sessionId = null;
+          this.list = [];
+          this.currentVoteId = null;
+          this.activeSessions = list;
+          this.showSessionSelect = true;
+        } else {
+          const cachedId = sessionStorage.getItem('currentSessionId');
+          if (cachedId) {
+            this.sessionId = Number(cachedId);
+            this.loadVotes();
+          } else {
+            this.$message.info('当前无正在进行的课程，请输入 Session ID');
+          }
+        }
+      });
+    },
+    selectSession(session) {
+      this.sessionId = session.sessionId;
+      sessionStorage.setItem('currentSessionId', this.sessionId);
+      this.showSessionSelect = false;
+      this.loadVotes();
+    },
     parseTime,
     async loadVotes() {
       if (!this.sessionId) return this.$message.warning('请输入 Session ID');

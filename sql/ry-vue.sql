@@ -1527,6 +1527,10 @@ INSERT INTO `class_login_log` VALUES (220, 'admin', '127.0.0.1', '内网IP', 'Ch
 INSERT INTO `class_login_log` VALUES (221, 'teacher_zhang', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-23 21:59:00');
 INSERT INTO `class_login_log` VALUES (222, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-12-23 22:33:34');
 INSERT INTO `class_login_log` VALUES (223, '2023141460348', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-23 22:33:47');
+INSERT INTO `class_login_log` VALUES (209, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-16 01:19:04');
+INSERT INTO `class_login_log` VALUES (210, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-23 15:30:56');
+INSERT INTO `class_login_log` VALUES (211, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-23 16:40:05');
+INSERT INTO `class_login_log` VALUES (212, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-23 22:03:57');
 
 -- ----------------------------
 -- Table structure for class_material
@@ -2420,6 +2424,7 @@ INSERT INTO `class_oper_log` VALUES (848, '资料上传', 1, 'com.ruoyi.web.cont
 INSERT INTO `class_oper_log` VALUES (849, '资料管理', 1, 'com.ruoyi.web.controller.proj_lw.MaterialController.add()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/material', '127.0.0.1', NULL, '{\"createBy\":\"admin\",\"createTime\":\"2025-12-23 21:29:26\",\"filePath\":\"2025/12/23/实验1 Web服务器配置和http协议分析_1766496566437A831.pdf\",\"fileSize\":975550,\"fileType\":\"pdf\",\"materialId\":14,\"materialName\":\"实验1 Web服务器配置和http协议分析.pdf\",\"pushStatus\":\"0\",\"sessionId\":1}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-12-23 21:29:27');
 INSERT INTO `class_oper_log` VALUES (850, '修改课堂学生人数', 2, 'com.ruoyi.web.controller.proj_lw.TeacherClassController.updateSessionStudents()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/teacher/class/updateStudents', '127.0.0.1', NULL, '1 60', '{\"msg\":\"学生人数修改成功\",\"code\":200}', 0, NULL, '2025-12-23 21:51:32');
 INSERT INTO `class_oper_log` VALUES (851, '修改课堂学生人数', 2, 'com.ruoyi.web.controller.proj_lw.TeacherClassController.updateSessionStudents()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/teacher/class/updateStudents', '127.0.0.1', NULL, '1 50', '{\"msg\":\"学生人数修改成功\",\"code\":200}', 0, NULL, '2025-12-23 21:51:47');
+INSERT INTO `class_oper_log` VALUES (848, '签到任务管理', 1, 'com.ruoyi.web.controller.proj_myx.AttendanceController.createTask()', 'POST', 1, '系统用户', '系统部门', '/proj_myx/attendance/task/create', '127.0.0.1', NULL, '{\"centerLat\":30.551132,\"centerLng\":103.977266,\"createBy\":\"admin\",\"endTime\":\"2025-12-23 17:05:27.105\",\"qrCode\":\"{\\\"type\\\":\\\"QA\\\",\\\"q\\\":\\\"现任美国总统是谁？\\\",\\\"o\\\":[\\\"特朗普\\\",\\\"马斯克\\\",\\\"马云\\\",\\\"马化腾\\\"],\\\"a\\\":2}\",\"radius\":9999999,\"sessionId\":1,\"startTime\":\"2025-12-23 16:50:27.105\",\"status\":1,\"taskId\":45,\"title\":\"1\",\"type\":\"location\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"centerLat\":30.551132,\"centerLng\":103.977266,\"createBy\":\"admin\",\"createTime\":\"2025-12-23 16:52:21\",\"endTime\":\"2025-12-23 17:05:27\",\"qrCode\":\"{\\\"type\\\":\\\"QA\\\",\\\"q\\\":\\\"现任美国总统是谁？\\\",\\\"o\\\":[\\\"特朗普\\\",\\\"马斯克\\\",\\\"马云\\\",\\\"马化腾\\\"],\\\"a\\\":2}\",\"radius\":9999999,\"sessionId\":1,\"startTime\":\"2025-12-23 16:50:27\",\"status\":1,\"taskId\":45,\"title\":\"1\",\"type\":\"location\"}}', 0, NULL, '2025-12-23 16:52:22');
 
 -- ----------------------------
 -- Table structure for class_password_reset
@@ -2517,24 +2522,60 @@ CREATE TABLE `class_session`  (
   `course_id` bigint NULL DEFAULT NULL,
   `week_day` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '星期几（1-7）',
   `class_duration` int NULL DEFAULT 45 COMMENT '每堂课时长（分钟）',
-  `start_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '上课时间（HH:mm）',
-  `end_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '下课时间（HH:mm）',
+  `start_time` datetime NULL DEFAULT NULL COMMENT '开始时间',
+  `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
   PRIMARY KEY (`session_id`) USING BTREE,
   INDEX `fk_session_course`(`course_id` ASC) USING BTREE,
   CONSTRAINT `fk_session_course` FOREIGN KEY (`course_id`) REFERENCES `class_course` (`course_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_session
 -- ----------------------------
-INSERT INTO `class_session` VALUES (1, '研究与开发实践01', 1, 1, 50, 'teacher_zhang', 1, '', NULL, 'teacher_zhang', '2025-12-23 21:51:47', 1, '1', 45, '20:50', '20:50');
-INSERT INTO `class_session` VALUES (3, '计算机金融应用', 3, 0, 30, 'teacher_zhang', 3, '', NULL, 'admin', '2025-10-31 21:49:01', 3, '1', 45, '20:57', '20:57');
-INSERT INTO `class_session` VALUES (4, '研究与开发实践02', 2, 2, 42, 'B', 1, 'admin', '2025-10-31 21:55:44', 'admin', '2025-10-31 21:56:17', 1, '1', 45, '21:55', '21:55');
-INSERT INTO `class_session` VALUES (7, '研究与开发实践', 1, 0, 33, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-12-03 18:00:20', 1, '1', 45, '12:00', '22:00');
-INSERT INTO `class_session` VALUES (8, '数据库01', 1, 0, 30, '111', 2, 'admin', '2025-11-04 20:22:11', '', NULL, 5, '1', 45, '00:00', '20:22');
-INSERT INTO `class_session` VALUES (9, '金融01', 1, 1, 37, '1', 3, 'admin', '2025-11-04 20:41:53', '', NULL, 6, '4', 60, '20:37', '20:57');
-INSERT INTO `class_session` VALUES (10, '12111', 1, 0, 30, '121', NULL, 'admin', '2025-11-04 21:09:42', '', NULL, 7, '1', 45, '21:08', '21:11');
-INSERT INTO `class_session` VALUES (11, '123123', 1, 0, 30, '111', NULL, 'admin', '2025-11-04 22:22:22', '', NULL, 8, '3', 50, '22:22', '22:28');
+INSERT INTO `class_session` VALUES (1, '研究与开发实践01', 1, 1, 50, 'teacher_zhang', 1, '', NULL, '', NULL, 1, '1', 45, '2025-12-17 17:23:57', '2025-12-28 17:23:59');
+INSERT INTO `class_session` VALUES (3, '计算机金融应用', 3, 1, 30, 'teacher_zhang', 3, '', NULL, 'admin', '2025-10-31 21:49:01', 3, '1', 45, '2025-12-18 17:26:24', '2025-12-24 17:26:27');
+INSERT INTO `class_session` VALUES (4, '研究与开发实践02', 1, 2, 42, 'B', 1, 'admin', '2025-10-31 21:55:44', 'admin', '2025-10-31 21:56:17', 1, '1', 45, '2025-12-17 17:34:08', '2025-12-25 17:34:12');
+INSERT INTO `class_session` VALUES (7, '研究与开发实践', 1, 0, 33, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-12-03 18:00:20', 1, '1', 45, NULL, NULL);
+INSERT INTO `class_session` VALUES (8, '数据库01', 1, 0, 30, '111', 2, 'admin', '2025-11-04 20:22:11', '', NULL, 5, '1', 45, NULL, NULL);
+INSERT INTO `class_session` VALUES (9, '金融01', 1, 1, 37, '1', 3, 'admin', '2025-11-04 20:41:53', '', NULL, 6, '4', 60, NULL, NULL);
+INSERT INTO `class_session` VALUES (10, '12111', 1, 0, 30, '121', NULL, 'admin', '2025-11-04 21:09:42', '', NULL, 7, '1', 45, NULL, NULL);
+INSERT INTO `class_session` VALUES (11, '123123', 1, 0, 30, '111', NULL, 'admin', '2025-11-04 22:22:22', '', NULL, 8, '3', 50, NULL, NULL);
+INSERT INTO `class_session` VALUES (15, '测试', 1, 0, NULL, NULL, NULL, '', NULL, '', NULL, NULL, NULL, 45, '2025-12-23 22:07:34', '2025-12-24 23:07:36');
+
+-- ----------------------------
+-- Table structure for class_session_backup
+-- ----------------------------
+DROP TABLE IF EXISTS `class_session_backup`;
+CREATE TABLE `class_session_backup`  (
+  `session_id` bigint NOT NULL DEFAULT 0,
+  `class_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `teacher_id` bigint NOT NULL,
+  `status` tinyint NULL DEFAULT 0 COMMENT '0未开始 1进行中 2已结束',
+  `total_students` int NULL DEFAULT NULL COMMENT '总人数',
+  `teacher` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `class_number` int NULL DEFAULT NULL,
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `course_id` bigint NULL DEFAULT NULL,
+  `week_day` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '星期几（1-7）',
+  `class_duration` int NULL DEFAULT 45 COMMENT '每堂课时长（分钟）',
+  `start_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '上课时间（HH:mm）',
+  `end_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '下课时间（HH:mm）'
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of class_session_backup
+-- ----------------------------
+INSERT INTO `class_session_backup` VALUES (1, '研究与开发实践01', 1, 1, 50, 'teacher_zhang', 1, '', NULL, '', NULL, 1, '1', 45, '20:50', '20:50');
+INSERT INTO `class_session_backup` VALUES (3, '计算机金融应用', 3, 0, 30, 'teacher_zhang', 3, '', NULL, 'admin', '2025-10-31 21:49:01', 3, '1', 45, '20:57', '20:57');
+INSERT INTO `class_session_backup` VALUES (4, '研究与开发实践02', 2, 2, 42, 'B', 1, 'admin', '2025-10-31 21:55:44', 'admin', '2025-10-31 21:56:17', 1, '1', 45, '21:55', '21:55');
+INSERT INTO `class_session_backup` VALUES (7, '研究与开发实践', 1, 0, 33, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-12-03 18:00:20', 1, '1', 45, '12:00', '22:00');
+INSERT INTO `class_session_backup` VALUES (8, '数据库01', 1, 0, 30, '111', 2, 'admin', '2025-11-04 20:22:11', '', NULL, 5, '1', 45, '00:00', '20:22');
+INSERT INTO `class_session_backup` VALUES (9, '金融01', 1, 1, 37, '1', 3, 'admin', '2025-11-04 20:41:53', '', NULL, 6, '4', 60, '20:37', '20:57');
+INSERT INTO `class_session_backup` VALUES (10, '12111', 1, 0, 30, '121', NULL, 'admin', '2025-11-04 21:09:42', '', NULL, 7, '1', 45, '21:08', '21:11');
+INSERT INTO `class_session_backup` VALUES (11, '123123', 1, 0, 30, '111', NULL, 'admin', '2025-11-04 22:22:22', '', NULL, 8, '3', 50, '22:22', '22:28');
 
 -- ----------------------------
 -- Table structure for class_session_student
@@ -4000,6 +4041,10 @@ INSERT INTO `sys_logininfor` VALUES (581, 'admin', '127.0.0.1', '内网IP', 'Chr
 INSERT INTO `sys_logininfor` VALUES (582, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-23 21:59:00');
 INSERT INTO `sys_logininfor` VALUES (583, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-12-23 22:33:34');
 INSERT INTO `sys_logininfor` VALUES (584, '2023141460348', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-23 22:33:46');
+INSERT INTO `sys_logininfor` VALUES (570, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-16 01:19:04');
+INSERT INTO `sys_logininfor` VALUES (571, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-23 15:30:55');
+INSERT INTO `sys_logininfor` VALUES (572, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-23 16:40:05');
+INSERT INTO `sys_logininfor` VALUES (573, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-23 22:03:57');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -5321,10 +5366,6 @@ INSERT INTO `sys_oper_log` VALUES (1127, '课程管理', 2, 'com.ruoyi.web.contr
 INSERT INTO `sys_oper_log` VALUES (1128, '课程管理', 2, 'com.ruoyi.web.controller.proj_lw.CourseController.edit()', 'PUT', 1, 'admin', '研发部门', '/proj_lw/course', '127.0.0.1', '内网IP', '{\"courseCode\":\"333\",\"courseId\":10,\"courseName\":\"222\",\"courseType\":\"必修\",\"createBy\":\"admin\",\"createTime\":\"2025-12-03 15:08:41\",\"credit\":1.0,\"introduction\":\"aaa1111111\",\"params\":{},\"status\":\"0\",\"updateBy\":\"admin\",\"updateTime\":\"2025-12-03 15:08:52\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-12-03 15:27:31', 14);
 INSERT INTO `sys_oper_log` VALUES (1129, '课程管理', 1, 'com.ruoyi.web.controller.proj_lw.CourseController.add()', 'POST', 1, 'admin', '研发部门', '/proj_lw/course', '127.0.0.1', '内网IP', '{\"courseCode\":\"124\",\"courseId\":11,\"courseName\":\"叫什么\",\"courseType\":\"2\",\"createBy\":\"admin\",\"credit\":0.0,\"introduction\":\"1\",\"params\":{},\"status\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-12-03 15:27:46', 4);
 INSERT INTO `sys_oper_log` VALUES (1130, '课程管理', 2, 'com.ruoyi.web.controller.proj_lw.CourseController.edit()', 'PUT', 1, 'teacher_zhang', NULL, '/proj_lw/course', '127.0.0.1', '内网IP', '{\"courseCode\":\"124\",\"courseId\":11,\"courseName\":\"叫什么\",\"courseType\":\"2\",\"createBy\":\"admin\",\"createTime\":\"2025-12-03 15:27:46\",\"credit\":0.0,\"introduction\":\"111\",\"params\":{},\"status\":\"0\",\"updateBy\":\"teacher_zhang\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-12-03 15:28:25', 4);
-INSERT INTO `sys_oper_log` VALUES (1131, '菜单管理', 1, 'com.ruoyi.web.controller.system.SysMenuController.add()', 'POST', 1, 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createBy\":\"admin\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuName\":\"课程打印\",\"menuType\":\"F\",\"orderNum\":6,\"params\":{},\"parentId\":2007,\"perms\":\"projlw:course:list\",\"status\":\"0\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-12-23 21:56:56', 15);
-INSERT INTO `sys_oper_log` VALUES (1132, '角色管理', 2, 'com.ruoyi.web.controller.system.SysRoleController.edit()', 'PUT', 1, 'admin', '研发部门', '/system/role', '127.0.0.1', '内网IP', '{\"admin\":false,\"createTime\":\"2025-11-12 01:28:13\",\"dataScope\":\"1\",\"delFlag\":\"0\",\"deptCheckStrictly\":true,\"flag\":false,\"menuCheckStrictly\":true,\"menuIds\":[2006,2000,2038,2014,2025,2004,2005,2095,2096,2097,2098,2099,2100,2101,2018,2102,2103,2104,2105,2106,2107,2108,2109,2110,2111,2019,2112,2113,2114,2115,2116,2117,2118,2007,2068,2069,2070,2071,2092,2119,2008,2072,2073,2074,2075,2051,2076,2077,2078,2079,2080,2052,2054,2055,2011,2012,2032,2033,2034,2035,2036,2037,2013,2022,2044,2045,2047,2002,2064,2065,2066,2067,2023,2024,2039,2081,2082,2083,2084,2085,2086,2087,2088,2089,2090,2091,2056,2093,2094,2057,2009,2010,2042,2043,2046,2063,2015,2016,2017,2026,2031,2058,2059,2060,2061,2062,1,102,1012,1013,1014,1015,103,1016,1017,1018,1019,104,1020,1021,1022,1023,1024,105,1025,1026,1027,1028,1029,106,1030,1031,1032,1033,1034,107,1035,1036,1037,1038,108,500,1039,1040,1041,501,1042,1043,1044,1045],\"params\":{},\"roleId\":100,\"roleKey\":\"teacher\",\"roleName\":\"teacher\",\"roleSort\":3,\"status\":\"0\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-12-23 21:57:37', 32);
-INSERT INTO `sys_oper_log` VALUES (1133, '菜单管理', 2, 'com.ruoyi.web.controller.system.SysMenuController.edit()', 'PUT', 1, 'admin', '研发部门', '/system/menu', '127.0.0.1', '内网IP', '{\"children\":[],\"createTime\":\"2025-12-23 21:56:56\",\"icon\":\"#\",\"isCache\":\"0\",\"isFrame\":\"1\",\"menuId\":2119,\"menuName\":\"课程导出\",\"menuType\":\"F\",\"orderNum\":6,\"params\":{},\"parentId\":2007,\"path\":\"\",\"perms\":\"projlw:course:export\",\"routeName\":\"\",\"status\":\"0\",\"updateBy\":\"admin\",\"visible\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-12-23 21:58:19', 19);
-INSERT INTO `sys_oper_log` VALUES (1134, '角色管理', 2, 'com.ruoyi.web.controller.system.SysRoleController.edit()', 'PUT', 1, 'admin', '研发部门', '/system/role', '127.0.0.1', '内网IP', '{\"admin\":false,\"createTime\":\"2025-11-12 01:28:13\",\"dataScope\":\"1\",\"delFlag\":\"0\",\"deptCheckStrictly\":true,\"flag\":false,\"menuCheckStrictly\":true,\"menuIds\":[2006,2000,2038,2014,2025,2004,2005,2095,2096,2097,2098,2099,2100,2101,2018,2102,2103,2104,2105,2106,2107,2108,2109,2110,2111,2019,2112,2113,2114,2115,2116,2117,2118,2007,2068,2069,2070,2071,2092,2119,2008,2072,2073,2074,2075,2051,2076,2077,2078,2079,2080,2052,2054,2055,2011,2012,2032,2033,2034,2035,2036,2037,2013,2022,2044,2045,2047,2002,2064,2065,2066,2067,2023,2024,2039,2081,2082,2083,2084,2085,2086,2087,2088,2089,2090,2091,2056,2093,2094,2057,2009,2010,2042,2043,2046,2063,2015,2016,2017,2026,2031,2058,2059,2060,2061,2062,1,102,1012,1013,1014,1015,103,1016,1017,1018,1019,104,1020,1021,1022,1023,1024,105,1025,1026,1027,1028,1029,106,1030,1031,1032,1033,1034,107,1035,1036,1037,1038,108,500,1039,1040,1041,501,1042,1043,1044,1045],\"params\":{},\"roleId\":100,\"roleKey\":\"teacher\",\"roleName\":\"teacher\",\"roleSort\":3,\"status\":\"0\",\"updateBy\":\"admin\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-12-23 21:58:43', 18);
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -5852,7 +5893,7 @@ INSERT INTO `sys_user` VALUES (4, 105, 'teacher1', '王老师', '01', 'teacher1@
 INSERT INTO `sys_user` VALUES (5, 103, 'student2', '赵六', '00', 'student2@school.com', '13700137001', '0', 'https://picsum.photos/200/200?random=3', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 09:15:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '学生', NULL);
 INSERT INTO `sys_user` VALUES (100, NULL, 'teacher_zhang', '张老师', '00', 'chenrabbitcyq@163.com', '13800000001', '0', '', '$2a$10$ldKvLfpL/LOTr8YoBPsFOuoEQqqp/fiI1UqnTDZLByjgjK2zINCO2', '0', '0', '127.0.0.1', '2025-12-23 21:59:00', '2025-11-21 23:24:33', 'admin', '2025-11-12 01:32:46', '', '2025-11-21 23:24:33', NULL, NULL);
 INSERT INTO `sys_user` VALUES (101, NULL, 'student_li', '李同学', '00', '', '13800000002', '1', '', '$2a$10$76UxrSPYQSpNnfhy7PcKcukg9nPYHs9Q00ereE6msATSUELIOIybC', '0', '0', '127.0.0.1', '2025-11-26 19:03:20', NULL, 'admin', '2025-11-12 01:33:19', 'admin', '2025-11-12 01:34:13', NULL, NULL);
-INSERT INTO `sys_user` VALUES (102, NULL, '2022141460087', 'myx', '00', '', '', '0', 'http://tmp/kVMt3zC5vK4r52ecd9e1f8b93ece3c8ec4a59a005d22.jpeg', '$2a$10$cFNpukiHcAmX8c8kSIG6RO539tAR385u27QXFdeiqYzCAIkbGCK/e', '0', '0', '127.0.0.1', '2025-12-09 22:52:47', '2025-11-26 19:44:05', '', '2025-11-26 19:44:04', 'admin', '2025-12-10 07:26:09', NULL, 'o1Dbr57QmIdm-NpcU3YFY2ABEOXw');
+INSERT INTO `sys_user` VALUES (102, NULL, '2022141460087', 'myx', '00', '', '', '0', 'http://tmp/kVMt3zC5vK4r52ecd9e1f8b93ece3c8ec4a59a005d22.jpeg', '$2a$10$cFNpukiHcAmX8c8kSIG6RO539tAR385u27QXFdeiqYzCAIkbGCK/e', '0', '0', '127.0.0.1', '2025-12-09 22:52:47', '2025-11-26 19:44:05', '', '2025-11-26 19:44:04', 'admin', '2025-12-10 07:26:09', NULL, NULL);
 INSERT INTO `sys_user` VALUES (103, NULL, '2022141460092', '刘成伟', '00', '', '', '0', '', '$2a$10$Z961iyKUCfMjf0rX4LjVquUFZRv4bgo3xiZ3fn5e81xKvpG.AY3rO', '0', '0', '', NULL, '2025-11-26 19:45:22', '', '2025-11-26 19:45:21', 'admin', '2025-11-26 23:33:47', NULL, NULL);
 INSERT INTO `sys_user` VALUES (104, NULL, '2022141460189', '陈禹岐', '00', '', '', '0', '', '$2a$10$GlnhY38Ldz1Y52Ijn8uQLeKhIQliu6zsw83hD8D9smxu4s4DfsQHS', '0', '0', '', NULL, '2025-11-26 19:46:11', '', '2025-11-26 19:46:10', 'admin', '2025-11-26 23:33:57', NULL, NULL);
 INSERT INTO `sys_user` VALUES (105, NULL, '2022141460306', '王际华', '00', '', '', '0', '', '$2a$10$aQDpnv7.7VDHfm3PXzrcYe7Qe2DtHGzPYQFpvZmc14To0bA80afp6', '0', '0', '', NULL, '2025-11-26 19:46:39', '', '2025-11-26 19:46:39', 'admin', '2025-11-26 23:34:02', NULL, NULL);

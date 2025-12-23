@@ -13,6 +13,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/proj_lw/session")
@@ -20,6 +22,37 @@ public class ClassSessionController extends BaseController {
 
     @Autowired
     private IClassSessionService sessionService;
+
+    /**
+     * 获取当前活跃的课堂（自动获取）
+     */
+    @GetMapping("/current/active")
+    public AjaxResult getActiveSessions() {
+        Long userId = getUserId();
+        ClassSession query = new ClassSession();
+        query.setTeacherId(userId);
+        // 获取该老师的所有课程
+        List<ClassSession> allSessions = sessionService.selectSessionList(query);
+        List<ClassSession> activeList = new ArrayList<>();
+
+        Date now = new Date();
+        long bufferMillis = 15 * 60 * 1000; // 15 minutes buffer
+
+        for (ClassSession session : allSessions) {
+            if (session.getStartTime() != null && session.getEndTime() != null) {
+                long start = session.getStartTime().getTime();
+                long end = session.getEndTime().getTime();
+                long current = now.getTime();
+
+                // Active if: (Start - 15min) <= Now <= (End + 15min)
+                if (current >= (start - bufferMillis) && current <= (end + bufferMillis)) {
+                    activeList.add(session);
+                }
+            }
+        }
+
+        return AjaxResult.success(activeList);
+    }
 
     /**
      * 查询课堂列表
