@@ -28,6 +28,9 @@ public class ClassSessionStudent {
     /** 学号 */
     private String studentNo;
 
+    /** 性别 */
+    private String gender;
+
     /** 课堂名称 */
     private String className;
 
@@ -64,6 +67,9 @@ public class ClassSessionStudent {
 
     public String getStudentNo() { return studentNo; }
     public void setStudentNo(String studentNo) { this.studentNo = studentNo; }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
 
     public String getClassName() { return className; }
     public void setClassName(String className) { this.className = className; }
