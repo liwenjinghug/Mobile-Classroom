@@ -57,3 +57,22 @@ export function batchAuditApplications(applicationIds, status) {
     }
   })
 }
+
+// 新增：修改课堂学生人数API
+export function updateSessionStudents(sessionId, totalStudents) {
+  console.log('API调用: 修改课堂学生人数, sessionId:', sessionId, 'totalStudents:', totalStudents)
+  return request({
+    url: '/proj_lw/teacher/class/updateStudents',
+    method: 'post',
+    params: {
+      sessionId,
+      totalStudents
+    }
+  }).then(response => {
+    console.log('修改学生人数API响应:', response)
+    return response
+  }).catch(error => {
+    console.error('修改学生人数API错误:', error)
+    throw error
+  })
+}
