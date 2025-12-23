@@ -69,6 +69,52 @@ Page({
     })
   },
 
+  handleScanBind() {
+    wx.scanCode({
+      success: (res) => {
+        console.log('Scan result:', res)
+        try {
+          // 尝试解析JSON格式: {"username": "xxx", "password": "xxx"}
+          const result = JSON.parse(res.result)
+          if (result.username && result.password) {
+            this.setData({
+              username: result.username,
+              password: result.password
+            })
+            wx.showToast({
+              title: '扫码成功',
+              icon: 'success'
+            })
+          } else {
+            wx.showToast({
+              title: '二维码缺少信息',
+              icon: 'none'
+            })
+          }
+        } catch (e) {
+          // 如果不是JSON，尝试直接作为学号处理 (假设学校二维码直接是学号)
+          if (res.result && res.result.length > 0) {
+             this.setData({
+               username: res.result
+             })
+             wx.showToast({
+               title: '已填入学号',
+               icon: 'success'
+             })
+          } else {
+             wx.showToast({
+               title: '无法识别二维码',
+               icon: 'none'
+             })
+          }
+        }
+      },
+      fail: (err) => {
+        console.error('Scan failed', err)
+      }
+    })
+  },
+
   handleBind() {
     if (!this.data.username || !this.data.password) {
       wx.showToast({

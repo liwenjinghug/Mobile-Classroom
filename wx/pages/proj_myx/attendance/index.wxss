@@ -353,3 +353,11 @@
   padding: 10rpx 20rpx;
 }
 
+
+/* Question Mode Styles */
+.question-container { width: 90%; background: #fff; padding: 30rpx; border-radius: 20rpx; box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05); }
+.question-text { font-size: 34rpx; font-weight: bold; color: #333; margin-bottom: 30rpx; display: block; text-align: center; }
+.options-list { display: flex; flex-direction: column; gap: 20rpx; }
+.option-btn { width: 100%; background: #f5f7fa; color: #333; font-size: 30rpx; padding: 20rpx; border-radius: 10rpx; border: 1px solid #e4e7ed; text-align: left; }
+.option-btn:active { background: #e6f7ff; border-color: #4facfe; }
+.status-text { display: block; text-align: center; margin-top: 20rpx; color: #13ce66; font-weight: bold; }

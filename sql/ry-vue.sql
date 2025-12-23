@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : ry-vue
+ Source Server         : 01tech
  Source Server Type    : MySQL
  Source Server Version : 80042 (8.0.42)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 14/12/2025 15:41:17
+ Date: 23/12/2025 22:33:37
 */
 
 SET NAMES utf8mb4;
@@ -74,7 +74,7 @@ CREATE TABLE `class_article_like`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `uk_article_user`(`article_id` ASC, `user_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_article_like
@@ -379,7 +379,7 @@ CREATE TABLE `class_attendance_task`  (
   INDEX `idx_task_session`(`session_id` ASC) USING BTREE,
   INDEX `idx_task_status`(`status` ASC) USING BTREE,
   CONSTRAINT `fk_task_session` FOREIGN KEY (`session_id`) REFERENCES `class_session` (`session_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 45 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到任务表（记录签到活动：位置/二维码等）' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 46 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到任务表（记录签到活动：位置/二维码等）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_attendance_task
@@ -407,7 +407,8 @@ INSERT INTO `class_attendance_task` VALUES (32, 1, NULL, 'qr', NULL, NULL, 500, 
 INSERT INTO `class_attendance_task` VALUES (35, 1, NULL, 'qr', NULL, NULL, 500, NULL, '2025-12-08 21:27:35', '2025-12-30 00:00:00', 1, 'teacher_zhang', '2025-12-03 14:21:55');
 INSERT INTO `class_attendance_task` VALUES (40, 3, '位置测试2', 'location', 30.550868, 103.977486, 500, NULL, '2025-12-09 22:10:51', '2025-12-09 22:25:51', 2, 'admin', '2025-12-09 22:15:17');
 INSERT INTO `class_attendance_task` VALUES (43, 3, '期中考试', 'location', 30.554388, 103.987699, 150, NULL, '2025-12-09 22:39:21', '2025-12-09 22:54:21', 2, 'admin', '2025-12-09 22:41:49');
-INSERT INTO `class_attendance_task` VALUES (44, 3, '', 'location', 30.554388, 103.987699, 150, NULL, '2025-12-09 23:21:38', '2025-12-09 23:36:38', 1, 'admin', '2025-12-09 23:21:44');
+INSERT INTO `class_attendance_task` VALUES (44, 3, '', 'location', 30.554388, 103.987699, 150, NULL, '2025-12-09 23:21:38', '2025-12-09 23:36:38', 2, 'admin', '2025-12-09 23:21:44');
+INSERT INTO `class_attendance_task` VALUES (45, 1, '1', 'location', 30.551132, 103.977266, 9999999, '{\"type\":\"QA\",\"q\":\"现任美国总统是谁？\",\"o\":[\"特朗普\",\"马斯克\",\"马云\",\"马化腾\"],\"a\":2}', '2025-12-23 16:50:27', '2025-12-23 17:05:27', 2, 'admin', '2025-12-23 16:52:21');
 
 -- ----------------------------
 -- Table structure for class_course
@@ -460,7 +461,7 @@ CREATE TABLE `class_database_metrics_history`  (
   `monitor_time` datetime NOT NULL COMMENT '监控时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_monitor_time`(`monitor_time` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '数据库监控历史表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '数据库监控历史表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_database_metrics_history
@@ -736,7 +737,7 @@ CREATE TABLE `class_exam_monitor`  (
   INDEX `idx_exam_student`(`exam_id` ASC, `student_id` ASC) USING BTREE,
   INDEX `idx_event_type`(`event_type` ASC) USING BTREE,
   INDEX `idx_event_time`(`event_time` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试监控记录表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试监控记录表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_exam_monitor
@@ -866,7 +867,7 @@ CREATE TABLE `class_exam_session`  (
   UNIQUE INDEX `uk_exam_session`(`exam_id` ASC, `session_id` ASC) USING BTREE,
   INDEX `idx_exam_id`(`exam_id` ASC) USING BTREE,
   INDEX `idx_session_id`(`session_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试与课堂关联表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '考试与课堂关联表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_exam_session
@@ -1299,7 +1300,7 @@ CREATE TABLE `class_login_log`  (
   `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '提示消息',
   `login_time` datetime NULL DEFAULT NULL COMMENT '访问时间',
   PRIMARY KEY (`login_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 209 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 213 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_login_log
@@ -1512,6 +1513,10 @@ INSERT INTO `class_login_log` VALUES (205, '2023141460368', '127.0.0.1', '内网
 INSERT INTO `class_login_log` VALUES (206, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '用户不存在/密码错误', '2025-12-14 15:21:39');
 INSERT INTO `class_login_log` VALUES (207, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 1, '用户不存在/密码错误', '2025-12-14 15:22:18');
 INSERT INTO `class_login_log` VALUES (208, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome', 'Windows 10', 0, '登录成功', '2025-12-14 15:22:29');
+INSERT INTO `class_login_log` VALUES (209, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-16 01:19:04');
+INSERT INTO `class_login_log` VALUES (210, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-23 15:30:56');
+INSERT INTO `class_login_log` VALUES (211, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-23 16:40:05');
+INSERT INTO `class_login_log` VALUES (212, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-23 22:03:57');
 
 -- ----------------------------
 -- Table structure for class_material
@@ -1589,7 +1594,7 @@ CREATE TABLE `class_oper_log`  (
   `error_msg` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '错误消息',
   `oper_time` datetime NULL DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`oper_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 848 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 849 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_oper_log
@@ -2400,6 +2405,7 @@ INSERT INTO `class_oper_log` VALUES (844, '数据库监控', 0, 'com.ruoyi.web.c
 INSERT INTO `class_oper_log` VALUES (845, '监控记录', 0, 'com.ruoyi.web.controller.proj_fz.SystemMonitorController.getStatistics()', 'GET', 1, '系统用户', '系统部门', '/proj_fz/monitor/statistics', '127.0.0.1', NULL, '7', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"trend\":[],\"alertStats\":[],\"unhandledAlertCount\":6,\"typeStats\":[]}}', 0, NULL, '2025-12-14 00:44:18');
 INSERT INTO `class_oper_log` VALUES (846, '服务器监控', 0, 'com.ruoyi.web.controller.proj_fz.SystemMonitorController.getServerMetrics()', 'GET', 1, '系统用户', '系统部门', '/proj_fz/monitor/server/realtime', '127.0.0.1', NULL, '', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"cpuUsage\":16.4,\"diskUsage\":75.27,\"downloadSpeed\":1339.11,\"jvmHeapTotal\":4028.0,\"jvmHeapUsage\":2.47,\"jvmHeapUsed\":99.48,\"memoryUsage\":83.53,\"monitorTime\":\"2025-12-14 00:44:17\",\"threadCount\":169,\"totalDisk\":907.87,\"totalMemory\":15.73,\"uploadSpeed\":278.77,\"usedDisk\":683.31,\"usedMemory\":13.14}}', 0, NULL, '2025-12-14 00:44:19');
 INSERT INTO `class_oper_log` VALUES (847, '作业提交', 1, 'com.ruoyi.web.controller.proj_lwj.ClassHomeworkController.submit()', 'POST', 1, '系统用户', '系统部门', '/proj_lwj/homework/submit', '127.0.0.1', NULL, '{\"createBy\":\"2023141460368\",\"homeworkId\":60,\"params\":{},\"status\":1,\"studentHomeworkId\":44,\"studentId\":38,\"studentNo\":\"2023141460368\",\"submissionFiles\":\"/profile/upload/2025/12/14/屏幕截图 2025-10-08 205303_20251214152929A001.png\",\"submitTime\":\"2025-12-14 15:29:32\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-12-14 15:29:32');
+INSERT INTO `class_oper_log` VALUES (848, '签到任务管理', 1, 'com.ruoyi.web.controller.proj_myx.AttendanceController.createTask()', 'POST', 1, '系统用户', '系统部门', '/proj_myx/attendance/task/create', '127.0.0.1', NULL, '{\"centerLat\":30.551132,\"centerLng\":103.977266,\"createBy\":\"admin\",\"endTime\":\"2025-12-23 17:05:27.105\",\"qrCode\":\"{\\\"type\\\":\\\"QA\\\",\\\"q\\\":\\\"现任美国总统是谁？\\\",\\\"o\\\":[\\\"特朗普\\\",\\\"马斯克\\\",\\\"马云\\\",\\\"马化腾\\\"],\\\"a\\\":2}\",\"radius\":9999999,\"sessionId\":1,\"startTime\":\"2025-12-23 16:50:27.105\",\"status\":1,\"taskId\":45,\"title\":\"1\",\"type\":\"location\"}', '{\"msg\":\"操作成功\",\"code\":200,\"data\":{\"centerLat\":30.551132,\"centerLng\":103.977266,\"createBy\":\"admin\",\"createTime\":\"2025-12-23 16:52:21\",\"endTime\":\"2025-12-23 17:05:27\",\"qrCode\":\"{\\\"type\\\":\\\"QA\\\",\\\"q\\\":\\\"现任美国总统是谁？\\\",\\\"o\\\":[\\\"特朗普\\\",\\\"马斯克\\\",\\\"马云\\\",\\\"马化腾\\\"],\\\"a\\\":2}\",\"radius\":9999999,\"sessionId\":1,\"startTime\":\"2025-12-23 16:50:27\",\"status\":1,\"taskId\":45,\"title\":\"1\",\"type\":\"location\"}}', 0, NULL, '2025-12-23 16:52:22');
 
 -- ----------------------------
 -- Table structure for class_password_reset
@@ -2497,24 +2503,60 @@ CREATE TABLE `class_session`  (
   `course_id` bigint NULL DEFAULT NULL,
   `week_day` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '星期几（1-7）',
   `class_duration` int NULL DEFAULT 45 COMMENT '每堂课时长（分钟）',
-  `start_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '上课时间（HH:mm）',
-  `end_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '下课时间（HH:mm）',
+  `start_time` datetime NULL DEFAULT NULL COMMENT '开始时间',
+  `end_time` datetime NULL DEFAULT NULL COMMENT '结束时间',
   PRIMARY KEY (`session_id`) USING BTREE,
   INDEX `fk_session_course`(`course_id` ASC) USING BTREE,
   CONSTRAINT `fk_session_course` FOREIGN KEY (`course_id`) REFERENCES `class_course` (`course_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_session
 -- ----------------------------
-INSERT INTO `class_session` VALUES (1, '研究与开发实践01', 1, 1, 50, 'teacher_zhang', 1, '', NULL, '', NULL, 1, '1', 45, '20:50', '20:50');
-INSERT INTO `class_session` VALUES (3, '计算机金融应用', 3, 0, 30, 'teacher_zhang', 3, '', NULL, 'admin', '2025-10-31 21:49:01', 3, '1', 45, '20:57', '20:57');
-INSERT INTO `class_session` VALUES (4, '研究与开发实践02', 2, 2, 42, 'B', 1, 'admin', '2025-10-31 21:55:44', 'admin', '2025-10-31 21:56:17', 1, '1', 45, '21:55', '21:55');
-INSERT INTO `class_session` VALUES (7, '研究与开发实践', 1, 0, 33, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-12-03 18:00:20', 1, '1', 45, '12:00', '22:00');
-INSERT INTO `class_session` VALUES (8, '数据库01', 1, 0, 30, '111', 2, 'admin', '2025-11-04 20:22:11', '', NULL, 5, '1', 45, '00:00', '20:22');
-INSERT INTO `class_session` VALUES (9, '金融01', 1, 1, 37, '1', 3, 'admin', '2025-11-04 20:41:53', '', NULL, 6, '4', 60, '20:37', '20:57');
-INSERT INTO `class_session` VALUES (10, '12111', 1, 0, 30, '121', NULL, 'admin', '2025-11-04 21:09:42', '', NULL, 7, '1', 45, '21:08', '21:11');
-INSERT INTO `class_session` VALUES (11, '123123', 1, 0, 30, '111', NULL, 'admin', '2025-11-04 22:22:22', '', NULL, 8, '3', 50, '22:22', '22:28');
+INSERT INTO `class_session` VALUES (1, '研究与开发实践01', 1, 1, 50, 'teacher_zhang', 1, '', NULL, '', NULL, 1, '1', 45, '2025-12-17 17:23:57', '2025-12-28 17:23:59');
+INSERT INTO `class_session` VALUES (3, '计算机金融应用', 3, 1, 30, 'teacher_zhang', 3, '', NULL, 'admin', '2025-10-31 21:49:01', 3, '1', 45, '2025-12-18 17:26:24', '2025-12-24 17:26:27');
+INSERT INTO `class_session` VALUES (4, '研究与开发实践02', 1, 2, 42, 'B', 1, 'admin', '2025-10-31 21:55:44', 'admin', '2025-10-31 21:56:17', 1, '1', 45, '2025-12-17 17:34:08', '2025-12-25 17:34:12');
+INSERT INTO `class_session` VALUES (7, '研究与开发实践', 1, 0, 33, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-12-03 18:00:20', 1, '1', 45, NULL, NULL);
+INSERT INTO `class_session` VALUES (8, '数据库01', 1, 0, 30, '111', 2, 'admin', '2025-11-04 20:22:11', '', NULL, 5, '1', 45, NULL, NULL);
+INSERT INTO `class_session` VALUES (9, '金融01', 1, 1, 37, '1', 3, 'admin', '2025-11-04 20:41:53', '', NULL, 6, '4', 60, NULL, NULL);
+INSERT INTO `class_session` VALUES (10, '12111', 1, 0, 30, '121', NULL, 'admin', '2025-11-04 21:09:42', '', NULL, 7, '1', 45, NULL, NULL);
+INSERT INTO `class_session` VALUES (11, '123123', 1, 0, 30, '111', NULL, 'admin', '2025-11-04 22:22:22', '', NULL, 8, '3', 50, NULL, NULL);
+INSERT INTO `class_session` VALUES (15, '测试', 1, 0, NULL, NULL, NULL, '', NULL, '', NULL, NULL, NULL, 45, '2025-12-23 22:07:34', '2025-12-24 23:07:36');
+
+-- ----------------------------
+-- Table structure for class_session_backup
+-- ----------------------------
+DROP TABLE IF EXISTS `class_session_backup`;
+CREATE TABLE `class_session_backup`  (
+  `session_id` bigint NOT NULL DEFAULT 0,
+  `class_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `teacher_id` bigint NOT NULL,
+  `status` tinyint NULL DEFAULT 0 COMMENT '0未开始 1进行中 2已结束',
+  `total_students` int NULL DEFAULT NULL COMMENT '总人数',
+  `teacher` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `class_number` int NULL DEFAULT NULL,
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  `course_id` bigint NULL DEFAULT NULL,
+  `week_day` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '星期几（1-7）',
+  `class_duration` int NULL DEFAULT 45 COMMENT '每堂课时长（分钟）',
+  `start_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '上课时间（HH:mm）',
+  `end_time` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '下课时间（HH:mm）'
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of class_session_backup
+-- ----------------------------
+INSERT INTO `class_session_backup` VALUES (1, '研究与开发实践01', 1, 1, 50, 'teacher_zhang', 1, '', NULL, '', NULL, 1, '1', 45, '20:50', '20:50');
+INSERT INTO `class_session_backup` VALUES (3, '计算机金融应用', 3, 0, 30, 'teacher_zhang', 3, '', NULL, 'admin', '2025-10-31 21:49:01', 3, '1', 45, '20:57', '20:57');
+INSERT INTO `class_session_backup` VALUES (4, '研究与开发实践02', 2, 2, 42, 'B', 1, 'admin', '2025-10-31 21:55:44', 'admin', '2025-10-31 21:56:17', 1, '1', 45, '21:55', '21:55');
+INSERT INTO `class_session_backup` VALUES (7, '研究与开发实践', 1, 0, 33, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-12-03 18:00:20', 1, '1', 45, '12:00', '22:00');
+INSERT INTO `class_session_backup` VALUES (8, '数据库01', 1, 0, 30, '111', 2, 'admin', '2025-11-04 20:22:11', '', NULL, 5, '1', 45, '00:00', '20:22');
+INSERT INTO `class_session_backup` VALUES (9, '金融01', 1, 1, 37, '1', 3, 'admin', '2025-11-04 20:41:53', '', NULL, 6, '4', 60, '20:37', '20:57');
+INSERT INTO `class_session_backup` VALUES (10, '12111', 1, 0, 30, '121', NULL, 'admin', '2025-11-04 21:09:42', '', NULL, 7, '1', 45, '21:08', '21:11');
+INSERT INTO `class_session_backup` VALUES (11, '123123', 1, 0, 30, '111', NULL, 'admin', '2025-11-04 22:22:22', '', NULL, 8, '3', 50, '22:22', '22:28');
 
 -- ----------------------------
 -- Table structure for class_session_student
@@ -3458,7 +3500,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 570 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 574 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -3933,6 +3975,10 @@ INSERT INTO `sys_logininfor` VALUES (566, '2023141460368', '127.0.0.1', '内网I
 INSERT INTO `sys_logininfor` VALUES (567, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-12-14 15:21:38');
 INSERT INTO `sys_logininfor` VALUES (568, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '用户不存在/密码错误', '2025-12-14 15:22:17');
 INSERT INTO `sys_logininfor` VALUES (569, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-14 15:22:28');
+INSERT INTO `sys_logininfor` VALUES (570, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-16 01:19:04');
+INSERT INTO `sys_logininfor` VALUES (571, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-23 15:30:55');
+INSERT INTO `sys_logininfor` VALUES (572, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-23 16:40:05');
+INSERT INTO `sys_logininfor` VALUES (573, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-23 22:03:57');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -5775,14 +5821,14 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$oXjA8ihohPbuhYzECD3wt.1tZgyHIvx1hUj7e7lcVvbNEpbp.T9O2', '0', '0', '127.0.0.1', '2025-12-12 20:01:38', '2025-11-30 17:57:16', 'admin', '2025-10-30 17:06:55', '', '2025-11-30 17:57:16', '管理员', NULL);
+INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$oXjA8ihohPbuhYzECD3wt.1tZgyHIvx1hUj7e7lcVvbNEpbp.T9O2', '0', '0', '127.0.0.1', '2025-12-23 22:03:57', '2025-11-30 17:57:16', 'admin', '2025-10-30 17:06:55', '', '2025-11-30 17:57:16', '管理员', NULL);
 INSERT INTO `sys_user` VALUES (2, 105, 'ry', '张三', '00', 'ry@qq.com', '15666666666', '1', 'https://img0.baidu.com/it/u=3661017254,2148146033&fm=253&app=138&f=JPEG?w=500&h=500', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-12-08 19:36:35', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '测试员', NULL);
 INSERT INTO `sys_user` VALUES (3, 103, 'student1', '李比', '00', 'student1@school.com', '13800138001', '0', 'https://img0.baidu.com/it/u=2660145230,331641081&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=625', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-23 20:39:34', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '学生', NULL);
 INSERT INTO `sys_user` VALUES (4, 105, 'teacher1', '王老师', '01', 'teacher1@school.com', '13900139001', '1', 'https://picsum.photos/200/200?random=2', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-23 17:23:36', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '教师', NULL);
 INSERT INTO `sys_user` VALUES (5, 103, 'student2', '赵六', '00', 'student2@school.com', '13700137001', '0', 'https://picsum.photos/200/200?random=3', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 09:15:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '学生', NULL);
 INSERT INTO `sys_user` VALUES (100, NULL, 'teacher_zhang', '张老师', '00', 'chenrabbitcyq@163.com', '13800000001', '0', '', '$2a$10$ldKvLfpL/LOTr8YoBPsFOuoEQqqp/fiI1UqnTDZLByjgjK2zINCO2', '0', '0', '127.0.0.1', '2025-12-14 15:22:29', '2025-11-21 23:24:33', 'admin', '2025-11-12 01:32:46', '', '2025-11-21 23:24:33', NULL, NULL);
 INSERT INTO `sys_user` VALUES (101, NULL, 'student_li', '李同学', '00', '', '13800000002', '1', '', '$2a$10$76UxrSPYQSpNnfhy7PcKcukg9nPYHs9Q00ereE6msATSUELIOIybC', '0', '0', '127.0.0.1', '2025-11-26 19:03:20', NULL, 'admin', '2025-11-12 01:33:19', 'admin', '2025-11-12 01:34:13', NULL, NULL);
-INSERT INTO `sys_user` VALUES (102, NULL, '2022141460087', 'myx', '00', '', '', '0', 'http://tmp/kVMt3zC5vK4r52ecd9e1f8b93ece3c8ec4a59a005d22.jpeg', '$2a$10$cFNpukiHcAmX8c8kSIG6RO539tAR385u27QXFdeiqYzCAIkbGCK/e', '0', '0', '127.0.0.1', '2025-12-09 22:52:47', '2025-11-26 19:44:05', '', '2025-11-26 19:44:04', 'admin', '2025-12-10 07:26:09', NULL, 'o1Dbr57QmIdm-NpcU3YFY2ABEOXw');
+INSERT INTO `sys_user` VALUES (102, NULL, '2022141460087', 'myx', '00', '', '', '0', 'http://tmp/kVMt3zC5vK4r52ecd9e1f8b93ece3c8ec4a59a005d22.jpeg', '$2a$10$cFNpukiHcAmX8c8kSIG6RO539tAR385u27QXFdeiqYzCAIkbGCK/e', '0', '0', '127.0.0.1', '2025-12-09 22:52:47', '2025-11-26 19:44:05', '', '2025-11-26 19:44:04', 'admin', '2025-12-10 07:26:09', NULL, NULL);
 INSERT INTO `sys_user` VALUES (103, NULL, '2022141460092', '刘成伟', '00', '', '', '0', '', '$2a$10$Z961iyKUCfMjf0rX4LjVquUFZRv4bgo3xiZ3fn5e81xKvpG.AY3rO', '0', '0', '', NULL, '2025-11-26 19:45:22', '', '2025-11-26 19:45:21', 'admin', '2025-11-26 23:33:47', NULL, NULL);
 INSERT INTO `sys_user` VALUES (104, NULL, '2022141460189', '陈禹岐', '00', '', '', '0', '', '$2a$10$GlnhY38Ldz1Y52Ijn8uQLeKhIQliu6zsw83hD8D9smxu4s4DfsQHS', '0', '0', '', NULL, '2025-11-26 19:46:11', '', '2025-11-26 19:46:10', 'admin', '2025-11-26 23:33:57', NULL, NULL);
 INSERT INTO `sys_user` VALUES (105, NULL, '2022141460306', '王际华', '00', '', '', '0', '', '$2a$10$aQDpnv7.7VDHfm3PXzrcYe7Qe2DtHGzPYQFpvZmc14To0bA80afp6', '0', '0', '', NULL, '2025-11-26 19:46:39', '', '2025-11-26 19:46:39', 'admin', '2025-11-26 23:34:02', NULL, NULL);

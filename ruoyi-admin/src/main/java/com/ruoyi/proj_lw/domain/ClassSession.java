@@ -11,11 +11,11 @@ public class ClassSession extends BaseEntity {
     private String className;  // 保留这个字段，用于存储组合后的名称
     private Long teacherId;
 
-    @JsonFormat(pattern = "HH:mm")
-    private String startTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date startTime;
 
-    @JsonFormat(pattern = "HH:mm")
-    private String endTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date endTime;
 
     private String weekDay;
     private Integer classDuration;
@@ -35,11 +35,11 @@ public class ClassSession extends BaseEntity {
     public Long getTeacherId() { return teacherId; }
     public void setTeacherId(Long teacherId) { this.teacherId = teacherId; }
 
-    public String getStartTime() { return startTime; }
-    public void setStartTime(String startTime) { this.startTime = startTime; }
+    public Date getStartTime() { return startTime; }
+    public void setStartTime(Date startTime) { this.startTime = startTime; }
 
-    public String getEndTime() { return endTime; }
-    public void setEndTime(String endTime) { this.endTime = endTime; }
+    public Date getEndTime() { return endTime; }
+    public void setEndTime(Date endTime) { this.endTime = endTime; }
 
     public String getWeekDay() { return weekDay; }
     public void setWeekDay(String weekDay) { this.weekDay = weekDay; }

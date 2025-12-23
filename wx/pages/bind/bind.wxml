@@ -31,5 +31,6 @@
     </view>
 
     <button class="btn-bind" bindtap="handleBind">立即绑定</button>
+    <button class="btn-scan" bindtap="handleScanBind">扫码绑定</button>
   </view>
 </view>
