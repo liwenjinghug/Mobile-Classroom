@@ -203,6 +203,68 @@ public class TeacherClassController extends BaseController {
     }
 
     /**
+     * 修改课堂学生人数
+     */
+    @Log(title = "修改课堂学生人数", businessType = BusinessType.UPDATE)
+    @PostMapping("/updateStudents")
+    public AjaxResult updateSessionStudents(@RequestParam Long sessionId,
+                                            @RequestParam Integer totalStudents) {
+        try {
+            System.out.println("=== 修改课堂学生人数 ===");
+            System.out.println("课堂ID: " + sessionId + ", 新学生人数: " + totalStudents);
+
+            // 参数验证
+            if (sessionId == null || sessionId <= 0) {
+                return AjaxResult.error("课堂ID不能为空");
+            }
+            if (totalStudents == null || totalStudents < 0) {
+                return AjaxResult.error("学生人数不能为负数");
+            }
+            if (totalStudents > 999) {
+                return AjaxResult.error("学生人数不能超过999");
+            }
+
+            // 获取当前教师用户名
+            String currentUsername = SecurityUtils.getUsername();
+
+            // 1. 先查询课堂信息，验证权限
+            ClassSession session = classSessionService.selectSessionById(sessionId);
+            if (session == null) {
+                System.out.println("课堂不存在: " + sessionId);
+                return AjaxResult.error("课堂不存在");
+            }
+
+            // 2. 验证当前教师是否有权限修改这个课堂
+            if (!currentUsername.equals(session.getTeacher())) {
+                System.out.println("无权修改此课堂: " + sessionId + ", 教师: " + session.getTeacher() + ", 当前用户: " + currentUsername);
+                return AjaxResult.error("无权修改此课堂");
+            }
+
+            // 3. 记录修改前的学生人数
+            Integer oldStudents = session.getTotalStudents();
+            System.out.println("修改前学生人数: " + oldStudents + ", 修改后: " + totalStudents);
+
+            // 4. 更新学生人数
+            session.setTotalStudents(totalStudents);
+            session.setUpdateBy(SecurityUtils.getUsername());
+
+            int result = classSessionService.updateSession(session);
+
+            if (result > 0) {
+                System.out.println("学生人数修改成功: " + sessionId);
+                return AjaxResult.success("学生人数修改成功");
+            } else {
+                System.out.println("学生人数修改失败: " + sessionId);
+                return AjaxResult.error("学生人数修改失败");
+            }
+        } catch (Exception e) {
+            System.err.println("修改学生人数失败: " + e.getMessage());
+            e.printStackTrace();
+            return AjaxResult.error("修改失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * 测试接口 - 直接返回数据，不使用分页
      */
     @GetMapping("/test/no-page")

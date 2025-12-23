@@ -11,8 +11,13 @@
         <el-button type="primary" icon="el-icon-plus" @click="handleAddStudent">
           添加学生
         </el-button>
+        <!-- 保持原有的打印按钮不变 -->
         <el-button type="success" icon="el-icon-printer" @click="handlePrint">
           打印学生列表
+        </el-button>
+        <!-- 新增：导出名单按钮 -->
+        <el-button type="info" icon="el-icon-download" @click="handleExport" :loading="exportLoading">
+          导出名单
         </el-button>
         <el-button icon="el-icon-back" @click="handleBack">返回</el-button>
       </div>
@@ -243,7 +248,10 @@ export default {
 
       // 打印相关
       currentTime: new Date().toLocaleString(),
-      userName: '管理员'  // 可以改为从store获取当前用户
+      userName: '管理员',  // 可以改为从store获取当前用户
+
+      // 新增：导出相关状态
+      exportLoading: false
     }
   },
   computed: {
@@ -312,7 +320,7 @@ export default {
       }
     },
 
-    // 打印学生列表
+    // 打印学生列表 - 完全不变
     handlePrint() {
       if (this.studentList.length === 0) {
         this.$message.warning('没有学生数据可打印')
@@ -439,7 +447,97 @@ export default {
       })
     },
 
-    // 打开添加学生对话框
+    // 新增：导出学生名单（TXT格式）
+    async handleExport() {
+      if (this.studentList.length === 0) {
+        this.$message.warning('没有学生数据可导出')
+        return
+      }
+
+      try {
+        this.exportLoading = true
+
+        // 确认导出
+        await this.$confirm('确定要导出学生名单吗？', '确认导出', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        })
+
+        // 生成TXT文件
+        this.generateTxtFile()
+
+        this.$message.success('导出成功，文件已开始下载')
+
+      } catch (error) {
+        if (error !== 'cancel') {
+          console.error('导出失败:', error)
+          this.$message.error(error.message || '导出失败')
+        }
+      } finally {
+        this.exportLoading = false
+      }
+    },
+
+    // 生成TXT文件
+    generateTxtFile() {
+      // 构建TXT文件内容
+      let txtContent = ''
+
+      // 添加标题
+      txtContent += '='.repeat(50) + '\n'
+      txtContent += `课堂名称：${this.classInfo.className}\n`
+      txtContent += `课堂ID：${this.classInfo.sessionId}\n`
+      txtContent += `教师：${this.classInfo.teacher}\n`
+      txtContent += `导出时间：${new Date().toLocaleString()}\n`
+      txtContent += `学生总数：${this.studentList.length}人\n`
+      txtContent += '='.repeat(50) + '\n\n'
+
+      // 添加表头
+      txtContent += '序号\t学号\t姓名\t性别\t状态\t加入时间\n'
+      txtContent += '-'.repeat(60) + '\n'
+
+      // 添加学生数据
+      this.studentList.forEach((student, index) => {
+        const gender = student.gender === 'M' ? '男' : student.gender === 'F' ? '女' : '-'
+        const status = student.status === 1 ? '在读' : '退学'
+        const assignedAt = student.assignedAt ? this.$options.filters.parseTime(student.assignedAt, '{y}-{m}-{d} {h}:{i}') : ''
+
+        txtContent += `${index + 1}\t${student.studentNo || ''}\t${student.studentName || ''}\t${gender}\t${status}\t${assignedAt}\n`
+      })
+
+      // 添加统计信息
+      txtContent += '\n' + '='.repeat(50) + '\n'
+      txtContent += '统计信息：\n'
+      txtContent += `男生人数：${this.studentList.filter(s => s.gender === 'M').length}人\n`
+      txtContent += `女生人数：${this.studentList.filter(s => s.gender === 'F').length}人\n`
+      txtContent += `在读人数：${this.studentList.filter(s => s.status === 1).length}人\n`
+      txtContent += `退学人数：${this.studentList.filter(s => s.status !== 1).length}人\n`
+      txtContent += '='.repeat(50)
+
+      // 创建Blob对象
+      const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' })
+
+      // 创建下载链接
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+
+      // 生成文件名：课堂名称_学生名单_日期.txt
+      const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+      const fileName = `${this.classInfo.className}_学生名单_${dateStr}.txt`
+      link.download = fileName
+
+      // 触发下载
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      // 释放URL对象
+      URL.revokeObjectURL(url)
+    },
+
+    // 打开添加学生对话框 - 完全不变
     handleAddStudent() {
       this.addStudentDialog.visible = true
       this.studentSearch.keyword = ''
@@ -447,7 +545,7 @@ export default {
       this.studentSearch.selected = []
     },
 
-    // 搜索学生（用于添加学生对话框）
+    // 搜索学生（用于添加学生对话框）- 完全不变
     async searchStudents() {
       if (!this.studentSearch.keyword.trim()) {
         this.$message.warning('请输入搜索关键词')
@@ -481,12 +579,12 @@ export default {
       }
     },
 
-    // 表格选择变化
+    // 表格选择变化 - 完全不变
     handleSelectionChange(selection) {
       this.studentSearch.selected = selection
     },
 
-    // 添加学生提交
+    // 添加学生提交 - 完全不变
     async handleAddStudentsSubmit() {
       if (this.studentSearch.selected.length === 0) {
         this.$message.warning('请选择要添加的学生')
@@ -509,7 +607,7 @@ export default {
       }
     },
 
-    // 移除学生
+    // 移除学生 - 完全不变
     async handleRemoveStudent(row) {
       try {
         await this.$confirm(`确定要将学生 "${row.studentName}" 从课堂中移除吗？`, '提示', {
@@ -529,7 +627,7 @@ export default {
       }
     },
 
-    // 返回
+    // 返回 - 完全不变
     handleBack() {
       this.$router.push('/proj_lw/teacher-class')
     }

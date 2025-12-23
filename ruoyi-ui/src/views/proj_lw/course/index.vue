@@ -43,6 +43,13 @@
         @click="handleDelete"
         v-hasPermi="['projlw:course:remove']"
       >删除</el-button>
+      <!-- 添加的打印按钮 -->
+      <el-button
+        type="info"
+        icon="el-icon-printer"
+        @click="handlePrint"
+        v-hasPermi="['projlw:course:list']"
+      >打印</el-button>
       <el-button
         type="warning"
         icon="el-icon-download"
@@ -138,7 +145,7 @@
 </template>
 
 <script>
-import { listCourse, getCourse, delCourse, addCourse, updateCourse, exportCourse } from "@/api/proj_lw/course";
+import { listCourse, getCourse, delCourse, addCourse, updateCourse, exportCourse, printCourse } from "@/api/proj_lw/course";
 
 export default {
   name: "Course",
@@ -175,16 +182,16 @@ export default {
       // 表单校验
       rules: {
         courseName: [
-          { required: true, message: "课程名称不能为空", trigger: "blur" }
+          {required: true, message: "课程名称不能为空", trigger: "blur"}
         ],
         courseCode: [
-          { required: true, message: "课程编号不能为空", trigger: "blur" }
+          {required: true, message: "课程编号不能为空", trigger: "blur"}
         ],
         introduction: [
-          { required: true, message: "课程简介不能为空", trigger: "blur" }
+          {required: true, message: "课程简介不能为空", trigger: "blur"}
         ],
         status: [
-          { required: true, message: "状态不能为空", trigger: "change" }
+          {required: true, message: "状态不能为空", trigger: "change"}
         ]
       }
     };
@@ -234,7 +241,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.courseId)
-      this.single = selection.length!==1
+      this.single = selection.length !== 1
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
@@ -255,7 +262,6 @@ export default {
     },
     /** 课堂详情按钮操作 */
     handleSession(row) {
-      // 修改这里：传递courseId而不是classNumber
       this.$router.push({
         path: '/proj_lw/session',
         query: {
@@ -272,7 +278,8 @@ export default {
         type: "warning"
       }).then(() => {
         this.exportCSV();
-      }).catch(() => {});
+      }).catch(() => {
+      });
     },
 
     /** CSV导出方法 */
@@ -368,12 +375,225 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const courseIds = row.courseId || this.ids;
-      this.$modal.confirm('是否确认删除课程ID为"' + courseIds + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除课程ID为"' + courseIds + '"的数据项？').then(function () {
         return delCourse(courseIds);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => {
+      });
+    },
+
+    /** 新添加的打印按钮操作 */
+    handlePrint() {
+      this.$confirm('是否打印当前查询条件下的课程列表?', "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "info"
+      }).then(() => {
+        this.loading = true;
+        // 获取所有数据用于打印（不分页）
+        const printParams = {
+          ...this.queryParams,
+          pageSize: 1000,
+          pageNum: 1
+        };
+        delete printParams.pageSize;
+        delete printParams.pageNum;
+
+        listCourse(printParams).then(response => {
+          this.loading = false;
+          this.openPrintWindow(response.rows);
+        }).catch(error => {
+          this.loading = false;
+          this.$modal.msgError("获取打印数据失败: " + error.message);
+        });
+      }).catch(() => {
+      });
+    },
+
+    /** 新添加的：打开打印窗口并渲染数据 */
+    openPrintWindow(data) {
+      if (!data || data.length === 0) {
+        this.$modal.msgWarning("没有数据可以打印");
+        return;
+      }
+
+      // 创建打印页面HTML
+      const printHtml = this.generatePrintHtml(data);
+
+      // 打开新窗口
+      const printWindow = window.open('', '_blank', 'width=1000,height=700');
+
+      // 写入HTML内容
+      printWindow.document.write(printHtml);
+      printWindow.document.close();
+    },
+
+    /** 新添加的：生成打印页面HTML */
+    generatePrintHtml(data) {
+      const now = new Date();
+      const timeStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+
+      let tableRows = '';
+      data.forEach((item, index) => {
+        tableRows += `
+          <tr>
+            <td style="text-align:center">${index + 1}</td>
+            <td style="text-align:center">${item.courseId || ''}</td>
+            <td>${item.courseName || ''}</td>
+            <td>${item.courseCode || ''}</td>
+            <td>${item.courseType || ''}</td>
+            <td>${item.college || ''}</td>
+            <td style="text-align:center">${item.credit || '0'}</td>
+            <td>${(item.introduction || '').substring(0, 30)}${(item.introduction || '').length > 30 ? '...' : ''}</td>
+            <td style="text-align:center">${item.status === '0' ? '正常' : '停授'}</td>
+          </tr>
+        `;
+      });
+
+      return `
+        <!DOCTYPE html>
+        <html lang="zh-CN">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>课程列表打印</title>
+          <style>
+            @media print {
+              body {
+                font-family: "Microsoft YaHei", "SimSun", sans-serif;
+                font-size: 12pt;
+                margin: 0;
+                padding: 10px;
+              }
+              .print-header {
+                text-align: center;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid #000;
+              }
+              .print-header h1 {
+                margin: 0 0 10px 0;
+                font-size: 24px;
+              }
+              .print-info {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 15px;
+                font-size: 14px;
+              }
+              .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+              }
+              .print-table th {
+                background-color: #f5f5f5;
+                border: 1px solid #333;
+                padding: 8px 10px;
+                font-weight: bold;
+                text-align: center;
+              }
+              .print-table td {
+                border: 1px solid #333;
+                padding: 6px 10px;
+                page-break-inside: avoid;
+              }
+              .print-footer {
+                margin-top: 30px;
+                padding-top: 10px;
+                border-top: 1px solid #333;
+                font-size: 12px;
+                text-align: right;
+              }
+              .no-print {
+                display: none !important;
+              }
+            }
+
+            @media screen {
+              body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background: #f0f0f0;
+              }
+              .print-container {
+                background: white;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                max-width: 1000px;
+                margin: 0 auto;
+              }
+              .print-controls {
+                text-align: center;
+                margin: 20px 0;
+                padding: 15px;
+                background: #e9e9e9;
+                border-radius: 5px;
+              }
+              .btn {
+                padding: 10px 20px;
+                margin: 0 10px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+              }
+              .btn-primary {
+                background-color: #409EFF;
+                color: white;
+              }
+              .btn-secondary {
+                background-color: #909399;
+                color: white;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-container">
+            <div class="print-controls no-print">
+              <h3>课程列表打印预览</h3>
+              <button class="btn btn-primary" onclick="window.print()">打印</button>
+              <button class="btn btn-secondary" onclick="window.close()">关闭</button>
+            </div>
+
+            <div class="print-header">
+              <h1>课程列表</h1>
+              <div class="print-info">
+                <span>打印时间：${timeStr}</span>
+                <span>总记录数：${data.length} 条</span>
+              </div>
+            </div>
+
+            <table class="print-table">
+              <thead>
+                <tr>
+                  <th width="60">序号</th>
+                  <th>课程ID</th>
+                  <th>课程名称</th>
+                  <th>课程编号</th>
+                  <th>课程类型</th>
+                  <th>所属学院</th>
+                  <th width="60">学分</th>
+                  <th>课程简介</th>
+                  <th width="80">状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tableRows}
+              </tbody>
+            </table>
+
+            <div class="print-footer">
+              <div>第 1 页</div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
     }
   }
 };
