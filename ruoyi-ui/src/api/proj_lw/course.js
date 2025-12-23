@@ -46,3 +46,12 @@ export function exportCourse(query) {
     params: query
   })
 }
+
+// 打印函数（与listCourse相同，但这里保留接口一致性）
+export function printCourse(query) {
+  return request({
+    url: '/proj_lw/course/list',
+    method: 'get',
+    params: query
+  })
+}
