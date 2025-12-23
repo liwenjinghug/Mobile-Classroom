@@ -20,13 +20,17 @@
             </template>
           </el-table-column>
           <el-table-column label="学生人数" prop="totalStudents" align="center" width="100" />
-          <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
+          <el-table-column label="操作" align="center" width="280" class-name="small-padding fixed-width">
             <template slot-scope="{row}">
               <el-button type="primary" size="mini" @click="handleManageClass(row)">
                 管理
               </el-button>
               <el-button type="warning" size="mini" @click="handleViewApplications(row)">
                 审核申请
+              </el-button>
+              <!-- 新增：修改学生人数按钮 -->
+              <el-button type="success" size="mini" @click="handleUpdateStudents(row)">
+                修改人数
               </el-button>
             </template>
           </el-table-column>
@@ -133,11 +137,55 @@
         <el-button type="primary" :loading="auditDialog.loading" @click="handleAuditSubmit">确定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 新增：修改学生人数对话框 -->
+    <el-dialog
+      :title="updateStudentsDialog.title"
+      :visible.sync="updateStudentsDialog.visible"
+      width="400px"
+      @close="handleUpdateStudentsClose"
+    >
+      <el-form
+        ref="updateStudentsForm"
+        :model="updateStudentsDialog.form"
+        :rules="updateStudentsDialog.rules"
+        label-width="100px"
+      >
+        <el-form-item label="课堂名称">
+          <el-input v-model="updateStudentsDialog.form.className" :disabled="true" />
+        </el-form-item>
+        <el-form-item label="当前人数">
+          <el-input v-model="updateStudentsDialog.form.currentStudents" :disabled="true" />
+        </el-form-item>
+        <el-form-item label="新人数" prop="totalStudents" required>
+          <el-input-number
+            v-model="updateStudentsDialog.form.totalStudents"
+            :min="0"
+            :max="999"
+            controls-position="right"
+            style="width: 100%;"
+            placeholder="请输入新的人数"
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="updateStudentsDialog.visible = false">取消</el-button>
+        <el-button
+          type="primary"
+          :loading="updateStudentsDialog.loading"
+          @click="handleUpdateStudentsSubmit"
+        >
+          确定
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { getMyTeachingClasses, getPendingApplications, auditApplication, batchAuditApplications } from '@/api/proj_lw/teacher-class'
+// 新增API导入
+import { updateSessionStudents } from '@/api/proj_lw/teacher-class'
 import Pagination from '@/components/Pagination'
 
 export default {
@@ -183,6 +231,19 @@ export default {
     }
   },
   data() {
+    // 自定义验证规则：学生人数不能为负数
+    const validateStudents = (rule, value, callback) => {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('请输入学生人数'))
+      } else if (value < 0) {
+        callback(new Error('学生人数不能小于0'))
+      } else if (value > 999) {
+        callback(new Error('学生人数不能超过999'))
+      } else {
+        callback()
+      }
+    }
+
     return {
       activeTab: 'teaching',
 
@@ -217,6 +278,25 @@ export default {
           status: '1',
           remark: ''
         }
+      },
+
+      // 新增：修改学生人数对话框
+      updateStudentsDialog: {
+        visible: false,
+        loading: false,
+        title: '修改学生人数',
+        form: {
+          sessionId: null,
+          className: '',
+          currentStudents: '',
+          totalStudents: null
+        },
+        rules: {
+          totalStudents: [
+            { required: true, message: '请输入学生人数', trigger: 'blur' },
+            { validator: validateStudents, trigger: 'blur' }
+          ]
+        }
       }
     }
   },
@@ -224,7 +304,7 @@ export default {
     this.getTeachingList()
   },
   methods: {
-// 我管理的课堂
+    // 我管理的课堂
     async getTeachingList() {
       this.teachingLoading = true
       try {
@@ -269,7 +349,7 @@ export default {
       }
     },
 
-// 待审核申请
+    // 待审核申请
     async getPendingList() {
       this.pendingLoading = true
       try {
@@ -444,6 +524,70 @@ export default {
       } else if (tab.name === 'teaching') {
         this.getTeachingList()
       }
+    },
+
+    // ============ 新增：修改学生人数相关方法 ============
+
+    // 点击修改学生人数按钮
+    handleUpdateStudents(row) {
+      console.log('修改学生人数:', row)
+
+      this.updateStudentsDialog.form = {
+        sessionId: row.sessionId,
+        className: row.className,
+        currentStudents: row.totalStudents || 0,
+        totalStudents: row.totalStudents || 0
+      }
+
+      this.updateStudentsDialog.title = `修改学生人数 - ${row.className}`
+      this.updateStudentsDialog.visible = true
+    },
+
+    // 关闭修改学生人数对话框
+    handleUpdateStudentsClose() {
+      this.$refs.updateStudentsForm.clearValidate()
+      this.updateStudentsDialog.form = {
+        sessionId: null,
+        className: '',
+        currentStudents: '',
+        totalStudents: null
+      }
+    },
+
+    // 提交修改学生人数
+    async handleUpdateStudentsSubmit() {
+      this.$refs.updateStudentsForm.validate(async (valid) => {
+        if (!valid) {
+          return
+        }
+
+        this.updateStudentsDialog.loading = true
+        try {
+          const form = this.updateStudentsDialog.form
+
+          // 如果人数没有变化，直接关闭
+          if (form.totalStudents == form.currentStudents) {
+            this.$message.info('学生人数没有变化')
+            this.updateStudentsDialog.visible = false
+            return
+          }
+
+          console.log('提交修改学生人数:', form)
+
+          await updateSessionStudents(form.sessionId, form.totalStudents)
+
+          this.$message.success('学生人数修改成功')
+          this.updateStudentsDialog.visible = false
+
+          // 刷新课堂列表
+          this.getTeachingList()
+        } catch (error) {
+          console.error('修改学生人数失败:', error)
+          this.$message.error(error.message || '修改失败')
+        } finally {
+          this.updateStudentsDialog.loading = false
+        }
+      })
     }
   }
 }
