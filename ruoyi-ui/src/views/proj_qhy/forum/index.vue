@@ -1,13 +1,56 @@
 <template>
   <div class="forum-container">
-    <div class="top-buttons">
-      <el-button type="primary" @click="showNoticeDialog" icon="el-icon-bell">通知</el-button>
-      <el-button type="success" @click="showPublishDialog" icon="el-icon-edit">发帖</el-button>
-      <el-button type="info" @click="refreshPosts" icon="el-icon-refresh" :loading="refreshLoading">刷新</el-button>
+
+    <!-- 1. 查询栏 (打印时隐藏) -->
+    <el-form :model="queryParams" ref="queryForm" :inline="true" class="search-form no-print">
+      <el-form-item label="发帖人">
+        <el-input
+          v-model="queryParams.nickName"
+          placeholder="请输入发帖人昵称"
+          clearable
+          size="small"
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="帖子内容">
+        <el-input
+          v-model="queryParams.content"
+          placeholder="请输入内容关键词"
+          clearable
+          size="small"
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" size="small" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="small" @click="resetQuery">重置</el-button>
+      </el-form-item>
+    </el-form>
+
+    <!-- 2. 工具栏 (打印时隐藏) -->
+    <div class="toolbar no-print">
+      <!-- 左侧：功能按钮 -->
+      <div class="left-tools">
+        <el-button type="warning" plain icon="el-icon-download" size="small" @click="handleExport">导出</el-button>
+        <el-button type="danger" plain icon="el-icon-printer" size="small" @click="handlePrint">打印</el-button>
+        <el-button type="success" plain icon="el-icon-s-data" size="small" @click="handleStats">统计</el-button>
+      </div>
+      <!-- 右侧：原有操作 -->
+      <div class="right-tools">
+        <el-button type="primary" size="small" @click="showNoticeDialog" icon="el-icon-bell">通知</el-button>
+        <el-button type="success" size="small" @click="showPublishDialog" icon="el-icon-edit">发帖</el-button>
+        <el-button type="info" size="small" @click="refreshPosts" icon="el-icon-refresh" :loading="refreshLoading">刷新</el-button>
+      </div>
     </div>
 
-    <div class="post-list">
-      <div v-for="post in posts" :key="post.postId" class="post-item">
+    <!-- 3. 帖子列表 (显示分页后的数据) -->
+    <div class="post-list no-print" v-loading="loading">
+      <div v-if="filteredPosts.length === 0" class="no-data">
+        <i class="el-icon-search"></i>
+        <p>无匹配结果</p>
+      </div>
+
+      <div v-for="post in pagedPosts" :key="post.postId" class="post-item">
         <div class="post-content">
           <div class="avatar-container">
             <img
@@ -111,6 +154,47 @@
       </div>
     </div>
 
+    <!-- 4. 打印专用表格 (平时隐藏) -->
+    <div class="print-section">
+      <h2 class="print-title">论坛帖子列表</h2>
+      <table class="print-table">
+        <thead>
+        <tr>
+          <th>发帖人</th>
+          <th>内容</th>
+          <th>发布时间</th>
+          <th>点赞数</th>
+          <th>评论数</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="post in filteredPosts" :key="post.postId">
+          <td>{{ post.nickName }}</td>
+          <td>{{ post.content }}</td>
+          <td>{{ formatTime(post.createTime) }}</td>
+          <td>{{ post.likeCount }}</td>
+          <td>{{ post.commentCount }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 5. 分页组件 (打印时隐藏) -->
+    <div class="pagination-wrapper no-print" v-if="filteredPosts.length > 0">
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="pagination.currentPage"
+        :page-sizes="[5, 10, 20, 50]"
+        :page-size="pagination.pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="filteredPosts.length"
+        background
+      >
+      </el-pagination>
+    </div>
+
+    <!-- 弹窗组件保持不变 -->
     <el-dialog
       title="发布帖子"
       :visible.sync="publishDialogVisible"
@@ -255,39 +339,34 @@
       </div>
     </el-dialog>
 
+    <!-- 6. 统计图表弹窗 -->
+    <el-dialog title="发帖趋势统计" :visible.sync="statsVisible" width="800px" append-to-body>
+      <div id="forum-chart" style="width: 100%; height: 400px;"></div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="statsVisible = false">关 闭</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
 import forumApi from '@/api/proj_qhy/forum'
-// 引入 store 获取当前用户信息
 import store from '@/store'
+// 引入 ECharts
+import * as echarts from 'echarts';
 
-// 时间格式化函数 (若您已有全局方法，请替换)
 function formatDate(date, fmt) {
-  // 1. 安全检查：如果date是null或undefined，返回空字符串
-  if (!date) {
-    return ''
-  }
-
-  // 2. 确保date是Date对象
+  if (!date) return ''
   let dateObj
   if (typeof date === 'string') {
-    // 替换'-'为'/'以兼容iOS/Safari
     dateObj = new Date(date.replace(/-/g, '/'))
   } else if (date instanceof Date) {
     dateObj = date
   } else {
-    // 如果是数字时间戳等，也尝试转换
     dateObj = new Date(date)
   }
-
-  // 3. 检查转换结果是否有效
-  if (isNaN(dateObj.getTime())) {
-    return '' // 返回空字符串，而不是 "Invalid Date"
-  }
-
-  // 4. 开始格式化
+  if (isNaN(dateObj.getTime())) return ''
   if (/(y+)/.test(fmt)) {
     fmt = fmt.replace(RegExp.$1, (dateObj.getFullYear() + '').substr(4 - RegExp.$1.length))
   }
@@ -311,161 +390,265 @@ export default {
   name: 'Forum',
   data() {
     return {
-      // 当前登录用户ID
-      //currentUserId: store.getters.userId,
-
-      // 帖子列表
-      posts: [],
-      // 点赞列表缓存
+      loading: false,
+      // 原始所有数据（用于前端筛选和统计）
+      allPosts: [],
+      // 点赞/评论缓存
       likesMap: {},
-      // 评论列表缓存
       commentsMap: {},
-      // 默认头像
       defaultAvatar: require('@/assets/images/profile.jpg'),
 
-      // 发帖弹窗相关
+      // 查询参数
+      queryParams: {
+        nickName: '',
+        content: ''
+      },
+
+      // 分页参数
+      pagination: {
+        currentPage: 1,
+        pageSize: 10
+      },
+
+      // 统计图表
+      statsVisible: false,
+      chartInstance: null,
+
+      // 弹窗状态
       publishDialogVisible: false,
-      publishForm: {
-        content: '',
-        imageFileList: []
-      },
+      publishForm: { content: '', imageFileList: [] },
       publishLoading: false,
-
-      // 新增：修改弹窗相关
       editDialogVisible: false,
-      editForm: {
-        postId: null,
-        content: '',
-        imageFileList: []
-      },
+      editForm: { postId: null, content: '', imageFileList: [] },
       editLoading: false,
-
-      // 评论弹窗相关
       commentDialogVisible: false,
       commentContent: '',
       currentPostId: null,
       currentCommentParentId: null,
       currentReplyToUserId: null,
-
-      // 通知弹窗相关
       noticeDialogVisible: false,
       notices: [],
-
-      // 加载状态
       likeLoading: {},
       refreshLoading: false
+    }
+  },
+  computed: {
+    currentUserId() {
+      return store.getters.userId
+    },
+    // 根据条件筛选后的所有帖子
+    filteredPosts() {
+      let result = this.allPosts;
+      if (this.queryParams.nickName) {
+        result = result.filter(post => post.nickName && post.nickName.includes(this.queryParams.nickName));
+      }
+      if (this.queryParams.content) {
+        result = result.filter(post => post.content && post.content.includes(this.queryParams.content));
+      }
+      return result;
+    },
+    // 当前页显示的帖子
+    pagedPosts() {
+      const start = (this.pagination.currentPage - 1) * this.pagination.pageSize;
+      const end = start + this.pagination.pageSize;
+      return this.filteredPosts.slice(start, end);
     }
   },
   created() {
     this.loadPosts()
   },
-  // --- 新增这个 computed 块 ---
-  computed: {
-    currentUserId() {
-      // 这样写，currentUserId 就会在 store.getters.userId 变化时自动更新
-      return store.getters.userId
-    }
-  },
   methods: {
     // 基础路径处理
     getImageUrl(url) {
       if (!url) return this.defaultAvatar
-      // 若依的头像/profile路径已经是完整的，不需要再加
-      if (url.startsWith('/profile')) {
-        return process.env.VUE_APP_BASE_API + url
-      }
-      // 如果是http/https开头，直接返回
-      if (url.startsWith('http')) {
-        return url
-      }
-      // 兜底（如果用户头像是相对路径）
-      if (url.startsWith('/')) {
-        return process.env.VUE_APP_BASE_API + url
-      }
+      if (url.startsWith('/profile')) return process.env.VUE_APP_BASE_API + url
+      if (url.startsWith('http')) return url
+      if (url.startsWith('/')) return process.env.VUE_APP_BASE_API + url
       return url
     },
 
     // 加载帖子列表
     loadPosts() {
+      this.loading = true;
       forumApi.getPostList().then(response => {
-        this.posts = response.data || []
-        // 自动加载每个帖子的点赞和评论
-        this.posts.forEach(post => {
-          if (post.likeCount > 0) {
-            this.loadLikes(post.postId)
-          }
-          if (post.commentCount > 0) {
-            this.loadComments(post.postId)
-          }
+        this.allPosts = response.data || []
+        // 自动加载交互数据
+        this.allPosts.forEach(post => {
+          if (post.likeCount > 0) this.loadLikes(post.postId)
+          if (post.commentCount > 0) this.loadComments(post.postId)
         })
+        this.loading = false;
       }).catch(error => {
         this.$message.error('加载帖子失败')
+        this.loading = false;
       })
     },
 
-    // 加载点赞列表
+    // --- 查询操作 ---
+    handleQuery() {
+      this.pagination.currentPage = 1; // 搜索时重置到第一页
+    },
+    resetQuery() {
+      this.queryParams.nickName = '';
+      this.queryParams.content = '';
+      this.handleQuery();
+    },
+
+    // --- 分页操作 ---
+    handleSizeChange(val) {
+      this.pagination.pageSize = val;
+      this.pagination.currentPage = 1;
+    },
+    handleCurrentChange(val) {
+      this.pagination.currentPage = val;
+      // 翻页回到顶部
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    // --- 导出功能 ---
+    handleExport() {
+      if (this.filteredPosts.length === 0) {
+        this.$message.warning("暂无数据可导出");
+        return;
+      }
+      this.$confirm('确定导出当前查询到的数据吗？', '导出确认', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // 构建CSV内容
+        // BOM头，防止乱码
+        let csvContent = "\uFEFF";
+        // 表头
+        csvContent += "发帖人,帖子内容,发布时间,点赞数,评论数\n";
+
+        this.filteredPosts.forEach(item => {
+          // 处理内容中的换行和逗号，防止格式错乱
+          let safeContent = (item.content || '').replace(/"/g, '""').replace(/[\r\n]+/g, ' ');
+          let row = [
+            item.nickName,
+            `"${safeContent}"`, // 用引号包裹内容
+            formatDate(item.createTime, 'yyyy-MM-dd HH:mm:ss'),
+            item.likeCount,
+            item.commentCount
+          ];
+          csvContent += row.join(",") + "\n";
+        });
+
+        // 创建下载链接
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `论坛数据_${new Date().getTime()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        this.$message.success("导出成功");
+      });
+    },
+
+    // --- 打印功能 ---
+    handlePrint() {
+      window.print();
+    },
+
+    // --- 统计功能 ---
+    handleStats() {
+      this.statsVisible = true;
+      this.$nextTick(() => {
+        this.initChart();
+      });
+    },
+    initChart() {
+      if (this.chartInstance) {
+        this.chartInstance.dispose();
+      }
+      const chartDom = document.getElementById('forum-chart');
+      this.chartInstance = echarts.init(chartDom);
+
+      // 1. 数据处理：按日期分组统计
+      const dateMap = {};
+      this.allPosts.forEach(post => {
+        if (post.createTime) {
+          const dateStr = formatDate(post.createTime, 'yyyy-MM-dd');
+          if (dateStr) {
+            dateMap[dateStr] = (dateMap[dateStr] || 0) + 1;
+          }
+        }
+      });
+
+      // 2. 排序日期
+      const sortedDates = Object.keys(dateMap).sort();
+      const counts = sortedDates.map(date => dateMap[date]);
+
+      // 3. 配置图表
+      const option = {
+        title: { text: '发帖趋势统计', left: 'center' },
+        tooltip: { trigger: 'axis' },
+        xAxis: {
+          type: 'category',
+          data: sortedDates,
+          name: '日期'
+        },
+        yAxis: {
+          type: 'value',
+          name: '发帖数'
+        },
+        series: [{
+          data: counts,
+          type: 'line',
+          smooth: true,
+          itemStyle: { color: '#0071e3' },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(0, 113, 227, 0.5)' },
+              { offset: 1, color: 'rgba(0, 113, 227, 0.1)' }
+            ])
+          }
+        }]
+      };
+
+      this.chartInstance.setOption(option);
+    },
+
+    // --- 原有逻辑保留 ---
     loadLikes(postId) {
       forumApi.getLikesByPostId(postId).then(response => {
         this.$set(this.likesMap, postId, response.data || [])
-      }).catch(error => {
-        console.warn(`加载点赞失败 (PostID: ${postId}):`, error)
-      })
+      }).catch(error => { console.warn(error) })
     },
-
-    // 加载评论列表
     loadComments(postId) {
       forumApi.getCommentsByPostId(postId).then(response => {
         this.$set(this.commentsMap, postId, response.data || [])
-      }).catch(error => {
-        console.warn(`加载评论失败 (PostID: ${postId}):`, error)
-      })
+      }).catch(error => { console.warn(error) })
     },
-
-    // 刷新帖子列表
     refreshPosts() {
       this.refreshLoading = true
-      forumApi.refreshPosts().then(response => {
-        this.posts = response.data || []
-        this.posts.forEach(post => {
-          if (post.likeCount > 0) {
-            this.loadLikes(post.postId)
-          }
-          if (post.commentCount > 0) {
-            this.loadComments(post.postId)
-          }
-        })
-        this.$message.success('刷新成功')
-      }).catch(error => {
-        this.$message.error('刷新失败')
-      }).finally(() => {
-        this.refreshLoading = false
-      })
+      this.queryParams.nickName = ''
+      this.queryParams.content = ''
+      this.pagination.currentPage = 1
+      this.loadPosts();
+      setTimeout(() => {
+        this.refreshLoading = false;
+        this.$message.success('刷新成功');
+      }, 500);
     },
-
-    // 处理点赞/取消点赞
     handleLike(post) {
       this.$set(this.likeLoading, post.postId, true)
-
       const action = post.isLiked ? forumApi.cancelLike : forumApi.likePost
-
       action(post.postId).then(response => {
         if (response.data) {
-          // 更新UI
           post.isLiked = !post.isLiked
           post.likeCount += post.isLiked ? 1 : -1
-          // 重新加载点赞列表
           this.loadLikes(post.postId)
         } else {
           this.$message.warning(post.isLiked ? '取消点赞失败' : '点赞失败')
         }
-      }).catch(error => {
-        this.$message.error('操作失败')
-      }).finally(() => {
-        this.$set(this.likeLoading, post.postId, false)
-      })
+      }).catch(error => { this.$message.error('操作失败') })
+        .finally(() => { this.$set(this.likeLoading, post.postId, false) })
     },
-
-    // 显示评论弹窗
     showCommentDialog(post) {
       this.currentPostId = post.postId
       this.currentCommentParentId = 0
@@ -473,8 +656,6 @@ export default {
       this.commentContent = ''
       this.commentDialogVisible = true
     },
-
-    // 显示回复弹窗
     showReplyDialog(post, comment) {
       this.currentPostId = post.postId
       this.currentCommentParentId = comment.commentId
@@ -482,97 +663,67 @@ export default {
       this.commentContent = ''
       this.commentDialogVisible = true
     },
-
-    // 关闭评论弹窗
     closeCommentDialog() {
       this.commentDialogVisible = false
       this.commentContent = ''
     },
-
-    // 提交评论
     submitComment() {
       const content = this.commentContent.trim()
       if (!content) return
-
       const comment = {
         postId: this.currentPostId,
         parentId: this.currentCommentParentId,
         replyToUserId: this.currentReplyToUserId,
         content: content
       }
-
       forumApi.addComment(comment).then(response => {
         if (response.data) {
           this.closeCommentDialog()
-          // 重新加载评论并更新评论数
           this.loadComments(this.currentPostId)
-          const post = this.posts.find(p => p.postId === this.currentPostId)
-          if (post) {
-            post.commentCount += 1
-          }
+          const post = this.allPosts.find(p => p.postId === this.currentPostId)
+          if (post) post.commentCount += 1
           this.$message.success('评论成功')
         } else {
           this.$message.warning('评论失败')
         }
-      }).catch(error => {
-        this.$message.error('评论失败')
-      })
+      }).catch(error => { this.$message.error('评论失败') })
     },
-
-    // ---------------------------------
-    // 发帖相关
-    // ---------------------------------
     showPublishDialog() {
       this.publishDialogVisible = true
     },
     resetPublishForm() {
       this.publishForm.content = ''
       this.publishForm.imageFileList = []
-      if (this.$refs.publishUpload) {
-        this.$refs.publishUpload.clearFiles()
-      }
+      if (this.$refs.publishUpload) this.$refs.publishUpload.clearFiles()
     },
     handlePublishImageChange(file, fileList) {
       this.publishForm.imageFileList = fileList
     },
     submitPost() {
       this.publishLoading = true
-
-      const postData = {
-        content: this.publishForm.content
-      }
-      // files 列表
+      const postData = { content: this.publishForm.content }
       const files = this.publishForm.imageFileList.map(f => f.raw)
-
       forumApi.publishPost(postData, files).then(response => {
         if (response.data) {
           this.$message.success('发布成功')
           this.publishDialogVisible = false
-          this.refreshPosts() // 刷新列表
+          this.refreshPosts()
         } else {
           this.$message.warning('发布失败')
         }
-      }).catch(error => {
-        this.$message.error('发布失败')
-      }).finally(() => {
-        this.publishLoading = false
-      })
+      }).catch(error => { this.$message.error('发布失败') })
+        .finally(() => { this.publishLoading = false })
     },
-
-    // ---------------------------------
-    // 新增：修改帖子相关
-    // ---------------------------------
     showEditDialog(post) {
       this.editForm.postId = post.postId
       this.editForm.content = post.content
-      // 将已有的图片URL转换为 el-upload 需要的格式
       this.editForm.imageFileList = (post.imageUrls || '').split(',')
         .filter(Boolean)
         .map(url => ({
-          name: url, // 存储原始相对路径
-          url: this.getImageUrl(url), // 完整的显示路径
-          status: 'success', // 标记为已上传
-          uid: url // 唯一标识
+          name: url,
+          url: this.getImageUrl(url),
+          status: 'success',
+          uid: url
         }))
       this.editDialogVisible = true
     },
@@ -580,96 +731,53 @@ export default {
       this.editForm.postId = null
       this.editForm.content = ''
       this.editForm.imageFileList = []
-      if (this.$refs.editUpload) {
-        this.$refs.editUpload.clearFiles()
-      }
+      if (this.$refs.editUpload) this.$refs.editUpload.clearFiles()
     },
     handleEditImageChange(file, fileList) {
-      // 当on-change 和 on-remove 触发时，都用 fileList 更新
       this.editForm.imageFileList = fileList
     },
     submitEdit() {
       this.editLoading = true
-
-      // 1. 分离出需要保留的旧图片URL和新上传的文件
       const oldUrlsToKeep = []
       const newFilesToUpload = []
-
       this.editForm.imageFileList.forEach(file => {
-        if (file.status === 'success') {
-          // 'success' 状态的是我们初始化的旧图片
-          oldUrlsToKeep.push(file.name) // name 存的是原始相对路径
-        } else if (file.raw) {
-          // 带有 raw 属性的是新选择的文件
-          newFilesToUpload.push(file.raw)
-        }
+        if (file.status === 'success') oldUrlsToKeep.push(file.name)
+        else if (file.raw) newFilesToUpload.push(file.raw)
       })
-
-      // 2. 准备提交的数据
       const postData = {
         postId: this.editForm.postId,
         content: this.editForm.content,
-        imageUrls: oldUrlsToKeep.join(',') // 需要保留的旧图片URL列表
+        imageUrls: oldUrlsToKeep.join(',')
       }
-
-      // 3. 调用API
       forumApi.updatePost(postData, newFilesToUpload).then(response => {
         if (response.data) {
           this.$message.success('修改成功')
           this.editDialogVisible = false
-          // 刷新帖子列表（或只更新当前帖子）
           this.refreshPosts()
         } else {
           this.$message.warning('修改失败')
         }
-      }).catch(error => {
-        this.$message.error('修改失败')
-      }).finally(() => {
-        this.editLoading = false
-      })
+      }).catch(error => { this.$message.error('修改失败') })
+        .finally(() => { this.editLoading = false })
     },
-
-    // ---------------------------------
-    // 新增：删除帖子相关
-    // ---------------------------------
     handleDelete(post) {
       this.$confirm('此操作将永久删除该帖子及其所有评论和点赞, 是否继续?', '警告', {
         confirmButtonText: '确定删除',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        // 执行删除
         forumApi.deletePost(post.postId).then(() => {
           this.$message.success('删除成功')
-          // 从列表中移除
-          const index = this.posts.findIndex(p => p.postId === post.postId)
-          if (index > -1) {
-            this.posts.splice(index, 1)
-          }
-        }).catch(error => {
-          this.$message.error('删除失败')
-        })
-      }).catch(() => {
-        // 取消
-        this.$message.info('已取消删除')
-      })
+          this.loadPosts() // 重新加载以更新列表
+        }).catch(error => { this.$message.error('删除失败') })
+      }).catch(() => {})
     },
-
-    // ---------------------------------
-    // 通知相关
-    // ---------------------------------
     showNoticeDialog() {
       forumApi.getUserNotices().then(response => {
         this.notices = response.data || []
         this.noticeDialogVisible = true
-      }).catch(error => {
-        this.$message.error('加载通知失败')
-      })
+      }).catch(error => { this.$message.error('加载通知失败') })
     },
-
-    // ---------------------------------
-    // 工具方法
-    // ---------------------------------
     formatTime(time) {
       return formatDate(time, 'yyyy/MM/dd HH:mm')
     },
@@ -683,13 +791,8 @@ export default {
     getComments(postId) {
       return this.commentsMap[postId] || []
     },
-    // 为 el-image 预览生成列表
     getPreviewList(imageUrls, currentImg) {
-      const fullList = (imageUrls || '').split(',')
-        .filter(Boolean)
-        .map(url => this.getImageUrl(url))
-
-      // 切换当前预览的图片到第一张（体验更好）
+      const fullList = (imageUrls || '').split(',').filter(Boolean).map(url => this.getImageUrl(url))
       const currentIndex = fullList.indexOf(this.getImageUrl(currentImg))
       if (currentIndex > 0) {
         const current = fullList.splice(currentIndex, 1)
@@ -713,40 +816,59 @@ export default {
   min-height: 100vh;
 }
 
-/* Top Buttons */
-.top-buttons {
-  margin-bottom: 24px;
+/* 搜索表单 */
+.search-form {
+  background: white;
+  padding: 15px 20px 0 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* 工具栏 */
+.toolbar {
   display: flex;
-  gap: 12px;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-.top-buttons .el-button {
+.left-tools {
+  display: flex;
+  gap: 10px;
+}
+
+.right-tools {
+  display: flex;
+  gap: 10px;
+}
+
+/* 通用按钮圆角 */
+.el-button {
   border-radius: 980px;
-  font-weight: 500;
-  border: none;
-  padding: 9px 20px;
-  transition: all 0.2s ease;
 }
 
-.top-buttons .el-button--primary {
-  background-color: #0071e3;
-  box-shadow: 0 2px 8px rgba(0, 113, 227, 0.2);
+/* 无数据提示 */
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #86868b;
+}
+.no-data i {
+  font-size: 48px;
+  margin-bottom: 10px;
 }
 
-.top-buttons .el-button--primary:hover {
-  background-color: #0077ed;
-  transform: translateY(-1px);
+/* 打印表格 (默认隐藏) */
+.print-section {
+  display: none;
 }
 
-.top-buttons .el-button--success {
-  background-color: #34c759;
-  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.2);
-}
-
-.top-buttons .el-button--info {
-  background-color: #86868b;
-  box-shadow: 0 2px 8px rgba(134, 134, 139, 0.2);
+/* 分页组件 */
+.pagination-wrapper {
+  margin-top: 30px;
+  text-align: center;
+  padding-bottom: 30px;
 }
 
 /* Post List */
@@ -1067,6 +1189,67 @@ export default {
   width: 100px;
   height: 100px;
   border-radius: 12px;
+}
+
+/* 打印样式 */
+@media print {
+  @page {
+    size: auto;
+    margin: 10mm;
+  }
+
+  /* 隐藏所有无关元素 */
+  .no-print,
+  .navbar,
+  .sidebar-container,
+  .tags-view-container,
+  .el-dialog__wrapper,
+  .v-modal {
+    display: none !important;
+  }
+
+  /* 调整容器 */
+  .forum-container {
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+    background: white;
+  }
+
+  .main-container {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  /* 显示打印表格 */
+  .print-section {
+    display: block !important;
+  }
+
+  .print-title {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  .print-table th,
+  .print-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    font-size: 14px;
+  }
+
+  .print-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
 }
 
 /* Responsive */

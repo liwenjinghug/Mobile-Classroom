@@ -1,6 +1,7 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="68px">
+    <!-- 搜索表单 (打印时隐藏: class="no-print") -->
+    <el-form :model="queryParams" ref="queryForm" :inline="true" label-width="68px" class="no-print">
       <el-form-item label="文章标题" prop="title">
         <el-input
           v-model="queryParams.title"
@@ -31,7 +32,8 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
+    <!-- 操作按钮组 (打印时隐藏) -->
+    <el-row :gutter="10" class="mb8 no-print">
       <template v-if="!isSelectionMode">
         <el-col :span="1.5">
           <el-button
@@ -41,6 +43,26 @@
             @click="handleAdd"
             v-hasPermi="['proj_qhy:article:add']"
           >新增</el-button>
+        </el-col>
+
+        <!-- 打印按钮 -->
+        <el-col :span="1.5">
+          <el-button
+            type="warning"
+            plain
+            icon="el-icon-printer"
+            @click="handlePrint"
+          >打印</el-button>
+        </el-col>
+
+        <!-- 统计按钮 -->
+        <el-col :span="1.5">
+          <el-button
+            type="success"
+            plain
+            icon="el-icon-s-data"
+            @click="handleStatistics"
+          >统计</el-button>
         </el-col>
 
         <el-col :span="1.5">
@@ -103,7 +125,8 @@
           class="article-wrapper"
           @click="handleArticleClick(article)"
         >
-          <div v-if="isSelectionMode" class="selection-area">
+          <!-- 选择模式的复选框 (打印时隐藏) -->
+          <div v-if="isSelectionMode" class="selection-area no-print">
             <el-checkbox
               :label="article.id"
               @click.native.stop
@@ -142,7 +165,8 @@
                     </el-tag>
                   </div>
                 </div>
-                <div class="action-buttons">
+                <!-- 按钮组 (打印时隐藏) -->
+                <div class="action-buttons no-print">
                   <el-button
                     type="text"
                     class="like-btn"
@@ -173,7 +197,8 @@
                 </div>
               </div>
 
-              <div class="article-actions">
+              <!-- 操作按钮 (打印时隐藏) -->
+              <div class="article-actions no-print">
                 <el-button
                   size="mini"
                   type="text"
@@ -195,14 +220,17 @@
       </div>
     </el-checkbox-group>
 
+    <!-- 分页 (打印时隐藏) -->
     <pagination
       v-show="total>0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
+      class="no-print"
     />
 
+    <!-- 编辑/新增弹窗 -->
     <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="文章标题" prop="title">
@@ -238,6 +266,15 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- ⭐ 统计图表弹窗 -->
+    <el-dialog title="文章分类统计" :visible.sync="statsVisible" width="800px" append-to-body>
+      <div id="chart-container" style="width: 100%; height: 400px;"></div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="statsVisible = false">关 闭</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -254,6 +291,8 @@ import {
   exportPdf,
   exportWord
 } from "@/api/proj_qhy/article";
+// ⭐ 引入 echarts
+import * as echarts from 'echarts';
 
 export default {
   name: "Article",
@@ -292,6 +331,10 @@ export default {
       // 选择模式相关
       isSelectionMode: false,
       selectedIds: [], // 选中的ID数组
+
+      // ⭐ 统计相关数据
+      statsVisible: false,
+      chartInstance: null
     };
   },
   created() {
@@ -555,6 +598,93 @@ export default {
         this.$modal.msgError("下载失败");
       });
     },
+
+    /** ⭐ 打印功能 */
+    handlePrint() {
+      window.print();
+    },
+
+    /** ⭐ 打开统计弹窗 (使用真实数据) */
+    handleStatistics() {
+      this.statsVisible = true;
+
+      // 显示加载动画
+      const loading = this.$loading({
+        lock: true,
+        text: '正在统计数据...',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+
+      // 获取所有文章数据 (pageSize 设置很大以获取全部)
+      listArticle({ pageNum: 1, pageSize: 10000 }).then(response => {
+        const list = response.rows;
+
+        // 统计逻辑
+        let statsMap = {
+          '技术': 0,
+          '生活': 0,
+          '思考': 0,
+          '读书': 0
+        };
+
+        // 遍历所有文章进行计数
+        list.forEach(item => {
+          if (statsMap[item.articleType] !== undefined) {
+            statsMap[item.articleType]++;
+          }
+        });
+
+        // 构造 ECharts 数据格式
+        const chartData = [
+          { value: statsMap['技术'], name: '技术' },
+          { value: statsMap['生活'], name: '生活' },
+          { value: statsMap['思考'], name: '思考' },
+          { value: statsMap['读书'], name: '读书' }
+        ];
+
+        loading.close();
+
+        // 渲染图表
+        this.$nextTick(() => {
+          this.initChart(chartData);
+        });
+      }).catch(() => {
+        loading.close();
+        this.$modal.msgError("获取统计数据失败");
+      });
+    },
+
+    /** ⭐ 初始化图表 (接收真实数据) */
+    initChart(data) {
+      if (this.chartInstance) {
+        this.chartInstance.dispose();
+      }
+      const chartDom = document.getElementById('chart-container');
+      this.chartInstance = echarts.init(chartDom);
+
+      const option = {
+        title: { text: '文章分类统计', left: 'center' },
+        tooltip: { trigger: 'item' },
+        legend: { orient: 'vertical', left: 'left' },
+        series: [
+          {
+            name: '文章数量',
+            type: 'pie',
+            radius: '50%',
+            data: data, // 使用传入的真实数据
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            }
+          }
+        ]
+      };
+      this.chartInstance.setOption(option);
+    }
   }
 };
 </script>
@@ -781,6 +911,45 @@ export default {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+}
+</style>
+
+<!-- ⭐ 修正后的打印专用样式：只在打印时生效 -->
+<style>
+@media print {
+  @page {
+    size: auto;
+    margin: 10mm;
+  }
+  /* 隐藏不想打印的元素：侧边栏、顶部导航、标签页等 */
+  .navbar,
+  .sidebar-container,
+  .tags-view-container,
+  .el-dialog__wrapper,
+  .v-modal {
+    display: none !important;
+  }
+  /* 隐藏带有 no-print 类的元素（我们在 template 里加的） */
+  .no-print {
+    display: none !important;
+  }
+  /* 调整主容器宽度，让内容铺满打印纸 */
+  .main-container {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+  /* 确保文章列表可见 */
+  .article-list {
+    display: block !important;
+  }
+  /* 优化打印时的卡片样式 */
+  .article-item {
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+    page-break-inside: avoid; /* 防止分页切断内容 */
+    box-shadow: none !important;
   }
 }
 </style>
