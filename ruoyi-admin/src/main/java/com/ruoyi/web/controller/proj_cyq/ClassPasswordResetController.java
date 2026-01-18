@@ -39,8 +39,8 @@ public class ClassPasswordResetController extends BaseController
     @Value("${spring.mail.username}")
     private String mailFrom;
 
-    // 您的前端页面地址 (若依默认是 http://localhost:80 或 http://localhost)
-    @Value("${ruoyi.frontendUrl:http://localhost:80}")
+    // 您的前端页面地址 (ruoyi.frontendUrl:http://www.ylxteach.net:8080)
+    @Value("${ruoyi.frontendUrl:http://www.ylxteach.net:8080}")
     private String frontendUrl;
 
 
