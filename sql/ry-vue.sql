@@ -11,7 +11,7 @@
  Target Server Version : 80044 (8.0.44)
  File Encoding         : 65001
 
- Date: 23/12/2025 23:40:13
+ Date: 19/01/2026 22:35:35
 */
 
 SET NAMES utf8mb4;
@@ -430,7 +430,7 @@ CREATE TABLE `class_course`  (
   `class_number` int NULL DEFAULT NULL,
   PRIMARY KEY (`course_id`) USING BTREE,
   UNIQUE INDEX `idx_course_code`(`course_code` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '课程信息表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '课程信息表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_course
@@ -441,8 +441,8 @@ INSERT INTO `class_course` VALUES (3, '计算机金融应用', 'MSNU32546', '选
 INSERT INTO `class_course` VALUES (5, '数据库', '7', NULL, NULL, 2.0, '1', '0', 'admin', '2025-11-01 15:48:47', '', NULL, NULL, 1);
 INSERT INTO `class_course` VALUES (6, '金融', '6', '12', '124', 1.0, '11', '0', 'admin', '2025-11-04 20:22:51', '', NULL, NULL, 4);
 INSERT INTO `class_course` VALUES (7, '121', '12', '1', '222', 0.0, '1', '0', 'admin', '2025-11-04 21:09:23', '', NULL, NULL, 1);
-INSERT INTO `class_course` VALUES (8, 'AAAAA', '112', '212', '11', 0.0, '111', '0', 'admin', '2025-11-04 22:22:02', 'teacher_zhang', '2025-11-24 19:20:17', NULL, 1);
-INSERT INTO `class_course` VALUES (10, '222', '333', '必修', NULL, 1.0, 'aaa1111111', '0', 'admin', '2025-12-03 15:08:41', 'admin', '2025-12-03 15:27:31', NULL, NULL);
+INSERT INTO `class_course` VALUES (8, 'AAAAA333', '112', '212', '11', 0.0, '111', '0', 'admin', '2025-11-04 22:22:02', 'admin', '2026-01-19 21:58:51', NULL, 1);
+INSERT INTO `class_course` VALUES (10, '222aaa', '333q', '必修', NULL, 1.0, 'aaa1111111', '0', 'admin', '2025-12-03 15:08:41', 'admin', '2026-01-19 20:49:12', NULL, NULL);
 INSERT INTO `class_course` VALUES (11, '叫什么', '124', '2', NULL, 0.0, '111', '0', 'admin', '2025-12-03 15:27:46', 'teacher_zhang', '2025-12-03 15:28:25', NULL, NULL);
 
 -- ----------------------------
@@ -1237,14 +1237,13 @@ CREATE TABLE `class_join_application`  (
   `audit_user_id` bigint NULL DEFAULT NULL,
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`application_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '课堂加入申请表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '课堂加入申请表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_join_application
 -- ----------------------------
 INSERT INTO `class_join_application` VALUES (1, 3, 19, '2023141460348', '李为', '1', '2025-11-22 18:39:12', '2025-11-22 21:01:17', 100, '已经通过审核');
 INSERT INTO `class_join_application` VALUES (2, 4, 19, '2023141460348', '李为', '0', '2025-11-22 18:57:26', NULL, NULL, NULL);
-INSERT INTO `class_join_application` VALUES (3, 1, 19, '2023141460348', '李为', '0', '2025-11-23 12:26:18', NULL, NULL, NULL);
 INSERT INTO `class_join_application` VALUES (4, 3, 21, '2023141460350', '陈殷琦', '1', '2025-12-03 00:54:52', '2025-12-03 00:55:56', 100, '');
 INSERT INTO `class_join_application` VALUES (5, 4, 21, '2023141460350', '陈殷琦', '0', '2025-12-03 14:25:04', NULL, NULL, NULL);
 INSERT INTO `class_join_application` VALUES (6, 1, 21, '2023141460350', '陈殷琦', '1', '2025-12-03 14:25:35', '2025-12-03 14:25:48', 100, '');
@@ -1299,7 +1298,7 @@ CREATE TABLE `class_login_log`  (
   `msg` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '提示消息',
   `login_time` datetime NULL DEFAULT NULL COMMENT '访问时间',
   PRIMARY KEY (`login_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 229 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 254 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统登录日志' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_login_log
@@ -1532,6 +1531,31 @@ INSERT INTO `class_login_log` VALUES (225, 'admin', '127.0.0.1', '内网IP', 'Mi
 INSERT INTO `class_login_log` VALUES (226, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2025-12-23 22:40:52');
 INSERT INTO `class_login_log` VALUES (227, 'teacher_zhang', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 1, '验证码错误', '2025-12-23 22:40:59');
 INSERT INTO `class_login_log` VALUES (228, 'teacher_zhang', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2025-12-23 22:41:02');
+INSERT INTO `class_login_log` VALUES (229, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2026-01-19 20:42:36');
+INSERT INTO `class_login_log` VALUES (230, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2026-01-19 20:46:55');
+INSERT INTO `class_login_log` VALUES (231, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2026-01-19 20:46:58');
+INSERT INTO `class_login_log` VALUES (232, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2026-01-19 21:13:36');
+INSERT INTO `class_login_log` VALUES (233, 'teacher_zhang', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2026-01-19 21:13:44');
+INSERT INTO `class_login_log` VALUES (234, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2026-01-19 21:40:42');
+INSERT INTO `class_login_log` VALUES (235, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2026-01-19 21:40:52');
+INSERT INTO `class_login_log` VALUES (236, '未知用户', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2026-01-19 21:56:33');
+INSERT INTO `class_login_log` VALUES (237, 'admin', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2026-01-19 21:56:38');
+INSERT INTO `class_login_log` VALUES (238, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2026-01-19 22:04:32');
+INSERT INTO `class_login_log` VALUES (239, 'teacher_zhang', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2026-01-19 22:04:44');
+INSERT INTO `class_login_log` VALUES (240, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2026-01-19 22:11:05');
+INSERT INTO `class_login_log` VALUES (241, '2023141460348', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2026-01-19 22:11:19');
+INSERT INTO `class_login_log` VALUES (242, '2023141460348', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2026-01-19 22:17:31');
+INSERT INTO `class_login_log` VALUES (243, 'teacher_zhang', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2026-01-19 22:17:46');
+INSERT INTO `class_login_log` VALUES (244, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2026-01-19 22:18:23');
+INSERT INTO `class_login_log` VALUES (245, '2023141460348', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2026-01-19 22:18:34');
+INSERT INTO `class_login_log` VALUES (246, '2023141460348', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', 0, '退出成功', '2026-01-19 22:23:51');
+INSERT INTO `class_login_log` VALUES (247, 'teacher_zhang', '127.0.0.1', '内网IP', 'Microsoft Edge', 'Windows 10', 0, '登录成功', '2026-01-19 22:24:02');
+INSERT INTO `class_login_log` VALUES (248, '2023141460348', '127.0.0.1', '内网IP', 'Safari', 'Mac OS X', 1, '用户不存在/密码错误', '2026-01-19 22:30:11');
+INSERT INTO `class_login_log` VALUES (249, '2023141460348', '127.0.0.1', '内网IP', 'Safari', 'Mac OS X', 1, '验证码错误', '2026-01-19 22:30:14');
+INSERT INTO `class_login_log` VALUES (250, '2023141460348', '127.0.0.1', '内网IP', 'Safari', 'Mac OS X', 1, '验证码错误', '2026-01-19 22:30:19');
+INSERT INTO `class_login_log` VALUES (251, '2023141460348', '127.0.0.1', '内网IP', 'Safari', 'Mac OS X', 0, '登录成功', '2026-01-19 22:30:27');
+INSERT INTO `class_login_log` VALUES (252, 'teacher_zhang', '127.0.0.1', '内网IP', 'Safari', 'Mac OS X', 0, '登录成功', '2026-01-19 22:31:43');
+INSERT INTO `class_login_log` VALUES (253, '2023141460348', '127.0.0.1', '内网IP', 'Safari', 'Mac OS X', 0, '登录成功', '2026-01-19 22:32:15');
 
 -- ----------------------------
 -- Table structure for class_material
@@ -1554,7 +1578,7 @@ CREATE TABLE `class_material`  (
   PRIMARY KEY (`material_id`) USING BTREE,
   INDEX `idx_session_id`(`session_id` ASC) USING BTREE,
   INDEX `idx_push_status`(`push_status` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '资料表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '资料表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_material
@@ -1610,7 +1634,7 @@ CREATE TABLE `class_oper_log`  (
   `error_msg` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '错误消息',
   `oper_time` datetime NULL DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`oper_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 852 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 889 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_oper_log
@@ -2425,6 +2449,43 @@ INSERT INTO `class_oper_log` VALUES (848, '资料上传', 1, 'com.ruoyi.web.cont
 INSERT INTO `class_oper_log` VALUES (849, '资料管理', 1, 'com.ruoyi.web.controller.proj_lw.MaterialController.add()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/material', '127.0.0.1', NULL, '{\"createBy\":\"admin\",\"createTime\":\"2025-12-23 21:29:26\",\"filePath\":\"2025/12/23/实验1 Web服务器配置和http协议分析_1766496566437A831.pdf\",\"fileSize\":975550,\"fileType\":\"pdf\",\"materialId\":14,\"materialName\":\"实验1 Web服务器配置和http协议分析.pdf\",\"pushStatus\":\"0\",\"sessionId\":1}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2025-12-23 21:29:27');
 INSERT INTO `class_oper_log` VALUES (850, '修改课堂学生人数', 2, 'com.ruoyi.web.controller.proj_lw.TeacherClassController.updateSessionStudents()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/teacher/class/updateStudents', '127.0.0.1', NULL, '1 60', '{\"msg\":\"学生人数修改成功\",\"code\":200}', 0, NULL, '2025-12-23 21:51:32');
 INSERT INTO `class_oper_log` VALUES (851, '修改课堂学生人数', 2, 'com.ruoyi.web.controller.proj_lw.TeacherClassController.updateSessionStudents()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/teacher/class/updateStudents', '127.0.0.1', NULL, '1 50', '{\"msg\":\"学生人数修改成功\",\"code\":200}', 0, NULL, '2025-12-23 21:51:47');
+INSERT INTO `class_oper_log` VALUES (852, '课程管理', 1, 'com.ruoyi.web.controller.proj_lw.CourseController.add()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/course', '127.0.0.1', NULL, '{\"college\":\"计算机学院\",\"courseCode\":\"33\",\"courseId\":13,\"courseName\":\"网络编程\",\"courseType\":\"1\",\"createBy\":\"admin\",\"credit\":2.0,\"introduction\":\"111\",\"params\":{},\"status\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 20:48:33');
+INSERT INTO `class_oper_log` VALUES (853, '课程管理', 3, 'com.ruoyi.web.controller.proj_lw.CourseController.remove()', 'DELETE', 1, '系统用户', '系统部门', '/proj_lw/course/13', '127.0.0.1', NULL, '[13]', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 20:48:40');
+INSERT INTO `class_oper_log` VALUES (854, '课程管理', 2, 'com.ruoyi.web.controller.proj_lw.CourseController.edit()', 'PUT', 1, '系统用户', '系统部门', '/proj_lw/course', '127.0.0.1', NULL, '{\"courseCode\":\"333q\",\"courseId\":10,\"courseName\":\"222aaa\",\"courseType\":\"必修\",\"createBy\":\"admin\",\"createTime\":\"2025-12-03 15:08:41\",\"credit\":1.0,\"introduction\":\"aaa1111111\",\"params\":{},\"status\":\"0\",\"updateBy\":\"admin\",\"updateTime\":\"2025-12-03 15:27:31\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 20:49:12');
+INSERT INTO `class_oper_log` VALUES (855, '课程管理', 1, 'com.ruoyi.web.controller.proj_lw.CourseController.add()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/course', '127.0.0.1', NULL, '{\"college\":\"计算机\",\"courseCode\":\"333\",\"courseId\":14,\"courseName\":\"23456\",\"courseType\":\"111\",\"createBy\":\"admin\",\"credit\":1.5,\"introduction\":\"aaa\",\"params\":{},\"status\":\"0\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 21:58:21');
+INSERT INTO `class_oper_log` VALUES (856, '课程管理', 3, 'com.ruoyi.web.controller.proj_lw.CourseController.remove()', 'DELETE', 1, '系统用户', '系统部门', '/proj_lw/course/14', '127.0.0.1', NULL, '[14]', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 21:58:27');
+INSERT INTO `class_oper_log` VALUES (857, '课程管理', 2, 'com.ruoyi.web.controller.proj_lw.CourseController.edit()', 'PUT', 1, '系统用户', '系统部门', '/proj_lw/course', '127.0.0.1', NULL, '{\"classNumber\":1,\"college\":\"11\",\"courseCode\":\"112\",\"courseId\":8,\"courseName\":\"AAAAA333\",\"courseType\":\"212\",\"createBy\":\"admin\",\"createTime\":\"2025-11-04 22:22:02\",\"credit\":0.0,\"introduction\":\"111\",\"params\":{},\"status\":\"0\",\"updateBy\":\"admin\",\"updateTime\":\"2025-11-24 19:20:17\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 21:58:51');
+INSERT INTO `class_oper_log` VALUES (858, '课堂管理', 1, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.add()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/session', '127.0.0.1', NULL, '{\"classDuration\":45,\"className\":\"研究与开发实践\",\"courseId\":1,\"createBy\":\"admin\",\"endTime\":\"09:00\",\"params\":{},\"sessionId\":12,\"startTime\":\"08:15\",\"status\":0,\"teacher\":\"E\",\"teacherId\":1,\"totalStudents\":30,\"weekDay\":\"1\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 21:59:12');
+INSERT INTO `class_oper_log` VALUES (859, '课堂管理', 3, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.remove()', 'DELETE', 1, '系统用户', '系统部门', '/proj_lw/session/12', '127.0.0.1', NULL, '[12]', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 21:59:16');
+INSERT INTO `class_oper_log` VALUES (860, '课堂管理', 2, 'com.ruoyi.web.controller.proj_lw.ClassSessionController.edit()', 'PUT', 1, '系统用户', '系统部门', '/proj_lw/session', '127.0.0.1', NULL, '{\"classDuration\":45,\"className\":\"研究与开发实践\",\"classNumber\":1,\"courseId\":1,\"createBy\":\"admin\",\"createTime\":\"2025-10-31 21:55:44\",\"endTime\":\"21:55\",\"params\":{},\"sessionId\":4,\"startTime\":\"11:00\",\"status\":0,\"teacher\":\"B\",\"teacherId\":2,\"totalStudents\":42,\"updateBy\":\"admin\",\"updateTime\":\"2025-10-31 21:56:17\",\"weekDay\":\"1\"}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 21:59:28');
+INSERT INTO `class_oper_log` VALUES (861, '资料上传', 1, 'com.ruoyi.web.controller.proj_lw.MaterialController.uploadFile()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/material/upload', '127.0.0.1', NULL, '', '{\"msg\":\"上传成功\",\"fileName\":\"ARCH模型_1768831688577A302.pptx\",\"code\":200,\"url\":\"2026/01/19/ARCH模型_1768831688577A302.pptx\"}', 0, NULL, '2026-01-19 22:08:09');
+INSERT INTO `class_oper_log` VALUES (862, '资料管理', 1, 'com.ruoyi.web.controller.proj_lw.MaterialController.add()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/material', '127.0.0.1', NULL, '{\"createBy\":\"teacher_zhang\",\"createTime\":\"2026-01-19 22:08:08\",\"filePath\":\"2026/01/19/ARCH模型_1768831688577A302.pptx\",\"fileSize\":1795575,\"fileType\":\"pptx\",\"materialId\":15,\"materialName\":\"ARCH模型.pptx\",\"pushStatus\":\"0\",\"sessionId\":1}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 22:08:09');
+INSERT INTO `class_oper_log` VALUES (863, '资料推送', 2, 'com.ruoyi.web.controller.proj_lw.MaterialController.pushMaterial()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/material/push/15', '127.0.0.1', NULL, '15', '{\"msg\":\"资料推送成功\",\"code\":200}', 0, NULL, '2026-01-19 22:08:14');
+INSERT INTO `class_oper_log` VALUES (864, '资料管理', 3, 'com.ruoyi.web.controller.proj_lw.MaterialController.remove()', 'DELETE', 1, '系统用户', '系统部门', '/proj_lw/material/15', '127.0.0.1', NULL, '15', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 22:08:18');
+INSERT INTO `class_oper_log` VALUES (865, '资料上传', 1, 'com.ruoyi.web.controller.proj_lw.MaterialController.uploadFile()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/material/upload', '127.0.0.1', NULL, '', '{\"msg\":\"上传成功\",\"fileName\":\"ARCH模型_1768831802384A162.pptx\",\"code\":200,\"url\":\"2026/01/19/ARCH模型_1768831802384A162.pptx\"}', 0, NULL, '2026-01-19 22:10:02');
+INSERT INTO `class_oper_log` VALUES (866, '资料管理', 1, 'com.ruoyi.web.controller.proj_lw.MaterialController.add()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/material', '127.0.0.1', NULL, '{\"createBy\":\"teacher_zhang\",\"createTime\":\"2026-01-19 22:10:02\",\"filePath\":\"2026/01/19/ARCH模型_1768831802384A162.pptx\",\"fileSize\":1795575,\"fileType\":\"pptx\",\"materialId\":16,\"materialName\":\"ARCH模型.pptx\",\"pushStatus\":\"0\",\"sessionId\":1}', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 22:10:03');
+INSERT INTO `class_oper_log` VALUES (867, '资料推送', 2, 'com.ruoyi.web.controller.proj_lw.MaterialController.pushMaterial()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/material/push/16', '127.0.0.1', NULL, '16', '{\"msg\":\"资料推送成功\",\"code\":200}', 0, NULL, '2026-01-19 22:10:07');
+INSERT INTO `class_oper_log` VALUES (868, '资料管理', 3, 'com.ruoyi.web.controller.proj_lw.MaterialController.remove()', 'DELETE', 1, '系统用户', '系统部门', '/proj_lw/material/16', '127.0.0.1', NULL, '16', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-01-19 22:10:12');
+INSERT INTO `class_oper_log` VALUES (869, '学生取消申请', 3, 'com.ruoyi.web.controller.proj_lw.StudentClassController.cancelApplication()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/application/cancel/3', '127.0.0.1', NULL, '3', '{\"msg\":\"取消申请成功\",\"code\":200}', 0, NULL, '2026-01-19 22:14:40');
+INSERT INTO `class_oper_log` VALUES (870, '学生申请加入课堂', 1, 'com.ruoyi.web.controller.proj_lw.StudentClassController.applyJoinClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/apply/1', '127.0.0.1', NULL, '1', '{\"msg\":\"您已在该课堂中，无需重复申请\",\"code\":500}', 0, NULL, '2026-01-19 22:14:57');
+INSERT INTO `class_oper_log` VALUES (871, '学生申请加入课堂', 1, 'com.ruoyi.web.controller.proj_lw.StudentClassController.applyJoinClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/apply/8', '127.0.0.1', NULL, '8', '{\"msg\":\"申请成功\",\"code\":200}', 0, NULL, '2026-01-19 22:15:15');
+INSERT INTO `class_oper_log` VALUES (872, '学生取消申请', 3, 'com.ruoyi.web.controller.proj_lw.StudentClassController.cancelApplication()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/application/cancel/10', '127.0.0.1', NULL, '10', '{\"msg\":\"取消申请成功\",\"code\":200}', 0, NULL, '2026-01-19 22:15:19');
+INSERT INTO `class_oper_log` VALUES (873, '学生申请加入课堂', 1, 'com.ruoyi.web.controller.proj_lw.StudentClassController.applyJoinClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/apply/8', '127.0.0.1', NULL, '8', '{\"msg\":\"申请成功\",\"code\":200}', 0, NULL, '2026-01-19 22:15:49');
+INSERT INTO `class_oper_log` VALUES (874, '学生取消申请', 3, 'com.ruoyi.web.controller.proj_lw.StudentClassController.cancelApplication()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/application/cancel/11', '127.0.0.1', NULL, '11', '{\"msg\":\"取消申请成功\",\"code\":200}', 0, NULL, '2026-01-19 22:15:56');
+INSERT INTO `class_oper_log` VALUES (875, '学生申请加入课堂', 1, 'com.ruoyi.web.controller.proj_lw.StudentClassController.applyJoinClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/apply/1', '127.0.0.1', NULL, '1', '{\"msg\":\"您已在该课堂中，无需重复申请\",\"code\":500}', 0, NULL, '2026-01-19 22:15:59');
+INSERT INTO `class_oper_log` VALUES (876, '学生申请加入课堂', 1, 'com.ruoyi.web.controller.proj_lw.StudentClassController.applyJoinClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/apply/4', '127.0.0.1', NULL, '4', '{\"msg\":\"您已申请加入该课堂，请勿重复申请\",\"code\":500}', 0, NULL, '2026-01-19 22:16:03');
+INSERT INTO `class_oper_log` VALUES (877, '学生申请加入课堂', 1, 'com.ruoyi.web.controller.proj_lw.StudentClassController.applyJoinClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/apply/3', '127.0.0.1', NULL, '3', '{\"msg\":\"您已申请加入该课堂，请勿重复申请\",\"code\":500}', 0, NULL, '2026-01-19 22:17:20');
+INSERT INTO `class_oper_log` VALUES (878, '课堂添加学生', 1, 'com.ruoyi.web.controller.proj_lw.ClassManagementController.addStudentsToClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/class/management/3/students/add', '127.0.0.1', NULL, '3 [19]', '{\"msg\":\"成功添加 1 名学生\",\"code\":200}', 0, NULL, '2026-01-19 22:18:13');
+INSERT INTO `class_oper_log` VALUES (879, '学生申请加入课堂', 1, 'com.ruoyi.web.controller.proj_lw.StudentClassController.applyJoinClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/apply/8', '127.0.0.1', NULL, '8', '{\"msg\":\"申请成功\",\"code\":200}', 0, NULL, '2026-01-19 22:22:45');
+INSERT INTO `class_oper_log` VALUES (880, '学生取消申请', 3, 'com.ruoyi.web.controller.proj_lw.StudentClassController.cancelApplication()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/application/cancel/12', '127.0.0.1', NULL, '12', '{\"msg\":\"取消申请成功\",\"code\":200}', 0, NULL, '2026-01-19 22:22:50');
+INSERT INTO `class_oper_log` VALUES (881, '学生申请加入课堂', 1, 'com.ruoyi.web.controller.proj_lw.StudentClassController.applyJoinClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/apply/1', '127.0.0.1', NULL, '1', '{\"msg\":\"您已在该课堂中，无需重复申请\",\"code\":500}', 0, NULL, '2026-01-19 22:22:54');
+INSERT INTO `class_oper_log` VALUES (882, '学生申请加入课堂', 1, 'com.ruoyi.web.controller.proj_lw.StudentClassController.applyJoinClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/apply/4', '127.0.0.1', NULL, '4', '{\"msg\":\"您已申请加入该课堂，请勿重复申请\",\"code\":500}', 0, NULL, '2026-01-19 22:22:58');
+INSERT INTO `class_oper_log` VALUES (883, '修改课堂学生人数', 2, 'com.ruoyi.web.controller.proj_lw.TeacherClassController.updateSessionStudents()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/teacher/class/updateStudents', '127.0.0.1', NULL, '1 52', '{\"msg\":\"学生人数修改成功\",\"code\":200}', 0, NULL, '2026-01-19 22:26:44');
+INSERT INTO `class_oper_log` VALUES (884, '课堂添加学生', 1, 'com.ruoyi.web.controller.proj_lw.ClassManagementController.addStudentsToClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/class/management/1/students/add', '127.0.0.1', NULL, '1 [42]', '{\"msg\":\"成功添加 1 名学生\",\"code\":200}', 0, NULL, '2026-01-19 22:27:07');
+INSERT INTO `class_oper_log` VALUES (885, '课堂移除学生', 3, 'com.ruoyi.web.controller.proj_lw.ClassManagementController.removeStudentFromClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/class/management/1/students/42/remove', '127.0.0.1', NULL, '1 42', '{\"msg\":\"移除学生成功\",\"code\":200}', 0, NULL, '2026-01-19 22:27:14');
+INSERT INTO `class_oper_log` VALUES (886, '学生申请加入课堂', 1, 'com.ruoyi.web.controller.proj_lw.StudentClassController.applyJoinClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/apply/8', '127.0.0.1', NULL, '8', '{\"msg\":\"申请成功\",\"code\":200}', 0, NULL, '2026-01-19 22:33:19');
+INSERT INTO `class_oper_log` VALUES (887, '学生取消申请', 3, 'com.ruoyi.web.controller.proj_lw.StudentClassController.cancelApplication()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/application/cancel/13', '127.0.0.1', NULL, '13', '{\"msg\":\"取消申请成功\",\"code\":200}', 0, NULL, '2026-01-19 22:33:25');
+INSERT INTO `class_oper_log` VALUES (888, '学生申请加入课堂', 1, 'com.ruoyi.web.controller.proj_lw.StudentClassController.applyJoinClass()', 'POST', 1, '系统用户', '系统部门', '/proj_lw/student/class/apply/1', '127.0.0.1', NULL, '1', '{\"msg\":\"您已在该课堂中，无需重复申请\",\"code\":500}', 0, NULL, '2026-01-19 22:33:27');
 
 -- ----------------------------
 -- Table structure for class_password_reset
@@ -2497,7 +2558,7 @@ CREATE TABLE `class_server_metrics_history`  (
   `monitor_time` datetime NOT NULL COMMENT '监控时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_monitor_time`(`monitor_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '服务器监控历史表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '服务器监控历史表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_server_metrics_history
@@ -2527,14 +2588,14 @@ CREATE TABLE `class_session`  (
   PRIMARY KEY (`session_id`) USING BTREE,
   INDEX `fk_session_course`(`course_id` ASC) USING BTREE,
   CONSTRAINT `fk_session_course` FOREIGN KEY (`course_id`) REFERENCES `class_course` (`course_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of class_session
 -- ----------------------------
-INSERT INTO `class_session` VALUES (1, '研究与开发实践01', 1, 1, 50, 'teacher_zhang', 1, '', NULL, 'teacher_zhang', '2025-12-23 21:51:47', 1, '1', 45, '20:50', '20:50');
+INSERT INTO `class_session` VALUES (1, '研究与开发实践01', 1, 1, 52, 'teacher_zhang', 1, '', NULL, 'teacher_zhang', '2026-01-19 22:26:44', 1, '1', 45, '20:50', '20:50');
 INSERT INTO `class_session` VALUES (3, '计算机金融应用', 3, 0, 30, 'teacher_zhang', 3, '', NULL, 'admin', '2025-10-31 21:49:01', 3, '1', 45, '20:57', '20:57');
-INSERT INTO `class_session` VALUES (4, '研究与开发实践02', 2, 2, 42, 'B', 1, 'admin', '2025-10-31 21:55:44', 'admin', '2025-10-31 21:56:17', 1, '1', 45, '21:55', '21:55');
+INSERT INTO `class_session` VALUES (4, '研究与开发实践', 2, 0, 42, 'B', 1, 'admin', '2025-10-31 21:55:44', 'admin', '2026-01-19 21:59:27', 1, '1', 45, '11:00', '21:55');
 INSERT INTO `class_session` VALUES (7, '研究与开发实践', 1, 0, 33, 'C', 1, 'admin', '2025-11-01 00:42:58', 'admin', '2025-12-03 18:00:20', 1, '1', 45, '12:00', '22:00');
 INSERT INTO `class_session` VALUES (8, '数据库01', 1, 0, 30, '111', 2, 'admin', '2025-11-04 20:22:11', '', NULL, 5, '1', 45, '00:00', '20:22');
 INSERT INTO `class_session` VALUES (9, '金融01', 1, 1, 37, '1', 3, 'admin', '2025-11-04 20:41:53', '', NULL, 6, '4', 60, '20:37', '20:57');
@@ -2577,7 +2638,7 @@ INSERT INTO `class_session_student` VALUES (1, 15, '2025-11-02 20:20:16');
 INSERT INTO `class_session_student` VALUES (1, 16, '2025-11-02 20:20:16');
 INSERT INTO `class_session_student` VALUES (1, 17, '2025-11-02 20:20:16');
 INSERT INTO `class_session_student` VALUES (1, 18, '2025-11-02 20:20:16');
-INSERT INTO `class_session_student` VALUES (1, 19, '2025-11-22 21:01:17');
+INSERT INTO `class_session_student` VALUES (1, 19, '2025-11-22 20:17:17');
 INSERT INTO `class_session_student` VALUES (1, 20, '2025-11-02 20:20:16');
 INSERT INTO `class_session_student` VALUES (1, 21, '2025-12-03 14:25:48');
 INSERT INTO `class_session_student` VALUES (1, 22, '2025-11-02 20:20:16');
@@ -2602,6 +2663,7 @@ INSERT INTO `class_session_student` VALUES (1, 40, '2025-11-02 20:20:16');
 INSERT INTO `class_session_student` VALUES (3, 1, '2025-11-20 21:37:41');
 INSERT INTO `class_session_student` VALUES (3, 2, '2025-11-20 21:37:45');
 INSERT INTO `class_session_student` VALUES (3, 3, '2025-11-20 21:37:48');
+INSERT INTO `class_session_student` VALUES (3, 19, '2025-11-22 21:01:13');
 INSERT INTO `class_session_student` VALUES (3, 21, '2025-12-03 00:55:56');
 INSERT INTO `class_session_student` VALUES (3, 25, '2025-11-22 22:47:57');
 INSERT INTO `class_session_student` VALUES (3, 38, '2025-12-07 14:17:35');
@@ -2968,7 +3030,7 @@ CREATE TABLE `gen_table`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`table_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of gen_table
@@ -3002,7 +3064,7 @@ CREATE TABLE `gen_table_column`  (
   `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`column_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表字段' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '代码生成业务表字段' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of gen_table_column
@@ -3492,7 +3554,7 @@ CREATE TABLE `sys_job_log`  (
   `exception_info` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '异常信息',
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`job_log_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '定时任务调度日志表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '定时任务调度日志表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_job_log
@@ -3515,7 +3577,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status` ASC) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 590 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 615 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统访问记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -4010,6 +4072,31 @@ INSERT INTO `sys_logininfor` VALUES (586, 'admin', '127.0.0.1', '内网IP', 'Chr
 INSERT INTO `sys_logininfor` VALUES (587, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2025-12-23 22:40:52');
 INSERT INTO `sys_logininfor` VALUES (588, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2025-12-23 22:40:59');
 INSERT INTO `sys_logininfor` VALUES (589, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2025-12-23 22:41:01');
+INSERT INTO `sys_logininfor` VALUES (590, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-19 20:42:36');
+INSERT INTO `sys_logininfor` VALUES (591, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2026-01-19 20:46:55');
+INSERT INTO `sys_logininfor` VALUES (592, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-19 20:46:58');
+INSERT INTO `sys_logininfor` VALUES (593, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2026-01-19 21:13:36');
+INSERT INTO `sys_logininfor` VALUES (594, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-19 21:13:44');
+INSERT INTO `sys_logininfor` VALUES (595, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2026-01-19 21:40:41');
+INSERT INTO `sys_logininfor` VALUES (596, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-19 21:40:51');
+INSERT INTO `sys_logininfor` VALUES (597, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2026-01-19 21:56:33');
+INSERT INTO `sys_logininfor` VALUES (598, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-19 21:56:37');
+INSERT INTO `sys_logininfor` VALUES (599, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2026-01-19 22:04:32');
+INSERT INTO `sys_logininfor` VALUES (600, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-19 22:04:43');
+INSERT INTO `sys_logininfor` VALUES (601, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2026-01-19 22:11:04');
+INSERT INTO `sys_logininfor` VALUES (602, '2023141460348', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-19 22:11:18');
+INSERT INTO `sys_logininfor` VALUES (603, '2023141460348', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2026-01-19 22:17:31');
+INSERT INTO `sys_logininfor` VALUES (604, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-19 22:17:45');
+INSERT INTO `sys_logininfor` VALUES (605, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2026-01-19 22:18:23');
+INSERT INTO `sys_logininfor` VALUES (606, '2023141460348', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-19 22:18:34');
+INSERT INTO `sys_logininfor` VALUES (607, '2023141460348', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '退出成功', '2026-01-19 22:23:50');
+INSERT INTO `sys_logininfor` VALUES (608, 'teacher_zhang', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-01-19 22:24:01');
+INSERT INTO `sys_logininfor` VALUES (609, '2023141460348', '127.0.0.1', '内网IP', 'Mobile Safari', 'Mac OS X (iPhone)', '1', '用户不存在/密码错误', '2026-01-19 22:30:10');
+INSERT INTO `sys_logininfor` VALUES (610, '2023141460348', '127.0.0.1', '内网IP', 'Mobile Safari', 'Mac OS X (iPhone)', '1', '验证码已失效', '2026-01-19 22:30:14');
+INSERT INTO `sys_logininfor` VALUES (611, '2023141460348', '127.0.0.1', '内网IP', 'Mobile Safari', 'Mac OS X (iPhone)', '1', '验证码已失效', '2026-01-19 22:30:19');
+INSERT INTO `sys_logininfor` VALUES (612, '2023141460348', '127.0.0.1', '内网IP', 'Mobile Safari', 'Mac OS X (iPhone)', '0', '登录成功', '2026-01-19 22:30:27');
+INSERT INTO `sys_logininfor` VALUES (613, 'teacher_zhang', '127.0.0.1', '内网IP', 'Mobile Safari', 'Mac OS X (iPhone)', '0', '登录成功', '2026-01-19 22:31:42');
+INSERT INTO `sys_logininfor` VALUES (614, '2023141460348', '127.0.0.1', '内网IP', 'Mobile Safari', 'Mac OS X (iPhone)', '0', '登录成功', '2026-01-19 22:32:14');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -5856,12 +5943,12 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$oXjA8ihohPbuhYzECD3wt.1tZgyHIvx1hUj7e7lcVvbNEpbp.T9O2', '0', '0', '127.0.0.1', '2025-12-23 22:39:26', '2025-11-30 17:57:16', 'admin', '2025-10-30 17:06:55', '', '2025-11-30 17:57:16', '管理员', NULL);
+INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', 'https://ww4.sinaimg.cn/mw690/008uscSugy1haq9fh1q4vj30sg0sggno.jpg', '$2a$10$oXjA8ihohPbuhYzECD3wt.1tZgyHIvx1hUj7e7lcVvbNEpbp.T9O2', '0', '0', '127.0.0.1', '2026-01-19 21:56:38', '2025-11-30 17:57:16', 'admin', '2025-10-30 17:06:55', '', '2025-11-30 17:57:16', '管理员', NULL);
 INSERT INTO `sys_user` VALUES (2, 105, 'ry', '张三', '00', 'ry@qq.com', '15666666666', '1', 'https://img0.baidu.com/it/u=3661017254,2148146033&fm=253&app=138&f=JPEG?w=500&h=500', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-12-08 19:36:35', '2025-10-30 17:06:55', 'admin', '2025-10-30 17:06:55', '', NULL, '测试员', NULL);
 INSERT INTO `sys_user` VALUES (3, 103, 'student1', '李比', '00', 'student1@school.com', '13800138001', '0', 'https://img0.baidu.com/it/u=2660145230,331641081&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=625', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-23 20:39:34', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '学生', NULL);
 INSERT INTO `sys_user` VALUES (4, 105, 'teacher1', '王老师', '01', 'teacher1@school.com', '13900139001', '1', 'https://picsum.photos/200/200?random=2', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-23 17:23:36', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '教师', NULL);
 INSERT INTO `sys_user` VALUES (5, 103, 'student2', '赵六', '00', 'student2@school.com', '13700137001', '0', 'https://picsum.photos/200/200?random=3', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2025-11-06 09:15:00', '2025-11-01 00:00:00', 'admin', '2025-11-01 00:00:00', '', NULL, '学生', NULL);
-INSERT INTO `sys_user` VALUES (100, NULL, 'teacher_zhang', '张老师', '00', 'chenrabbitcyq@163.com', '13800000001', '0', '', '$2a$10$ldKvLfpL/LOTr8YoBPsFOuoEQqqp/fiI1UqnTDZLByjgjK2zINCO2', '0', '0', '127.0.0.1', '2025-12-23 22:41:02', '2025-11-21 23:24:33', 'admin', '2025-11-12 01:32:46', '', '2025-11-21 23:24:33', NULL, NULL);
+INSERT INTO `sys_user` VALUES (100, NULL, 'teacher_zhang', '张老师', '00', 'chenrabbitcyq@163.com', '13800000001', '0', '', '$2a$10$ldKvLfpL/LOTr8YoBPsFOuoEQqqp/fiI1UqnTDZLByjgjK2zINCO2', '0', '0', '127.0.0.1', '2026-01-19 22:31:43', '2025-11-21 23:24:33', 'admin', '2025-11-12 01:32:46', '', '2025-11-21 23:24:33', NULL, NULL);
 INSERT INTO `sys_user` VALUES (101, NULL, 'student_li', '李同学', '00', '', '13800000002', '1', '', '$2a$10$76UxrSPYQSpNnfhy7PcKcukg9nPYHs9Q00ereE6msATSUELIOIybC', '0', '0', '127.0.0.1', '2025-11-26 19:03:20', NULL, 'admin', '2025-11-12 01:33:19', 'admin', '2025-11-12 01:34:13', NULL, NULL);
 INSERT INTO `sys_user` VALUES (102, NULL, '2022141460087', 'myx', '00', '', '', '0', 'http://tmp/kVMt3zC5vK4r52ecd9e1f8b93ece3c8ec4a59a005d22.jpeg', '$2a$10$cFNpukiHcAmX8c8kSIG6RO539tAR385u27QXFdeiqYzCAIkbGCK/e', '0', '0', '127.0.0.1', '2025-12-09 22:52:47', '2025-11-26 19:44:05', '', '2025-11-26 19:44:04', 'admin', '2025-12-10 07:26:09', NULL, 'o1Dbr57QmIdm-NpcU3YFY2ABEOXw');
 INSERT INTO `sys_user` VALUES (103, NULL, '2022141460092', '刘成伟', '00', '', '', '0', '', '$2a$10$Z961iyKUCfMjf0rX4LjVquUFZRv4bgo3xiZ3fn5e81xKvpG.AY3rO', '0', '0', '', NULL, '2025-11-26 19:45:22', '', '2025-11-26 19:45:21', 'admin', '2025-11-26 23:33:47', NULL, NULL);
@@ -5881,7 +5968,7 @@ INSERT INTO `sys_user` VALUES (116, NULL, '2023141460344', '卜天一', '00', ''
 INSERT INTO `sys_user` VALUES (117, NULL, '2023141460345', '王慧卓', '00', '', '', '0', '', '$2a$10$FIBKH6bUoky2aPzza3VDvuAOLzoE1piwT3C33EtYqg/4HdZKo68bW', '0', '0', '', NULL, '2025-11-26 20:53:57', '', '2025-11-26 20:53:56', 'admin', '2025-11-26 23:34:54', NULL, NULL);
 INSERT INTO `sys_user` VALUES (118, NULL, '2023141460346', '卢昊', '00', '', '', '0', '', '$2a$10$xM2T4j8mY0qBxwcitspSJOjtaZbbt3Na4EAxpdSMn8h91UhxOkYK6', '0', '0', '', NULL, '2025-11-26 20:54:27', '', '2025-11-26 20:54:26', 'admin', '2025-11-26 23:35:15', NULL, NULL);
 INSERT INTO `sys_user` VALUES (119, NULL, '2023141460347', '朱藩林', '00', '', '', '0', '', '$2a$10$rD3bDhavgZccx2x3B/lEzenKEcy0zQ19sJVqkUa4CyN0SVPctHzB6', '0', '0', '', NULL, '2025-11-26 20:54:55', '', '2025-11-26 20:54:55', 'admin', '2025-11-26 23:35:21', NULL, NULL);
-INSERT INTO `sys_user` VALUES (120, NULL, '2023141460348', '李为', '00', '', '', '0', '', '$2a$10$8kXJlgxMfEf4gEWpAIk8B.VZzZtPokESvJtJ6Iknn.cCvbrRS5JNS', '0', '0', '127.0.0.1', '2025-12-23 22:33:46', '2025-11-26 20:55:17', '', '2025-11-26 20:55:17', 'admin', '2025-11-26 23:35:24', NULL, NULL);
+INSERT INTO `sys_user` VALUES (120, NULL, '2023141460348', '李为', '00', '', '', '0', '', '$2a$10$8kXJlgxMfEf4gEWpAIk8B.VZzZtPokESvJtJ6Iknn.cCvbrRS5JNS', '0', '0', '127.0.0.1', '2026-01-19 22:32:15', '2025-11-26 20:55:17', '', '2025-11-26 20:55:17', 'admin', '2025-11-26 23:35:24', NULL, NULL);
 INSERT INTO `sys_user` VALUES (121, NULL, '2023141460349', '岂皓月', '00', '', '', '0', '', '$2a$10$oaKzc7fTRa7g5S5nGToS/OZvzO9mgECMbPZCEuLTgCaqVjCK0U172', '0', '0', '127.0.0.1', '2025-12-01 21:35:25', '2025-11-26 20:55:42', '', '2025-11-26 20:55:41', 'admin', '2025-11-26 23:35:27', NULL, NULL);
 INSERT INTO `sys_user` VALUES (122, NULL, '2023141460350', '陈殷琦', '00', '', '', '0', '/profile/avatar/2025/11/30/109aa63dc2574538b9c97881e2ac34cc.jpg', '$2a$10$KupX6xxSx3WkieNaJSbYtuUvGxWfLMGbiaCv6/VOIv9SQUY2pSaZG', '0', '0', '127.0.0.1', '2025-12-12 20:02:11', '2025-11-26 20:56:05', '', '2025-11-26 20:56:05', 'admin', '2025-11-30 17:58:25', NULL, NULL);
 INSERT INTO `sys_user` VALUES (123, NULL, '2023141460352', '程晨', '00', '', '', '0', '', '$2a$10$WPgavXg.WNa1EYIX6EVNU.4Ry3jL0JzuTUcxEn6iM00NzEwz/oyeW', '0', '0', '', NULL, '2025-11-26 20:56:30', '', '2025-11-26 20:56:30', 'admin', '2025-11-26 23:35:32', NULL, NULL);
