@@ -160,14 +160,6 @@
 <script>
 import { listSession, getSession, addSession, updateSession, delSession } from "@/api/proj_lw/session";
 
-// 添加进入课堂的API调用
-const checkEnterPermission = (sessionId) => {
-  return request({
-    url: '/proj_lw/session/enter/' + sessionId,
-    method: 'get'
-  });
-};
-
 export default {
   name: "ClassSession",
   data() {
@@ -373,29 +365,17 @@ export default {
         return;
       }
 
-      // 检查进入课堂权限
-      this.loading = true;
-      checkEnterPermission(row.sessionId)
-        .then(response => {
-          // 权限检查通过，进入课堂
-          this.$router.push({
-            path: '/proj_lw/classroom',
-            query: {
-              sessionId: row.sessionId,
-              courseId: this.courseId,
-              courseName: this.courseName,
-              teacher: row.teacher,
-              teacherId: row.teacherId
-            }
-          });
-        })
-        .catch(error => {
-          console.error("进入课堂权限检查失败:", error);
-          this.$modal.msgError("没有进入课堂的权限");
-        })
-        .finally(() => {
-          this.loading = false;
-        });
+      // 直接跳转到课堂页面
+      this.$router.push({
+        path: '/proj_lw/classroom',
+        query: {
+          sessionId: row.sessionId,
+          courseId: this.courseId,
+          courseName: this.courseName,
+          teacher: row.teacher,
+          teacherId: row.teacherId
+        }
+      });
     },
 
     /** 提交按钮 */
@@ -411,7 +391,7 @@ export default {
           this.form.className = this.courseName;
           this.form.status = 0; // 后端存储固定为0
 
-          const submitData = { ...this.form };
+          const submitData = {...this.form};
 
           const request = submitData.sessionId != null
             ? updateSession(submitData)
@@ -439,7 +419,8 @@ export default {
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => {
+      });
     },
 
     /** 获取状态文本 */
@@ -507,13 +488,13 @@ export default {
 .app-container >>> .el-card {
   border-radius: 18px;
   border: none;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
   background-color: #ffffff;
   transition: all 0.3s ease;
 }
 
 .app-container >>> .el-card:hover {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
 
@@ -654,7 +635,7 @@ export default {
 /* Dialog Styling */
 .app-container >>> .el-dialog {
   border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .app-container >>> .el-dialog__header {
