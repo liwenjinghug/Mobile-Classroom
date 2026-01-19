@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 @RestController
 @RequestMapping("/proj_lw/session")
@@ -38,15 +40,34 @@ public class ClassSessionController extends BaseController {
         Date now = new Date();
         long bufferMillis = 15 * 60 * 1000; // 15 minutes buffer
 
-        for (ClassSession session : allSessions) {
-            if (session.getStartTime() != null && session.getEndTime() != null) {
-                long start = session.getStartTime().getTime();
-                long end = session.getEndTime().getTime();
-                long current = now.getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat dateSdf = new SimpleDateFormat("yyyy-MM-dd");
 
-                // Active if: (Start - 15min) <= Now <= (End + 15min)
-                if (current >= (start - bufferMillis) && current <= (end + bufferMillis)) {
-                    activeList.add(session);
+        for (ClassSession session : allSessions) {
+            String startTimeStr = session.getStartTime();
+            String endTimeStr = session.getEndTime();
+
+            if (startTimeStr != null && endTimeStr != null &&
+                    !startTimeStr.isEmpty() && !endTimeStr.isEmpty()) {
+                try {
+                    // 获取当前日期字符串
+                    String currentDate = dateSdf.format(now);
+
+                    // 创建完整的日期时间
+                    Date startDateTime = sdf.parse(currentDate + " " + startTimeStr);
+                    Date endDateTime = sdf.parse(currentDate + " " + endTimeStr);
+
+                    long start = startDateTime.getTime();
+                    long end = endDateTime.getTime();
+                    long current = now.getTime();
+
+                    // Active if: (Start - 15min) <= Now <= (End + 15min)
+                    if (current >= (start - bufferMillis) && current <= (end + bufferMillis)) {
+                        activeList.add(session);
+                    }
+                } catch (ParseException e) {
+                    // 时间格式错误，跳过这个课堂
+                    continue;
                 }
             }
         }
