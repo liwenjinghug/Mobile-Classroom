@@ -44,6 +44,17 @@ public class SystemMonitorController extends BaseController {
     }
 
     /**
+     * 查询系统监控列表（不分页，用于打印所有筛选结果）
+     */
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")
+    @Log(title = "系统监控", businessType = BusinessType.OTHER)
+    @GetMapping("/listAll")
+    public AjaxResult listAll(SystemMonitor systemMonitor) {
+        List<SystemMonitor> list = systemMonitorService.selectSystemMonitorList(systemMonitor);
+        return success(list);
+    }
+
+    /**
      * 获取系统监控详细信息
      */
     @PreAuthorize("@ss.hasPermi('proj_fz:monitor:query') or @ss.hasAnyRoles('teacher,student')")

@@ -316,7 +316,7 @@
 </template>
 
 <script>
-import { listMonitor, getMonitor, addMonitor, updateMonitor, delMonitor, handleAlert, exportMonitor, collectMetrics } from '@/api/proj_fz/systemMonitor'
+import { listMonitor, listAllMonitor, getMonitor, addMonitor, updateMonitor, delMonitor, handleAlert, exportMonitor, collectMetrics } from '@/api/proj_fz/systemMonitor'
 
 export default {
   name: 'MonitorRecord',
@@ -608,61 +608,81 @@ export default {
     getHandledName(handled) {
       return handled == 0 ? '未处理' : '已处理'
     },
-    // 打印表格（根据筛选结果）
+    // 打印表格（根据筛选结果 - 打印所有符合条件的记录）
     handlePrintTable() {
-      const printWindow = window.open('', '_blank')
-      printWindow.document.write('<html><head><title>监控记录打印</title>')
-      printWindow.document.write('<style>')
-      printWindow.document.write('body { font-family: Arial, sans-serif; padding: 20px; }')
-      printWindow.document.write('h2 { text-align: center; margin-bottom: 20px; }')
-      printWindow.document.write('.print-info { margin-bottom: 15px; color: #666; }')
-      printWindow.document.write('table { border-collapse: collapse; width: 100%; }')
-      printWindow.document.write('th, td { border: 1px solid #333; padding: 8px; text-align: center; }')
-      printWindow.document.write('th { background-color: #f0f0f0; font-weight: bold; }')
-      printWindow.document.write('tr:nth-child(even) { background-color: #fafafa; }')
-      printWindow.document.write('.status-normal { color: #67c23a; }')
-      printWindow.document.write('.status-warning { color: #e6a23c; }')
-      printWindow.document.write('.status-danger { color: #f56c6c; }')
-      printWindow.document.write('</style>')
-      printWindow.document.write('</head><body>')
-      printWindow.document.write('<h2>系统监控记录报表</h2>')
-      printWindow.document.write('<div class="print-info">')
-      printWindow.document.write('<p>打印时间：' + this.parseTime(new Date()) + '</p>')
-      printWindow.document.write('<p>记录总数：' + this.monitorList.length + ' 条</p>')
-      printWindow.document.write('</div>')
-      printWindow.document.write('<table>')
-      printWindow.document.write('<thead><tr>')
-      printWindow.document.write('<th>监控ID</th>')
-      printWindow.document.write('<th>监控类型</th>')
-      printWindow.document.write('<th>监控项名称</th>')
-      printWindow.document.write('<th>告警级别</th>')
-      printWindow.document.write('<th>告警描述</th>')
-      printWindow.document.write('<th>状态</th>')
-      printWindow.document.write('<th>处理状态</th>')
-      printWindow.document.write('<th>监控时间</th>')
-      printWindow.document.write('</tr></thead>')
-      printWindow.document.write('<tbody>')
+      // 使用当前筛选条件获取所有记录（不分页）
+      const queryData = this.addDateRange({ ...this.queryParams }, this.dateRange)
+      // 移除分页参数
+      delete queryData.pageNum
+      delete queryData.pageSize
       
-      this.monitorList.forEach(item => {
-        printWindow.document.write('<tr>')
-        printWindow.document.write('<td>' + item.monitorId + '</td>')
-        printWindow.document.write('<td>' + this.getMonitorTypeName(item.monitorType) + '</td>')
-        printWindow.document.write('<td>' + (item.monitorName || '-') + '</td>')
-        const alertClass = item.alertLevel == 0 ? 'status-normal' : (item.alertLevel == 1 ? 'status-warning' : 'status-danger')
-        printWindow.document.write('<td class="' + alertClass + '">' + this.getAlertLevelName(item.alertLevel) + '</td>')
-        printWindow.document.write('<td>' + (item.alertDesc || '-') + '</td>')
-        const statusClass = item.status == 0 ? 'status-normal' : 'status-danger'
-        printWindow.document.write('<td class="' + statusClass + '">' + this.getStatusName(item.status) + '</td>')
-        const handledClass = item.handled == 1 ? 'status-normal' : 'status-warning'
-        printWindow.document.write('<td class="' + handledClass + '">' + this.getHandledName(item.handled) + '</td>')
-        printWindow.document.write('<td>' + this.parseTime(item.monitorTime) + '</td>')
-        printWindow.document.write('</tr>')
+      this.loading = true
+      listAllMonitor(queryData).then(response => {
+        this.loading = false
+        const allRecords = response.data || []
+        
+        if (allRecords.length === 0) {
+          this.$modal.msgWarning('当前筛选条件下没有记录可打印')
+          return
+        }
+        
+        const printWindow = window.open('', '_blank')
+        printWindow.document.write('<html><head><title>监控记录打印</title>')
+        printWindow.document.write('<style>')
+        printWindow.document.write('body { font-family: Arial, sans-serif; padding: 20px; }')
+        printWindow.document.write('h2 { text-align: center; margin-bottom: 20px; }')
+        printWindow.document.write('.print-info { margin-bottom: 15px; color: #666; }')
+        printWindow.document.write('table { border-collapse: collapse; width: 100%; }')
+        printWindow.document.write('th, td { border: 1px solid #333; padding: 8px; text-align: center; }')
+        printWindow.document.write('th { background-color: #f0f0f0; font-weight: bold; }')
+        printWindow.document.write('tr:nth-child(even) { background-color: #fafafa; }')
+        printWindow.document.write('.status-normal { color: #67c23a; }')
+        printWindow.document.write('.status-warning { color: #e6a23c; }')
+        printWindow.document.write('.status-danger { color: #f56c6c; }')
+        printWindow.document.write('</style>')
+        printWindow.document.write('</head><body>')
+        printWindow.document.write('<h2>系统监控记录报表</h2>')
+        printWindow.document.write('<div class="print-info">')
+        printWindow.document.write('<p>打印时间：' + this.parseTime(new Date()) + '</p>')
+        printWindow.document.write('<p>记录总数：' + allRecords.length + ' 条</p>')
+        printWindow.document.write('</div>')
+        printWindow.document.write('<table>')
+        printWindow.document.write('<thead><tr>')
+        printWindow.document.write('<th>监控ID</th>')
+        printWindow.document.write('<th>监控类型</th>')
+        printWindow.document.write('<th>监控项名称</th>')
+        printWindow.document.write('<th>告警级别</th>')
+        printWindow.document.write('<th>告警描述</th>')
+        printWindow.document.write('<th>状态</th>')
+        printWindow.document.write('<th>处理状态</th>')
+        printWindow.document.write('<th>监控时间</th>')
+        printWindow.document.write('</tr></thead>')
+        printWindow.document.write('<tbody>')
+        
+        allRecords.forEach(item => {
+          printWindow.document.write('<tr>')
+          printWindow.document.write('<td>' + item.monitorId + '</td>')
+          printWindow.document.write('<td>' + this.getMonitorTypeName(item.monitorType) + '</td>')
+          printWindow.document.write('<td>' + (item.monitorName || '-') + '</td>')
+          const alertClass = item.alertLevel == 0 ? 'status-normal' : (item.alertLevel == 1 ? 'status-warning' : 'status-danger')
+          printWindow.document.write('<td class="' + alertClass + '">' + this.getAlertLevelName(item.alertLevel) + '</td>')
+          printWindow.document.write('<td>' + (item.alertDesc || '-') + '</td>')
+          const statusClass = item.status == 0 ? 'status-normal' : 'status-danger'
+          printWindow.document.write('<td class="' + statusClass + '">' + this.getStatusName(item.status) + '</td>')
+          const handledClass = item.handled == 1 ? 'status-normal' : 'status-warning'
+          printWindow.document.write('<td class="' + handledClass + '">' + this.getHandledName(item.handled) + '</td>')
+          printWindow.document.write('<td>' + this.parseTime(item.monitorTime) + '</td>')
+          printWindow.document.write('</tr>')
+        })
+        
+        printWindow.document.write('</tbody></table>')
+        printWindow.document.write('</body></html>')
+        printWindow.document.close()
+        printWindow.print()
+      }).catch(() => {
+        this.loading = false
+        this.$modal.msgError('获取打印数据失败')
       })
-      
-      printWindow.document.write('</tbody></table>')
-      printWindow.document.write('</body></html>')
-      printWindow.document.close()
-      printWindow.print()
     }
   }
 }

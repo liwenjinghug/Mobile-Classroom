@@ -9,6 +9,15 @@ export function listMonitor(query) {
   })
 }
 
+// 查询系统监控列表（不分页，用于打印所有筛选结果）
+export function listAllMonitor(query) {
+  return request({
+    url: '/proj_fz/monitor/listAll',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询系统监控详细
 export function getMonitor(monitorId) {
   return request({
