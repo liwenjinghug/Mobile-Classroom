@@ -89,14 +89,22 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
             long[] prevTicks = processor.getSystemCpuLoadTicks();
             Util.sleep(OSHI_WAIT_SECOND);
             long[] ticks = processor.getSystemCpuLoadTicks();
-            long user = ticks[CentralProcessor.TickType.USER.getIndex()] - prevTicks[CentralProcessor.TickType.USER.getIndex()];
-            long nice = ticks[CentralProcessor.TickType.NICE.getIndex()] - prevTicks[CentralProcessor.TickType.NICE.getIndex()];
-            long sys = ticks[CentralProcessor.TickType.SYSTEM.getIndex()] - prevTicks[CentralProcessor.TickType.SYSTEM.getIndex()];
-            long idle = ticks[CentralProcessor.TickType.IDLE.getIndex()] - prevTicks[CentralProcessor.TickType.IDLE.getIndex()];
-            long iowait = ticks[CentralProcessor.TickType.IOWAIT.getIndex()] - prevTicks[CentralProcessor.TickType.IOWAIT.getIndex()];
-            long irq = ticks[CentralProcessor.TickType.IRQ.getIndex()] - prevTicks[CentralProcessor.TickType.IRQ.getIndex()];
-            long softirq = ticks[CentralProcessor.TickType.SOFTIRQ.getIndex()] - prevTicks[CentralProcessor.TickType.SOFTIRQ.getIndex()];
-            long steal = ticks[CentralProcessor.TickType.STEAL.getIndex()] - prevTicks[CentralProcessor.TickType.STEAL.getIndex()];
+            long user = ticks[CentralProcessor.TickType.USER.getIndex()]
+                    - prevTicks[CentralProcessor.TickType.USER.getIndex()];
+            long nice = ticks[CentralProcessor.TickType.NICE.getIndex()]
+                    - prevTicks[CentralProcessor.TickType.NICE.getIndex()];
+            long sys = ticks[CentralProcessor.TickType.SYSTEM.getIndex()]
+                    - prevTicks[CentralProcessor.TickType.SYSTEM.getIndex()];
+            long idle = ticks[CentralProcessor.TickType.IDLE.getIndex()]
+                    - prevTicks[CentralProcessor.TickType.IDLE.getIndex()];
+            long iowait = ticks[CentralProcessor.TickType.IOWAIT.getIndex()]
+                    - prevTicks[CentralProcessor.TickType.IOWAIT.getIndex()];
+            long irq = ticks[CentralProcessor.TickType.IRQ.getIndex()]
+                    - prevTicks[CentralProcessor.TickType.IRQ.getIndex()];
+            long softirq = ticks[CentralProcessor.TickType.SOFTIRQ.getIndex()]
+                    - prevTicks[CentralProcessor.TickType.SOFTIRQ.getIndex()];
+            long steal = ticks[CentralProcessor.TickType.STEAL.getIndex()]
+                    - prevTicks[CentralProcessor.TickType.STEAL.getIndex()];
             long totalCpu = user + nice + sys + idle + iowait + irq + softirq + steal;
 
             double cpuUsage = 100d * (totalCpu - idle) / totalCpu;
@@ -177,9 +185,11 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
 
         try {
             // 查询最近N小时的服务器监控记录
-            List<SystemMonitor> records = systemMonitorMapper.selectSystemMonitorList(new SystemMonitor() {{
-                setMonitorType(1); // 服务器监控
-            }});
+            List<SystemMonitor> records = systemMonitorMapper.selectSystemMonitorList(new SystemMonitor() {
+                {
+                    setMonitorType(1); // 服务器监控
+                }
+            });
 
             // 只取最近hours小时的数据
             Date cutoffTime = new Date(System.currentTimeMillis() - hours * 60 * 60 * 1000);
@@ -218,7 +228,7 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
         }
 
         try (Connection conn = dataSource.getConnection();
-             Statement stmt = conn.createStatement()) {
+                Statement stmt = conn.createStatement()) {
 
             // 查询连接数（真实数据）
             ResultSet rs = stmt.executeQuery("SHOW STATUS LIKE 'Threads_connected'");
@@ -247,7 +257,8 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
             rs.close();
 
             // 查询数据库大小（真实数据）
-            rs = stmt.executeQuery("SELECT SUM(data_length + index_length) / 1024 / 1024 AS size FROM information_schema.TABLES WHERE table_schema = DATABASE()");
+            rs = stmt.executeQuery(
+                    "SELECT SUM(data_length + index_length) / 1024 / 1024 AS size FROM information_schema.TABLES WHERE table_schema = DATABASE()");
             if (rs.next()) {
                 metrics.setDatabaseSize(rs.getDouble("size"));
             }
@@ -275,9 +286,11 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
 
         try {
             // 查询最近N小时的数据库监控记录
-            List<SystemMonitor> records = systemMonitorMapper.selectSystemMonitorList(new SystemMonitor() {{
-                setMonitorType(2); // 数据库监控
-            }});
+            List<SystemMonitor> records = systemMonitorMapper.selectSystemMonitorList(new SystemMonitor() {
+                {
+                    setMonitorType(2); // 数据库监控
+                }
+            });
 
             // 只取最近hours小时的数据
             Date cutoffTime = new Date(System.currentTimeMillis() - hours * 60 * 60 * 1000);
@@ -358,7 +371,7 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
         if (serverMetrics.getMemoryUsage() != null && serverMetrics.getMemoryUsage() > 80) {
             monitor.setAlertLevel(serverMetrics.getMemoryUsage() > 90 ? 2 : 1);
             monitor.setAlertDesc((monitor.getAlertDesc() == null ? "" : monitor.getAlertDesc() + "; ")
-                + "内存使用率过高：" + serverMetrics.getMemoryUsage() + "%");
+                    + "内存使用率过高：" + serverMetrics.getMemoryUsage() + "%");
             monitor.setStatus(1);
         }
 
@@ -366,7 +379,7 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
         if (serverMetrics.getDiskUsage() != null && serverMetrics.getDiskUsage() > 85) {
             monitor.setAlertLevel(serverMetrics.getDiskUsage() > 95 ? 2 : 1);
             monitor.setAlertDesc((monitor.getAlertDesc() == null ? "" : monitor.getAlertDesc() + "; ")
-                + "磁盘使用率过高：" + serverMetrics.getDiskUsage() + "%");
+                    + "磁盘使用率过高：" + serverMetrics.getDiskUsage() + "%");
             monitor.setStatus(1);
         }
 
@@ -390,5 +403,9 @@ public class SystemMonitorServiceImpl implements ISystemMonitorService {
 
         insertSystemMonitor(dbMonitor);
     }
-}
 
+    @Override
+    public int updateSystemMonitor(SystemMonitor systemMonitor) {
+        return systemMonitorMapper.updateSystemMonitor(systemMonitor);
+    }
+}

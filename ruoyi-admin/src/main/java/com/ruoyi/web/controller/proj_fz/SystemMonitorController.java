@@ -63,6 +63,16 @@ public class SystemMonitorController extends BaseController {
     }
 
     /**
+     * 修改系统监控
+     */
+    @PreAuthorize("@ss.hasPermi('proj_fz:monitor:edit') or @ss.hasAnyRoles('teacher,student')")
+    @Log(title = "系统监控", businessType = BusinessType.UPDATE)
+    @PutMapping
+    public AjaxResult edit(@RequestBody SystemMonitor systemMonitor) {
+        return toAjax(systemMonitorService.updateSystemMonitor(systemMonitor));
+    }
+
+    /**
      * 删除系统监控
      */
     @PreAuthorize("@ss.hasPermi('proj_fz:monitor:remove') or @ss.hasAnyRoles('teacher,student')")

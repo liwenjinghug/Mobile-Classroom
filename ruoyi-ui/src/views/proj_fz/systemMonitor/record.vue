@@ -58,6 +58,16 @@
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
+          type="primary"
+          plain
+          icon="el-icon-plus"
+          size="mini"
+          @click="handleAdd"
+          v-if="hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:add'])"
+        >新增</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
           type="danger"
           plain
           icon="el-icon-delete"
@@ -76,6 +86,16 @@
           @click="handleExport"
           v-if="hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:export'])"
         >导出</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="info"
+          plain
+          icon="el-icon-printer"
+          size="mini"
+          @click="handlePrintTable"
+          v-if="hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:query'])"
+        >打印</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -129,7 +149,7 @@
           <span>{{ parseTime(scope.row.monitorTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="250">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -139,10 +159,17 @@
             v-if="hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:query'])"
           >详情</el-button>
           <el-button
-            v-if="(scope.row.handled == 0 && scope.row.alertLevel > 0) && (hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:edit']))"
             size="mini"
             type="text"
             icon="el-icon-edit"
+            @click="handleUpdate(scope.row)"
+            v-if="hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:edit'])"
+          >修改</el-button>
+          <el-button
+            v-if="(scope.row.handled == 0 && (scope.row.status == 1 || scope.row.alertLevel > 0)) && (hasRole(['teacher','student']) || hasPermi(['proj_fz:monitor:edit']))"
+            size="mini"
+            type="text"
+            icon="el-icon-check"
             @click="handleHandle(scope.row)"
           >处理</el-button>
           <el-button
@@ -221,11 +248,75 @@
         <el-button @click="handleOpen = false">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 新增/修改对话框 -->
+    <el-dialog :title="title" :visible.sync="addEditOpen" width="700px" append-to-body>
+      <el-form ref="addEditFormRef" :model="addEditForm" :rules="addEditRules" label-width="100px">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="监控类型" prop="monitorType">
+              <el-select v-model="addEditForm.monitorType" placeholder="请选择监控类型" style="width: 100%">
+                <el-option label="服务器监控" :value="1" />
+                <el-option label="数据库监控" :value="2" />
+                <el-option label="用户行为监控" :value="3" />
+                <el-option label="功能模块监控" :value="4" />
+                <el-option label="接口性能监控" :value="5" />
+                <el-option label="异常监控" :value="6" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="监控项名称" prop="monitorName">
+              <el-input v-model="addEditForm.monitorName" placeholder="请输入监控项名称" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="告警级别" prop="alertLevel">
+              <el-select v-model="addEditForm.alertLevel" placeholder="请选择告警级别" style="width: 100%">
+                <el-option label="正常" :value="0" />
+                <el-option label="警告" :value="1" />
+                <el-option label="严重" :value="2" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="状态" prop="status">
+              <el-select v-model="addEditForm.status" placeholder="请选择状态" style="width: 100%">
+                <el-option label="正常" :value="0" />
+                <el-option label="异常" :value="1" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="处理状态" prop="handled">
+              <el-select v-model="addEditForm.handled" placeholder="请选择处理状态" style="width: 100%">
+                <el-option label="未处理" :value="0" />
+                <el-option label="已处理" :value="1" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="告警描述" prop="alertDesc">
+          <el-input v-model="addEditForm.alertDesc" type="textarea" :rows="3" placeholder="请输入告警描述" />
+        </el-form-item>
+        <el-form-item label="处理备注" prop="handleRemark">
+          <el-input v-model="addEditForm.handleRemark" type="textarea" :rows="3" placeholder="请输入处理备注" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitAddEdit">确 定</el-button>
+        <el-button @click="cancelAddEdit">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listMonitor, getMonitor, delMonitor, handleAlert, exportMonitor, collectMetrics } from '@/api/proj_fz/systemMonitor'
+import { listMonitor, getMonitor, addMonitor, updateMonitor, delMonitor, handleAlert, exportMonitor, collectMetrics } from '@/api/proj_fz/systemMonitor'
 
 export default {
   name: 'MonitorRecord',
@@ -233,6 +324,7 @@ export default {
     return {
       loading: true,
       ids: [],
+      single: true,
       multiple: true,
       showSearch: true,
       total: 0,
@@ -240,6 +332,7 @@ export default {
       title: '',
       open: false,
       handleOpen: false,
+      addEditOpen: false,
       dateRange: [],
       queryParams: {
         pageNum: 1,
@@ -252,6 +345,30 @@ export default {
       },
       form: {},
       handleForm: {},
+      addEditForm: {
+        monitorId: null,
+        monitorType: null,
+        monitorName: '',
+        alertLevel: 0,
+        alertDesc: '',
+        status: 0,
+        handled: 0,
+        handleRemark: ''
+      },
+      addEditRules: {
+        monitorType: [
+          { required: true, message: '请选择监控类型', trigger: 'change' }
+        ],
+        monitorName: [
+          { required: true, message: '请输入监控项名称', trigger: 'blur' }
+        ],
+        alertLevel: [
+          { required: true, message: '请选择告警级别', trigger: 'change' }
+        ],
+        status: [
+          { required: true, message: '请选择状态', trigger: 'change' }
+        ]
+      },
       currentIndex: 0
     }
   },
@@ -278,6 +395,7 @@ export default {
     },
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.monitorId)
+      this.single = selection.length !== 1
       this.multiple = !selection.length
     },
     handleView(row) {
@@ -396,6 +514,155 @@ export default {
       } catch (e) {
         return false
       }
+    },
+    // 重置新增/修改表单
+    resetAddEditForm() {
+      this.addEditForm = {
+        monitorId: null,
+        monitorType: null,
+        monitorName: '',
+        alertLevel: 0,
+        alertDesc: '',
+        status: 0,
+        handled: 0,
+        handleRemark: ''
+      }
+      if (this.$refs.addEditFormRef) {
+        this.$refs.addEditFormRef.resetFields()
+      }
+    },
+    // 新增按钮操作
+    handleAdd() {
+      this.resetAddEditForm()
+      this.title = '新增监控记录'
+      this.addEditOpen = true
+    },
+    // 修改按钮操作
+    handleUpdate(row) {
+      this.resetAddEditForm()
+      const monitorId = row.monitorId || this.ids[0]
+      getMonitor(monitorId).then(response => {
+        this.addEditForm = {
+          monitorId: response.data.monitorId,
+          monitorType: response.data.monitorType,
+          monitorName: response.data.monitorName,
+          alertLevel: response.data.alertLevel,
+          alertDesc: response.data.alertDesc,
+          status: response.data.status,
+          handled: response.data.handled,
+          handleRemark: response.data.handleRemark
+        }
+        this.title = '修改监控记录'
+        this.addEditOpen = true
+      })
+    },
+    // 提交新增/修改
+    submitAddEdit() {
+      this.$refs.addEditFormRef.validate(valid => {
+        if (valid) {
+          if (this.addEditForm.monitorId) {
+            // 修改
+            updateMonitor(this.addEditForm).then(response => {
+              this.$modal.msgSuccess('修改成功')
+              this.addEditOpen = false
+              this.getList()
+            })
+          } else {
+            // 新增
+            addMonitor(this.addEditForm).then(response => {
+              this.$modal.msgSuccess('新增成功')
+              this.addEditOpen = false
+              this.getList()
+            })
+          }
+        }
+      })
+    },
+    // 取消新增/修改
+    cancelAddEdit() {
+      this.addEditOpen = false
+      this.resetAddEditForm()
+    },
+    // 获取监控类型名称
+    getMonitorTypeName(type) {
+      const typeMap = {
+        1: '服务器监控',
+        2: '数据库监控',
+        3: '用户行为监控',
+        4: '功能模块监控',
+        5: '接口性能监控',
+        6: '异常监控'
+      }
+      return typeMap[type] || '未知'
+    },
+    // 获取告警级别名称
+    getAlertLevelName(level) {
+      const levelMap = { 0: '正常', 1: '警告', 2: '严重' }
+      return levelMap[level] || '未知'
+    },
+    // 获取状态名称
+    getStatusName(status) {
+      return status == 0 ? '正常' : '异常'
+    },
+    // 获取处理状态名称
+    getHandledName(handled) {
+      return handled == 0 ? '未处理' : '已处理'
+    },
+    // 打印表格（根据筛选结果）
+    handlePrintTable() {
+      const printWindow = window.open('', '_blank')
+      printWindow.document.write('<html><head><title>监控记录打印</title>')
+      printWindow.document.write('<style>')
+      printWindow.document.write('body { font-family: Arial, sans-serif; padding: 20px; }')
+      printWindow.document.write('h2 { text-align: center; margin-bottom: 20px; }')
+      printWindow.document.write('.print-info { margin-bottom: 15px; color: #666; }')
+      printWindow.document.write('table { border-collapse: collapse; width: 100%; }')
+      printWindow.document.write('th, td { border: 1px solid #333; padding: 8px; text-align: center; }')
+      printWindow.document.write('th { background-color: #f0f0f0; font-weight: bold; }')
+      printWindow.document.write('tr:nth-child(even) { background-color: #fafafa; }')
+      printWindow.document.write('.status-normal { color: #67c23a; }')
+      printWindow.document.write('.status-warning { color: #e6a23c; }')
+      printWindow.document.write('.status-danger { color: #f56c6c; }')
+      printWindow.document.write('</style>')
+      printWindow.document.write('</head><body>')
+      printWindow.document.write('<h2>系统监控记录报表</h2>')
+      printWindow.document.write('<div class="print-info">')
+      printWindow.document.write('<p>打印时间：' + this.parseTime(new Date()) + '</p>')
+      printWindow.document.write('<p>记录总数：' + this.monitorList.length + ' 条</p>')
+      printWindow.document.write('</div>')
+      printWindow.document.write('<table>')
+      printWindow.document.write('<thead><tr>')
+      printWindow.document.write('<th>监控ID</th>')
+      printWindow.document.write('<th>监控类型</th>')
+      printWindow.document.write('<th>监控项名称</th>')
+      printWindow.document.write('<th>告警级别</th>')
+      printWindow.document.write('<th>告警描述</th>')
+      printWindow.document.write('<th>状态</th>')
+      printWindow.document.write('<th>处理状态</th>')
+      printWindow.document.write('<th>监控时间</th>')
+      printWindow.document.write('</tr></thead>')
+      printWindow.document.write('<tbody>')
+      
+      this.monitorList.forEach(item => {
+        printWindow.document.write('<tr>')
+        printWindow.document.write('<td>' + item.monitorId + '</td>')
+        printWindow.document.write('<td>' + this.getMonitorTypeName(item.monitorType) + '</td>')
+        printWindow.document.write('<td>' + (item.monitorName || '-') + '</td>')
+        const alertClass = item.alertLevel == 0 ? 'status-normal' : (item.alertLevel == 1 ? 'status-warning' : 'status-danger')
+        printWindow.document.write('<td class="' + alertClass + '">' + this.getAlertLevelName(item.alertLevel) + '</td>')
+        printWindow.document.write('<td>' + (item.alertDesc || '-') + '</td>')
+        const statusClass = item.status == 0 ? 'status-normal' : 'status-danger'
+        printWindow.document.write('<td class="' + statusClass + '">' + this.getStatusName(item.status) + '</td>')
+        const handledClass = item.handled == 1 ? 'status-normal' : 'status-warning'
+        printWindow.document.write('<td class="' + handledClass + '">' + this.getHandledName(item.handled) + '</td>')
+        printWindow.document.write('<td>' + this.parseTime(item.monitorTime) + '</td>')
+        printWindow.document.write('</tr>')
+      })
+      
+      printWindow.document.write('</tbody></table>')
+      printWindow.document.write('</body></html>')
+      printWindow.document.close()
+      printWindow.print()
     }
   }
 }

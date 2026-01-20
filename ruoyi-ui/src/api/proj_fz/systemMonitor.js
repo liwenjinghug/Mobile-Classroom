@@ -26,6 +26,15 @@ export function addMonitor(data) {
   })
 }
 
+// 修改系统监控
+export function updateMonitor(data) {
+  return request({
+    url: '/proj_fz/monitor',
+    method: 'put',
+    data: data
+  })
+}
+
 // 删除系统监控
 export function delMonitor(monitorIds) {
   return request({

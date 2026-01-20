@@ -77,4 +77,9 @@ public interface ISystemMonitorService {
      * 执行系统监控采集（定时任务）
      */
     void collectSystemMetrics();
+
+    /**
+     * 修改系统监控
+     */
+    int updateSystemMonitor(SystemMonitor systemMonitor);
 }
