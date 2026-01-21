@@ -167,6 +167,48 @@ public class DashboardController extends BaseController {
     }
 
     /**
+     * 导出作业明细
+     */
+    @PostMapping("/export-homework")
+    public void exportHomeworkDetails(@RequestBody Map<String, Object> params,
+            javax.servlet.http.HttpServletResponse response) {
+        try {
+            dashboardService.exportHomeworkDetails(params, response);
+        } catch (Exception e) {
+            logger.error("导出作业明细失败", e);
+            throw new RuntimeException("导出失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 导出最新公告
+     */
+    @PostMapping("/export-notices")
+    public void exportNotices(@RequestBody Map<String, Object> params,
+            javax.servlet.http.HttpServletResponse response) {
+        try {
+            dashboardService.exportNotices(params, response);
+        } catch (Exception e) {
+            logger.error("导出最新公告失败", e);
+            throw new RuntimeException("导出失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 导出操作日志
+     */
+    @PostMapping("/export-logs")
+    public void exportOperationLogs(@RequestBody Map<String, Object> params,
+            javax.servlet.http.HttpServletResponse response) {
+        try {
+            dashboardService.exportOperationLogs(params, response);
+        } catch (Exception e) {
+            logger.error("导出操作日志失败", e);
+            throw new RuntimeException("导出失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * 导出单个作业详情
      */
     @GetMapping("/export-single-homework/{homeworkId}")
