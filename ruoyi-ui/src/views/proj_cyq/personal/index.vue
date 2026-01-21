@@ -1,7 +1,6 @@
 <template>
   <div class="app-container personal-center">
     <el-row :gutter="20">
-      <!-- 欢迎卡片 -->
       <el-col :span="24">
         <el-card class="welcome-card" shadow="hover">
           <div class="welcome-content">
@@ -12,9 +11,7 @@
             <div class="welcome-actions">
               <el-button type="primary" icon="el-icon-list" @click="$router.push('/proj_cyq/todo')">待办事项</el-button>
               <el-button type="success" icon="el-icon-message" @click="$router.push('/proj_cyq/message')">消息中心</el-button>
-              <!-- 新增日志查看按钮 -->
-              <el-button type="warning" icon="el-icon-document" @click="$router.push('/proj_cyq/operlog')">操作日志</el-button>
-              <el-button type="info" icon="el-icon-time" @click="$router.push('/proj_cyq/loginlog')">登录日志</el-button>
+              <el-button type="warning" icon="el-icon-bell" @click="$router.push('/proj_cyq/notice')">查看通告</el-button>
             </div>
           </div>
         </el-card>
@@ -22,7 +19,6 @@
     </el-row>
 
     <el-row :gutter="20" style="margin-top: 20px;">
-      <!-- 快速入口 -->
       <el-col :span="12">
         <el-card class="quick-access" shadow="hover">
           <div slot="header" class="clearfix">
@@ -45,28 +41,18 @@
             >
               查看消息
             </el-button>
-            <!-- 新增日志快速入口 -->
             <el-button
               type="warning"
-              icon="el-icon-document"
+              icon="el-icon-bell"
               class="access-item"
-              @click="$router.push('/proj_cyq/operlog')"
+              @click="$router.push('/proj_cyq/notice')"
             >
-              操作日志
-            </el-button>
-            <el-button
-              type="info"
-              icon="el-icon-time"
-              class="access-item"
-              @click="$router.push('/proj_cyq/loginlog')"
-            >
-              登录日志
+              查看通告
             </el-button>
           </div>
         </el-card>
       </el-col>
 
-      <!-- 统计概览 -->
       <el-col :span="12">
         <el-card class="stats-overview" shadow="hover">
           <div slot="header" class="clearfix">

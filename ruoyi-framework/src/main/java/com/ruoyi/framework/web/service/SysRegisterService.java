@@ -18,12 +18,10 @@ import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysUserService;
+// 【关键】引入 JDBC 工具
+import org.springframework.jdbc.core.JdbcTemplate;
+import java.util.Date;
 
-/**
- * 注册校验方法
- * 
- * @author ruoyi
- */
 @Component
 public class SysRegisterService
 {
@@ -36,16 +34,22 @@ public class SysRegisterService
     @Autowired
     private RedisCache redisCache;
 
+    // 【关键】注入 JdbcTemplate
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     /**
      * 注册
      */
     public String register(RegisterBody registerBody)
     {
+        // 1. 添加显眼的控制台日志，确认代码生效
+        System.out.println("====== [DEBUG] 正在执行注册逻辑 (新代码已生效) ======");
+
         String msg = "", username = registerBody.getUsername(), password = registerBody.getPassword();
         SysUser sysUser = new SysUser();
         sysUser.setUserName(username);
 
-        // 验证码开关
         boolean captchaEnabled = configService.selectCaptchaEnabled();
         if (captchaEnabled)
         {
@@ -76,48 +80,68 @@ public class SysRegisterService
         }
         else
         {
-//            sysUser.setNickName(username);
-            // ========== 【新增】使用前端传来的昵称 ==========
             if (StringUtils.isEmpty(registerBody.getNickName())) {
-                sysUser.setNickName(username); // 如果没传，才默认用账号名
+                sysUser.setNickName(username);
             } else {
                 sysUser.setNickName(registerBody.getNickName());
             }
-            // ========== 【新增】结束 ==========
+
             sysUser.setPwdUpdateDate(DateUtils.getNowDate());
             sysUser.setPassword(SecurityUtils.encryptPassword(password));
 
-            // ========== 【新增】开始 ==========
-            // 获取前端传来的 roleId，如果没有传则默认为 101 (学生)
+            // 设置角色 (默认为学生 101)
             Long roleId = registerBody.getRoleId();
             if (roleId == null) {
                 roleId = 101L;
             }
-            // 将角色ID放入 user 对象中，以便下一步使用
             sysUser.setRoleIds(new Long[]{roleId});
-            // ========== 【新增】结束 ==========
 
+            // 2. 插入系统用户表 (sys_user)
             boolean regFlag = userService.registerUser(sysUser);
+
             if (!regFlag)
             {
                 msg = "注册失败,请联系系统管理人员";
+                System.out.println("====== [DEBUG] sys_user 插入失败 ======");
             }
             else
             {
+                System.out.println("====== [DEBUG] sys_user 插入成功，ID: " + sysUser.getUserId());
+
+                // 3. 【防回滚核心】插入学生表 (class_student)
+                if (roleId == 101L) {
+                    try {
+                        System.out.println("====== [DEBUG] 正在尝试插入 class_student ======");
+
+                        String sql = "INSERT INTO class_student " +
+                                "(user_id, student_no, student_name, gender, status, create_time) " +
+                                "VALUES (?, ?, ?, ?, ?, ?)";
+
+                        // 准备参数
+                        Long userId = sysUser.getUserId();
+                        String studentNo = "S" + System.currentTimeMillis();
+                        String studentName = sysUser.getNickName();
+                        String gender = "M";
+                        Integer status = 1;
+                        Date createTime = new Date();
+
+                        int rows = jdbcTemplate.update(sql, userId, studentNo, studentName, gender, status, createTime);
+                        System.out.println("====== [DEBUG] class_student 插入成功，行数: " + rows + " ======");
+
+                    } catch (Exception e) {
+                        // 【重点】这里捕获了所有错误，只打印，不抛出！
+                        // 这样即使 SQL 写错了，sys_user 表的数据也绝对保留下来。
+                        System.err.println("====== [ERROR] 学生表插入报错 (不影响账号注册) ======");
+                        e.printStackTrace();
+                    }
+                }
+
                 AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.REGISTER, MessageUtils.message("user.register.success")));
             }
         }
         return msg;
     }
 
-    /**
-     * 校验验证码
-     * 
-     * @param username 用户名
-     * @param code 验证码
-     * @param uuid 唯一标识
-     * @return 结果
-     */
     public void validateCaptcha(String username, String code, String uuid)
     {
         String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + StringUtils.nvl(uuid, "");
