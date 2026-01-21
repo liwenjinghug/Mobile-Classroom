@@ -1,7 +1,9 @@
 package com.ruoyi.proj_lwj.service.impl;
 
 import com.ruoyi.proj_lwj.domain.ClassExamAnswer;
+import com.ruoyi.proj_lwj.domain.ClassStudent;
 import com.ruoyi.proj_lwj.mapper.ClassExamAnswerMapper;
+import com.ruoyi.proj_lwj.mapper.ClassStudentMapper;
 import com.ruoyi.proj_lwj.service.IClassExamAnswerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,10 +15,21 @@ public class ClassExamAnswerServiceImpl implements IClassExamAnswerService {
 
     @Autowired
     private ClassExamAnswerMapper mapper;
+    @Autowired
+    private ClassStudentMapper studentMapper;
 
     @Override
     public List<ClassExamAnswer> selectList(ClassExamAnswer a) {
-        return mapper.selectList(a);
+        List<ClassExamAnswer> list = mapper.selectList(a);
+        for (ClassExamAnswer answer : list) {
+            if (answer.getStudentId() != null) {
+                ClassStudent student = studentMapper.selectClassStudentById(answer.getStudentId());
+                if (student != null) {
+                    answer.setStudentName(student.getStudentName());
+                }
+            }
+        }
+        return list;
     }
 
     @Override

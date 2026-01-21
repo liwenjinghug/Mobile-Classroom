@@ -36,7 +36,7 @@ public interface ClassStudentMapper {
     // 保留按 studentId 查询学生基础信息
     @Select("SELECT student_id AS studentId, student_no AS studentNo, student_name AS studentName " +
             "FROM class_student WHERE student_id = #{studentId} LIMIT 1")
-    ClassStudent selectByStudentId(@Param("studentId") Long studentId);
+    ClassStudent selectClassStudentById(@Param("studentId") Long studentId);
 
     @Select("SELECT student_id AS studentId, student_no AS studentNo, student_name AS studentName FROM class_student WHERE user_id = #{userId}")
     ClassStudent selectByUserId(@Param("userId") Long userId);

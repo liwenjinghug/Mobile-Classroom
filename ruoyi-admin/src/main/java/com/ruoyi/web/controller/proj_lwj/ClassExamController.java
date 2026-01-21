@@ -466,7 +466,6 @@ public class ClassExamController extends BaseController {
             }
             return AjaxResult.success(result);
         } catch (Exception ex) {
-            // 任何异常均返回空列表，避免 500 影响前端
             return AjaxResult.success(java.util.Collections.emptyList()).put("error", ex.getMessage());
         }
     }
@@ -589,7 +588,7 @@ public class ClassExamController extends BaseController {
 
         // 反查补齐 studentNo/studentName，避免 DB 约束失败
         if (payload.getStudentNo() == null) {
-            ClassStudent s2 = classStudentMapper.selectByStudentId(studentId);
+            ClassStudent s2 = classStudentMapper.selectClassStudentById(studentId);
             if (s2 != null) {
                 payload.setStudentNo(s2.getStudentNo());
                 if (payload.getStudentName() == null) payload.setStudentName(s2.getStudentName());
@@ -863,6 +862,38 @@ public class ClassExamController extends BaseController {
             if (s != null) { a.setStudentId(s.getStudentId()); }
         }
         List<ClassExamAnswer> list = answerService.selectList(a);
+
+        // 补充提交时间和姓名：若带有 examId 参数，则按参与者映射补齐 submitTime、studentName
+        try {
+            Long examId = a != null ? a.getExamId() : null;
+            if (examId != null) {
+                ClassExamParticipant pf = new ClassExamParticipant();
+                pf.setExamId(examId);
+                List<ClassExamParticipant> parts = participantService.selectList(pf);
+                Map<Long, ClassExamParticipant> partByStuId = new HashMap<>();
+                if (parts != null) {
+                    for (ClassExamParticipant p : parts) {
+                        if (p.getStudentId() != null) partByStuId.put(p.getStudentId(), p);
+                    }
+                }
+                for (ClassExamAnswer ans : list) {
+                    ClassExamParticipant p = ans.getStudentId() == null ? null : partByStuId.get(ans.getStudentId());
+                    if (p != null) {
+                        // 统一用参与记录的提交时间
+                        if (ans.getSubmitTime() == null) ans.setSubmitTime(p.getSubmitTime());
+                        // 补充姓名
+                        if (ans.getStudentName() == null || ans.getStudentName().trim().isEmpty()) {
+                            ans.setStudentName(p.getStudentName());
+                        }
+                        // 补充学号
+                        if ((ans.getStudentNo() == null || ans.getStudentNo().trim().isEmpty()) && p.getStudentNo() != null) {
+                            ans.setStudentNo(p.getStudentNo());
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignore) {}
+
         return AjaxResult.success(list);
     }
 
@@ -1027,7 +1058,7 @@ public class ClassExamController extends BaseController {
         }
         // 补齐 studentNo
         if (payload.getStudentNo() == null) {
-            ClassStudent stu = classStudentMapper.selectByStudentId(studentId);
+            ClassStudent stu = classStudentMapper.selectClassStudentById(studentId);
             if (stu != null) { payload.setStudentNo(stu.getStudentNo()); }
         }
         // 快照字段填充（仅在不存在时）
@@ -1415,3 +1446,4 @@ public class ClassExamController extends BaseController {
         return AjaxResult.success(ungraded);
     }
 }
+

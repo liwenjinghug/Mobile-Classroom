@@ -34,8 +34,14 @@ public class ClassStudentServiceImpl implements IClassStudentService {
         return classStudentMapper.selectByStudentNo(studentNo);
     }
 
+    // Implement interface method
     @Override
     public ClassStudent selectByStudentId(Long studentId) {
-        return classStudentMapper.selectByStudentId(studentId);
+        return classStudentMapper.selectClassStudentById(studentId);
+    }
+
+    // Backward-compatible alias (not part of interface)
+    public ClassStudent selectClassStudentById(Long studentId) {
+        return classStudentMapper.selectClassStudentById(studentId);
     }
 }

@@ -17,18 +17,23 @@ public class ClassExamAnswer extends BaseEntity {
     private Long questionId;
     private String studentAnswer; // 学生答案
     private String answerFiles; // 附件文件(多个逗号分隔)
-    private Integer isCorrect; // 是否正确(客观题)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date submitTime;
     private BigDecimal score; // 得分
     private Long correctorId; // 批改人ID
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date correctTime; // 批改时间
     private String correctComment; // 批改评语
     private Integer answerDuration; // 耗时(秒)
+    private Integer isCorrect; // 是否正确（客观题）
 
     // 快照字段
     private String questionContent;
     private String questionOptions;
     private String correctAnswer; // 正确答案快照
+
+    // 非表字段：联表查询填充
+    private String studentName;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -44,8 +49,8 @@ public class ClassExamAnswer extends BaseEntity {
     public void setStudentAnswer(String studentAnswer) { this.studentAnswer = studentAnswer; }
     public String getAnswerFiles() { return answerFiles; }
     public void setAnswerFiles(String answerFiles) { this.answerFiles = answerFiles; }
-    public Integer getIsCorrect() { return isCorrect; }
-    public void setIsCorrect(Integer isCorrect) { this.isCorrect = isCorrect; }
+    public Date getSubmitTime() { return submitTime; }
+    public void setSubmitTime(Date submitTime) { this.submitTime = submitTime; }
     public BigDecimal getScore() { return score; }
     public void setScore(BigDecimal score) { this.score = score; }
     public Long getCorrectorId() { return correctorId; }
@@ -62,5 +67,14 @@ public class ClassExamAnswer extends BaseEntity {
     public void setQuestionOptions(String questionOptions) { this.questionOptions = questionOptions; }
     public String getCorrectAnswer() { return correctAnswer; }
     public void setCorrectAnswer(String correctAnswer) { this.correctAnswer = correctAnswer; }
-}
+    public String getStudentName() {
+        return studentName;
+    }
 
+    public void setStudentName(String studentName) {
+        this.studentName = studentName;
+    }
+
+    public Integer getIsCorrect() { return isCorrect; }
+    public void setIsCorrect(Integer isCorrect) { this.isCorrect = isCorrect; }
+}

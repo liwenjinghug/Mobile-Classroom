@@ -1,108 +1,128 @@
 <template>
   <div class="app-container">
-    <!-- 顶部配置表单 -->
-    <el-form :model="form" label-width="100px" class="beautified-form">
-      <div class="form-section">
-        <el-form-item label="课程">
-          <el-select v-model="form.courseId" placeholder="请选择课程" filterable class="beautified-select">
-            <el-option v-for="c in courses" :key="c.courseId" :label="c.courseName" :value="c.courseId" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="课堂">
-          <el-select v-model="form.sessionId" placeholder="请选择课堂" @change="onSessionChange" class="beautified-select">
-            <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
-          </el-select>
-        </el-form-item>
+    <!-- 顶部卡片：考试发布配置 -->
+    <el-card class="hero-card" shadow="hover">
+      <div slot="header" class="card-header">
+        <div class="title-wrap">
+          <i class="el-icon-edit-outline" />
+          <span class="title">考试发布</span>
+          <span class="sub">请选择课程与课堂，配置考试时间、规则与题目策略</span>
+        </div>
+        <div class="header-actions">
+           <el-button type="primary" icon="el-icon-check" @click="onSave(false)" :loading="btnLoading">保存草稿</el-button>
+           <el-button type="success" icon="el-icon-upload" @click="onSave(true)" :loading="btnLoading">发布考试</el-button>
+        </div>
       </div>
 
-      <div class="form-section">
-        <el-form-item label="考试名称">
-          <el-input v-model="form.examName" class="beautified-input" />
-        </el-form-item>
-        <el-form-item label="类型">
-          <el-select v-model="form.examType" class="beautified-select">
-            <el-option :value="1" label="期中"/>
-            <el-option :value="2" label="期末"/>
-            <el-option :value="3" label="测验"/>
-            <el-option :value="4" label="模拟考"/>
-            <el-option :value="5" label="课堂测验"/>
-          </el-select>
-        </el-form-item>
-      </div>
+      <el-form :model="form" ref="form" label-width="100px" size="small" class="form-grid">
+        <el-row :gutter="24">
+          <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="课程选择" prop="courseId">
+              <el-select v-model="form.courseId" placeholder="请选择课程" filterable class="w-100">
+                <el-option v-for="c in courses" :key="c.courseId" :label="c.courseName" :value="c.courseId" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="课堂选择" prop="sessionId">
+              <el-select v-model="form.sessionId" placeholder="请先选择课程" @change="onSessionChange" class="w-100">
+                <el-option v-for="s in sessions" :key="s.sessionId" :label="(s.className ? `${s.className} (ID:${s.sessionId})` : String(s.sessionId))" :value="s.sessionId" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="12">
+            <el-form-item label="考试名称" prop="examName">
+              <el-input v-model="form.examName" placeholder="请输入考试名称" />
+            </el-form-item>
+          </el-col>
 
-      <div class="form-section">
-        <el-form-item label="时间范围">
-          <el-date-picker v-model="timeRange" type="datetimerange" start-placeholder="开始时间" end-placeholder="结束时间" class="beautified-datepicker" />
-        </el-form-item>
-        <el-form-item label="时长(分钟)">
-          <el-input-number v-model="form.examDuration" :min="1" :max="1000" class="beautified-number" />
-        </el-form-item>
-      </div>
+          <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="考试时间" required>
+              <el-date-picker v-model="timeRange" type="datetimerange" start-placeholder="开始时间" end-placeholder="结束时间" class="w-100" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="考试时长">
+              <el-input-number v-model="form.examDuration" :min="1" :max="1000" label="分钟" controls-position="right" class="w-100" />
+            </el-form-item>
+          </el-col>
+           <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="考试类型">
+              <el-select v-model="form.examType" class="w-100">
+                <el-option :value="3" label="测验"/>
+                <el-option :value="1" label="期中"/>
+                <el-option :value="2" label="期末"/>
+                <el-option :value="5" label="课堂测验"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
 
-      <div class="form-section">
-        <el-form-item label="总分/及格">
-          <div class="score-container">
-            <el-input-number v-model="form.totalScore" :precision="2" :step="1" :min="0" :max="1000" class="beautified-number" />
-            <span class="score-divider">/</span>
-            <el-input-number v-model="form.passScore" :precision="2" :step="1" :min="0" :max="1000" class="beautified-number" />
-          </div>
-        </el-form-item>
-        <el-form-item label="考试模式">
-          <el-radio-group v-model="form.examMode" class="beautified-radio">
-            <el-radio :label="1">定时考试</el-radio>
-            <el-radio :label="2">随到随考</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </div>
+          <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="总分">
+              <el-input-number v-model="form.totalScore" :precision="2" :step="1" :min="0" :max="1000" controls-position="right" class="w-100" />
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="及格分">
+              <el-input-number v-model="form.passScore" :precision="2" :step="1" :min="0" :max="1000" controls-position="right" class="w-100" />
+            </el-form-item>
+          </el-col>
+           <el-col :xs="24" :sm="24" :md="12">
+            <el-form-item label="其他选项">
+               <div style="display:flex;align-items:center;">
+                  <el-checkbox v-model="bool.antiCheat" style="margin-right:16px">防作弊</el-checkbox>
+                  <el-checkbox v-model="bool.autoSubmit" style="margin-right:16px">自动交卷</el-checkbox>
+                  <el-checkbox v-model="bool.lateSubmit">允许迟交</el-checkbox>
+                  <div v-if="bool.lateSubmit" style="margin-left:12px;display:flex;align-items:center">
+                     <el-input-number v-model="form.lateTime" :min="0" :max="1440" size="mini" style="width:100px" />
+                     <span style="color:#666;font-size:12px;margin-left:4px">分钟</span>
+                  </div>
+               </div>
+            </el-form-item>
+          </el-col>
 
-      <div class="form-section">
-        <el-form-item label="防作弊">
-          <el-switch v-model="bool.antiCheat" class="beautified-switch" />
-        </el-form-item>
-        <el-form-item label="题目顺序">
-          <el-radio-group v-model="form.questionOrder" class="beautified-radio">
-            <el-radio :label="0">正常顺序</el-radio>
-            <el-radio :label="1">随机排序</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </div>
-
-      <div class="form-section">
-        <el-form-item label="答案显示">
-          <el-select v-model="form.showAnswer" class="beautified-select">
-            <el-option :label="'不显示'" :value="0"/>
-            <el-option :label="'立即显示'" :value="1"/>
-            <el-option :label="'考试结束后'" :value="2"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="其他">
-          <div class="other-settings">
-            <el-checkbox v-model="bool.autoSubmit" class="beautified-checkbox">自动交卷</el-checkbox>
-            <el-checkbox v-model="bool.lateSubmit" class="beautified-checkbox">允许迟交</el-checkbox>
-            <el-input-number v-model="form.lateTime" :min="0" :max="1440" label="迟交时间" class="late-time-input" />
-            <span class="time-unit">分钟</span>
-          </div>
-        </el-form-item>
-      </div>
-
-      <!-- 将原来的保存草稿/发布考试改为"题目配置"入口 -->
-      <el-form-item class="action-buttons">
-        <!-- 主入口：题目配置（保存草稿并跳转） -->
-        <el-button type="primary" @click="goToQuestionsFromForm" :loading="btnLoading" class="primary-action-btn">
-          题目配置
-        </el-button>
-        <el-tooltip effect="dark" content="先完成题目配置再发布考试" placement="right">
-          <i class="el-icon-info info-icon"></i>
-        </el-tooltip>
-      </el-form-item>
-    </el-form>
+          <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="考试模式">
+              <el-radio-group v-model="form.examMode">
+                <el-radio :label="1">定时考试</el-radio>
+                <el-radio :label="2">随到随考</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="题目顺序">
+              <el-radio-group v-model="form.questionOrder">
+                <el-radio :label="0">正常</el-radio>
+                <el-radio :label="1">随机</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="12">
+            <el-form-item label="答案显示">
+              <el-select v-model="form.showAnswer" placeholder="" class="w-100">
+                <el-option :label="'不显示'" :value="0"/>
+                <el-option :label="'立即显示'" :value="1"/>
+                <el-option :label="'考试结束后'" :value="2"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+         <div class="form-hint">
+          <el-alert type="info" :closable="false" show-icon title="说明：保存后可在下方列表继续配置题目，配置完成后方可发布。" />
+        </div>
+      </el-form>
+    </el-card>
 
     <!-- 已创建考试列表 -->
-    <el-card class="beautified-card">
+    <el-card class="list-card" shadow="hover">
       <div slot="header" class="card-header">
         <span class="card-title">已创建考试（当前课堂）</span>
         <el-input v-model="query.examName" placeholder="按名称过滤" size="small" class="search-input" @input="loadList" />
         <el-button size="small" type="primary" icon="el-icon-refresh" :loading="listLoading" @click="loadList" style="margin-left:8px">刷新</el-button>
+        <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
+          <el-button size="small" icon="el-icon-download" @click="exportExamList">导出列表</el-button>
+          <el-button size="small" icon="el-icon-printer" @click="printExamList">打印列表</el-button>
+        </div>
       </div>
       <el-alert
         title="发布流程：1) 题目配置 → 2) 列表中点击发布考试 → 3) 开始考试"
@@ -152,6 +172,8 @@
                   <el-button type="primary" size="mini" icon="el-icon-refresh" @click="forceRefresh(scope.row)">刷新</el-button>
                   <el-button size="mini" type="info" @click="stopAuto(scope.row)" v-if="submissionStats[scope.row.id].timer">停止自动刷新</el-button>
                   <el-button size="mini" type="success" @click="startAuto(scope.row)" v-else>开启自动刷新</el-button>
+                  <el-button size="mini" type="warning" icon="el-icon-download" @click="exportSubmissionStats(scope.row)">导出统计</el-button>
+                  <el-button size="mini" type="info" icon="el-icon-printer" @click="printSubmissionStats(scope.row)">打印统计</el-button>
                   <span class="last-fetch" v-if="submissionStats[scope.row.id].lastFetch">上次更新：{{ fmtTime(submissionStats[scope.row.id].lastFetch) }}</span>
                   <span class="error-tip" v-if="submissionStats[scope.row.id].error">{{ submissionStats[scope.row.id].error }}</span>
                 </div>
@@ -1177,170 +1199,176 @@ export default {
         stat.error = silent ? null : ('统计加载失败: ' + (e.message || '网络错误'))
       } finally { stat.loading = false }
     },
-  },
-  beforeDestroy(){
-    // 清理自动刷新定时器
-    Object.values(this.submissionStats).forEach(s => { if(s && s.timer){ clearInterval(s.timer) } })
+    // Export submission statistics CSV for a given exam row
+    exportSubmissionStats(row){
+      if(!row || !row.id){ this.$message.error('请选择考试'); return }
+      const stat = this.submissionStats[row.id]
+      if(!stat || stat.loading){ this.$message.warning('统计尚未加载完成'); return }
+      const headers = ['学号','提交状态','得分','及格','答题数']
+      const lines = [headers.join(',')]
+      const recs = Array.isArray(stat.records) ? stat.records : []
+      recs.forEach(r=>{
+        const submitted = r.submitted ? '已提交' : '未提交'
+        const score = r.score == null ? '' : r.score
+        const passed = r.passed ? '是' : '否'
+        const rowArr = [r.studentNo||'', submitted, score, passed, r.answerCount||0]
+        lines.push(rowArr.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(','))
+      })
+      const summary = [
+        '',
+        `总人数: ${stat.participantsCount||0}`,
+        `已提交: ${stat.submittedCount||0}`,
+        `未提交: ${stat.unsubmittedCount||0}`,
+        `平均分: ${stat.averageScore==null?'—':stat.averageScore.toFixed(1)}`,
+        `及格率: ${stat.passRate==null?'—':(stat.passRate.toFixed(1)+'%')}`
+      ].join(',')
+      lines.push('')
+      lines.push(summary)
+      const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `考试提交统计_${row.examName || '考试'}_${this.fmtTime(Date.now()).replace(/[:\s]/g,'')}.csv`
+      a.click()
+      URL.revokeObjectURL(a.href)
+    },
+    // Print submission statistics in a formatted page
+    printSubmissionStats(row){
+      if(!row || !row.id){ this.$message.error('请选择考试'); return }
+      const stat = this.submissionStats[row.id]
+      if(!stat || stat.loading){ this.$message.warning('统计尚未加载完成'); return }
+      const title = `${row.examName || '考试'} - 提交统计`
+      const cols = ['学号','提交状态','得分','及格','答题数']
+      const rowsHtml = (stat.records||[]).map(r=>{
+        const submitted = r.submitted ? '已提交' : '未提交'
+        const score = r.score == null ? '—' : r.score
+        const passed = r.passed ? '是' : '否'
+        return `<tr><td>${r.studentNo||''}</td><td>${submitted}</td><td>${score}</td><td>${passed}</td><td>${r.answerCount||0}</td></tr>`
+      }).join('')
+      const summaryHtml = `
+        <div class="stats">
+          <div class="stat">总人数：${stat.participantsCount||0}</div>
+          <div class="stat">已提交：${stat.submittedCount||0}</div>
+          <div class="stat">未提交：${stat.unsubmittedCount||0}</div>
+          <div class="stat">平均分：${stat.averageScore==null?'—':stat.averageScore.toFixed(1)}</div>
+          <div class="stat">及格率：${stat.passRate==null?'—':(stat.passRate.toFixed(1)+'%')}</div>
+        </div>`
+      const html = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>${title}</title>
+        <style>
+          body{font-family:Segoe UI,Arial,Helvetica,sans-serif;padding:20px;color:#303133}
+          h1{font-size:20px;margin:0 0 12px}
+          .stats{display:flex;gap:12px;margin-bottom:12px}
+          .stat{border:1px solid #ddd;border-radius:6px;padding:8px 12px}
+          .table{width:100%;border-collapse:collapse}
+          .table th,.table td{border:1px solid #ddd;padding:6px 8px;font-size:12px}
+          .table th{background:#f5f7fa;text-align:left}
+          @media print{button{display:none}}
+        </style>
+      </head><body>
+        <h1>${title}</h1>
+        ${summaryHtml}
+        <table class="table"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table>
+        <button onclick="window.print()" style="margin-top:12px">打印</button>
+      </body></html>`
+      const win = window.open('', '_blank')
+      if(win){ win.document.open(); win.document.write(html); win.document.close(); win.focus(); }
+    },
+    // Export the entire exam list as CSV
+    exportExamList(){
+      const rows = Array.isArray(this.sortedList) ? this.sortedList : []
+      if(!rows.length){ this.$message.warning('暂无考试数据'); return }
+      const headers = ['考试ID','名称','类型','开始时间','结束时间','时长(分钟)','总分','及格分','题目数','状态']
+      const lines = [headers.join(',')]
+      const typeMap = {1:'期中',2:'期末',3:'测验',4:'模拟考',5:'课堂测验'}
+      rows.forEach(r=>{
+        const id = r.id || r.examId || ''
+        const name = r.examName || ''
+        const type = typeMap[Number(r.examType)||3] || '测验'
+        const start = r.startTime ? this.fmt(r.startTime) : ''
+        const end = r.endTime ? this.fmt(r.endTime) : ''
+        const duration = r.examDuration!=null ? r.examDuration : ''
+        const total = r.totalScore!=null ? r.totalScore : ''
+        const pass = r.passScore!=null ? r.passScore : ''
+        const qcnt = r.questionCount!=null ? r.questionCount : ''
+        const status = this.statusDisplay(r)
+        const arr = [id, name, type, start, end, duration, total, pass, qcnt, status]
+        lines.push(arr.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(','))
+      })
+      const blob = new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `考试列表_${this.fmtTime(Date.now()).replace(/[:\s]/g,'')}.csv`
+      a.click()
+      URL.revokeObjectURL(a.href)
+    },
+    // Print the entire exam list in a formatted page
+    printExamList(){
+      const rows = Array.isArray(this.sortedList) ? this.sortedList : []
+      if(!rows.length){ this.$message.warning('暂无考试数据'); return }
+      const title = '考试列表'
+      const cols = ['考试ID','名称','类型','开始时间','结束时间','时长(分钟)','总分','及格分','题目数','状态']
+      const typeMap = {1:'期中',2:'期末',3:'测验',4:'模拟考',5:'课堂测验'}
+      const rowsHtml = rows.map(r=>{
+        const id = r.id || r.examId || ''
+        const name = r.examName || ''
+        const type = typeMap[Number(r.examType)||3] || '测验'
+        const start = r.startTime ? this.fmt(r.startTime) : ''
+        const end = r.endTime ? this.fmt(r.endTime) : ''
+        const duration = r.examDuration!=null ? r.examDuration : ''
+        const total = r.totalScore!=null ? r.totalScore : ''
+        const pass = r.passScore!=null ? r.passScore : ''
+        const qcnt = r.questionCount!=null ? r.questionCount : ''
+        const status = this.statusDisplay(r)
+        return `<tr>
+          <td>${id}</td>
+          <td>${name}</td>
+          <td>${type}</td>
+          <td>${start}</td>
+          <td>${end}</td>
+          <td>${duration}</td>
+          <td>${total}</td>
+          <td>${pass}</td>
+          <td>${qcnt}</td>
+          <td>${status}</td>
+        </tr>`
+      }).join('')
+      const html = `<!DOCTYPE html><html lang=\"zh-CN\"><head><meta charset=\"utf-8\"><title>${title}</title>
+        <style>
+          body{font-family:Segoe UI,Arial,Helvetica,sans-serif;padding:20px;color:#303133}
+          h1{font-size:20px;margin:0 0 12px}
+          .table{width:100%;border-collapse:collapse}
+          .table th,.table td{border:1px solid #ddd;padding:6px 8px;font-size:12px}
+          .table th{background:#f5f7fa;text-align:left}
+          @media print{button{display:none}}
+        </style>
+      </head><body>
+        <h1>${title}</h1>
+        <table class=\"table\"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table>
+        <button onclick=\"window.print()\" style=\"margin-top:12px\">打印</button>
+      </body></html>`
+      const win = window.open('', '_blank')
+      if(win){ win.document.open(); win.document.write(html); win.document.close(); win.focus(); }
+    }
   }
 }
 </script>
 
 <style scoped>
 .app-container {
-  padding: 24px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+  padding: 16px;
+  background-color: #f5f7fa;
   min-height: 100vh;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* 美化表单 */
-.beautified-form {
-  background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  margin-bottom: 24px;
-}
-
-.form-section {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 20px;
-}
-
-.form-section .el-form-item {
-  flex: 1;
-  margin-bottom: 0;
-}
-
-.beautified-form ::v-deep(.el-form-item__label) {
-  font-weight: 600;
-  color: #2c3e50;
-  font-size: 14px;
-}
-
-/* 美化输入框 */
-.beautified-input ::v-deep(.el-input__inner),
-.beautified-select ::v-deep(.el-input__inner) {
+.hero-card {
+  background-color: #ffffff;
   border-radius: 8px;
-  border: 1.5px solid #e1e5e9;
-  height: 40px;
-  line-height: 40px;
-  transition: all 0.3s ease;
+  padding: 8px; /* el-card header has padding usually, body padding handled by form-grid */
+  margin-bottom: 16px;
 }
 
-.beautified-input ::v-deep(.el-input__inner:focus),
-.beautified-select ::v-deep(.el-input__inner:focus) {
-  border-color: #409EFF;
-  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
-}
-
-.beautified-datepicker {
-  width: 100%;
-}
-
-.beautified-datepicker ::v-deep(.el-input__inner) {
-  border-radius: 8px;
-  border: 1.5px solid #e1e5e9;
-}
-
-.beautified-number ::v-deep(.el-input__inner) {
-  border-radius: 8px;
-  border: 1.5px solid #e1e5e9;
-}
-
-/* 美化单选按钮 */
-.beautified-radio ::v-deep(.el-radio__inner) {
-  border: 1.5px solid #dcdfe6;
-}
-
-.beautified-radio ::v-deep(.el-radio__input.is-checked .el-radio__inner) {
-  background: #409EFF;
-  border-color: #409EFF;
-}
-
-/* 美化开关 */
-.beautified-switch ::v-deep(.el-switch__core) {
-  border-radius: 10px;
-}
-
-/* 美化复选框 */
-.beautified-checkbox ::v-deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
-  background: #409EFF;
-  border-color: #409EFF;
-}
-
-/* 总分/及格样式 */
-.score-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.score-divider {
-  color: #909399;
-  font-weight: 500;
-}
-
-/* 其他设置样式 */
-.other-settings {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.late-time-input {
-  width: 100px;
-}
-
-.time-unit {
-  color: #909399;
-  font-size: 12px;
-}
-
-/* 主操作按钮 */
-.action-buttons {
-  text-align: center;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #f0f0f0;
-}
-
-.primary-action-btn {
-  border-radius: 8px;
-  padding: 12px 32px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #409EFF 0%, #337ecc 100%);
-  border: none;
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
-  transition: all 0.3s ease;
-}
-
-.primary-action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.4);
-}
-
-.info-icon {
-  color: #909399;
-  margin-left: 12px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-/* 美化卡片 */
-.beautified-card {
-  border-radius: 12px;
-  border: none;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  background: white;
-}
-
-.beautified-card ::v-deep(.el-card__header) {
-  border-bottom: 1px solid #f0f0f0;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+.hero-card ::v-deep .el-card__header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #ebeef5;
 }
 
 .card-header {
@@ -1349,129 +1377,85 @@ export default {
   align-items: center;
 }
 
-.card-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1a1a1a;
+.title-wrap {
+  display: flex;
+  align-items: center;
 }
 
+.title-wrap i {
+  font-size: 24px;
+  color: #409eff;
+  margin-right: 12px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.sub {
+  font-size: 14px;
+  color: #909399;
+  margin-left: 12px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.header-actions .el-button {
+  margin-left: 12px;
+}
+
+.form-grid {
+  padding: 16px 0;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.form-hint {
+  margin-top: 8px;
+}
+
+.list-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+}
+
+/* Reusing existing styles for table/list actions if needed, or overriding */
 .search-input {
   width: 240px;
 }
-
-.search-input ::v-deep(.el-input__inner) {
-  border-radius: 20px;
-  border: 1px solid #e1e5e9;
-}
-
-/* 美化表格 */
-.beautified-table {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.beautified-table ::v-deep(.el-table th) {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  color: #2c3e50;
-  font-weight: 700;
-  border-bottom: 2px solid #e1e5e9;
-}
-
-.beautified-table ::v-deep(.el-table td) {
-  border-bottom: 1px solid #f0f0f0;
-  padding: 12px 0;
-}
-
-.beautified-table ::v-deep(.el-table__row:hover td) {
-  background: #f8f9fa !important;
-}
-
-/* 状态标签 */
-.status-tag {
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-}
-
-/* 操作按钮行 */
-.op-actions-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  align-items: center;
-  padding: 0;
-  overflow: visible;
-}
-
-.op-actions-row ::v-deep(.el-button) {
-  padding: 2px 8px !important;
-  font-size: 11px;
-  border-radius: 14px;
-  line-height: 1.1;
-  border: none;
-  font-weight: 500;
-}
-
-/* 批量操作 */
-.batch-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 12px 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-}
-
-.batch-tip {
-  font-size: 12px;
-  color: #F56C6C;
-  font-weight: 500;
-}
-
-/* 浮动按钮 */
 .batch-float-btn {
   position: fixed;
   right: 32px;
   bottom: 32px;
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #67C23A 0%, #529b2e 100%);
-  border: none;
-  box-shadow: 0 6px 20px rgba(103, 194, 58, 0.4);
   z-index: 1000;
-  transition: all 0.3s ease;
 }
 
-.batch-float-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(103, 194, 58, 0.5);
+/* Keeping necessary list styles */
+.op-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
-
-/* 警告提示 */
-.process-alert, .score-alert {
-  border-radius: 8px;
+.status-tag {
   border: none;
-  margin-bottom: 16px;
+  font-weight: 600;
 }
 
-.process-alert ::v-deep(.el-alert__title),
-.score-alert ::v-deep(.el-alert__title) {
-  font-weight: 500;
+.batch-actions {
+    margin-top: 16px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 4px;
 }
 
-/* 高亮行 */
-.row-updated td {
-  background: #fff7e6 !important;
-  transition: background 0.6s;
-}
-
-/* 批量发布对话框 */
-.batch-dialog-body { max-height:520px; overflow-y:auto; }
-.batch-summary { margin-top:4px; }
-
-/* 提交统计展开行样式 */
+/* Submission panel styles needed for the expand row */
 .exam-submission-panel { background:#fafafa; padding:12px 16px; border:1px solid #ebeef5; border-radius:8px; }
 .submission-summary { display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start; }
 .ring-wrapper { display:flex; align-items:center; justify-content:center; }
@@ -1487,70 +1471,6 @@ export default {
 .submission-actions { margin-top:12px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 .last-fetch { font-size:12px; color:#909399; }
 .error-tip { font-size:12px; color:#f56c6c; }
-.submission-table { margin-top:12px; }
+.process-alert, .score-alert { margin-bottom: 16px; }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .form-section {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .card-header {
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .search-input {
-    width: 100%;
-  }
-}
-</style>
-
-<style>
-/* 美化对话框 - 使用 fixed + transform 完美居中 */
-.beautified-dialog .el-dialog__wrapper {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  overflow: auto !important;
-}
-
-.beautified-dialog .el-dialog {
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
-  border-radius: 12px;
-  overflow: hidden;
-  max-height: 90vh;
-  max-width: 95vw;
-  display: flex;
-  flex-direction: column;
-}
-
-.beautified-dialog .el-dialog__header {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 20px 24px;
-  border-bottom: 1px solid #e1e5e9;
-  flex-shrink: 0;
-}
-
-.beautified-dialog .el-dialog__title {
-  font-weight: 700;
-  color: #1a1a1a;
-}
-
-.beautified-dialog .el-dialog__body {
-  overflow-y: auto;
-  flex: 1;
-}
-
-.beautified-dialog .el-dialog__footer {
-  flex-shrink: 0;
-}
 </style>

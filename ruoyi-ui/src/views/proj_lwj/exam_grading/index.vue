@@ -1390,7 +1390,15 @@ Request工具响应: ${JSON.stringify(requestResponse, null, 2)}
     timestampString(){
       const d = new Date()
       const pad = n => String(n).padStart(2,'0')
-      return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`
+      return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${d.getHours().toString().padStart(2,'0')}${d.getMinutes().toString().padStart(2,'0')}${d.getSeconds().toString().padStart(2,'0')}`
+    },
+    // New: format date/time consistently for table rendering
+    formatDateTime(value){
+      const ts = this.parseDateTime(value)
+      if(!ts) return ''
+      const d = new Date(ts)
+      const pad = n => String(n).padStart(2,'0')
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
     }
   }
 }
